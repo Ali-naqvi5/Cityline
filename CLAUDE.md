@@ -36,11 +36,20 @@ pnpm worker         # run the outbox worker once, locally
 pnpm check:migrations   # DATA-04 guard: migrations must only add
 
 # Payload (admin + schema). The DB must be up: pnpm db:up
-pnpm exec payload migrate:create <name>   # generate, then READ it before running
-pnpm exec payload migrate                 # apply pending migrations locally
+pnpm migrate:create <name>                # generate, then READ it before running
+pnpm migrate                              # apply pending migrations locally
+pnpm migrate:status                       # which migrations have run
 pnpm exec payload generate:types          # refresh src/payload-types.ts
 pnpm exec payload generate:importmap      # after adding a custom admin component
 ```
+
+**Schema push is off, in dev too** (`push: false` in `payload.config.ts`). Every
+database, local included, is shaped only by migrations. Changed a collection?
+`pnpm migrate:create <name>` → read it → `pnpm migrate`. Until you do, dev
+pages that touch that collection error. Push was turned off because it would
+drop the parts of the schema that exist only in migrations: the partial unique
+index on jobs (booking, leg), the source/booking check constraint and
+`job_reference_seq`.
 
 Deploy: push to `main` → CI builds the image → SSH deploy. **Never edit files on the server.**
 

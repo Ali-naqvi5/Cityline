@@ -13,53 +13,53 @@
  * via the `definition` "supportedTimezones".
  */
 export type SupportedTimezones =
-  | "Pacific/Midway"
-  | "Pacific/Niue"
-  | "Pacific/Honolulu"
-  | "Pacific/Rarotonga"
-  | "America/Anchorage"
-  | "Pacific/Gambier"
-  | "America/Los_Angeles"
-  | "America/Tijuana"
-  | "America/Denver"
-  | "America/Phoenix"
-  | "America/Chicago"
-  | "America/Guatemala"
-  | "America/New_York"
-  | "America/Bogota"
-  | "America/Caracas"
-  | "America/Santiago"
-  | "America/Buenos_Aires"
-  | "America/Sao_Paulo"
-  | "Atlantic/South_Georgia"
-  | "Atlantic/Azores"
-  | "Atlantic/Cape_Verde"
-  | "Europe/London"
-  | "Europe/Berlin"
-  | "Africa/Lagos"
-  | "Europe/Athens"
-  | "Africa/Cairo"
-  | "Europe/Moscow"
-  | "Asia/Riyadh"
-  | "Asia/Dubai"
-  | "Asia/Baku"
-  | "Asia/Karachi"
-  | "Asia/Tashkent"
-  | "Asia/Calcutta"
-  | "Asia/Dhaka"
-  | "Asia/Almaty"
-  | "Asia/Jakarta"
-  | "Asia/Bangkok"
-  | "Asia/Shanghai"
-  | "Asia/Singapore"
-  | "Asia/Tokyo"
-  | "Asia/Seoul"
-  | "Australia/Brisbane"
-  | "Australia/Sydney"
-  | "Pacific/Guam"
-  | "Pacific/Noumea"
-  | "Pacific/Auckland"
-  | "Pacific/Fiji";
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
 
 export interface Config {
   auth: {
@@ -71,15 +71,15 @@ export interface Config {
     quotes: Quote;
     bookings: Booking;
     jobs: Job;
-    "job-events": JobEvent;
+    'job-events': JobEvent;
     payments: Payment;
     refunds: Refund;
-    "webhook-events": WebhookEvent;
+    'webhook-events': WebhookEvent;
     users: User;
-    "payload-kv": PayloadKv;
-    "payload-locked-documents": PayloadLockedDocument;
-    "payload-preferences": PayloadPreference;
-    "payload-migrations": PayloadMigration;
+    'payload-kv': PayloadKv;
+    'payload-locked-documents': PayloadLockedDocument;
+    'payload-preferences': PayloadPreference;
+    'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
@@ -87,17 +87,15 @@ export interface Config {
     quotes: QuotesSelect<false> | QuotesSelect<true>;
     bookings: BookingsSelect<false> | BookingsSelect<true>;
     jobs: JobsSelect<false> | JobsSelect<true>;
-    "job-events": JobEventsSelect<false> | JobEventsSelect<true>;
+    'job-events': JobEventsSelect<false> | JobEventsSelect<true>;
     payments: PaymentsSelect<false> | PaymentsSelect<true>;
     refunds: RefundsSelect<false> | RefundsSelect<true>;
-    "webhook-events": WebhookEventsSelect<false> | WebhookEventsSelect<true>;
+    'webhook-events': WebhookEventsSelect<false> | WebhookEventsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    "payload-kv": PayloadKvSelect<false> | PayloadKvSelect<true>;
-    "payload-locked-documents":
-      PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
-    "payload-preferences":
-      PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    "payload-migrations": PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: number;
@@ -164,7 +162,7 @@ export interface Quote {
    * Opaque, random. The only thing that travels in the URL between steps.
    */
   token: string;
-  status: "open" | "converted" | "expired";
+  status: 'open' | 'converted' | 'expired';
   /**
    * Set to 30 minutes after creation (BK-08).
    */
@@ -224,7 +222,7 @@ export interface Booking {
    * CL-XXXXXX, from domain/booking/reference.ts. Read down the phone, so the alphabet excludes I, L, O and U.
    */
   reference: string;
-  status: "pending_payment" | "confirmed" | "cancelled" | "completed" | "expired";
+  status: 'pending_payment' | 'confirmed' | 'cancelled' | 'completed' | 'expired';
   customer: number | Customer;
   quote?: (number | null) | Quote;
   /**
@@ -284,12 +282,12 @@ export interface Job {
   /**
    * Required and immutable (§2). Website jobs come only from checkout.
    */
-  source: "website" | "supplier" | "phone" | "whatsapp" | "email" | "account" | "other";
+  source: 'website' | 'supplier' | 'phone' | 'whatsapp' | 'email' | 'account' | 'other';
   booking?: (number | null) | Booking;
   /**
    * One job per leg. Unique per (booking, leg).
    */
-  leg?: ("outbound" | "return") | null;
+  leg?: ('outbound' | 'return') | null;
   returnOfJob?: (number | null) | Job;
   pickupAt: string;
   pickupAddress: string;
@@ -337,13 +335,7 @@ export interface Job {
         id?: string | null;
       }[]
     | null;
-  status:
-    | "unassigned"
-    | "assigned"
-    | "driver_confirmed"
-    | "completed"
-    | "no_show"
-    | "cancelled";
+  status: 'unassigned' | 'assigned' | 'driver_confirmed' | 'completed' | 'no_show' | 'cancelled';
   /**
    * Copied onto the job at assignment, not looked up later (CMP-03). The register must show the number that applied on the day.
    */
@@ -364,7 +356,7 @@ export interface Job {
    * CMP-02: a fare must be agreed before the journey and recorded. Integer pence (NFR-08).
    */
   customerPricePence: number;
-  paymentMethod: "web_prepaid" | "supplier" | "cash" | "card_link" | "bank" | "account";
+  paymentMethod: 'web_prepaid' | 'supplier' | 'cash' | 'card_link' | 'bank' | 'account';
   /**
    * Stripe's fee, from the webhook.
    */
@@ -391,7 +383,7 @@ export interface Job {
 export interface User {
   id: number;
   name: string;
-  role: "owner" | "controller" | "accounts" | "editor";
+  role: 'owner' | 'controller' | 'accounts' | 'editor';
   active?: boolean | null;
   lastLoginAt?: string | null;
   updatedAt: string;
@@ -412,7 +404,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
-  collection: "users";
+  collection: 'users';
 }
 /**
  * Append-only history. Rows are never edited or removed.
@@ -423,12 +415,11 @@ export interface User {
 export interface JobEvent {
   id: number;
   job: number | Job;
-  type:
-    "created" | "updated" | "assigned" | "unassigned" | "status_changed" | "message_sent";
+  type: 'created' | 'updated' | 'assigned' | 'unassigned' | 'status_changed' | 'message_sent';
   field?: string | null;
   oldValue?: string | null;
   newValue?: string | null;
-  actorType: "user" | "system" | "customer";
+  actorType: 'user' | 'system' | 'customer';
   actorUser?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
@@ -448,7 +439,7 @@ export interface Payment {
    */
   feePence?: number | null;
   status: string;
-  kind: "initial" | "amendment" | "post_trip" | "payment_link";
+  kind: 'initial' | 'amendment' | 'post_trip' | 'payment_link';
   /**
    * The Stripe object as received, for reconciliation.
    */
@@ -486,7 +477,7 @@ export interface Refund {
  */
 export interface WebhookEvent {
   id: number;
-  provider: "stripe" | "whatsapp";
+  provider: 'stripe' | 'whatsapp';
   eventId: string;
   type: string;
   processedAt?: string | null;
@@ -527,44 +518,44 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: "customers";
+        relationTo: 'customers';
         value: number | Customer;
       } | null)
     | ({
-        relationTo: "quotes";
+        relationTo: 'quotes';
         value: number | Quote;
       } | null)
     | ({
-        relationTo: "bookings";
+        relationTo: 'bookings';
         value: number | Booking;
       } | null)
     | ({
-        relationTo: "jobs";
+        relationTo: 'jobs';
         value: number | Job;
       } | null)
     | ({
-        relationTo: "job-events";
+        relationTo: 'job-events';
         value: number | JobEvent;
       } | null)
     | ({
-        relationTo: "payments";
+        relationTo: 'payments';
         value: number | Payment;
       } | null)
     | ({
-        relationTo: "refunds";
+        relationTo: 'refunds';
         value: number | Refund;
       } | null)
     | ({
-        relationTo: "webhook-events";
+        relationTo: 'webhook-events';
         value: number | WebhookEvent;
       } | null)
     | ({
-        relationTo: "users";
+        relationTo: 'users';
         value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
-    relationTo: "users";
+    relationTo: 'users';
     value: number | User;
   };
   updatedAt: string;
@@ -577,7 +568,7 @@ export interface PayloadLockedDocument {
 export interface PayloadPreference {
   id: number;
   user: {
-    relationTo: "users";
+    relationTo: 'users';
     value: number | User;
   };
   key?: string | null;
@@ -863,7 +854,7 @@ export interface CollectionsWidget {
   data?: {
     [k: string]: unknown;
   };
-  width: "full";
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -873,6 +864,7 @@ export interface Auth {
   [k: string]: unknown;
 }
 
-declare module "payload" {
+
+declare module 'payload' {
   export interface GeneratedTypes extends Config {}
 }

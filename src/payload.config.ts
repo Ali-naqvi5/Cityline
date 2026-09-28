@@ -71,12 +71,26 @@ export default buildConfig({
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URL },
     /**
-     * Migrations are generated, reviewed and committed (DATA-03), then run by
-     * `deploy.sh` before the new containers start. Never `push: true` outside
-     * local development — that lets Payload alter the schema silently, which
-     * is exactly what DATA-03 and DATA-04 exist to prevent.
+     * Off everywhere, including `next dev`. Every database — local included —
+     * is shaped only by the reviewed migrations in `src/migrations` (DATA-03),
+     * which `deploy.sh` also runs in production.
+     *
+     * Payload's default is to "push" in development: rewrite the database to
+     * match the collections on first use. That is unsafe here because part of
+     * the schema lives only in migrations — the partial unique index on
+     * (booking, leg), the source/booking check constraint and
+     * `job_reference_seq` — and a push would drop them. Payload's own docs say
+     * not to mix push and migrations on one database, and suggest either a
+     * sandbox database for push or `push: false`. A sandbox would lack those
+     * three objects (Payload's schema hooks cannot declare a sequence, and
+     * declaring the index there would make the next generated migration
+     * re-create it), so migrations-only it is.
+     *
+     * The cost: after changing a collection, run `pnpm migrate:create <name>`,
+     * review the file, then `pnpm migrate`, or dev pages that touch that
+     * collection error until you do.
      */
-    push: process.env.NODE_ENV === "development",
+    push: false,
     /**
      * Must stay set even in production. `prodMigrations` below is what actually
      * runs there, but Payload still resolves this path first — and if it is

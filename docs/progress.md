@@ -366,9 +366,16 @@ without that, Apple Pay and Google Pay never appear in Stripe's iframe.
 **Testing payments locally** needs Docker (Postgres), a production build
 (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is baked in at build time) and
 `stripe listen --forward-to localhost:3000/api/webhooks/stripe`, whose printed
-`whsec_…` goes in `.env.local`. Test card `4242 4242 4242 4242`. Do not use
-`next dev` against the shared local database: in development Payload pushes its
-schema, which would drop the hand-written constraints and the job sequence.
+`whsec_…` goes in `.env.local`. Test card `4242 4242 4242 4242`.
+
+**`next dev` is safe against the local database** now that schema push is off
+(`push: false`, 29 Sep 2026). Payload's docs suggest keeping push on against a
+throwaway sandbox database instead. That was checked and rejected: three parts
+of the schema exist only in migrations (the partial unique index, the check
+constraint, `job_reference_seq`), Payload's schema hooks cannot declare a
+sequence, and declaring the index there would make the next generated
+migration re-create it. So every database is migration-only; after changing a
+collection, `pnpm migrate:create <name>` then `pnpm migrate`.
 
 **Playwright clicks mid-scroll miss.** The site scrolls smoothly, so a click
 issued while Playwright scrolls a button into view lands where the button was.
