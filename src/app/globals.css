@@ -334,9 +334,17 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
+  /*
+   * `--color-primary` and `--color-secondary` are deliberately NOT mapped here.
+   * shadcn's installer adds both, and because this block comes later it
+   * overrides the Cityline palette in the @theme block at the top: `secondary`
+   * became shadcn's pale surface (#e9f7ec) instead of the design's green
+   * (#006d3a), so every `hover:bg-secondary` button turned near-white under its
+   * white text. Nothing from the shadcn registry here uses those two classes —
+   * the components were adapted to the Cityline tokens — so the design's values
+   * stand. If `shadcn add` puts these lines back, take them out again.
+   */
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
