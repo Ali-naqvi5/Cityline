@@ -17,10 +17,17 @@ export function FaqList({
   faqs,
   heading,
   headingId = "faqs",
+  structuredData = true,
 }: {
   faqs: readonly PlaceFaq[];
   heading: string;
   headingId?: string;
+  /**
+   * Off when one page shows several groups: Google expects a single `FAQPage`
+   * per page, so `/faq` renders its groups without it and emits one block for
+   * all of them.
+   */
+  structuredData?: boolean;
 }) {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -60,11 +67,13 @@ export function FaqList({
         ))}
       </div>
 
-      <script
-        type="application/ld+json"
-        // Generated from `faqs` above, never from user input.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {structuredData ? (
+        <script
+          type="application/ld+json"
+          // Generated from `faqs` above, never from user input.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      ) : null}
     </section>
   );
 }

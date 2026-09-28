@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+import { siteUrl } from "@/lib/company";
+
 // Evaluated per request: the launch gate flips with a container restart, never a rebuild.
 export const dynamic = "force-dynamic";
 
@@ -9,8 +11,7 @@ export const dynamic = "force-dynamic";
  * everything else is allowed.
  */
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://citylineairporttransfers.com";
+  const origin = siteUrl();
 
   if (process.env.LAUNCH_GATE === "on") {
     return { rules: [{ userAgent: "*", disallow: "/" }] };
@@ -24,7 +25,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/manage/", "/book/", "/api/", "/account/"],
       },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
-    host: siteUrl,
+    sitemap: `${origin}/sitemap.xml`,
+    host: origin,
   };
 }

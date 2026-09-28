@@ -28,6 +28,16 @@ export const policies = {
 
   /** Meet and greet inside arrivals is included on airport pickups. */
   meetAndGreetIncluded: true,
+
+  /** Complaints: acknowledged within, then resolved within, in working days. */
+  complaintAcknowledgeWorkingDays: 2,
+  complaintResolveWorkingDays: 10,
+
+  /**
+   * How long complaint and lost-property records are kept (CMP-05). A TfL
+   * licence condition, so it is stated to customers rather than left implicit.
+   */
+  recordRetentionMonths: 12,
 } as const;
 
 /** Phrases reused across pages, so the numbers can never drift apart. */

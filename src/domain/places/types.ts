@@ -61,6 +61,22 @@ export function introWordCount(place: PlaceGuide): number {
   return place.intro.join(" ").trim().split(/\s+/).length;
 }
 
+/**
+ * Links a place guide renders to other pages, for SEO-01's count: one per
+ * destination, one to each sibling place, and four fixed ones (booking, fares,
+ * fleet and the hub).
+ *
+ * Shared by the page and the sitemap. SEO-01 wants a thin page both `noindex`
+ * and out of the sitemap, and two copies of this arithmetic would eventually
+ * disagree about which pages those are.
+ */
+export function placeInternalLinkCount(
+  place: PlaceGuide,
+  siblings: readonly PlaceGuide[],
+): number {
+  return place.destinations.length + (siblings.length - 1) + 4;
+}
+
 export interface QualityCheck {
   passes: boolean;
   failures: string[];

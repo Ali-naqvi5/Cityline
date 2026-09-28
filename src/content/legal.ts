@@ -184,7 +184,7 @@ export const TERMS: LegalDocument = {
       heading: "Complaints",
       body: [
         `If something goes wrong, please tell us. Email ${company.email} or call us, quoting your booking reference, and we will look into it.`,
-        "We aim to acknowledge complaints within two working days and resolve them within ten. Telling us promptly helps — details are easier to establish while the journey is recent.",
+        `We aim to acknowledge complaints within ${policies.complaintAcknowledgeWorkingDays} working days and resolve them within ${policies.complaintResolveWorkingDays}. Telling us promptly helps — details are easier to establish while the journey is recent. Our full complaints procedure, including how to take a complaint further, is published on our complaints page.`,
       ],
     },
     {
@@ -272,7 +272,7 @@ export const PRIVACY: LegalDocument = {
       list: [
         "Booking records are kept for at least 12 months, because Transport for London requires a licensed operator to keep them.",
         "Records needed for accounting and tax are kept for six years.",
-        "Complaints and lost property records are kept for 12 months.",
+        `Complaints and lost property records are kept for ${policies.recordRetentionMonths} months.`,
         "Marketing consent is kept until you withdraw it.",
       ],
     },
@@ -297,8 +297,8 @@ export const PRIVACY: LegalDocument = {
     {
       heading: "Cookies",
       body: [
-        "We use cookies that are necessary for the site to function, such as keeping your place in the booking process. These do not need your consent.",
-        "Any analytics or marketing cookies load only after you have agreed to them, and you can change your mind at any time.",
+        "We only use cookies that are strictly necessary, such as those our payment provider needs to take a payment securely. These do not need your consent. Your place in the booking process is held on our servers, not in a cookie.",
+        "We do not use analytics or advertising cookies. If that changes, they will load only after you have agreed to them, and you will be able to change your mind at any time. Our cookie policy lists every cookie we set.",
       ],
     },
     {
@@ -324,6 +324,184 @@ export const PRIVACY: LegalDocument = {
       heading: "Changes to this notice",
       body: [
         "We may update this notice as the service changes. The date at the top shows when it was last revised.",
+      ],
+    },
+  ],
+};
+
+/**
+ * The cookie policy (CMP-11, PECR).
+ *
+ * Lists what the site **actually** sets, checked against the code on
+ * 2026-09-28: one owner-only preview cookie from `src/proxy.ts`, and Stripe's
+ * own cookies on the payment step. No analytics, no advertising, no maps. When
+ * any of that changes — GA4 under SEO-10, Google Places under BK-02 — this has
+ * to change in the same commit, and the consent banner has to exist first.
+ */
+export const COOKIES: LegalDocument = {
+  title: "Cookie policy",
+  description:
+    "Which cookies the Cityline Airport Transfers website sets, why, and how to control them.",
+  updated: "2026-09-28",
+  intro: [
+    "Cookies are small files a website stores in your browser. Some are needed for a site to work; others are used to measure or advertise. This page lists every cookie our site sets and why.",
+    "The short version: we only use cookies that are strictly necessary. We do not use analytics or advertising cookies, and nothing on this site follows you around the web.",
+  ],
+  sections: [
+    {
+      heading: "Browsing and booking",
+      body: [
+        "Browsing the site and getting a price sets no cookies at all. While you book, your journey and your details are held on our servers against a random reference in the page address, not in a cookie in your browser.",
+      ],
+    },
+    {
+      heading: "Paying for your journey",
+      body: [
+        "When you reach the payment step, card payments are handled by Stripe, our payment provider. Stripe sets cookies of its own that it needs to take a payment securely and to detect fraud. These are strictly necessary for paying online, so they do not need your consent, and Stripe explains them in its own cookie policy.",
+      ],
+    },
+    {
+      heading: "Staff previews",
+      body: [
+        "Before the site opens to the public, our own staff can preview it using a private link. That sets one cookie, named cityline_preview, which lasts seven days and does nothing else. You will not receive it as a customer.",
+      ],
+    },
+    {
+      heading: "Analytics and advertising",
+      body: [
+        "We do not use them. If we ever add analytics to understand how the site is used, those cookies will load only after you have agreed to them, you will be able to change your mind at any time, and this page will list them before they go live.",
+      ],
+    },
+    {
+      heading: "Controlling cookies",
+      body: [
+        "You can block or delete cookies in your browser's settings. Blocking the payment provider's cookies may stop you paying online; if that happens, call us and we will take your booking by phone.",
+      ],
+    },
+    {
+      heading: "Questions",
+      body: [
+        `Email ${company.email} if you have a question about this policy. How we handle your personal information more generally is explained in our privacy policy.`,
+      ],
+    },
+  ],
+};
+
+/**
+ * Who licenses Cityline and what that means for a passenger (CMP-09, §5
+ * `/legal/licensing`).
+ *
+ * The operator licence number appears only if `company.showOperatorLicence` is
+ * flipped. Cityline has asked for it to be hidden, and the note on that flag
+ * records that CMP-09 expects it to be shown. This page is where its absence
+ * is most noticeable, which is worth raising with Cityline before launch.
+ */
+export const LICENSING: LegalDocument = {
+  title: "Licensing",
+  description:
+    "Cityline Airport Transfers is a private hire operator licensed by Transport for London. What that means for your journey.",
+  updated: "2026-09-28",
+  intro: [
+    company.showOperatorLicence
+      ? `${company.legalName} is licensed by ${company.licensingAuthority} as a private hire operator, under operator licence number ${company.operatorLicenceNumber}.`
+      : `${company.legalName} is licensed by ${company.licensingAuthority} as a private hire operator.`,
+    "Private hire is regulated in London so that passengers know who is driving them, in what vehicle, and who is responsible if something goes wrong. Here is what that means in practice.",
+  ],
+  sections: [
+    {
+      heading: "Every journey is booked in advance",
+      body: [
+        "Private hire vehicles cannot be hailed in the street or picked up from a rank. Every journey has to be booked with a licensed operator before it starts, and the operator has to record it. That is the law, and it is why you book with us rather than flag one of our cars down.",
+      ],
+    },
+    {
+      heading: "Licensed drivers and vehicles",
+      body: [
+        "Every driver who carries our passengers holds a private hire driver licence, and every vehicle holds a private hire vehicle licence and is insured for carrying passengers for hire and reward.",
+        "We record the expiry date of each driver's and vehicle's licences and documents, and a driver or vehicle whose documents have expired cannot be given a journey.",
+      ],
+    },
+    {
+      heading: "Knowing who is collecting you",
+      body: [
+        "Before your journey we send you your driver's first name, their private hire licence number, and the make, colour and registration of the vehicle. Check the registration before you get in. If anything does not match, do not get in the vehicle — call us.",
+      ],
+    },
+    {
+      heading: "Booking records",
+      body: [
+        "As a licensed operator we keep a record of every booking: when it was made, the journey, the fare agreed, the driver and vehicle that carried it, and who at Cityline took and dispatched it. These records are kept for at least 12 months and can be inspected by our licensing authority.",
+      ],
+    },
+    {
+      heading: "Our address",
+      body: [
+        `Our registered and operating address is ${formattedAddress()}. It is an office, not a public counter: our licence carries a no public access condition, so please contact us by phone or email rather than calling in.`,
+        ...(company.companyNumber
+          ? [`Registered in England and Wales, company number ${company.companyNumber}.`]
+          : []),
+        ...(company.vatNumber ? [`VAT number ${company.vatNumber}.`] : []),
+      ],
+    },
+  ],
+};
+
+/**
+ * The complaints procedure (WEB-03, CMP-05, §5 `/legal/complaints`).
+ *
+ * Its timings are `policies.complaintAcknowledgeWorkingDays` and
+ * `complaintResolveWorkingDays` — the same numbers the terms quote, so the two
+ * pages cannot promise different things.
+ *
+ * WEB-05 asks for a complaints form with spam protection, which needs the
+ * `enquiries` table (§14) to store into. Until that exists, complaints come by
+ * email or phone, and this page says so rather than showing a form that goes
+ * nowhere.
+ */
+export const COMPLAINTS: LegalDocument = {
+  title: "Complaints procedure",
+  description: `How to make a complaint to Cityline Airport Transfers, what happens next, and how long it takes. Every complaint is acknowledged within ${policies.complaintAcknowledgeWorkingDays} working days.`,
+  updated: "2026-09-28",
+  intro: [
+    "If something has gone wrong with your journey, we want to know. Most problems are sorted out quickly once we have the details, and every complaint is read by a person.",
+  ],
+  sections: [
+    {
+      heading: "How to complain",
+      body: [
+        `Email ${company.email} or call us on ${company.phone}. It helps us put things right quickly if you include:`,
+      ],
+      list: [
+        "your booking reference, which starts CL-",
+        "the date and time of the journey",
+        "what happened, in as much detail as you remember",
+        "what you would like us to do about it",
+      ],
+    },
+    {
+      heading: "What happens next",
+      body: [
+        `We acknowledge every complaint within ${policies.complaintAcknowledgeWorkingDays} working days and tell you who is looking into it.`,
+        `We aim to give you a full response within ${policies.complaintResolveWorkingDays} working days. If we need longer — for example, because we need to speak to a driver who is away — we will tell you why, and when you can expect an answer.`,
+      ],
+    },
+    {
+      heading: "Complaints about safety",
+      body: [
+        "If you felt unsafe during a journey, or you are concerned about a driver's conduct, please tell us straight away. If you are in immediate danger, call 999 first.",
+      ],
+    },
+    {
+      heading: "Records we keep",
+      body: [
+        `As a licensed operator we keep a record of every complaint and what we did about it for ${policies.recordRetentionMonths} months. Our licensing authority can inspect these records.`,
+      ],
+    },
+    {
+      heading: "If you are not satisfied",
+      body: [
+        `If you have been through this procedure and are unhappy with our response, you can raise your complaint with ${company.licensingAuthority}, which licenses us as a private hire operator. Please give us the chance to put things right first.`,
+        "This procedure does not affect your statutory rights as a consumer.",
       ],
     },
   ],

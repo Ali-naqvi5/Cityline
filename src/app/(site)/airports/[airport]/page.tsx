@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { PlaceGuidePage } from "@/components/site/place-guide-page";
 import { AIRPORTS, airportBySlug } from "@/domain/places/airports";
-import { meetsQualityBar, type PlaceGuide } from "@/domain/places/types";
+import { meetsQualityBar, placeInternalLinkCount } from "@/domain/places/types";
 import { TABLE_CLASSES } from "@/domain/pricing/indicative";
 import { company } from "@/lib/company";
 
@@ -25,11 +25,6 @@ export function generateStaticParams() {
   return AIRPORTS.map((airport) => ({ airport: airport.slug }));
 }
 
-/** Links this page renders to other pages, for the SEO-01 count. */
-function internalLinkCount(airport: PlaceGuide): number {
-  return airport.destinations.length + (AIRPORTS.length - 1) + 4;
-}
-
 export async function generateMetadata({
   params,
 }: PageProps<"/airports/[airport]">): Promise<Metadata> {
@@ -38,7 +33,7 @@ export async function generateMetadata({
 
   const quality = meetsQualityBar(
     airport,
-    internalLinkCount(airport),
+    placeInternalLinkCount(airport, AIRPORTS),
     TABLE_CLASSES.length,
   );
 

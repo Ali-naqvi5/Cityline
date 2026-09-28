@@ -1,0 +1,115 @@
+import { ArrowRight, Phone, Plane, Ship, Tag, Wrench } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { ButtonLink } from "@/components/ui/button";
+import { Container } from "@/components/ui/container";
+import { company, telHref } from "@/lib/company";
+
+/**
+ * The 404 page.
+ *
+ * Next renders its own bare-bones 404 without this file, which for a site whose
+ * traffic is mostly search is a wasted page: someone arrives from a stale result
+ * or a mistyped URL, finds a black-and-white error, and leaves.
+ *
+ * So this is a signpost rather than an apology. The links are the routes people
+ * actually arrive looking for — an airport, a price, a way to reach a human —
+ * and the phone number is here because a mistyped URL at 4am is exactly when
+ * someone gives up on the website and calls.
+ */
+export const metadata: Metadata = {
+  title: "Page not found",
+  // A 404 must never be indexed; a soft-404 in the index outranks the real page.
+  robots: { index: false, follow: true },
+};
+
+const DESTINATIONS = [
+  {
+    href: "/airports",
+    icon: Plane,
+    title: "Airport transfers",
+    detail: "Heathrow, Gatwick, Stansted, Luton, City and Southend.",
+  },
+  {
+    href: "/fares",
+    icon: Tag,
+    title: "Fares",
+    detail: "What a journey costs, by vehicle, before you book.",
+  },
+  {
+    href: "/services",
+    icon: Wrench,
+    title: "Services",
+    detail: "Airport, seaport, station, hourly hire and more.",
+  },
+  {
+    href: "/seaports",
+    icon: Ship,
+    title: "Cruise transfers",
+    detail: "Southampton, Dover, Tilbury, Harwich and Portsmouth.",
+  },
+] as const;
+
+export default function NotFound() {
+  return (
+    <Container className="py-16 sm:py-24">
+      <div className="max-w-2xl">
+        <p className="text-label-sm text-on-surface-variant mb-space-sm tabular-nums">
+          404
+        </p>
+
+        <h1 className="text-headline-lg-mobile sm:text-headline-lg mb-space-md">
+          We cannot find that page
+        </h1>
+
+        <div className="gap-space-md text-body-lg text-on-surface-variant flex flex-col">
+          <p>
+            The link may be out of date, or the address may have a typo in it. Everything
+            else on the site is where it was.
+          </p>
+          <p>
+            If you already have a booking, the link in your confirmation email opens it.
+          </p>
+        </div>
+
+        <div className="gap-space-md mt-space-xl flex flex-wrap items-center">
+          <ButtonLink href="/book">
+            Get a price
+            <ArrowRight aria-hidden className="h-4 w-4" />
+          </ButtonLink>
+
+          <p className="text-body-sm text-on-surface-variant flex items-center gap-1.5">
+            <Phone aria-hidden className="h-4 w-4" />
+            Or call{" "}
+            <a href={telHref()} className="text-primary tabular-nums hover:underline">
+              {company.phone}
+            </a>{" "}
+            — {company.serviceHours}.
+          </p>
+        </div>
+      </div>
+
+      <h2 className="text-headline-sm mb-space-lg mt-16">You might be looking for</h2>
+
+      <ul className="gap-gutter grid sm:grid-cols-2">
+        {DESTINATIONS.map(({ href, icon: Icon, title, detail }) => (
+          <li key={href}>
+            <Link
+              href={href}
+              className="border-outline-variant hover:border-outline hover:bg-surface-container-low rounded-card p-space-lg group flex h-full gap-4 border transition-colors"
+            >
+              <Icon aria-hidden className="text-primary mt-0.5 h-5 w-5 shrink-0" />
+              <span>
+                <span className="text-title-md group-hover:text-primary block transition-colors">
+                  {title}
+                </span>
+                <span className="text-body-md text-on-surface-variant">{detail}</span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </Container>
+  );
+}

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { PlaceGuidePage } from "@/components/site/place-guide-page";
 import { SEAPORTS, seaportBySlug } from "@/domain/places/seaports";
-import { meetsQualityBar, type PlaceGuide } from "@/domain/places/types";
+import { meetsQualityBar, placeInternalLinkCount } from "@/domain/places/types";
 import { TABLE_CLASSES } from "@/domain/pricing/indicative";
 import { company } from "@/lib/company";
 
@@ -15,17 +15,17 @@ export function generateStaticParams() {
   return SEAPORTS.map((port) => ({ port: port.slug }));
 }
 
-function internalLinkCount(port: PlaceGuide): number {
-  return port.destinations.length + (SEAPORTS.length - 1) + 4;
-}
-
 export async function generateMetadata({
   params,
 }: PageProps<"/seaports/[port]">): Promise<Metadata> {
   const port = seaportBySlug((await params).port);
   if (!port) return {};
 
-  const quality = meetsQualityBar(port, internalLinkCount(port), TABLE_CLASSES.length);
+  const quality = meetsQualityBar(
+    port,
+    placeInternalLinkCount(port, SEAPORTS),
+    TABLE_CLASSES.length,
+  );
 
   return {
     title: `${port.fullName} transfers`,
