@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * The journey as it travels through the funnel's query string.
  *
@@ -44,6 +46,41 @@ export interface FunnelParams {
   /** Vehicle class slug, set at step 2. */
   vehicle: string;
 }
+
+/**
+ * The same shape as a runtime schema.
+ *
+ * `FunnelParams` above is the type the funnel passes around; this is what
+ * validates one that has been *stored* and read back — a `quotes.request`
+ * written by an older release, or edited in the admin. Parsing on read is the
+ * difference between a bad row failing loudly and a bad row quietly becoming
+ * a booking.
+ */
+export const funnelParamsSchema = z.object({
+  service: z.enum(SERVICE_MODES),
+  pickup: z.string(),
+  dropoff: z.string(),
+  via: z.array(z.string()),
+  date: z.string(),
+  time: z.string(),
+  hours: z.number().int().min(0),
+
+  returnJourney: z.boolean(),
+  returnPickup: z.string(),
+  returnDropoff: z.string(),
+  returnVia: z.array(z.string()),
+  returnDate: z.string(),
+  returnTime: z.string(),
+  returnPassengers: z.number().int().min(0),
+  returnBags: z.number().int().min(0),
+
+  flightNumber: z.string(),
+  airline: z.string(),
+  passengers: z.number().int().min(0),
+  bags: z.number().int().min(0),
+  notes: z.string(),
+  vehicle: z.string(),
+}) satisfies z.ZodType<FunnelParams>;
 
 export type RawSearchParams = Record<string, string | string[] | undefined>;
 

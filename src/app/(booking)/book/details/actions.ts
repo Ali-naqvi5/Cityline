@@ -1,30 +1,33 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import {
-  DETAILS_COOKIE,
-  extrasFromFormData,
-  type DetailsFormState,
-} from "@/domain/booking/details-session";
+import { parseFunnelParams } from "@/domain/booking/funnel-params";
 import { passengerDetailsSchema } from "@/domain/booking/passenger";
+import {
+  createQuoteToken,
+  extrasFromFormData,
+  quoteExpiresAt,
+  type DetailsFormState,
+} from "@/domain/booking/quote-session";
+import { quoteFor } from "@/domain/pricing/quote";
+import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
+import { payloadClient } from "@/lib/payload";
 
 /**
- * Step 3 submit.
+ * Step 3 submit: validate the passenger, price the journey, store it, move on.
  *
- * Passenger details are deliberately NOT passed to step 4 in the query string.
- * A URL containing a name, email and phone number ends up in browser history,
- * in `Referer` headers sent to Stripe and Google, in server access logs, and in
- * any link the customer shares. They go in an httpOnly cookie instead.
+ * The price is worked out **here, on the server**, and written to the quote.
+ * Step 4 charges what this row says, not what the browser sends — BK-08 and
+ * CLAUDE.md are both explicit that a price from a client is never trusted.
  *
- * TODO(S3): this cookie is an interim. Once the `quotes` table exists (BK-08),
- * the in-progress booking is stored server-side against a quote token and the
- * cookie holds nothing but that token. The schema is re-validated on read, so
- * a tampered or stale cookie cannot put bad data into a booking record.
+ * Only the quote token travels to step 4. No name, phone or email in the URL:
+ * a URL with a phone number in it ends up in browser history, in `Referer`
+ * headers sent to Stripe and Google, in access logs, and in any link the
+ * customer forwards to someone.
  *
- * A `"use server"` module may only export async functions, so the cookie name
- * and the form-state type live in `@/domain/booking/details-session`.
+ * A `"use server"` module may only export async functions, so the token
+ * helpers and the form-state type live in `@/domain/booking/quote-session`.
  */
 export async function saveDetails(
   _previous: DetailsFormState,
@@ -54,21 +57,43 @@ export async function saveDetails(
     return { errors };
   }
 
-  const store = await cookies();
-  store.set(
-    DETAILS_COOKIE,
-    JSON.stringify({ details: parsed.data, extras: extrasFromFormData(formData) }),
-    {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/book",
-      // Long enough to finish paying, short enough not to linger on a shared
-      // computer. It is deleted once the booking is confirmed.
-      maxAge: 60 * 60,
-    },
-  );
+  // The journey is rebuilt from the query the form carries, then parsed with
+  // the same function every other step uses — never read field by field here.
+  const journeyQuery = new URLSearchParams(String(formData.get("journeyQuery") ?? ""));
+  const journey = parseFunnelParams({
+    ...Object.fromEntries(journeyQuery),
+    via: journeyQuery.getAll("via"),
+    returnVia: journeyQuery.getAll("returnVia"),
+  });
 
-  const journey = String(formData.get("journeyQuery") ?? "");
-  redirect(`/book/payment${journey ? `?${journey}` : ""}`);
+  const vehicle = VEHICLE_CLASSES.find((item) => item.slug === journey.vehicle);
+  if (!vehicle) {
+    // No vehicle means a tampered or stale link; send them back to choose one
+    // rather than guessing on their behalf.
+    redirect(`/book/vehicle?${journeyQuery.toString()}`);
+  }
+
+  const extras = extrasFromFormData(formData);
+  const quote = quoteFor(journey, vehicle, extras);
+  const token = createQuoteToken();
+
+  const payload = await payloadClient();
+  await payload.create({
+    collection: "quotes",
+    data: {
+      token,
+      status: "open",
+      expiresAt: quoteExpiresAt().toISOString(),
+      request: { journey, details: parsed.data, extras },
+      results: {
+        vehicleSlug: vehicle.slug,
+        legs: quote.legs,
+        lines: quote.lines,
+        totalPence: quote.totalPence,
+      },
+      totalPence: quote.totalPence,
+    },
+  });
+
+  redirect(`/book/payment?q=${encodeURIComponent(token)}`);
 }

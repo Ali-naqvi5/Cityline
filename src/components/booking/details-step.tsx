@@ -8,7 +8,7 @@ import { useActionState, useState } from "react";
 import { JourneySummary } from "@/components/booking/journey-summary";
 import { Field, fieldControlClasses } from "@/components/ui/field";
 import { saveDetails } from "@/app/(booking)/book/details/actions";
-import type { DetailsFormState } from "@/domain/booking/details-session";
+import type { DetailsFormState } from "@/domain/booking/quote-session";
 import type { FunnelParams } from "@/domain/booking/funnel-params";
 import { funnelQuery } from "@/domain/booking/funnel-params";
 import { formatPence } from "@/domain/money";

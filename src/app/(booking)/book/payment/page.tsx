@@ -1,25 +1,16 @@
 import { Lock, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { FunnelProgress } from "@/components/booking/funnel-progress";
 import { PaymentPanel } from "@/components/booking/payment-panel";
+import { QuoteExpired } from "@/components/booking/quote-expired";
 import { Container } from "@/components/ui/container";
-import {
-  DETAILS_COOKIE,
-  bookingDraftSchema,
-  type BookingDraft,
-} from "@/domain/booking/details-session";
-import {
-  funnelQuery,
-  hasJourney,
-  parseFunnelParams,
-} from "@/domain/booking/funnel-params";
+import { funnelQuery } from "@/domain/booking/funnel-params";
 import { nameBoardText } from "@/domain/booking/passenger";
+import { loadQuote } from "@/domain/booking/load-quote";
 import { formatPence } from "@/domain/money";
-import { quoteFor } from "@/domain/pricing/quote";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { policies } from "@/lib/policies";
 
@@ -36,46 +27,43 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** Reads and re-validates the in-progress booking from the httpOnly cookie. */
-async function readDraft(): Promise<BookingDraft | null> {
-  const raw = (await cookies()).get(DETAILS_COOKIE)?.value;
-  if (!raw) return null;
-
-  try {
-    const parsed = bookingDraftSchema.safeParse(JSON.parse(raw));
-    return parsed.success ? parsed.data : null;
-  } catch {
-    // Malformed JSON means a corrupted or hand-edited cookie, not a crash.
-    return null;
-  }
-}
-
 export default async function PaymentStepPage({
   searchParams,
 }: PageProps<"/book/payment">) {
-  const journey = parseFunnelParams(await searchParams);
+  const params = await searchParams;
+  const token = typeof params.q === "string" ? params.q : "";
 
-  if (!hasJourney(journey)) {
-    redirect(`/book?${funnelQuery(journey)}`);
+  /*
+   * Everything on this page comes from the quote row, not from the URL. The
+   * customer cannot change the price by editing a query string, and the
+   * passenger's details never travel in one.
+   */
+  const loaded = await loadQuote(token);
+
+  if (loaded.state === "missing") {
+    // No token, or one that matches nothing. Arriving here directly is the
+    // usual cause; start them again rather than showing an empty payment form.
+    redirect("/book");
   }
 
-  const vehicle = VEHICLE_CLASSES.find((item) => item.slug === journey.vehicle);
+  if (loaded.state === "expired") {
+    // §7's "quote expired" state (BK-08). Their journey is preserved so
+    // starting again is one click, not a retype.
+    return <QuoteExpired journey={loaded.journey} />;
+  }
+
+  const { journey, details, extras, results } = loaded;
+
+  const vehicle = VEHICLE_CLASSES.find((item) => item.slug === results.vehicleSlug);
   if (!vehicle) {
     redirect(`/book/vehicle?${funnelQuery({ ...journey, vehicle: undefined })}`);
   }
 
-  // No draft means the cookie expired or they arrived here directly. Send them
-  // back to step 3 rather than showing a payment form with nobody to bill.
-  const draft = await readDraft();
-  if (!draft) {
-    redirect(`/book/details?${funnelQuery(journey)}`);
-  }
-
-  // The whole quote, not a fare plus extras. The old sum here charged a single
-  // fare while the panel below told the customer it covered both journeys —
-  // which would have undercharged every return booking.
-  const quote = quoteFor(journey, vehicle, draft.extras);
-  const total = quote.totalPence;
+  // The price the server stored when the quote was made — never recomputed
+  // from anything the browser sent (BK-08).
+  const quote = { lines: results.lines, legs: results.legs };
+  const total = results.totalPence;
+  const draft = { details, extras };
 
   return (
     <>
