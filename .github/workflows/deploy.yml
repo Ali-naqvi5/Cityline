@@ -1,0 +1,99 @@
+name: Deploy
+
+# Push to main → checks → build image → push to GHCR → SSH deploy to production.
+# Never deploy by editing files on the server.
+#
+# There is no staging environment. Cityline's decision (28 Sep 2026): main goes
+# straight to production. The spec's PRD-01 assumes a staging step; this is a
+# deliberate departure from it.
+#
+# That makes the `checks` job below the only thing standing between a bad commit
+# and the live site, which is why the build cannot start until it passes
+# (PRD-06). Do not remove that dependency to get a deploy out faster — with no
+# staging, there is nowhere else for a mistake to surface.
+
+on:
+  push:
+    branches: [main]
+  # Manual re-deploy of whatever is on main, e.g. to roll forward after a fix
+  # or to redeploy after changing an environment variable on the server.
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # Typecheck, lint, formatting, the TfL wording and unsupported-claims guards,
+  # and the unit tests. Reuses .github/workflows/ci.yml rather than repeating
+  # it, so the checks on a pull request and the checks before a deploy cannot
+  # drift apart.
+  checks:
+    name: Checks
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: Build and push image
+    needs: checks
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: meta
+        run: echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/cityline-web:${{ steps.meta.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/cityline-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY=${{ vars.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY }}
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+            NEXT_PUBLIC_GA4_ID=${{ vars.NEXT_PUBLIC_GA4_ID }}
+
+  deploy:
+    name: Deploy to production
+    needs: build
+    runs-on: ubuntu-latest
+    # A GitHub Environment called "production". Worth creating even with one
+    # environment: it holds the deploy secrets, records a deployment history,
+    # and can carry a required reviewer or a wait timer if you ever want a
+    # human between main and the live site.
+    environment: production
+    steps:
+      - name: Open SSH connection
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      # deploy.sh lives on the VPS at /srv/cityline/deploy.sh (copied from
+      # scripts/deploy.sh). It dumps the database first, migrates, replaces only
+      # the app and worker containers, health-checks and rolls back on failure.
+      - name: Deploy
+        run: |
+          ssh -o BatchMode=yes "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "APP_TAG=${{ needs.build.outputs.tag }} /srv/cityline/deploy.sh"

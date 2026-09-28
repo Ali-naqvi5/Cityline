@@ -1,0 +1,71 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 1000 260"
+  width="1000"
+  height="260"
+  fill="none"
+>
+  <!-- Clean minimal background -->
+  <rect width="1000" height="260" fill="none" />
+
+  <!-- Subtle route base track -->
+  <line
+    x1="120"
+    y1="130"
+    x2="880"
+    y2="130"
+    stroke="#E2EBE4"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+
+  <!-- Main connection line (3px deep-green #0E6B39) -->
+  <line
+    x1="120"
+    y1="130"
+    x2="880"
+    y2="130"
+    stroke="#0E6B39"
+    stroke-width="3"
+    stroke-linecap="round"
+  />
+
+  <!-- Waypoint 1 (#DDE8DF dot) -->
+  <circle cx="370" cy="130" r="10" fill="#FFFFFF" stroke="#DDE8DF" stroke-width="3" />
+  <circle cx="370" cy="130" r="4" fill="#DDE8DF" />
+
+  <!-- Waypoint 2 (#DDE8DF dot) -->
+  <circle cx="630" cy="130" r="10" fill="#FFFFFF" stroke="#DDE8DF" stroke-width="3" />
+  <circle cx="630" cy="130" r="4" fill="#DDE8DF" />
+
+  <!-- Origin Marker (Left): #90EE90 filled circle with dark aeroplane glyph -->
+  <g transform="translate(120, 130)">
+    <!-- Soft outer glow ring -->
+    <circle cx="0" cy="0" r="38" fill="#90EE90" fill-opacity="0.3" />
+    <!-- Main circle #90EE90 filled with #0E6B39 stroke -->
+    <circle cx="0" cy="0" r="28" fill="#90EE90" stroke="#0E6B39" stroke-width="3" />
+    <!-- Aeroplane glyph (deep-green #0E6B39, pointing right/takeoff 25 deg) -->
+    <g transform="rotate(25) scale(0.9)">
+      <path
+        d="M0 -18 L4 -6 L18 -1 L4 4 L4 13 L8 16 L8 18 L0 16 L-8 18 L-8 16 L-4 13 L-4 4 L-18 -1 L-4 -6 Z"
+        fill="#0E6B39"
+      />
+    </g>
+  </g>
+
+  <!-- Destination Marker (Right): deep-green outlined circle with aeroplane glyph -->
+  <g transform="translate(880, 130)">
+    <!-- Soft outer glow ring -->
+    <circle cx="0" cy="0" r="38" fill="#E9F7EC" fill-opacity="0.5" />
+    <!-- Main circle white filled with #0E6B39 stroke -->
+    <circle cx="0" cy="0" r="28" fill="#FFFFFF" stroke="#0E6B39" stroke-width="3.5" />
+    <circle cx="0" cy="0" r="22" fill="#F2FBF3" />
+    <!-- Aeroplane glyph (deep-green #0E6B39, landing angle -15 deg) -->
+    <g transform="rotate(-15) scale(0.9)">
+      <path
+        d="M0 -18 L4 -6 L18 -1 L4 4 L4 13 L8 16 L8 18 L0 16 L-8 18 L-8 16 L-4 13 L-4 4 L-18 -1 L-4 -6 Z"
+        fill="#0E6B39"
+      />
+    </g>
+  </g>
+</svg>

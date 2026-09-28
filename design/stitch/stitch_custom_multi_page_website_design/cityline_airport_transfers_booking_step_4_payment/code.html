@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#85faac",
+              "inverse-on-surface": "#e6f4e9",
+              "on-primary-fixed": "#00210d",
+              "on-tertiary-fixed-variant": "#005316",
+              "on-primary-fixed-variant": "#005229",
+              "on-error": "#ffffff",
+              "surface-container-high": "#ddece1",
+              "surface-variant": "#d8e6db",
+              outline: "#6f7a6f",
+              "tertiary-fixed-dim": "#7edb7f",
+              error: "#ba1a1a",
+              "secondary-fixed-dim": "#69dd92",
+              "inverse-primary": "#84d89b",
+              "surface-container-lowest": "#ffffff",
+              "surface-dim": "#cfded3",
+              "on-background": "#121e18",
+              secondary: "#006d3a",
+              "on-primary-container": "#94e9aa",
+              "inverse-surface": "#27332c",
+              "tertiary-container": "#006c20",
+              surface: "#effdf2",
+              "on-secondary-container": "#00723d",
+              "surface-container-highest": "#d8e6db",
+              "on-secondary": "#ffffff",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed-variant": "#00522a",
+              "on-surface-variant": "#3f4940",
+              "surface-tint": "#116c3a",
+              "surface-container-low": "#e9f7ec",
+              "tertiary-fixed": "#99f899",
+              "on-tertiary-fixed": "#002105",
+              "on-surface": "#121e18",
+              "outline-variant": "#bfc9bd",
+              "primary-fixed-dim": "#84d89b",
+              "on-tertiary-container": "#8deb8d",
+              background: "#effdf2",
+              tertiary: "#005116",
+              "error-container": "#ffdad6",
+              "on-tertiary": "#ffffff",
+              "surface-bright": "#effdf2",
+              "primary-fixed": "#a0f5b5",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed": "#00210e",
+              primary: "#005128",
+              "primary-container": "#0e6b39",
+              "secondary-container": "#83f7a9",
+              "surface-container": "#e3f1e7",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "space-md": "1rem",
+              margin: "2rem",
+              "margin-desktop": "7.5rem",
+              "gutter-sm": "1rem",
+              "space-xl": "2rem",
+              gutter: "1.5rem",
+              "space-xs": "0.25rem",
+              "space-lg": "1.5rem",
+              "space-sm": "0.5rem",
+            },
+            fontFamily: {
+              "label-sm": ["Inter"],
+              "headline-sm": ["Inter"],
+              "title-md": ["Inter"],
+              "body-sm": ["Inter"],
+              "body-lg": ["Inter"],
+              "display-lg-mobile": ["Inter"],
+              "fare-tabular": ["Inter"],
+              "body-md": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "headline-lg": ["Inter"],
+              "display-lg": ["Inter"],
+              "label-md": ["Inter"],
+              "headline-md": ["Inter"],
+            },
+            fontSize: {
+              "label-sm": [
+                "12px",
+                { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "600" },
+              ],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" },
+              ],
+              "title-md": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" },
+              ],
+              "body-sm": [
+                "13px",
+                { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-lg-mobile": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "fare-tabular": [
+                "22px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "600" },
+              ],
+              "body-md": [
+                "15px",
+                { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "display-lg": [
+                "48px",
+                { lineHeight: "56px", letterSpacing: "-0.025em", fontWeight: "600" },
+              ],
+              "label-md": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-surface font-body-md text-on-surface antialiased">
+    <header
+      class="bg-surface-container-lowest/95 fixed top-0 z-50 w-full shadow-[0_1px_8px_rgba(15,26,20,0.06)] backdrop-blur-md"
+    >
+      <div
+        class="px-gutter mx-auto flex h-20 max-w-[1200px] items-center justify-between"
+      >
+        <a class="gap-space-sm group flex items-center" data-path="airports" href="#"
+          ><img
+            alt="Cityline Logo"
+            class="h-9 w-9 rounded-full object-cover"
+            src="https://lh3.googleusercontent.com/aida/AEtjO1Wo22GfjdFIHzeGon_3-qDYCbJ8zfGVPUbhyXvOo9JbmvAcXmgXfQMwgnJ4Wxogy2UM4FIGHiDezMQXtAw2SfVt6DhwgY3Qq1zNQg3KKOybc60shelsIWUoRYgyQGV65-lKSkkEImO86wU5QYICG2Y39soqob3WsMYuAO9ZSORsTwxoihDjWNbC7ItIMwMdRgAps-bkrW8eEj975ndX4P_k7BVhauMa7relA-Js419ty9Xa_joxr74MANuCv9-WhURwraMjiffCDg"
+          />
+          <div class="flex flex-col">
+            <span
+              class="font-title-md text-title-md text-on-surface group-hover:text-primary leading-none tracking-tight transition-colors"
+              >Cityline</span
+            ><span
+              class="font-label-sm text-label-sm text-on-surface-variant text-[10px] leading-tight tracking-wider uppercase"
+              >Airport Transfers · London</span
+            >
+          </div></a
+        >
+        <nav
+          class="gap-space-lg hidden items-center md:flex"
+          data-active-classes="text-primary font-semibold"
+        >
+          <a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="airports"
+            href="#"
+            >Airports</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="services"
+            href="#"
+            >Services</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="fleet"
+            href="#"
+            >Fleet</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="fares"
+            href="#"
+            >Fares</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="help"
+            href="#"
+            >Help</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="contact"
+            href="#"
+            >Contact</a
+          >
+        </nav>
+        <div class="gap-space-md flex items-center">
+          <div class="hidden flex-col text-right lg:flex">
+            <span
+              class="font-label-sm text-label-sm text-on-surface-variant text-[10px] tracking-wider uppercase"
+              >24/7 Dispatch</span
+            ><a
+              class="font-label-md text-label-md text-on-surface hover:text-primary font-semibold tabular-nums transition-colors"
+              href="tel:+442079460812"
+              >+44 (0)20 7946 0812</a
+            >
+          </div>
+          <a
+            class="bg-primary-container text-on-primary font-label-md text-label-md px-space-lg py-space-sm hover:bg-secondary inline-flex items-center justify-center rounded-lg font-semibold shadow-[0_1px_3px_rgba(15,26,20,0.08)] transition-colors"
+            data-path="book"
+            href="#"
+            >Book now</a
+          >
+        </div>
+      </div>
+    </header>
+    <main class="bg-surface min-h-[calc(100vh-20rem)] w-full pt-20">
+      <div class="flex w-full flex-col">
+        <!-- Progress Indicator Section -->
+        <section class="bg-surface-container-low py-space-lg w-full shadow-sm">
+          <div class="px-gutter mx-auto max-w-[1200px]">
+            <div
+              class="gap-space-md flex flex-col items-center justify-between md:flex-row"
+            >
+              <!-- Step Indicator Track -->
+              <ol class="relative flex w-full max-w-2xl items-center justify-between">
+                <!-- Connector line -->
+                <div
+                  class="bg-secondary-container absolute top-1/2 right-4 left-4 -z-0 h-[2px] -translate-y-1/2"
+                ></div>
+                <!-- Step 1: Journey -->
+                <li
+                  class="gap-space-xs bg-surface-container-low relative z-10 flex items-center pr-2"
+                >
+                  <span
+                    class="bg-primary text-on-primary flex h-8 w-8 items-center justify-center rounded-full shadow-sm"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">check</span>
+                  </span>
+                  <span
+                    class="font-label-md text-label-md text-on-surface hidden font-semibold sm:inline"
+                    >Journey</span
+                  >
+                </li>
+                <!-- Step 2: Vehicle -->
+                <li
+                  class="gap-space-xs bg-surface-container-low relative z-10 flex items-center px-2"
+                >
+                  <span
+                    class="bg-primary text-on-primary flex h-8 w-8 items-center justify-center rounded-full shadow-sm"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">check</span>
+                  </span>
+                  <span
+                    class="font-label-md text-label-md text-on-surface hidden font-semibold sm:inline"
+                    >Vehicle</span
+                  >
+                </li>
+                <!-- Step 3: Details -->
+                <li
+                  class="gap-space-xs bg-surface-container-low relative z-10 flex items-center px-2"
+                >
+                  <span
+                    class="bg-primary text-on-primary flex h-8 w-8 items-center justify-center rounded-full shadow-sm"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">check</span>
+                  </span>
+                  <span
+                    class="font-label-md text-label-md text-on-surface hidden font-semibold sm:inline"
+                    >Details</span
+                  >
+                </li>
+                <!-- Step 4: Payment (Active) -->
+                <li
+                  class="gap-space-xs bg-surface-container-low relative z-10 flex items-center pl-2"
+                >
+                  <span
+                    class="bg-secondary-container text-primary font-label-md text-label-md ring-primary flex h-8 w-8 items-center justify-center rounded-full font-bold shadow-sm ring-2"
+                  >
+                    4
+                  </span>
+                  <span class="font-label-md text-label-md text-primary font-bold"
+                    >Payment</span
+                  >
+                </li>
+              </ol>
+              <!-- Guarantee Badge -->
+              <div
+                class="gap-space-xs bg-surface-container-lowest px-space-md text-secondary font-label-sm text-label-sm hidden items-center rounded-full py-1.5 shadow-sm lg:flex"
+              >
+                <span class="bg-primary-container h-2 w-2 rounded-full"></span>
+                <span>Fixed Price Protection Guarantee</span>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Main Booking Content (2-Column Grid) -->
+        <section class="py-space-xl w-full">
+          <div class="px-gutter mx-auto max-w-[1200px]">
+            <div class="gap-gutter grid grid-cols-1 items-start lg:grid-cols-12">
+              <!-- Left Column: Payment & Final Details (~66% / 8 Cols) -->
+              <div class="gap-space-xl flex flex-col lg:col-span-8">
+                <!-- Header block -->
+                <div class="gap-space-xs flex flex-col">
+                  <div class="gap-space-sm flex items-center">
+                    <span
+                      class="px-space-sm bg-surface-container-high text-primary font-label-sm text-label-sm rounded-full py-0.5"
+                    >
+                      Step 4 of 4
+                    </span>
+                    <span
+                      class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"
+                    >
+                      <span class="material-symbols-outlined text-primary text-[16px]"
+                        >verified_user</span
+                      >
+                      Encrypted Checkout
+                    </span>
+                  </div>
+                  <h1 class="font-headline-lg text-headline-lg text-on-surface">
+                    Payment &amp; Confirmation
+                  </h1>
+                  <p class="font-body-md text-body-md text-on-surface-variant">
+                    Review and complete your secure booking. Fixed fare guaranteed with no
+                    card fees or surge pricing.
+                  </p>
+                </div>
+                <!-- Payment Method Selector -->
+                <div class="gap-space-sm flex flex-col">
+                  <label class="font-title-md text-title-md text-on-surface"
+                    >Select payment method</label
+                  >
+                  <div class="gap-space-md grid grid-cols-1 sm:grid-cols-3">
+                    <!-- Credit/Debit Card (Selected) -->
+                    <label
+                      class="p-space-md bg-surface-container-low relative flex cursor-pointer flex-col rounded-xl shadow-sm transition-all"
+                    >
+                      <div class="mb-space-sm flex w-full items-center justify-between">
+                        <span class="material-symbols-outlined text-primary text-[24px]"
+                          >credit_card</span
+                        >
+                        <input
+                          checked=""
+                          class="accent-primary h-5 w-5 cursor-pointer"
+                          name="payment_method"
+                          type="radio"
+                          value="card"
+                        />
+                      </div>
+                      <span class="font-title-md text-title-md text-primary font-semibold"
+                        >Credit or Debit Card</span
+                      >
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >Instant confirmation</span
+                      >
+                    </label>
+                    <!-- Apple Pay / Google Pay -->
+                    <label
+                      class="p-space-md bg-surface-container-lowest hover:bg-surface-container-low relative flex cursor-pointer flex-col rounded-xl shadow-sm transition-all"
+                    >
+                      <div class="mb-space-sm flex w-full items-center justify-between">
+                        <span
+                          class="material-symbols-outlined text-on-surface-variant text-[24px]"
+                          >account_balance_wallet</span
+                        >
+                        <input
+                          class="accent-primary h-5 w-5 cursor-pointer"
+                          name="payment_method"
+                          type="radio"
+                          value="wallet"
+                        />
+                      </div>
+                      <span
+                        class="font-title-md text-title-md text-on-surface font-medium"
+                        >Digital Wallet</span
+                      >
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >Apple Pay / Google Pay</span
+                      >
+                    </label>
+                    <!-- Pay on Arrival (Disabled) -->
+                    <div
+                      class="p-space-md bg-surface-container-high/60 relative flex cursor-not-allowed flex-col rounded-xl opacity-70"
+                    >
+                      <div class="mb-space-sm flex w-full items-center justify-between">
+                        <span class="material-symbols-outlined text-outline text-[24px]"
+                          >lock</span
+                        >
+                        <span
+                          class="px-space-xs bg-surface-container text-on-surface-variant rounded py-0.5 text-[10px] font-semibold uppercase"
+                          >Accounts</span
+                        >
+                      </div>
+                      <span
+                        class="font-title-md text-title-md text-on-surface-variant font-medium"
+                        >Pay on Arrival</span
+                      >
+                      <span class="font-body-sm text-body-sm text-outline"
+                        >Corporate accounts only</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <!-- Card Details Input Form -->
+                <div
+                  class="bg-surface-container-lowest p-space-xl gap-space-lg flex flex-col rounded-xl shadow-sm"
+                >
+                  <div
+                    class="pb-space-sm bg-surface-container-low/50 -mx-space-xl -mt-space-xl p-space-lg flex items-center justify-between rounded-t-xl"
+                  >
+                    <span
+                      class="font-title-md text-title-md text-on-surface gap-space-xs flex items-center"
+                    >
+                      <span class="material-symbols-outlined text-primary text-[20px]"
+                        >lock</span
+                      >
+                      Cardholder Payment Details
+                    </span>
+                    <div
+                      class="text-on-surface-variant flex items-center gap-1 text-[11px] font-medium tracking-wider uppercase"
+                    >
+                      <span>Direct 256-bit TLS gateway</span>
+                    </div>
+                  </div>
+                  <!-- Card Number -->
+                  <div class="flex flex-col gap-1.5">
+                    <label
+                      class="font-label-md text-label-md text-on-surface"
+                      for="cardNumber"
+                      >Card number</label
+                    >
+                    <div class="relative flex items-center">
+                      <input
+                        class="pl-space-md bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-primary h-12 w-full rounded-xl pr-28 tabular-nums shadow-sm focus:ring-2 focus:outline-none"
+                        id="cardNumber"
+                        inputmode="numeric"
+                        placeholder="4532 •••• •••• 8841"
+                        type="text"
+                        value="4532 9012 3418 8841"
+                      />
+                      <!-- Payment Badges Right-aligned -->
+                      <div
+                        class="pointer-events-none absolute right-3 flex items-center gap-1.5"
+                      >
+                        <span
+                          class="bg-surface-container text-on-surface rounded px-1.5 py-0.5 text-[10px] font-bold tracking-tight"
+                          >VISA</span
+                        >
+                        <span
+                          class="bg-surface-container text-on-surface rounded px-1.5 py-0.5 text-[10px] font-bold tracking-tight"
+                          >MC</span
+                        >
+                        <span
+                          class="bg-surface-container text-on-surface rounded px-1.5 py-0.5 text-[10px] font-bold tracking-tight"
+                          >AMEX</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Expiry & CVV Row -->
+                  <div class="gap-space-md grid grid-cols-1 sm:grid-cols-2">
+                    <div class="flex flex-col gap-1.5">
+                      <label
+                        class="font-label-md text-label-md text-on-surface"
+                        for="cardExpiry"
+                        >Expiry date</label
+                      >
+                      <input
+                        class="px-space-md bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-primary h-12 w-full rounded-xl tabular-nums shadow-sm focus:ring-2 focus:outline-none"
+                        id="cardExpiry"
+                        inputmode="numeric"
+                        placeholder="MM / YY"
+                        type="text"
+                        value="08 / 27"
+                      />
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                      <div class="flex items-center justify-between">
+                        <label
+                          class="font-label-md text-label-md text-on-surface"
+                          for="cardCvc"
+                          >Security code</label
+                        >
+                        <span
+                          class="text-on-surface-variant font-body-sm text-body-sm flex items-center gap-0.5 text-[12px]"
+                          title="3 digits on reverse, or 4 on front for Amex"
+                        >
+                          <span class="material-symbols-outlined text-[14px]"
+                            >help_outline</span
+                          >
+                          3 digits on back
+                        </span>
+                      </div>
+                      <div class="relative flex items-center">
+                        <input
+                          class="px-space-md bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-primary h-12 w-full rounded-xl tabular-nums shadow-sm focus:ring-2 focus:outline-none"
+                          id="cardCvc"
+                          maxlength="4"
+                          placeholder="CVC / CVV"
+                          type="password"
+                          value="821"
+                        />
+                        <span
+                          class="material-symbols-outlined text-on-surface-variant absolute right-3 text-[18px]"
+                          >credit_card</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Name on Card -->
+                  <div class="flex flex-col gap-1.5">
+                    <label
+                      class="font-label-md text-label-md text-on-surface"
+                      for="cardName"
+                      >Name on card</label
+                    >
+                    <input
+                      class="px-space-md bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-primary h-12 w-full rounded-xl shadow-sm focus:ring-2 focus:outline-none"
+                      id="cardName"
+                      placeholder="e.g. David Anderson"
+                      type="text"
+                      value="David Anderson"
+                    />
+                  </div>
+                  <!-- Billing Address Checkbox Section -->
+                  <div class="pt-space-sm gap-space-sm flex flex-col">
+                    <label
+                      class="gap-space-sm flex cursor-pointer items-start select-none"
+                    >
+                      <input
+                        checked=""
+                        class="accent-primary mt-1 h-5 w-5 cursor-pointer rounded"
+                        type="checkbox"
+                      />
+                      <div class="flex flex-col">
+                        <span class="font-title-md text-title-md text-on-surface"
+                          >Billing address matches destination address</span
+                        >
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">
+                          The Dorchester, 53 Park Lane, Mayfair, London W1K 1QA
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                <!-- Fair & Transparent Cancellation Policy Panel -->
+                <div
+                  class="bg-surface-container-low p-space-lg gap-space-md flex flex-col rounded-xl shadow-sm"
+                >
+                  <div class="gap-space-sm flex items-center">
+                    <span
+                      class="bg-secondary-container text-primary flex h-7 w-7 items-center justify-center rounded-full"
+                    >
+                      <span class="material-symbols-outlined text-[18px]">schedule</span>
+                    </span>
+                    <h3 class="font-title-md text-title-md text-on-surface font-semibold">
+                      Fair &amp; Transparent Cancellation Policy
+                    </h3>
+                  </div>
+                  <ul
+                    class="gap-space-sm font-body-sm text-body-sm text-on-surface-variant flex flex-col pl-2"
+                  >
+                    <li class="gap-space-sm flex items-start">
+                      <span class="bg-primary mt-2 h-1.5 w-1.5 rounded-full"></span>
+                      <span
+                        ><strong class="text-on-surface font-semibold"
+                          >Free cancellation up to 24 hours</strong
+                        >
+                        before scheduled pickup time (100% full instant refund to payment
+                        method).</span
+                      >
+                    </li>
+                    <li class="gap-space-sm flex items-start">
+                      <span
+                        class="bg-secondary-container mt-2 h-1.5 w-1.5 rounded-full"
+                      ></span>
+                      <span
+                        ><strong class="text-on-surface font-semibold">50% refund</strong>
+                        for cancellations submitted within 24 to 3 hours of scheduled
+                        pickup.</span
+                      >
+                    </li>
+                    <li class="gap-space-sm flex items-start">
+                      <span
+                        class="bg-outline-variant mt-2 h-1.5 w-1.5 rounded-full"
+                      ></span>
+                      <span
+                        >Non-refundable for notice given within 3 hours of scheduled
+                        pickup.</span
+                      >
+                    </li>
+                    <li
+                      class="gap-space-sm bg-surface-container-lowest p-space-sm flex items-start rounded-lg"
+                    >
+                      <span
+                        class="material-symbols-outlined text-primary mt-0.5 shrink-0 text-[18px]"
+                        >flight_takeoff</span
+                      >
+                      <span class="text-primary font-medium"
+                        >Flight delay guarantee included: We track British Airways BA 1392
+                        in real time. Chauffeur dispatch adjusts automatically with 60
+                        minutes free waiting time post-touchdown.</span
+                      >
+                    </li>
+                  </ul>
+                </div>
+                <!-- Terms of Service Agreement -->
+                <div class="gap-space-md flex flex-col">
+                  <label class="gap-space-sm flex cursor-pointer items-start select-none">
+                    <input
+                      checked=""
+                      class="accent-primary mt-1 h-5 w-5 cursor-pointer rounded"
+                      type="checkbox"
+                    />
+                    <span class="font-body-sm text-body-sm text-on-surface-variant">
+                      I agree to Cityline Airport Transfers'
+                      <a
+                        class="text-primary hover:text-secondary font-semibold underline underline-offset-2"
+                        href="#"
+                        >Terms of Service</a
+                      >,
+                      <a
+                        class="text-primary hover:text-secondary font-semibold underline underline-offset-2"
+                        href="#"
+                        >Privacy Policy</a
+                      >, and confirm passenger &amp; flight schedule are accurate.
+                    </span>
+                  </label>
+                  <!-- Call to Action Row -->
+                  <div
+                    class="gap-space-md pt-space-xs flex flex-col items-center justify-between sm:flex-row"
+                  >
+                    <a
+                      class="gap-space-xs font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-sm flex items-center transition-colors"
+                      href="#"
+                    >
+                      <span class="material-symbols-outlined text-[18px]"
+                        >arrow_back</span
+                      >
+                      <span>Back to passenger details</span>
+                    </a>
+                    <button
+                      class="px-space-xl py-space-md bg-primary-container text-on-primary font-headline-sm text-headline-sm hover:bg-secondary gap-space-sm group flex w-full items-center justify-center rounded-xl shadow-md transition-all sm:w-auto"
+                      type="button"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110"
+                        >lock</span
+                      >
+                      <span>Pay £128.00 and confirm booking</span>
+                    </button>
+                  </div>
+                </div>
+                <!-- Security Reassurance Strip -->
+                <div
+                  class="pt-space-md gap-space-sm flex flex-col items-center justify-center text-center"
+                >
+                  <img
+                    class="mx-auto h-10 object-contain"
+                    data-alt="Security assurance badges including 256-Bit SSL encrypted checkout lock icon, 3-D Secure verified payment green shield icon, and TfL Regulated license badge in Cityline emerald green palette on white background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbpB1OtM2rdHsQCSIKtpCk0yjEuT-Wni9U3pN04rKzJh_mX5VuSKsunRJQlqhaT9Ju7RU0wyHhmtXWl7eEZVw3E8AJapWjCFMjlYNVo-RyJ3LYXzN4cvwSaBa6uwtrtbSqsmtubjSQbZx9dgjPvYeDIv8lfQaDv7CiaO8ZbNotDyR2Vw0vbZbrg7wK0kADmOW64gMmlhkEGiTm5LNhwhgWaslNtSB8YycpOPM79V4G2NODAly57HGr"
+                  />
+                  <p
+                    class="font-body-sm text-body-sm text-outline flex flex-wrap items-center justify-center gap-2 text-[12px]"
+                  >
+                    <span>Powered by Stripe</span>
+                    <span>•</span>
+                    <span>256-Bit TLS Encryption</span>
+                    <span>•</span>
+                    <span>3-D Secure 2.0</span>
+                    <span>•</span>
+                    <span>TfL Private Hire Operator Licence #008942/01</span>
+                  </p>
+                </div>
+              </div>
+              <!-- Right Column: Sticky Summary Card (~33% / 4 Cols) -->
+              <div class="gap-space-md sticky top-28 flex flex-col lg:col-span-4">
+                <div
+                  class="bg-surface-container-lowest p-space-lg gap-space-md flex flex-col rounded-xl shadow-md"
+                >
+                  <!-- Summary Header -->
+                  <div
+                    class="pb-space-sm bg-surface-container-low -mx-space-lg -mt-space-lg p-space-md flex items-center justify-between rounded-t-xl"
+                  >
+                    <span
+                      class="font-title-md text-title-md text-on-surface font-semibold"
+                      >Booking summary</span
+                    >
+                    <span
+                      class="px-space-xs bg-surface-container-highest text-primary font-label-sm text-label-sm rounded py-0.5 font-semibold"
+                      >Fixed Rate</span
+                    >
+                  </div>
+                  <!-- Route Timeline -->
+                  <div class="gap-space-md py-space-xs flex items-stretch">
+                    <!-- Route graphic -->
+                    <div class="flex w-7 shrink-0 flex-col items-center justify-between">
+                      <img
+                        class="h-full w-auto object-contain py-1"
+                        data-alt="Vertical flight arrival transfer icon indicator with green circle airport symbol at top connected by dashed line to destination pin at bottom in dark green palette"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAfoO9GIMfmfroQfWpC_qJczyRTbPfuLjZsYxN5O2pr_g1ucCgrr5knXX1cgaZa_Q2sL7SeO2K5d8oXCtIaTQ4k0MNv9On9m8aMDmd8g34NSK-2PVCVqgOOxsNeVH2U57_Gr4VEBNO3PtLZZvX0g2VUuJrBhPtrhe8fmcAok1l_Ts4uvozZ3OmnxqAaDuTOFCiIWOgN6LzT5RKNOVA3ygXLL5vC6o8HRPSTQBAgX-0KptXiNUVFE9C"
+                      />
+                    </div>
+                    <!-- Route points text -->
+                    <div class="gap-space-md flex w-full flex-col justify-between py-1">
+                      <div class="flex flex-col">
+                        <span
+                          class="font-label-sm text-label-sm text-on-surface-variant text-[11px] tracking-wider uppercase"
+                          >Pick-up · Terminal Arrival</span
+                        >
+                        <span
+                          class="font-title-md text-title-md text-on-surface font-semibold"
+                          >Heathrow Airport (LHR) T2</span
+                        >
+                        <span class="font-body-sm text-body-sm text-on-surface-variant"
+                          >Flight BA 1392 · Touchdown 14:30</span
+                        >
+                      </div>
+                      <div class="flex flex-col">
+                        <span
+                          class="font-label-sm text-label-sm text-on-surface-variant text-[11px] tracking-wider uppercase"
+                          >Drop-off Destination</span
+                        >
+                        <span
+                          class="font-title-md text-title-md text-on-surface font-semibold"
+                          >The Dorchester Hotel</span
+                        >
+                        <span class="font-body-sm text-body-sm text-on-surface-variant"
+                          >53 Park Lane, Mayfair, London</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Date & Vehicle Info Pill -->
+                  <div
+                    class="bg-surface-container-low p-space-sm gap-space-xs flex flex-col rounded-lg"
+                  >
+                    <div
+                      class="font-body-sm text-body-sm flex items-center justify-between"
+                    >
+                      <span class="text-on-surface-variant">Date:</span>
+                      <span class="text-on-surface font-semibold"
+                        >Thursday, 16 May 2024</span
+                      >
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm flex items-center justify-between"
+                    >
+                      <span class="text-on-surface-variant">Vehicle:</span>
+                      <span class="text-on-surface text-right font-semibold"
+                        >Executive Saloon</span
+                      >
+                    </div>
+                    <div class="text-on-surface-variant text-right text-[12px]">
+                      Mercedes-Benz E-Class · Up to 3 pass, 2 bags
+                    </div>
+                  </div>
+                  <!-- Itemised Breakdown -->
+                  <div
+                    class="gap-space-xs font-body-sm text-body-sm pt-space-xs flex flex-col"
+                  >
+                    <div
+                      class="text-on-surface-variant flex items-center justify-between"
+                    >
+                      <span>Base transfer fare</span>
+                      <span class="text-on-surface font-medium tabular-nums"
+                        >£110.00</span
+                      >
+                    </div>
+                    <div
+                      class="text-on-surface-variant flex items-center justify-between"
+                    >
+                      <div class="flex items-center gap-1">
+                        <span>Terminal Meet &amp; Greet</span>
+                        <span
+                          class="bg-secondary-container text-primary rounded px-1 text-[10px] font-bold"
+                          >FREE</span
+                        >
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <span class="text-outline text-[12px] line-through">£15.00</span>
+                        <span class="text-primary font-medium tabular-nums">£0.00</span>
+                      </div>
+                    </div>
+                    <div
+                      class="text-on-surface-variant flex items-center justify-between"
+                    >
+                      <span>Airport pickup &amp; drop fee</span>
+                      <span class="text-on-surface font-medium tabular-nums"
+                        >Included</span
+                      >
+                    </div>
+                    <div
+                      class="text-on-surface-variant flex items-center justify-between"
+                    >
+                      <span>60 min complimentary waiting</span>
+                      <span class="text-on-surface font-medium tabular-nums"
+                        >Included</span
+                      >
+                    </div>
+                    <div
+                      class="text-on-surface-variant flex items-center justify-between"
+                    >
+                      <span>Child booster seat (1×)</span>
+                      <span class="text-on-surface font-medium tabular-nums">£18.00</span>
+                    </div>
+                  </div>
+                  <!-- Grand Total Container -->
+                  <div
+                    class="bg-surface-container-high/70 p-space-md mt-space-xs flex items-baseline justify-between rounded-xl"
+                  >
+                    <div class="flex flex-col">
+                      <span
+                        class="font-title-md text-title-md text-on-surface font-semibold"
+                        >Total to pay</span
+                      >
+                      <span class="text-on-surface-variant text-[11px]"
+                        >All taxes &amp; tolls included</span
+                      >
+                    </div>
+                    <span
+                      class="font-display-lg-mobile text-display-lg-mobile text-primary font-bold tabular-nums"
+                    >
+                      £128.00
+                    </span>
+                  </div>
+                  <!-- Reassurance Checklist -->
+                  <ul
+                    class="gap-space-xs text-on-surface-variant pt-space-xs flex flex-col text-[12px]"
+                  >
+                    <li class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-[16px]"
+                        >done</span
+                      >
+                      <span
+                        >No hidden surcharges — tolls &amp; congestion fees
+                        inclusive</span
+                      >
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-[16px]"
+                        >done</span
+                      >
+                      <span
+                        >Chauffeur contact details dispatched by SMS 90 min prior</span
+                      >
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-[16px]"
+                        >done</span
+                      >
+                      <span>TfL licensed private hire operator #008942/01</span>
+                    </li>
+                  </ul>
+                  <!-- Need Assistance Banner -->
+                  <div
+                    class="bg-surface-container-low p-space-md gap-space-sm mt-space-xs flex items-center rounded-lg"
+                  >
+                    <span
+                      class="bg-surface-container-lowest text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm"
+                    >
+                      <span class="material-symbols-outlined text-[18px]"
+                        >support_agent</span
+                      >
+                    </span>
+                    <div class="flex flex-col">
+                      <span
+                        class="font-label-sm text-label-sm text-on-surface font-semibold"
+                        >Need urgent help?</span
+                      >
+                      <a
+                        class="font-body-sm text-body-sm text-primary font-semibold tabular-nums hover:underline"
+                        href="tel:+442079460812"
+                      >
+                        +44 (0)20 7946 0812
+                        <span class="text-on-surface-variant text-[11px] font-normal"
+                          >(24/7 Dispatch)</span
+                        >
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="bg-surface-container-low pt-space-xl pb-space-lg mt-auto w-full">
+      <div class="px-gutter mx-auto max-w-[1200px]">
+        <div
+          class="gap-gutter mb-space-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+        >
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Airports
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Heathrow Airport (LHR)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Gatwick Airport (LGW)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Stansted Airport (STN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Luton Airport (LTN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >London City Airport (LCY)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >London Southend (SEN)</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Services
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Airport Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Corporate Accounts</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="fleet" href="#"
+                  >Executive Fleet</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Group Travel</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Cruise Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Private Sightseeing</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Legal &amp; Company
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="contact"
+                  href="#"
+                  >About Cityline</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >TfL Licensing &amp; Compliance</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Terms &amp; Conditions</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Privacy Policy</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Cookie Settings</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Help &amp; Support
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="contact"
+                  href="#"
+                  >Contact Dispatch</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Flight Delay Guarantee</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Meeting Point Guides</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Luggage Guidelines</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Frequently Asked Questions</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="pt-space-lg gap-space-md text-on-surface-variant font-body-sm text-body-sm flex flex-col items-start justify-between lg:flex-row lg:items-center"
+        >
+          <div
+            class="gap-space-xs sm:gap-space-md flex flex-col text-[12px] sm:flex-row sm:items-center"
+          >
+            <span
+              class="px-space-sm bg-surface-container text-on-surface inline-flex items-center rounded py-0.5 font-semibold"
+              >TfL PH Operator Lic. #008942/01</span
+            ><span
+              >Cityline Transfers Ltd, Registered in England &amp; Wales. London,
+              UK.</span
+            >
+          </div>
+          <div class="gap-space-sm flex items-center self-end lg:self-auto">
+            <span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Visa</span
+            ><span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Mastercard</span
+            ><span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Amex</span
+            ><span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Apple Pay</span
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,3 +1,21 @@
 allowBuilds:
-  sharp: false
-  unrs-resolver: false
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+
+# Vitest 5 bundles with rolldown, which needs a platform-specific native
+# binding shipped as an optional dependency. pnpm resolves optional deps for
+# the *current* platform only, so a plain `pnpm install` on Windows left the
+# binding out entirely and vitest failed to start.
+#
+# Declaring the platforms we actually build on — Windows for local development,
+# Linux x64 for CI and the Docker image — makes the resolution explicit and
+# keeps the lockfile valid on all of them.
+supportedArchitectures:
+  os:
+    - win32
+    - linux
+    - darwin
+  cpu:
+    - x64
+    - arm64

@@ -39,3 +39,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# --- Cityline ---
+# secrets: .env.production lives on the VPS only, never in git (NFR-04)
+.env
+.env.*
+!.env.example
+# local uploads / private documents (DATA-02) — these live in a Docker volume
+/storage
+# test output
+/playwright-report
+/test-results
+/coverage
+
+# worker bundle — built by `pnpm build:worker`, and rebuilt inside the Docker
+# image. Committing it would mean a stale copy shadowing the real source.
+/dist
+
+# design/ is deliberately NOT ignored. It is the source of truth for how the
+# site looks (§6), and docs/design-deviations.md can only be audited against
+# it. ~37MB of one-off Stitch exports that never churn is a fair price for
+# that; it is excluded from the Docker build context instead (.dockerignore).

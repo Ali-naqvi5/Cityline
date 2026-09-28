@@ -1,0 +1,1779 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error-container": "#ffdad6",
+              "secondary-fixed": "#85faac",
+              "surface-bright": "#effdf2",
+              "on-tertiary-fixed-variant": "#005316",
+              "inverse-primary": "#84d89b",
+              "surface-container-low": "#e9f7ec",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary": "#ffffff",
+              "primary-fixed": "#a0f5b5",
+              "on-secondary-fixed-variant": "#00522a",
+              "tertiary-container": "#006c20",
+              surface: "#effdf2",
+              tertiary: "#005116",
+              "on-error": "#ffffff",
+              "outline-variant": "#bfc9bd",
+              error: "#ba1a1a",
+              "surface-tint": "#116c3a",
+              "secondary-fixed-dim": "#69dd92",
+              "on-tertiary": "#ffffff",
+              "secondary-container": "#83f7a9",
+              primary: "#005128",
+              "surface-dim": "#cfded3",
+              "on-primary-container": "#94e9aa",
+              "on-primary": "#ffffff",
+              "tertiary-fixed": "#99f899",
+              "primary-fixed-dim": "#84d89b",
+              "inverse-on-surface": "#e6f4e9",
+              "on-primary-fixed": "#00210d",
+              "on-tertiary-fixed": "#002105",
+              "surface-container": "#e3f1e7",
+              secondary: "#006d3a",
+              "on-surface": "#121e18",
+              "tertiary-fixed-dim": "#7edb7f",
+              "on-error-container": "#93000a",
+              "inverse-surface": "#27332c",
+              "surface-container-highest": "#d8e6db",
+              "on-background": "#121e18",
+              "on-primary-fixed-variant": "#005229",
+              "primary-container": "#0e6b39",
+              "surface-variant": "#d8e6db",
+              "on-secondary-fixed": "#00210e",
+              "on-surface-variant": "#3f4940",
+              "surface-container-high": "#ddece1",
+              outline: "#6f7a6f",
+              "on-secondary-container": "#00723d",
+              background: "#effdf2",
+              "on-tertiary-container": "#8deb8d",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              gutter: "1.5rem",
+              "margin-desktop": "7.5rem",
+              "space-sm": "0.5rem",
+              "space-xs": "0.25rem",
+              "gutter-sm": "1rem",
+              "space-lg": "1.5rem",
+              "space-xl": "2rem",
+              margin: "2rem",
+              "space-md": "1rem",
+            },
+            fontFamily: {
+              "body-md": ["Inter"],
+              "body-sm": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "label-sm": ["Inter"],
+              "label-md": ["Inter"],
+              "headline-lg": ["Inter"],
+              "headline-md": ["Inter"],
+              "display-lg": ["Inter"],
+              "title-md": ["Inter"],
+              "headline-sm": ["Inter"],
+              "body-lg": ["Inter"],
+              "display-lg-mobile": ["Inter"],
+              "fare-tabular": ["Inter"],
+            },
+            fontSize: {
+              "body-md": [
+                "15px",
+                { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "body-sm": [
+                "13px",
+                { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" },
+              ],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "label-sm": [
+                "12px",
+                { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "600" },
+              ],
+              "label-md": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500" },
+              ],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "display-lg": [
+                "48px",
+                { lineHeight: "56px", letterSpacing: "-0.025em", fontWeight: "600" },
+              ],
+              "title-md": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" },
+              ],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-lg-mobile": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "fare-tabular": [
+                "22px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "600" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <meta content="web_standard" name="shell-type" />
+  </head>
+  <body class="bg-surface-container-lowest font-body-md text-on-surface antialiased">
+    <header
+      class="bg-surface-container-lowest/95 fixed top-0 right-0 left-0 z-50 w-full shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-md"
+    >
+      <div
+        class="px-gutter mx-auto flex h-20 max-w-[1200px] items-center justify-between"
+      >
+        <div class="gap-space-lg flex items-center">
+          <a class="gap-space-sm flex items-center" data-path="home" href="#"
+            ><div
+              class="bg-primary text-on-primary flex h-9 w-9 items-center justify-center rounded-lg"
+            >
+              <span class="material-symbols-outlined text-title-md font-title-md"
+                >local_taxi</span
+              >
+            </div>
+            <div class="flex flex-col">
+              <span
+                class="font-title-md text-title-md text-on-surface leading-none tracking-tight"
+                >Cityline</span
+              ><span
+                class="font-label-sm text-label-sm text-on-surface-variant mt-space-xs leading-none"
+                >Airport Transfers</span
+              >
+            </div></a
+          >
+          <nav
+            class="gap-space-xs hidden items-center xl:flex"
+            data-active-classes="bg-surface-container text-primary font-bold"
+          >
+            <a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="airports"
+              href="#"
+              >Airports</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="services"
+              href="#"
+              >Services</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="fleet"
+              href="#"
+              >Fleet</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="fares"
+              href="#"
+              >Fares</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="help"
+              href="#"
+              >Help</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="contact"
+              href="#"
+              >Contact</a
+            >
+          </nav>
+        </div>
+        <div class="gap-space-lg flex items-center">
+          <div class="gap-space-sm text-on-surface-variant hidden items-center lg:flex">
+            <span
+              class="material-symbols-outlined text-primary text-title-md font-title-md"
+              >headset_mic</span
+            >
+            <div class="flex flex-col">
+              <span
+                class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+                >24/7 UK Dispatch</span
+              ><a
+                class="font-label-md text-label-md text-on-surface hover:text-primary font-medium transition-colors"
+                href="tel:+442079460812"
+                >+44 (0)20 7946 0812</a
+              >
+            </div>
+          </div>
+          <a
+            class="px-space-lg py-space-sm bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md hidden items-center justify-center rounded-lg shadow-sm transition-colors sm:inline-flex"
+            data-path="booking-step-2"
+            href="#"
+            >Book now</a
+          >
+          <div class="gap-space-sm pl-space-sm flex items-center">
+            <img
+              alt="Profile"
+              class="h-8 w-8 rounded-full object-cover"
+              src="https://lh3.googleusercontent.com/aida/AEtjO1Wo22GfjdFIHzeGon_3-qDYCbJ8zfGVPUbhyXvOo9JbmvAcXmgXfQMwgnJ4Wxogy2UM4FIGHiDezMQXtAw2SfVt6DhwgY3Qq1zNQg3KKOybc60shelsIWUoRYgyQGV65-lKSkkEImO86wU5QYICG2Y39soqob3WsMYuAO9ZSORsTwxoihDjWNbC7ItIMwMdRgAps-bkrW8eEj975ndX4P_k7BVhauMa7relA-Js419ty9Xa_joxr74MANuCv9-WhURwraMjiffCDg"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="bg-surface-container-lowest w-full pt-20">
+      <div class="text-on-surface flex w-full flex-col">
+        <!-- 1. BREADCRUMB -->
+        <div class="bg-surface-container-low/50 w-full">
+          <div class="px-gutter py-space-sm mx-auto max-w-[1200px]">
+            <nav
+              aria-label="Breadcrumb"
+              class="gap-space-xs font-label-md text-label-md text-on-surface-variant flex items-center"
+            >
+              <a class="hover:text-primary transition-colors" data-path="home" href="#"
+                >Home</a
+              >
+              <span class="material-symbols-outlined text-sm">chevron_right</span>
+              <a class="hover:text-primary transition-colors" data-path="routes" href="#"
+                >Routes</a
+              >
+              <span class="material-symbols-outlined text-sm">chevron_right</span>
+              <span class="text-on-surface font-semibold"
+                >Heathrow Airport to Gatwick Airport</span
+              >
+            </nav>
+          </div>
+        </div>
+        <!-- 2. HERO SECTION (TWO-COLUMN ROUTE COMMAND) -->
+        <section class="px-gutter mx-auto w-full max-w-[1200px] pt-8 pb-14">
+          <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+            <!-- Left Column: Route Editorial & Diagnostics -->
+            <div class="flex flex-col gap-6 lg:col-span-7">
+              <!-- Status indicator badge -->
+              <div
+                class="bg-surface-container text-primary font-label-sm text-label-sm inline-flex items-center gap-2 self-start rounded-full px-3 py-1"
+              >
+                <span
+                  class="bg-secondary-fixed h-2 w-2 animate-pulse rounded-full"
+                ></span>
+                TfL Regulated Inter-Hub Chauffeur Route
+              </div>
+              <div class="flex flex-col gap-3">
+                <h1
+                  class="text-on-surface font-headline-lg text-headline-lg font-bold tracking-tight"
+                >
+                  Heathrow to Gatwick Airport Transfer
+                </h1>
+                <p
+                  class="text-on-surface-variant font-body-lg text-body-lg leading-relaxed"
+                >
+                  Fixed-rate private hire chauffeur between London Heathrow (LHR) and
+                  London Gatwick (LGW). Direct terminal forecourt drop-off with live
+                  flight monitoring and toll charges included.
+                </p>
+              </div>
+              <!-- Route Metrics Card Strip -->
+              <div
+                class="bg-surface-container-lowest grid grid-cols-3 gap-3 rounded-xl p-4 shadow-sm"
+              >
+                <div class="flex flex-col gap-1 pr-2">
+                  <span
+                    class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+                    >Distance</span
+                  >
+                  <span
+                    class="font-headline-sm text-headline-sm text-on-surface font-bold"
+                    >45.2 miles</span
+                  >
+                  <span class="font-body-sm text-body-sm text-on-surface-variant"
+                    >Direct via M25 corridor</span
+                  >
+                </div>
+                <div
+                  class="bg-surface-container-low/40 flex flex-col gap-1 rounded-lg p-2 px-3"
+                >
+                  <span
+                    class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+                    >Typical Journey</span
+                  >
+                  <span class="font-headline-sm text-headline-sm text-primary font-bold"
+                    >50–65 mins</span
+                  >
+                  <span class="font-body-sm text-body-sm text-on-surface-variant"
+                    >Live traffic dependent</span
+                  >
+                </div>
+                <div class="flex flex-col gap-1 pl-2">
+                  <span
+                    class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+                    >From Fare</span
+                  >
+                  <span
+                    class="font-fare-tabular text-fare-tabular text-on-surface font-bold"
+                    >£85.00</span
+                  >
+                  <span class="font-body-sm text-body-sm text-on-surface-variant"
+                    >Fixed guaranteed fare</span
+                  >
+                </div>
+              </div>
+              <!-- Route Schematic Diagram with Rich Overlay Context -->
+              <div
+                class="bg-surface-container-lowest flex flex-col gap-4 rounded-xl p-5 shadow-sm"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="material-symbols-outlined text-primary text-title-md font-title-md"
+                      >route</span
+                    >
+                    <span
+                      class="font-title-md text-title-md text-on-surface font-semibold"
+                      >Active Transit Corridor Schematic</span
+                    >
+                  </div>
+                  <span
+                    class="bg-surface-container text-primary font-label-sm text-label-sm rounded-full px-2.5 py-0.5 font-semibold"
+                    >Point-to-Point Forecourt</span
+                  >
+                </div>
+                <!-- Graphic Container -->
+                <div
+                  class="bg-surface-container-low/60 relative flex w-full flex-col items-center justify-center overflow-hidden rounded-lg p-3"
+                >
+                  <img
+                    alt="Route schematic illustration"
+                    class="max-h-36 w-full object-contain"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1X9ZRZWUpt7ATLQwdLVv1t88zTrdEIQkh3xl3HAHJ46OT9NSWQM5vbCDEocomsAZ8WjKfQ6BdcIBeVuYkZ70HtZR9wh6ktek5ZoxeqgkEFsvYV7jcCTiI0UIW1OwHEC9ZGTkZX2KESTWqYAs8G9waeyFTuAvb45uqfvC2VacGMJl0sbP3KNJhwsFQTaOC_z_LWDNWbKnBqW28KAyfB5DKbIJXD9-JwfZxTMUHuqV0Svy1rBP5yYC6LVyzI"
+                  />
+                  <!-- Overlaid Spatial Callouts -->
+                  <div class="mt-2 flex w-full items-center justify-between gap-2 px-1">
+                    <div
+                      class="bg-surface-container-lowest/90 flex flex-col items-start rounded-lg p-2 shadow-sm backdrop-blur-sm"
+                    >
+                      <span class="font-label-sm text-label-sm text-primary font-bold"
+                        >Heathrow (LHR)</span
+                      >
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >Terminals 2, 3, 4, 5</span
+                      >
+                    </div>
+                    <div
+                      class="bg-surface-container-lowest/90 hidden items-center gap-1 rounded-full px-3 py-1 text-center shadow-sm sm:flex"
+                    >
+                      <span class="material-symbols-outlined text-secondary text-sm"
+                        >alt_route</span
+                      >
+                      <span
+                        class="font-label-sm text-label-sm text-on-surface font-medium"
+                        >Direct connection (no rail changes)</span
+                      >
+                    </div>
+                    <div
+                      class="bg-surface-container-lowest/90 flex flex-col items-end rounded-lg p-2 text-right shadow-sm backdrop-blur-sm"
+                    >
+                      <span class="font-label-sm text-label-sm text-primary font-bold"
+                        >Gatwick (LGW)</span
+                      >
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >North &amp; South Terminals</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Right Column: Sticky Fare Quote & Dispatch Request -->
+            <div class="lg:sticky lg:top-24 lg:col-span-5">
+              <div
+                class="bg-surface-container-lowest flex flex-col gap-5 rounded-xl p-6 shadow-md"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface font-bold"
+                      >Instant Fare Quote</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >Guaranteed fixed price for this route</span
+                    >
+                  </div>
+                  <div
+                    class="bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-1.5 rounded px-2 py-1"
+                  >
+                    <span class="bg-secondary h-2 w-2 rounded-full"></span>
+                    TfL Licensed
+                  </div>
+                </div>
+                <!-- Interactive booking dispatch inputs -->
+                <form class="flex flex-col gap-4" onsubmit="event.preventDefault()">
+                  <!-- Pickup Point -->
+                  <div class="flex flex-col gap-1.5">
+                    <label
+                      class="font-label-md text-label-md text-on-surface flex items-center justify-between font-medium"
+                    >
+                      <span>Pickup Location</span>
+                      <span class="text-primary font-label-sm text-label-sm">Origin</span>
+                    </label>
+                    <div class="relative flex items-center">
+                      <span
+                        class="material-symbols-outlined text-primary text-title-md font-title-md pointer-events-none absolute left-3"
+                        >flight_land</span
+                      >
+                      <input
+                        class="bg-surface-container-low text-on-surface font-body-md text-body-md h-12 w-full cursor-default rounded-lg pr-3 pl-10 focus:outline-none"
+                        readonly=""
+                        type="text"
+                        value="Heathrow Airport (LHR) - All Terminals"
+                      />
+                    </div>
+                  </div>
+                  <!-- Destination Point -->
+                  <div class="flex flex-col gap-1.5">
+                    <label
+                      class="font-label-md text-label-md text-on-surface flex items-center justify-between font-medium"
+                    >
+                      <span>Drop-off Destination</span>
+                      <span class="text-secondary font-label-sm text-label-sm"
+                        >Destination</span
+                      >
+                    </label>
+                    <div class="relative flex items-center">
+                      <span
+                        class="material-symbols-outlined text-secondary text-title-md font-title-md pointer-events-none absolute left-3"
+                        >flight_takeoff</span
+                      >
+                      <input
+                        class="bg-surface-container-low text-on-surface font-body-md text-body-md h-12 w-full cursor-default rounded-lg pr-3 pl-10 focus:outline-none"
+                        readonly=""
+                        type="text"
+                        value="Gatwick Airport (LGW) - North/South"
+                      />
+                    </div>
+                  </div>
+                  <!-- Date & Time Grid -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1.5">
+                      <label
+                        class="font-label-sm text-label-sm text-on-surface font-medium"
+                        >Pickup Date</label
+                      >
+                      <div class="relative flex items-center">
+                        <span
+                          class="material-symbols-outlined text-on-surface-variant pointer-events-none absolute left-3 text-sm"
+                          >calendar_today</span
+                        >
+                        <input
+                          class="bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:bg-surface-container-low h-11 w-full rounded-lg pr-2 pl-9 shadow-sm transition-colors focus:outline-none"
+                          type="text"
+                          value="Today / Select Date"
+                        />
+                      </div>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                      <label
+                        class="font-label-sm text-label-sm text-on-surface font-medium"
+                        >Pickup Time</label
+                      >
+                      <div class="relative flex items-center">
+                        <span
+                          class="material-symbols-outlined text-on-surface-variant pointer-events-none absolute left-3 text-sm"
+                          >schedule</span
+                        >
+                        <input
+                          class="bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:bg-surface-container-low h-11 w-full rounded-lg pr-2 pl-9 shadow-sm transition-colors focus:outline-none"
+                          type="text"
+                          value="Immediate / Select Time"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Passenger & Luggage Counters -->
+                  <div
+                    class="bg-surface-container-low/60 grid grid-cols-2 gap-3 rounded-lg p-3"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <span
+                          class="material-symbols-outlined text-primary text-title-md font-title-md"
+                          >person</span
+                        >
+                        <span class="font-label-md text-label-md text-on-surface"
+                          >Passengers</span
+                        >
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <button
+                          class="bg-surface-container-lowest text-on-surface hover:bg-primary hover:text-on-primary flex h-6 w-6 items-center justify-center rounded font-bold transition"
+                          onclick="let el=this.nextElementSibling; if(+el.innerText&gt;1) el.innerText=+el.innerText-1;"
+                          type="button"
+                        >
+                          -
+                        </button>
+                        <span
+                          class="font-fare-tabular text-body-md w-4 text-center font-bold"
+                          >2</span
+                        >
+                        <button
+                          class="bg-surface-container-lowest text-on-surface hover:bg-primary hover:text-on-primary flex h-6 w-6 items-center justify-center rounded font-bold transition"
+                          onclick="let el=this.previousElementSibling; if(+el.innerText&lt;8) el.innerText=+el.innerText+1;"
+                          type="button"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <span
+                          class="material-symbols-outlined text-primary text-title-md font-title-md"
+                          >luggage</span
+                        >
+                        <span class="font-label-md text-label-md text-on-surface"
+                          >Luggage</span
+                        >
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <button
+                          class="bg-surface-container-lowest text-on-surface hover:bg-primary hover:text-on-primary flex h-6 w-6 items-center justify-center rounded font-bold transition"
+                          onclick="let el=this.nextElementSibling; if(+el.innerText&gt;0) el.innerText=+el.innerText-1;"
+                          type="button"
+                        >
+                          -
+                        </button>
+                        <span
+                          class="font-fare-tabular text-body-md w-4 text-center font-bold"
+                          >2</span
+                        >
+                        <button
+                          class="bg-surface-container-lowest text-on-surface hover:bg-primary hover:text-on-primary flex h-6 w-6 items-center justify-center rounded font-bold transition"
+                          onclick="let el=this.previousElementSibling; if(+el.innerText&lt;8) el.innerText=+el.innerText+1;"
+                          type="button"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Primary Dispatch CTA -->
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex h-12 w-full items-center justify-center gap-2 rounded-lg font-semibold shadow-sm transition-all active:scale-[0.99]"
+                    data-path="booking-step-2"
+                    href="#"
+                  >
+                    <span>Check Vehicles &amp; Book</span>
+                    <span class="material-symbols-outlined text-title-md font-title-md"
+                      >arrow_forward</span
+                    >
+                  </a>
+                  <!-- Assurance Micro-copy -->
+                  <div
+                    class="text-on-surface-variant font-label-sm text-label-sm flex items-center justify-center gap-4 pt-1"
+                  >
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-secondary text-sm"
+                        >verified</span
+                      >
+                      Zero-surge guarantee
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-secondary text-sm"
+                        >event_available</span
+                      >
+                      Free 24h cancellation
+                    </span>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- 3. PRICE TABLE BY VEHICLE CLASS -->
+        <section class="bg-surface-container-low/40 w-full py-14">
+          <div class="px-gutter mx-auto flex max-w-[1200px] flex-col gap-8">
+            <div class="flex max-w-3xl flex-col gap-2">
+              <h2
+                class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight"
+              >
+                Fixed Pricing by Vehicle Class
+              </h2>
+              <p class="font-body-md text-body-md text-on-surface-variant">
+                All prices are fully inclusive of airport terminal access fees, M25 tolls,
+                60 minutes airport waiting time, and flight tracking.
+              </p>
+            </div>
+            <div class="flex flex-col gap-4">
+              <!-- Row 1: Saloon Class -->
+              <div
+                class="bg-surface-container-lowest flex flex-col items-center justify-between gap-6 rounded-xl p-5 shadow-sm transition-shadow hover:shadow-md md:flex-row"
+              >
+                <div
+                  class="flex w-full flex-col items-center gap-5 sm:flex-row md:w-auto"
+                >
+                  <div
+                    class="bg-surface-container-low/40 flex h-24 w-32 flex-shrink-0 items-center justify-center rounded-lg p-2 sm:w-40"
+                  >
+                    <img
+                      alt="Saloon Car"
+                      class="h-full w-full object-contain"
+                      src="https://lh3.googleusercontent.com/aida/AEtjO1Xi8MnF6YCFYx5_AStag4EtSXbzBaWJ9hFjhCKQz0l6bRl_i1b1k3x9Udprwl-ZNb1OuREVAa9HMEz4_v9i6QvIkff7YkhXIiQfZgvTZQykQE3qnmahKiOuMs7zk19VpBKOM6r221KkimRiCUmk10btYyZK6d-D1JEfvWIQXQt-kfRZDjrygZVJl-GQDFn278DWgqpeeGtTp84bru9522dgVQQbYZf9fFxkCeDGzxDow8cuIL_c1Q6au1U"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1 text-center sm:text-left">
+                    <div class="flex items-center justify-center gap-2 sm:justify-start">
+                      <span class="font-title-md text-title-md text-on-surface font-bold"
+                        >Saloon</span
+                      >
+                      <span
+                        class="bg-surface-container text-primary rounded px-2 py-0.5 text-xs font-semibold"
+                        >Standard</span
+                      >
+                    </div>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >e.g. Skoda Superb, VW Passat or similar</span
+                    >
+                    <div
+                      class="text-on-surface-variant font-label-sm text-label-sm mt-1 flex flex-wrap items-center justify-center gap-3 sm:justify-start"
+                    >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">group</span> 4
+                        Passengers</span
+                      >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">luggage</span> 2
+                        Large Cases</span
+                      >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">work</span> 2
+                        Hand bags</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="flex w-full items-center justify-between gap-6 pt-3 md:w-auto md:justify-end md:pt-0"
+                >
+                  <div class="flex flex-col md:items-end">
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface font-bold"
+                      >£85.00</span
+                    >
+                    <span class="font-label-sm text-label-sm text-primary font-medium"
+                      >Guaranteed Fixed Fare</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-1 rounded-lg px-5 py-2.5 font-semibold shadow-sm transition-colors"
+                    data-path="booking-step-2"
+                    href="#"
+                  >
+                    <span>Book Saloon</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  </a>
+                </div>
+              </div>
+              <!-- Row 2: Estate Class -->
+              <div
+                class="bg-surface-container-lowest flex flex-col items-center justify-between gap-6 rounded-xl p-5 shadow-sm transition-shadow hover:shadow-md md:flex-row"
+              >
+                <div
+                  class="flex w-full flex-col items-center gap-5 sm:flex-row md:w-auto"
+                >
+                  <div
+                    class="bg-surface-container-low/40 flex h-24 w-32 flex-shrink-0 items-center justify-center rounded-lg p-2 sm:w-40"
+                  >
+                    <img
+                      alt="Estate Class"
+                      class="h-full w-full object-contain"
+                      src="https://lh3.googleusercontent.com/aida/AEtjO1XV2SWcx5iSSr3RMIq_7u52ylaGXTYVrA2v9WVFFh6iuwuDeHT0aOsCHJ4Bc_rJDpAi24V6FuMhHabQyDWBbX-einug_t5IY_-ZyKObhOLCfy2knHL92AqUUHbnIqCneLbgkE3M3IK8-F3ph_9nfZbo-anQ339rSqDqwK5jxGQX-NF5AJsY7YJwsJt7Gdy_IF87FsPGOmMvHTd_bf1ZesK245XVDWQnXlEOcqGBOpV_VZr3Zb6lRIUFOjk"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1 text-center sm:text-left">
+                    <div class="flex items-center justify-center gap-2 sm:justify-start">
+                      <span class="font-title-md text-title-md text-on-surface font-bold"
+                        >Estate</span
+                      >
+                      <span
+                        class="bg-surface-container text-primary rounded px-2 py-0.5 text-xs font-semibold"
+                        >Extra Luggage</span
+                      >
+                    </div>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >e.g. Skoda Superb Estate, Ford Mondeo Estate</span
+                    >
+                    <div
+                      class="text-on-surface-variant font-label-sm text-label-sm mt-1 flex flex-wrap items-center justify-center gap-3 sm:justify-start"
+                    >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">group</span> 4
+                        Passengers</span
+                      >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">luggage</span> 4
+                        Large Cases</span
+                      >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">work</span> 2
+                        Hand bags</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="flex w-full items-center justify-between gap-6 pt-3 md:w-auto md:justify-end md:pt-0"
+                >
+                  <div class="flex flex-col md:items-end">
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface font-bold"
+                      >£95.00</span
+                    >
+                    <span class="font-label-sm text-label-sm text-primary font-medium"
+                      >Guaranteed Fixed Fare</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-1 rounded-lg px-5 py-2.5 font-semibold shadow-sm transition-colors"
+                    data-path="booking-step-2"
+                    href="#"
+                  >
+                    <span>Book Estate</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  </a>
+                </div>
+              </div>
+              <!-- Row 3: MPV 5 / Executive -->
+              <div
+                class="bg-surface-container-lowest flex flex-col items-center justify-between gap-6 rounded-xl p-5 shadow-sm transition-shadow hover:shadow-md md:flex-row"
+              >
+                <div
+                  class="flex w-full flex-col items-center gap-5 sm:flex-row md:w-auto"
+                >
+                  <div
+                    class="bg-surface-container-low/40 flex h-24 w-32 flex-shrink-0 items-center justify-center rounded-lg p-2 sm:w-40"
+                  >
+                    <img
+                      alt="Executive Saloon"
+                      class="h-full w-full object-contain"
+                      src="https://lh3.googleusercontent.com/aida/AEtjO1XFbXErLJZFxTrQTii8VzpkJSXw8lH-VU7SQVbcZKkR3KRcamvMIUKqoROiByAUlgm7lRD6SCW21lLp54O2z0fH4oMdArxjKo54VlJf0nMl1B-RO_e9qTW2pPztMuK7UcOAgNLnEk4DHkHakIVfoxznK4TFA0VvRos7M4i2TkvniOHrm7pR0IS8BhHeG9wAcjbSAsxRO3MKGHU6KrU9fFFkUzoN8tLqI7OpAX_r2UAMmgd5j_BMgbSeS1Y"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1 text-center sm:text-left">
+                    <div class="flex items-center justify-center gap-2 sm:justify-start">
+                      <span class="font-title-md text-title-md text-on-surface font-bold"
+                        >Executive Saloon</span
+                      >
+                      <span
+                        class="bg-secondary-container text-on-secondary-container rounded px-2 py-0.5 text-xs font-semibold"
+                        >Chauffeur Spec</span
+                      >
+                    </div>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >Mercedes-Benz E-Class, BMW 5 Series</span
+                    >
+                    <div
+                      class="text-on-surface-variant font-label-sm text-label-sm mt-1 flex flex-wrap items-center justify-center gap-3 sm:justify-start"
+                    >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">group</span> 3
+                        Passengers</span
+                      >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">luggage</span> 2
+                        Large Cases</span
+                      >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">wifi</span> Wi-Fi
+                        &amp; bottled water</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="flex w-full items-center justify-between gap-6 pt-3 md:w-auto md:justify-end md:pt-0"
+                >
+                  <div class="flex flex-col md:items-end">
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface font-bold"
+                      >£115.00</span
+                    >
+                    <span class="font-label-sm text-label-sm text-primary font-medium"
+                      >Guaranteed Fixed Fare</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-1 rounded-lg px-5 py-2.5 font-semibold shadow-sm transition-colors"
+                    data-path="booking-step-2"
+                    href="#"
+                  >
+                    <span>Book Executive</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  </a>
+                </div>
+              </div>
+              <!-- Row 4: MPV 8 People Carrier -->
+              <div
+                class="bg-surface-container-lowest flex flex-col items-center justify-between gap-6 rounded-xl p-5 shadow-sm transition-shadow hover:shadow-md md:flex-row"
+              >
+                <div
+                  class="flex w-full flex-col items-center gap-5 sm:flex-row md:w-auto"
+                >
+                  <div
+                    class="bg-surface-container-low/40 flex h-24 w-32 flex-shrink-0 items-center justify-center rounded-lg p-2 sm:w-40"
+                  >
+                    <img
+                      alt="MPV 8 Passenger"
+                      class="h-full w-full object-contain"
+                      src="https://lh3.googleusercontent.com/aida/AEtjO1Xxh4OG_YDzRwBv1hlKB_J3YNQ6WDoJdSlsZLOsiUKm3c1cXUiMP4645dRLTtmWFkoT2-GE810zu-nwt8obOjxSGsf5ltR26S81kTQKrShSNZNQtM1k7NZrlFMhYzbvZYR4MsMcf3dw_oTllRWnu-WguWAEN_5NeKm-8rImeQvdzPOeQmGi7QR2kP3ngpos5aJ7yoEjef9woUdPF21OkQVXxS6XLxFaaoNJkoletmkS4Eg3AaLPQU7T0B4"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1 text-center sm:text-left">
+                    <div class="flex items-center justify-center gap-2 sm:justify-start">
+                      <span class="font-title-md text-title-md text-on-surface font-bold"
+                        >MPV 8 Passenger</span
+                      >
+                      <span
+                        class="bg-surface-container text-primary rounded px-2 py-0.5 text-xs font-semibold"
+                        >Group Transit</span
+                      >
+                    </div>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >Mercedes-Benz Vito, Ford Tourneo</span
+                    >
+                    <div
+                      class="text-on-surface-variant font-label-sm text-label-sm mt-1 flex flex-wrap items-center justify-center gap-3 sm:justify-start"
+                    >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">groups</span> 8
+                        Passengers</span
+                      >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">luggage</span> 8
+                        Large Cases</span
+                      >
+                      <span class="flex items-center gap-1"
+                        ><span class="material-symbols-outlined text-sm">work</span> 6
+                        Hand bags</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="flex w-full items-center justify-between gap-6 pt-3 md:w-auto md:justify-end md:pt-0"
+                >
+                  <div class="flex flex-col md:items-end">
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface font-bold"
+                      >£135.00</span
+                    >
+                    <span class="font-label-sm text-label-sm text-primary font-medium"
+                      >Guaranteed Fixed Fare</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-1 rounded-lg px-5 py-2.5 font-semibold shadow-sm transition-colors"
+                    data-path="booking-step-2"
+                    href="#"
+                  >
+                    <span>Book MPV 8</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- 4. ABOUT THIS JOURNEY SECTION -->
+        <section class="px-gutter mx-auto w-full max-w-[1200px] py-14">
+          <div class="grid grid-cols-1 gap-10 lg:grid-cols-12">
+            <!-- Narrative Left Column -->
+            <div class="flex flex-col gap-5 lg:col-span-7">
+              <div
+                class="text-primary font-label-sm text-label-sm flex items-center gap-2 font-semibold tracking-wider uppercase"
+              >
+                <span class="material-symbols-outlined text-sm">navigation</span>
+                Route Specific Operational Intelligence
+              </div>
+              <h2
+                class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight"
+              >
+                About this journey
+              </h2>
+              <p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                Connecting between London Heathrow and London Gatwick requires crossing
+                the southwestern quadrant of London via the M25 motorway corridor,
+                covering approximately 45 miles. Unlike journeys into Central London, this
+                orbital transfer avoids congestion charge zones and provides
+                point-to-point transit directly between terminal forecourts.
+              </p>
+              <p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                For international connecting passengers with flights booked across both
+                hubs, punctuality and zero handling stress are paramount. Cityline
+                chauffeurs monitor both your inbound flight into Heathrow and live M25
+                motorway telemetry to route via optimal junctions (M4/M25/M23) ensuring
+                comfortable arrival at Gatwick departures.
+              </p>
+            </div>
+            <!-- Pull-out Operational Guidance Right Column -->
+            <div class="flex flex-col justify-center lg:col-span-5">
+              <div
+                class="bg-surface-container-low relative flex flex-col gap-3 overflow-hidden rounded-l-sm rounded-r-xl p-6 shadow-sm"
+              >
+                <!-- Green Accent Bar -->
+                <div class="bg-secondary-fixed absolute top-0 bottom-0 left-0 w-2"></div>
+                <div class="text-primary flex items-center gap-2 pl-2">
+                  <span class="material-symbols-outlined text-title-md font-title-md"
+                    >info</span
+                  >
+                  <span class="font-title-md text-title-md font-bold"
+                    >M25 Traffic &amp; Transfer Window Advice</span
+                  >
+                </div>
+                <p
+                  class="font-body-sm text-body-sm text-on-surface-variant pl-2 leading-relaxed"
+                >
+                  We advise allowing a minimum connection window of
+                  <strong class="text-on-surface">3.5 hours</strong> between scheduled
+                  flight touchdown at Heathrow and scheduled departure at Gatwick. During
+                  weekday peak hours (07:00–09:30 and 16:30–19:00), M25 traffic between
+                  Junction 12 (M3) and Junction 8 (Reigate) can add 20–35 minutes.
+                </p>
+                <div
+                  class="text-on-surface font-label-sm text-label-sm mt-2 flex items-center gap-3 pl-2"
+                >
+                  <span
+                    class="bg-surface-container-lowest rounded px-2 py-1 font-semibold shadow-sm"
+                    >TfL Regulated Chauffeur</span
+                  >
+                  <span
+                    class="bg-surface-container-lowest rounded px-2 py-1 font-semibold shadow-sm"
+                    >Real-Time GPS Dispatch</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- 5. 'WHY NOT THE TRAIN OR COACH' COMPARISON MATRIX -->
+        <section class="bg-surface-container-low/50 w-full py-14">
+          <div class="px-gutter mx-auto flex max-w-[1200px] flex-col gap-8">
+            <div class="flex max-w-3xl flex-col gap-2">
+              <h2
+                class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight"
+              >
+                Why not the train or coach?
+              </h2>
+              <p class="font-body-md text-body-md text-on-surface-variant">
+                Compare the direct door-to-door Heathrow–Gatwick transfer against public
+                transit alternatives for two passengers travelling with luggage.
+              </p>
+            </div>
+            <!-- High-legibility Comparison Table Card -->
+            <div class="bg-surface-container-lowest overflow-hidden rounded-xl shadow-sm">
+              <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-left">
+                  <thead>
+                    <tr
+                      class="bg-surface-container-high/60 font-label-md text-label-md text-on-surface-variant tracking-wider uppercase"
+                    >
+                      <th class="px-5 py-4">Transport Mode</th>
+                      <th class="px-5 py-4">Journey Time</th>
+                      <th class="px-5 py-4">Cost (2 Passengers)</th>
+                      <th class="px-5 py-4">Luggage Handling</th>
+                      <th class="px-5 py-4">Comfort &amp; Reliability</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-surface-container divide-y">
+                    <!-- Row 1: Cityline Private Transfer (Featured) -->
+                    <tr
+                      class="bg-surface-container-low/80 hover:bg-surface-container-low transition-colors"
+                    >
+                      <td class="px-5 py-4">
+                        <div class="flex items-center gap-3">
+                          <img
+                            alt="Cityline Private Chauffeur"
+                            class="bg-surface-container-lowest h-10 w-10 rounded object-contain p-1"
+                            src="https://lh3.googleusercontent.com/aida/AEtjO1UmexhBiOSSRBXDyKfLp-2fXF4f1n4kf2BNXruaWgTesq6pjFwghpkz81B0IGAKUnm4TV2Ie_T-jYetRAfAKSrz_8aKMwh64VNU1Gg_Y5l-kBS5NzElueFOACIyIiA3T_1LNsh340tsHjEvoHLLhqRTHDLFPot_If5t49oW81hnX5WgHA9dLPWCXkPSKvuxH1fC0zeF76uKL8YLDxEhPOa1c7p3fegXFTE_K1FfDdvywNlOqit-ygV2jfw"
+                          />
+                          <div class="flex flex-col">
+                            <span
+                              class="font-title-md text-title-md text-primary font-bold"
+                              >Cityline Private Chauffeur</span
+                            >
+                            <span
+                              class="font-label-sm text-label-sm text-secondary font-semibold"
+                              >Recommended for Flights</span
+                            >
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-5 py-4">
+                        <span class="font-title-md text-title-md text-primary font-bold"
+                          >50–65 mins</span
+                        >
+                        <span
+                          class="font-body-sm text-body-sm text-on-surface-variant block"
+                          >Direct Forecourt</span
+                        >
+                      </td>
+                      <td class="px-5 py-4">
+                        <span
+                          class="font-fare-tabular text-body-lg text-on-surface font-bold"
+                          >£85.00 fixed</span
+                        >
+                        <span
+                          class="font-body-sm text-body-sm text-on-surface-variant block"
+                          >(£42.50 per person)</span
+                        >
+                      </td>
+                      <td class="font-body-sm text-body-sm text-on-surface px-5 py-4">
+                        Door-to-door assistance, loaded into boot by chauffeur
+                      </td>
+                      <td class="font-body-sm text-body-sm text-on-surface px-5 py-4">
+                        Terminal forecourt pickup, climate control, zero transfers
+                      </td>
+                    </tr>
+                    <!-- Row 2: National Express Coach -->
+                    <tr class="hover:bg-surface-container-low/30 transition-colors">
+                      <td class="px-5 py-4">
+                        <div class="flex items-center gap-3">
+                          <img
+                            alt="National Express Coach"
+                            class="bg-surface-container-low h-10 w-10 rounded object-contain p-1"
+                            src="https://lh3.googleusercontent.com/aida/AEtjO1VXIWiF_Ip5DmgiuyHRQN90c4XganFqU5b4n-OpO-cgOTsrs5OvcuDSqXh9sYvACqLc8DxsKOjyinPbn99r7vcXRev9mhhpfrB6F1VvVkdSXzs4lErE4LNnKcCfS38Nk0XMpB8yywZbVhDpH2TQdxsEh5aIxBHe0CD2SX0M0XN5QoePDTetz-kAPk7lGa2gDFCiuKhj5VQdMIuJWyFWDj32V6mIfeskAv9AwUkKnpucvgnwVGry7oZ5nA"
+                          />
+                          <span
+                            class="font-title-md text-title-md text-on-surface font-semibold"
+                            >National Express Coach</span
+                          >
+                        </div>
+                      </td>
+                      <td class="px-5 py-4">
+                        <span
+                          class="font-body-md text-body-md text-on-surface font-medium"
+                          >75–95 mins</span
+                        >
+                        <span
+                          class="font-body-sm text-body-sm text-on-surface-variant block"
+                          >Central Bus Stn</span
+                        >
+                      </td>
+                      <td class="px-5 py-4">
+                        <span
+                          class="font-body-md text-body-md text-on-surface font-medium"
+                          >£48.00–£64.00</span
+                        >
+                        <span
+                          class="font-body-sm text-body-sm text-on-surface-variant block"
+                          >(variable / peak)</span
+                        >
+                      </td>
+                      <td
+                        class="font-body-sm text-body-sm text-on-surface-variant px-5 py-4"
+                      >
+                        Must carry to central bus station, self-loading bays
+                      </td>
+                      <td
+                        class="font-body-sm text-body-sm text-on-surface-variant px-5 py-4"
+                      >
+                        Scheduled departure times, potential delays if missed
+                      </td>
+                    </tr>
+                    <!-- Row 3: Train via Central London -->
+                    <tr class="hover:bg-surface-container-low/30 transition-colors">
+                      <td class="px-5 py-4">
+                        <div class="flex items-center gap-3">
+                          <img
+                            alt="Train via Central London"
+                            class="bg-surface-container-low h-10 w-10 rounded object-contain p-1"
+                            src="https://lh3.googleusercontent.com/aida/AEtjO1XJpsNzr1nk__JEld55FKa0U_fadVFRR26bZOpiwoOrkA9oFdB7KH7m3nLhZOrw_wvnlmncOMePAgMo5c5ngDjwEqnD4Fs6VHJ84NeoH23ls_RGv-1nUYW_MYCoLKbg4vb9ezdYhvRw8RSl-JmSM0tPwpan1EsJxDCqdyqGPaWuWR4Wvskb4oaUM2tq673HEYYva1Exa8D2V2m7VmixLkL-VqvTyIWo2HsmnTN9EQihcI_lnCtZuKXZO94"
+                          />
+                          <span
+                            class="font-title-md text-title-md text-on-surface font-semibold"
+                            >Train (Elizabeth / Tube + Gatwick Express)</span
+                          >
+                        </div>
+                      </td>
+                      <td class="px-5 py-4">
+                        <span
+                          class="font-body-md text-body-md text-on-surface font-medium"
+                          >85–110 mins</span
+                        >
+                        <span
+                          class="font-body-sm text-body-sm text-on-surface-variant block"
+                          >Multiple Transfers</span
+                        >
+                      </td>
+                      <td class="px-5 py-4">
+                        <span
+                          class="font-body-md text-body-md text-on-surface font-medium"
+                          >£72.00–£88.00</span
+                        >
+                        <span
+                          class="font-body-sm text-body-sm text-on-surface-variant block"
+                          >(Peak rail fares)</span
+                        >
+                      </td>
+                      <td
+                        class="font-body-sm text-body-sm text-on-surface-variant px-5 py-4"
+                      >
+                        Demanding: multiple changes across Underground escalators &amp;
+                        concourses
+                      </td>
+                      <td
+                        class="font-body-sm text-body-sm text-on-surface-variant px-5 py-4"
+                      >
+                        Minimum 2 rail transfers (Farringdon or Victoria), crowded during
+                        peak
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- 6. 'INCLUDED IN YOUR FARE' INFRASTRUCTURE ROW -->
+        <section class="px-gutter mx-auto w-full max-w-[1200px] py-14">
+          <div class="flex flex-col gap-6">
+            <div class="flex flex-col">
+              <h2
+                class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight"
+              >
+                Included in your fare
+              </h2>
+              <p class="font-body-md text-body-md text-on-surface-variant">
+                Every Heathrow to Gatwick booking includes institutional-grade guarantees
+                at no additional cost.
+              </p>
+            </div>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div
+                class="bg-surface-container-lowest flex flex-col gap-3 rounded-xl p-5 shadow-sm"
+              >
+                <div
+                  class="bg-surface-container text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-title-md font-title-md"
+                    >flight_takeoff</span
+                  >
+                </div>
+                <span class="font-title-md text-title-md text-on-surface font-bold"
+                  >Flight Monitoring</span
+                >
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Live flight telemetry &amp; automated chauffeur dispatch adjustments
+                  ensure zero waiting charge if your inbound flight is delayed.
+                </p>
+              </div>
+              <div
+                class="bg-surface-container-lowest flex flex-col gap-3 rounded-xl p-5 shadow-sm"
+              >
+                <div
+                  class="bg-surface-container text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-title-md font-title-md"
+                    >timer</span
+                  >
+                </div>
+                <span class="font-title-md text-title-md text-on-surface font-bold"
+                  >60 Mins Free Waiting</span
+                >
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Ample buffer for UK Border Force clearance, customs, and baggage reclaim
+                  at Heathrow Terminals 2–5.
+                </p>
+              </div>
+              <div
+                class="bg-surface-container-lowest flex flex-col gap-3 rounded-xl p-5 shadow-sm"
+              >
+                <div
+                  class="bg-surface-container text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-title-md font-title-md"
+                    >toll</span
+                  >
+                </div>
+                <span class="font-title-md text-title-md text-on-surface font-bold"
+                  >All Tolls &amp; Airport Fees</span
+                >
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Heathrow terminal drop-off/pickup barrier charges and M25 motorway tolls
+                  are fully inclusive in your quote.
+                </p>
+              </div>
+              <div
+                class="bg-surface-container-lowest flex flex-col gap-3 rounded-xl p-5 shadow-sm"
+              >
+                <div
+                  class="bg-surface-container text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-title-md font-title-md"
+                    >badge</span
+                  >
+                </div>
+                <span class="font-title-md text-title-md text-on-surface font-bold"
+                  >Meet &amp; Greet in Arrivals</span
+                >
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Your chauffeur waits inside the arrivals terminal foyer with a
+                  personalized digital or physical nameboard.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- 7. ROUTE-SPECIFIC REVIEW CARDS -->
+        <section class="bg-surface-container-low/40 w-full py-14">
+          <div class="px-gutter mx-auto flex max-w-[1200px] flex-col gap-8">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2
+                  class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight"
+                >
+                  Passenger Feedback on This Route
+                </h2>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                  Verified recent transfers between Heathrow and Gatwick
+                </p>
+              </div>
+              <div class="text-primary hidden items-center gap-1 sm:flex">
+                <span
+                  class="material-symbols-outlined text-title-md font-title-md"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >star</span
+                >
+                <span class="font-title-md text-title-md font-bold">4.9 / 5.0</span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant"
+                  >(2,410+ ratings)</span
+                >
+              </div>
+            </div>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <!-- Review 1 -->
+              <div
+                class="bg-surface-container-lowest flex flex-col gap-4 rounded-xl p-6 shadow-sm"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="bg-secondary-fixed text-on-primary-fixed flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold"
+                  >
+                    MK
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface font-bold"
+                      >Marcus K.</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >Transferred between LHR T5 and LGW South</span
+                    >
+                  </div>
+                  <div class="text-primary ml-auto flex items-center">
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                  </div>
+                </div>
+                <p
+                  class="font-body-md text-body-md text-on-surface-variant leading-relaxed italic"
+                >
+                  “Seamless Heathrow to Gatwick connection. Our flight was delayed by 30
+                  mins at Terminal 5, but our driver Tariq was waiting right by the
+                  arrivals barrier. Arrived at Gatwick with plenty of time for our
+                  Caribbean connection.”
+                </p>
+              </div>
+              <!-- Review 2 -->
+              <div
+                class="bg-surface-container-lowest flex flex-col gap-4 rounded-xl p-6 shadow-sm"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="bg-secondary-fixed text-on-primary-fixed flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold"
+                  >
+                    EL
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface font-bold"
+                      >Emma &amp; Liam T.</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >Family transfer with 4 bags</span
+                    >
+                  </div>
+                  <div class="text-primary ml-auto flex items-center">
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-sm"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                  </div>
+                </div>
+                <p
+                  class="font-body-md text-body-md text-on-surface-variant leading-relaxed italic"
+                >
+                  “Travelling with two children and four heavy suitcases, avoiding the
+                  train across London was the best decision we made. The estate car had
+                  bags of space and the driver helped with everything.”
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- 8. RELATED ROUTES -->
+        <section class="px-gutter mx-auto w-full max-w-[1200px] py-14">
+          <div class="flex flex-col gap-6">
+            <h2
+              class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight"
+            >
+              Other popular airport and inter-terminal routes
+            </h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <a
+                class="bg-surface-container-lowest group flex items-center justify-between rounded-xl p-4 shadow-sm transition-shadow hover:shadow-md"
+                data-path="route-template"
+                href="#"
+              >
+                <div class="flex items-center gap-3">
+                  <span
+                    class="material-symbols-outlined text-primary text-title-md font-title-md transition-transform group-hover:translate-x-0.5"
+                    >flight_takeoff</span
+                  >
+                  <span
+                    class="font-title-md text-title-md text-on-surface group-hover:text-primary transition-colors"
+                    >Heathrow to Central London</span
+                  >
+                </div>
+                <span class="font-body-md text-body-md text-primary font-semibold"
+                  >from £55</span
+                >
+              </a>
+              <a
+                class="bg-surface-container-lowest group flex items-center justify-between rounded-xl p-4 shadow-sm transition-shadow hover:shadow-md"
+                data-path="route-template"
+                href="#"
+              >
+                <div class="flex items-center gap-3">
+                  <span
+                    class="material-symbols-outlined text-primary text-title-md font-title-md transition-transform group-hover:translate-x-0.5"
+                    >flight_takeoff</span
+                  >
+                  <span
+                    class="font-title-md text-title-md text-on-surface group-hover:text-primary transition-colors"
+                    >Gatwick to Central London</span
+                  >
+                </div>
+                <span class="font-body-md text-body-md text-primary font-semibold"
+                  >from £68</span
+                >
+              </a>
+              <a
+                class="bg-surface-container-lowest group flex items-center justify-between rounded-xl p-4 shadow-sm transition-shadow hover:shadow-md"
+                data-path="route-template"
+                href="#"
+              >
+                <div class="flex items-center gap-3">
+                  <span
+                    class="material-symbols-outlined text-primary text-title-md font-title-md transition-transform group-hover:translate-x-0.5"
+                    >connecting_airports</span
+                  >
+                  <span
+                    class="font-title-md text-title-md text-on-surface group-hover:text-primary transition-colors"
+                    >Heathrow to Stansted Airport</span
+                  >
+                </div>
+                <span class="font-body-md text-body-md text-primary font-semibold"
+                  >from £98</span
+                >
+              </a>
+              <a
+                class="bg-surface-container-lowest group flex items-center justify-between rounded-xl p-4 shadow-sm transition-shadow hover:shadow-md"
+                data-path="route-template"
+                href="#"
+              >
+                <div class="flex items-center gap-3">
+                  <span
+                    class="material-symbols-outlined text-primary text-title-md font-title-md transition-transform group-hover:translate-x-0.5"
+                    >connecting_airports</span
+                  >
+                  <span
+                    class="font-title-md text-title-md text-on-surface group-hover:text-primary transition-colors"
+                    >Gatwick to Stansted Airport</span
+                  >
+                </div>
+                <span class="font-body-md text-body-md text-primary font-semibold"
+                  >from £105</span
+                >
+              </a>
+              <a
+                class="bg-surface-container-lowest group flex items-center justify-between rounded-xl p-4 shadow-sm transition-shadow hover:shadow-md"
+                data-path="route-template"
+                href="#"
+              >
+                <div class="flex items-center gap-3">
+                  <span
+                    class="material-symbols-outlined text-primary text-title-md font-title-md transition-transform group-hover:translate-x-0.5"
+                    >flight_takeoff</span
+                  >
+                  <span
+                    class="font-title-md text-title-md text-on-surface group-hover:text-primary transition-colors"
+                    >Heathrow to London City Airport</span
+                  >
+                </div>
+                <span class="font-body-md text-body-md text-primary font-semibold"
+                  >from £65</span
+                >
+              </a>
+              <a
+                class="bg-surface-container-lowest group flex items-center justify-between rounded-xl p-4 shadow-sm transition-shadow hover:shadow-md"
+                data-path="route-template"
+                href="#"
+              >
+                <div class="flex items-center gap-3">
+                  <span
+                    class="material-symbols-outlined text-primary text-title-md font-title-md transition-transform group-hover:translate-x-0.5"
+                    >flight_takeoff</span
+                  >
+                  <span
+                    class="font-title-md text-title-md text-on-surface group-hover:text-primary transition-colors"
+                    >Luton Airport to Heathrow</span
+                  >
+                </div>
+                <span class="font-body-md text-body-md text-primary font-semibold"
+                  >from £75</span
+                >
+              </a>
+            </div>
+          </div>
+        </section>
+        <!-- 9. CLOSING QUOTE BAND -->
+        <section class="bg-surface-container-low w-full py-12">
+          <div
+            class="px-gutter mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-6 md:flex-row"
+          >
+            <div class="flex flex-col gap-2 text-center md:text-left">
+              <h3
+                class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight"
+              >
+                Ready to book your Heathrow to Gatwick transfer?
+              </h3>
+              <p class="font-body-md text-body-md text-on-surface-variant">
+                Fixed fare from £85.00 • Complimentary flight tracking • TfL private hire
+                licensed
+              </p>
+            </div>
+            <div class="flex w-full flex-col items-center gap-4 sm:flex-row md:w-auto">
+              <a
+                class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex w-full items-center justify-center gap-2 rounded-lg px-8 py-3.5 text-center font-semibold shadow-sm transition-all sm:w-auto"
+                data-path="booking-step-2"
+                href="#"
+              >
+                <span>Book This Route from £85.00</span>
+                <span class="material-symbols-outlined text-title-md font-title-md"
+                  >arrow_forward</span
+                >
+              </a>
+              <a
+                class="bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md flex w-full items-center justify-center gap-2 rounded-lg px-5 py-3.5 text-center font-semibold shadow-sm transition-colors sm:w-auto"
+                href="tel:+442079460812"
+              >
+                <span
+                  class="material-symbols-outlined text-primary text-title-md font-title-md"
+                  >call</span
+                >
+                <span>+44 (0)20 7946 0812</span>
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="bg-surface-container-low w-full">
+      <div class="px-gutter pt-space-xl pb-space-lg mx-auto max-w-[1200px]">
+        <div
+          class="gap-space-xl pb-space-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+        >
+          <div class="gap-space-md flex flex-col">
+            <span class="font-title-md text-title-md text-on-surface"
+              >London Airports &amp; Routes</span
+            >
+            <div class="gap-space-sm flex flex-col">
+              <a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="route-template"
+                href="#"
+                >Heathrow to Gatwick Transfer</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >Heathrow (LHR) Terminals 2–5</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >Gatwick (LGW) North &amp; South</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >London City Airport (LCY)</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >Stansted (STN) Passenger Hub</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >Luton (LTN) International</a
+              >
+            </div>
+          </div>
+          <div class="gap-space-md flex flex-col">
+            <span class="font-title-md text-title-md text-on-surface"
+              >Transit Services</span
+            >
+            <div class="gap-space-sm flex flex-col">
+              <a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="services"
+                href="#"
+                >Direct Airport Transfers</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="services"
+                href="#"
+                >Corporate Chauffeur Accounts</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="services"
+                href="#"
+                >Flight Delay Monitoring</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="services"
+                href="#"
+                >Meet &amp; Greet Arrivals</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="fleet"
+                href="#"
+                >Executive MPV &amp; Saloons</a
+              >
+            </div>
+          </div>
+          <div class="gap-space-md flex flex-col">
+            <span class="font-title-md text-title-md text-on-surface"
+              >Legal &amp; Company</span
+            >
+            <div class="gap-space-sm flex flex-col">
+              <a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="about"
+                href="#"
+                >About Cityline London</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="licensing"
+                href="#"
+                >TfL Regulatory Compliance</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="terms"
+                href="#"
+                >Terms of Transit</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="privacy"
+                href="#"
+                >Privacy &amp; Data Security</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="fares"
+                href="#"
+                >Fixed Fare Guarantee</a
+              >
+            </div>
+          </div>
+          <div class="gap-space-md flex flex-col">
+            <span class="font-title-md text-title-md text-on-surface"
+              >Help &amp; Support</span
+            >
+            <div class="gap-space-sm flex flex-col">
+              <a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="help"
+                href="#"
+                >Passenger FAQ</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="contact"
+                href="#"
+                >24/7 Operations Desk</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="luggage-policy"
+                href="#"
+                >Luggage Allowance Guide</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="booking-step-2"
+                href="#"
+                >Manage Existing Booking</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="cancellations"
+                href="#"
+                >Cancellation Policy</a
+              >
+            </div>
+          </div>
+        </div>
+        <div
+          class="pt-space-lg gap-space-lg flex flex-col items-start justify-between lg:flex-row lg:items-center"
+        >
+          <div class="gap-space-xs flex flex-col">
+            <span class="font-body-sm text-body-sm text-on-surface-variant"
+              >© 2025 Cityline Airport Transfers Ltd. Registered in England &amp; Wales
+              No. 09843211. Registered Office: 140 London Wall, London EC2Y 5DN.</span
+            >
+            <div class="gap-space-sm flex items-center">
+              <span
+                class="gap-space-xs px-space-sm bg-surface-container text-on-surface font-label-sm text-label-sm inline-flex items-center rounded py-0.5"
+                ><span class="bg-secondary h-1.5 w-1.5 rounded-full"></span>TfL PH
+                Operator Licence #008942/01</span
+              ><span class="font-body-sm text-body-sm text-on-surface-variant"
+                >Licensed by Transport for London</span
+              >
+            </div>
+          </div>
+          <div class="gap-space-sm flex flex-col items-start sm:flex-row sm:items-center">
+            <span
+              class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+              >Accepted Cards &amp; Pay:</span
+            >
+            <div class="gap-space-xs flex items-center">
+              <span
+                class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_3px_rgba(15,26,20,0.04)]"
+                >Visa</span
+              ><span
+                class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_3px_rgba(15,26,20,0.04)]"
+                >Mastercard</span
+              ><span
+                class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_3px_rgba(15,26,20,0.04)]"
+                >Amex</span
+              ><span
+                class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_3px_rgba(15,26,20,0.04)]"
+                >Apple Pay</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

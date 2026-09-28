@@ -1,0 +1,20 @@
+.next
+node_modules
+pnpm-lock.yaml
+storage
+playwright-report
+test-results
+dist
+coverage
+
+# The specification, kept byte-for-byte as delivered.
+docs/*.html
+
+# Design sources. These are Stitch's own exports and Cityline's brand files:
+# they are a reference the build is checked against, so reformatting them
+# would make that comparison meaningless. Includes design/brand/Loader.json,
+# which is generated Lottie output.
+design
+
+# Generated brand asset — SVGO output, not hand-edited.
+public/brand

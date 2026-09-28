@@ -1,0 +1,46 @@
+# Keep the build context small and secrets out of the image.
+#
+# The Dockerfile does `COPY . .` in the builder stage, so anything not listed
+# here is uploaded to the daemon on every build.
+
+# Dependencies and build output — reinstalled and rebuilt inside the image.
+node_modules
+.next
+dist
+*.tsbuildinfo
+
+# Version control and CI
+.git
+.github
+.gitattributes
+
+# Design sources (~37MB of Stitch exports and screenshots). The images the
+# site actually serves were already optimised into public/images by
+# `pnpm images:import`, so nothing in here is needed to build or run.
+design
+
+# Docs, tests and tooling config the runtime never reads.
+docs
+e2e
+playwright.config.ts
+vitest.config.mts
+*.md
+
+# Runtime data: uploads live in a mounted volume, never in the image (DATA-02).
+storage
+
+# Test and coverage output
+playwright-report
+test-results
+coverage
+
+# Editor and OS noise
+.vscode
+.idea
+.DS_Store
+*.log
+
+# Secrets never enter an image layer (NFR-04). .env.example is documentation.
+.env
+.env.*
+!.env.example

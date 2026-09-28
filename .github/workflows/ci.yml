@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+  # Called by deploy.yml on a push to main, so the same checks gate the
+  # deployment instead of running beside it. Not triggered on push directly,
+  # or every main push would run these twice.
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  checks:
+    name: Types, lint, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Formatting
+        run: pnpm format:check
+
+      - name: TfL wording check (CMP-01)
+        run: pnpm check:compliance
+
+      - name: Unit tests (pricing, money, compliance)
+        run: pnpm test
+
+  # The Playwright job turns on in S3, with the booking funnel (NFR-07, PRD-06).
+  # Until then the launch gate is covered by Vitest in src/proxy.test.ts, and
+  # downloading a browser on every CI run would buy nothing.
+  #
+  # e2e:
+  #   name: Booking flow (Playwright)
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: pnpm/action-setup@v4
+  #       with: { version: 12 }
+  #     - uses: actions/setup-node@v4
+  #       with: { node-version: 22, cache: pnpm }
+  #     - run: pnpm install --frozen-lockfile
+  #     - run: pnpm exec playwright install --with-deps chromium
+  #     - run: pnpm e2e
+  #     - uses: actions/upload-artifact@v4
+  #       if: ${{ !cancelled() }}
+  #       with:
+  #         name: playwright-report
+  #         path: playwright-report/
+  #         retention-days: 7

@@ -1,0 +1,26 @@
+# Local development database only. The app itself runs with `pnpm dev`.
+# Published on 5432 so tools on the host can connect; this file is never used
+# on the VPS.
+
+name: cityline-local
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: cityline
+      POSTGRES_PASSWORD: cityline
+      POSTGRES_DB: cityline
+    volumes:
+      - pg_data_local:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cityline"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pg_data_local:

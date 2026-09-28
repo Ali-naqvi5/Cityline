@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cityline Airport Transfers — web platform
 
-## Getting Started
+Direct-booking website and operations admin for **Cityline Airport Transfers
+Limited**, TfL private hire operator licence **11628**.
 
-First, run the development server:
+One Next.js 16 application, self-hosted on a single IONOS VPS with PostgreSQL,
+Caddy and a background worker in Docker. Public site and booking funnel first,
+operations admin last.
+
+- **Specification:** [`docs/cityline-platform-spec-v6.html`](docs/cityline-platform-spec-v6.html) (v6.0, 20 Sep 2026) — the source of truth.
+- **Where the build stands:** [`docs/progress.md`](docs/progress.md) — read this first
+- **Project rules for agents and developers:** [`CLAUDE.md`](CLAUDE.md)
+- **Server setup:** [`docs/runbook-vps.md`](docs/runbook-vps.md)
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env.local        # fill in what you need
+pnpm db:up                        # local Postgres on :5432
+pnpm dev                          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+With `LAUNCH_GATE=on` the site serves the coming-soon page; reach the real pages
+with `?preview=<PREVIEW_TOKEN>`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command                       | Does                                                                                                           |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`                    | Development server                                                                                             |
+| `pnpm build`                  | Production build (standalone output)                                                                           |
+| `pnpm build:worker`           | Bundle the worker to `dist/worker.js`                                                                          |
+| `pnpm typecheck`              | `tsc --noEmit`                                                                                                 |
+| `pnpm lint` / `pnpm format`   | ESLint / Prettier                                                                                              |
+| `pnpm test`                   | Vitest — pricing, money, compliance rules, launch gate                                                         |
+| `pnpm e2e`                    | Playwright at 390px and 1440px — **switches on in S3** with the booking funnel; browsers are not installed yet |
+| `pnpm worker`                 | Run one worker tick locally                                                                                    |
+| `pnpm db:up` / `pnpm db:down` | Local Postgres container                                                                                       |
 
-## Learn More
+## Where things are
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/app/(site)        public pages and templates
+src/app/(booking)     /quote + the four booking steps
+src/app/(manage)      magic-link self-service
+src/app/(payload)     operations admin (built last)
+src/app/api           health, cron, webhooks
+src/domain/*          pricing, booking, jobs, finance, messaging, compliance, seo
+src/worker            outbox retries, reminders, alerts
+docker/               Dockerfile, Caddyfile, backup image
+docs/                 specification and runbooks
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Build order
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Sprint | Scope                                                 |
+| ------ | ----------------------------------------------------- |
+| S0     | Server, foundations, CI, launch gate, worker, backups |
+| S1     | Design → component library                            |
+| S2     | Places, zones, routes, pricing engine                 |
+| S3–S4  | Quote, booking steps 1–4, Stripe                      |
+| S5     | Manage booking: amend, cancel, refund                 |
+| S6     | Phase-1 pages and SEO                                 |
+| S7     | Launch prep — _milestone A_, gate comes off           |
+| S8–S10 | Admin: jobs, dispatch, finance — _milestone B_        |
+| S11+   | Phase 2: route pages at scale, accounts, blog         |
 
-## Deploy on Vercel
+Current state of each lives in [`docs/progress.md`](docs/progress.md), so it is
+recorded in one place only.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Non-negotiables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Money is integer pence. Times are UTC, displayed Europe/London. Prices are
+always recalculated server-side. The words "taxi", "cab" and "minicab" appear
+nowhere in customer-facing output — it is a TfL licence condition, and
+`src/domain/compliance/forbidden-words.ts` enforces it.
+
+See [`CLAUDE.md`](CLAUDE.md) for the full list.

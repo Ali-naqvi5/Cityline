@@ -1,0 +1,65 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 200 200"
+  width="200"
+  height="200"
+  fill="none"
+>
+  <!-- Background circular badge in #F2FBF3 with subtle border -->
+  <circle cx="100" cy="100" r="94" fill="#F2FBF3" stroke="#DDE8DF" stroke-width="2" />
+
+  <!-- Subtle inner decorative accent ring -->
+  <circle
+    cx="100"
+    cy="100"
+    r="84"
+    stroke="#90EE90"
+    stroke-width="1.5"
+    stroke-opacity="0.7"
+    stroke-dasharray="4 4"
+  />
+
+  <!-- Clip path to keep silhouette contained cleanly inside circle -->
+  <defs>
+    <clipPath id="avatarCircle">
+      <circle cx="100" cy="100" r="92" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#avatarCircle)">
+    <!-- Shoulders & Coat Torso silhouette in deep-green #0E6B39 -->
+    <path
+      d="M40 180 C40 148 64 135 100 135 C136 135 160 148 160 180 V200 H40 Z"
+      fill="#0E6B39"
+    />
+
+    <!-- Chauffeur / Driver Uniform Lapel V-neck accent in #90EE90 -->
+    <path d="M88 135 L100 156 L112 135 Z" fill="#90EE90" />
+    <!-- Chauffeur tie node -->
+    <path d="M97 156 L103 156 L101 172 L99 172 Z" fill="#0F1A14" />
+
+    <!-- Neck in deep-green #0E6B39 -->
+    <rect x="92" y="112" width="16" height="26" rx="4" fill="#0E6B39" />
+
+    <!-- Head & Chin silhouette in deep-green #0E6B39 -->
+    <ellipse cx="100" cy="94" rx="26" ry="29" fill="#0E6B39" />
+
+    <!-- Traditional Chauffeur Flat Cap Silhouette -->
+    <!-- Cap crown -->
+    <path
+      d="M70 82 C70 60 84 52 100 52 C116 52 130 60 130 82 C125 76 112 73 100 73 C88 73 75 76 70 82 Z"
+      fill="#0E6B39"
+      stroke="#90EE90"
+      stroke-width="1.5"
+    />
+    <!-- Cap top button accent -->
+    <circle cx="100" cy="52" r="3.5" fill="#90EE90" />
+    <!-- Cap Visor / Peak protruding forward -->
+    <path
+      d="M66 82 C76 77 124 77 134 82 C138 84 136 89 128 89 C104 89 96 89 72 89 C64 89 62 84 66 82 Z"
+      fill="#0E6B39"
+      stroke="#90EE90"
+      stroke-width="1"
+    />
+  </g>
+</svg>

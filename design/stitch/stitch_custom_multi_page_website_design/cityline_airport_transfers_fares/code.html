@@ -1,0 +1,1783 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="web_standard" name="shell-type" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#005229",
+              primary: "#005128",
+              "inverse-surface": "#27332c",
+              "on-surface": "#121e18",
+              "on-secondary": "#ffffff",
+              "surface-variant": "#d8e6db",
+              background: "#effdf2",
+              "secondary-fixed-dim": "#69dd92",
+              "tertiary-container": "#006c20",
+              "on-tertiary-container": "#8deb8d",
+              "secondary-container": "#83f7a9",
+              "on-tertiary-fixed-variant": "#005316",
+              error: "#ba1a1a",
+              "primary-fixed": "#a0f5b5",
+              "surface-tint": "#116c3a",
+              surface: "#effdf2",
+              "surface-bright": "#effdf2",
+              "on-secondary-container": "#00723d",
+              "surface-container-low": "#e9f7ec",
+              "inverse-primary": "#84d89b",
+              "surface-container-high": "#ddece1",
+              "secondary-fixed": "#85faac",
+              "on-surface-variant": "#3f4940",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              tertiary: "#005116",
+              "surface-container-highest": "#d8e6db",
+              "on-primary-fixed": "#00210d",
+              "primary-fixed-dim": "#84d89b",
+              "on-secondary-fixed": "#00210e",
+              secondary: "#006d3a",
+              "on-tertiary-fixed": "#002105",
+              "surface-container": "#e3f1e7",
+              "on-background": "#121e18",
+              outline: "#6f7a6f",
+              "on-primary": "#ffffff",
+              "outline-variant": "#bfc9bd",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "tertiary-fixed-dim": "#7edb7f",
+              "surface-dim": "#cfded3",
+              "on-secondary-fixed-variant": "#00522a",
+              "primary-container": "#0e6b39",
+              "tertiary-fixed": "#99f899",
+              "on-primary-container": "#94e9aa",
+              "inverse-on-surface": "#e6f4e9",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "space-lg": "1.5rem",
+              "space-xl": "2rem",
+              "space-md": "1rem",
+              gutter: "1.5rem",
+              "space-sm": "0.5rem",
+              margin: "2rem",
+              "space-xs": "0.25rem",
+              "gutter-sm": "1rem",
+              "margin-desktop": "7.5rem",
+            },
+            fontFamily: {
+              "body-sm": ["Inter"],
+              "body-md": ["Inter"],
+              "display-lg-mobile": ["Inter"],
+              "headline-md": ["Inter"],
+              "display-lg": ["Inter"],
+              "headline-lg": ["Inter"],
+              "label-sm": ["Inter"],
+              "label-md": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "fare-tabular": ["Inter"],
+              "headline-sm": ["Inter"],
+              "title-md": ["Inter"],
+              "body-lg": ["Inter"],
+            },
+            fontSize: {
+              "body-sm": [
+                "13px",
+                { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" },
+              ],
+              "body-md": [
+                "15px",
+                { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-lg-mobile": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "display-lg": [
+                "48px",
+                { lineHeight: "56px", letterSpacing: "-0.025em", fontWeight: "600" },
+              ],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "label-sm": [
+                "12px",
+                { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "600" },
+              ],
+              "label-md": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500" },
+              ],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "fare-tabular": [
+                "22px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "600" },
+              ],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" },
+              ],
+              "title-md": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background font-body-md text-on-surface">
+    <header
+      class="bg-surface/90 fixed top-0 z-50 w-full shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl"
+    >
+      <div
+        class="px-gutter gap-space-md mx-auto flex h-20 max-w-[1200px] items-center justify-between"
+      >
+        <div class="gap-space-md flex flex-shrink-0 items-center">
+          <div class="gap-space-sm flex items-center">
+            <div class="bg-surface-container rounded-lg p-1">
+              <img
+                alt="Profile"
+                class="h-8 w-8 rounded-full object-cover"
+                src="https://lh3.googleusercontent.com/aida/AEtjO1Wo22GfjdFIHzeGon_3-qDYCbJ8zfGVPUbhyXvOo9JbmvAcXmgXfQMwgnJ4Wxogy2UM4FIGHiDezMQXtAw2SfVt6DhwgY3Qq1zNQg3KKOybc60shelsIWUoRYgyQGV65-lKSkkEImO86wU5QYICG2Y39soqob3WsMYuAO9ZSORsTwxoihDjWNbC7ItIMwMdRgAps-bkrW8eEj975ndX4P_k7BVhauMa7relA-Js419ty9Xa_joxr74MANuCv9-WhURwraMjiffCDg"
+              />
+            </div>
+            <div class="flex flex-col">
+              <span
+                class="font-headline-sm text-headline-sm text-primary leading-none tracking-tight"
+                >CITYLINE</span
+              ><span
+                class="font-label-sm text-label-sm text-on-surface-variant mt-0.5 tracking-wider uppercase"
+                >AIRPORT TRANSFERS · LONDON</span
+              >
+            </div>
+          </div>
+        </div>
+        <nav
+          class="gap-space-xs hidden items-center lg:flex"
+          data-active-classes="bg-surface-container-high text-primary font-title-md"
+        >
+          <a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="airports"
+            href="#"
+            >Airports</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="services"
+            href="#"
+            >Services</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="fleet"
+            href="#"
+            >Fleet</a
+          ><a
+            aria-current="page"
+            class="bg-surface-container-high text-primary font-title-md rounded-lg px-3 py-2 transition-all"
+            data-path="fares"
+            href="#"
+            >Fares</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="help"
+            href="#"
+            >Help</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="contact"
+            href="#"
+            >Contact</a
+          >
+        </nav>
+        <div class="gap-space-md flex flex-shrink-0 items-center">
+          <div class="hidden flex-col items-end xl:flex">
+            <span
+              class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+              >24/7 UK Dispatch</span
+            ><a
+              class="font-label-md text-label-md text-on-surface hover:text-primary tabular-nums transition-colors"
+              href="tel:+442079460812"
+              >+44 (0)20 7946 0812</a
+            >
+          </div>
+          <a
+            class="px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center rounded-lg py-2.5 shadow-[0_1px_3px_rgba(15,26,20,0.04)] transition-all hover:shadow-[0_8px_24px_rgba(14,107,57,0.08)]"
+            data-path="book-now"
+            href="#"
+            >Book now</a
+          >
+        </div>
+      </div>
+    </header>
+    <main class="bg-background w-full pt-20">
+      <div class="px-gutter mx-auto max-w-[1200px]">
+        <div class="flex w-full flex-col">
+          <!-- Top Breadcrumb & Hero Header Section -->
+          <section class="w-full pt-6 pb-8">
+            <div
+              class="gap-space-xs font-label-sm text-label-sm text-on-surface-variant mb-space-sm flex items-center"
+            >
+              <a class="hover:text-primary transition-colors" href="#">Home</a>
+              <span class="material-symbols-outlined text-sm">chevron_right</span>
+              <span class="text-primary font-semibold">Fares &amp; Pricing</span>
+            </div>
+            <div
+              class="gap-space-lg flex flex-col justify-between lg:flex-row lg:items-end"
+            >
+              <div class="max-w-2xl">
+                <div
+                  class="gap-space-xs bg-surface-container-high text-primary font-label-sm text-label-sm mb-space-sm inline-flex items-center rounded-full px-2.5 py-1 font-semibold"
+                >
+                  <span class="bg-primary h-2 w-2 animate-pulse rounded-full"></span>
+                  TfL Regulated Metred-Equivalent &amp; Guaranteed Fixed Tariffs
+                </div>
+                <h1
+                  class="font-display-lg text-display-lg text-on-surface leading-tight tracking-tight"
+                >
+                  Transparent, Fixed-Rate Fares
+                </h1>
+                <p class="font-body-lg text-body-lg text-on-surface-variant mt-space-xs">
+                  No surge pricing, no hidden extras. Every quote is guaranteed before you
+                  confirm, benchmarked to direct airport-to-central corridors.
+                </p>
+              </div>
+              <!-- Quick Route Lookup / Filter -->
+              <div
+                class="gap-space-sm bg-surface-container-lowest flex items-center rounded-xl p-2 shadow-sm"
+              >
+                <div
+                  class="gap-space-xs px-space-sm bg-surface-container-low text-on-surface-variant flex items-center rounded-lg py-1.5"
+                >
+                  <span class="material-symbols-outlined text-primary text-base"
+                    >flight_land</span
+                  >
+                  <span class="font-label-sm text-label-sm text-on-surface font-medium"
+                    >Arrivals to London Zone 1-2</span
+                  >
+                </div>
+                <div class="bg-surface-variant h-6 w-px"></div>
+                <span
+                  class="font-label-sm text-label-sm text-primary px-space-xs font-semibold tabular-nums"
+                  >2025 Tariff Matrix</span
+                >
+              </div>
+            </div>
+          </section>
+          <!-- Section 2: Plain-English Explanation Card (4 Pillars) -->
+          <section class="mb-space-xl w-full">
+            <div class="bg-surface-container-low p-space-lg rounded-xl shadow-sm">
+              <div class="gap-space-xs mb-space-md text-primary flex items-center">
+                <span class="material-symbols-outlined text-lg">shield</span>
+                <span class="font-title-md text-title-md text-on-surface"
+                  >The Cityline Pricing Guarantee</span
+                >
+              </div>
+              <div class="gap-space-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                <!-- Point 1 -->
+                <div
+                  class="bg-surface-container-lowest p- space-md p-space-md flex flex-col rounded-lg shadow-sm"
+                >
+                  <div
+                    class="bg-surface-container text-primary mb-space-sm flex h-9 w-9 items-center justify-center rounded-lg"
+                  >
+                    <span class="material-symbols-outlined text-xl">straighten</span>
+                  </div>
+                  <h2 class="font-title-md text-title-md text-on-surface mb-space-xs">
+                    Fixed Journey Rates
+                  </h2>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Calculated by vehicle class and exact radial distance. Once confirmed,
+                    your tariff never fluctuates with London traffic, rain, or gridlock
+                    delays.
+                  </p>
+                </div>
+                <!-- Point 2 -->
+                <div
+                  class="bg-surface-container-lowest p-space-md flex flex-col rounded-lg shadow-sm"
+                >
+                  <div
+                    class="bg-surface-container text-primary mb-space-sm flex h-9 w-9 items-center justify-center rounded-lg"
+                  >
+                    <span class="material-symbols-outlined text-xl">radar</span>
+                  </div>
+                  <h2 class="font-title-md text-title-md text-on-surface mb-space-xs">
+                    Flight Tracking Included
+                  </h2>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    We track inbound air traffic via live ADS-B radar feeds. Your
+                    chauffeur's dispatch and arrival automatically adapt to touchdown, not
+                    scheduled slot.
+                  </p>
+                </div>
+                <!-- Point 3 -->
+                <div
+                  class="bg-surface-container-lowest p-space-md flex flex-col rounded-lg shadow-sm"
+                >
+                  <div
+                    class="bg-surface-container text-primary mb-space-sm flex h-9 w-9 items-center justify-center rounded-lg"
+                  >
+                    <span class="material-symbols-outlined text-xl">hourglass_top</span>
+                  </div>
+                  <h2 class="font-title-md text-title-md text-on-surface mb-space-xs">
+                    60m Airport Grace
+                  </h2>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Full 60 minutes complimentary waiting time and parking fee included
+                    inside the terminal barrier from the second wheels touch tarmac.
+                  </p>
+                </div>
+                <!-- Point 4 -->
+                <div
+                  class="bg-surface-container-lowest p-space-md flex flex-col rounded-lg shadow-sm"
+                >
+                  <div
+                    class="bg-surface-container text-primary mb-space-sm flex h-9 w-9 items-center justify-center rounded-lg"
+                  >
+                    <span class="material-symbols-outlined text-xl">price_check</span>
+                  </div>
+                  <h2 class="font-title-md text-title-md text-on-surface mb-space-xs">
+                    Zero Surge, Ever
+                  </h2>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Rail strikes, tube outages, or peak evening downpours will never
+                    inflate your quoted rate. Guaranteed 24/7/365 transparent municipal
+                    stability.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Section 3: Fare Matrix Table -->
+          <section class="mb-space-xl w-full">
+            <div
+              class="mb-space-sm flex flex-col justify-between md:flex-row md:items-end"
+            >
+              <div>
+                <h2 class="font-headline-md text-headline-md text-on-surface">
+                  Standard Airport Corridor Rates
+                </h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                  Indicative tariffs between major London terminals and Central London
+                  (WC1 / W1 / SW1 / EC1 / Canary Wharf).
+                </p>
+              </div>
+              <div
+                class="gap-space-xs mt-space-sm font-label-sm text-label-sm text-on-surface-variant flex items-center md:mt-0"
+              >
+                <span class="material-symbols-outlined text-primary text-base"
+                  >verified_user</span
+                >
+                <span>Includes Congestion &amp; ULEZ Fees</span>
+              </div>
+            </div>
+            <!-- Table Wrapper -->
+            <div
+              class="bg-surface-container-lowest w-full overflow-x-auto rounded-xl shadow-sm"
+            >
+              <table class="w-full min-w-[880px] border-collapse text-left">
+                <thead>
+                  <tr
+                    class="bg-surface-container text-on-surface font-label-md text-label-md tracking-wider uppercase"
+                  >
+                    <th class="px-space-md py-3.5 font-semibold">
+                      Airport &amp; Corridor
+                    </th>
+                    <th class="px-space-sm py-3.5 text-right font-semibold">Saloon</th>
+                    <th class="px-space-sm py-3.5 text-right font-semibold">Estate</th>
+                    <th class="px-space-sm py-3.5 text-right font-semibold">
+                      Exec Saloon
+                    </th>
+                    <th class="px-space-sm py-3.5 text-right font-semibold">MPV 5</th>
+                    <th class="px-space-sm py-3.5 text-right font-semibold">MPV 8</th>
+                    <th class="px-space-sm py-3.5 text-right font-semibold">16-Seater</th>
+                    <th class="px-space-md py-3.5 text-center font-semibold">Book</th>
+                  </tr>
+                </thead>
+                <tbody class="font-body-sm text-body-sm divide-none">
+                  <!-- Row 1: LHR -->
+                  <tr
+                    class="hover:bg-surface-container-high bg-surface-container-lowest transition-colors"
+                  >
+                    <td class="px-space-md py-4">
+                      <div class="gap-space-sm flex items-center">
+                        <span
+                          class="bg-surface-container text-primary font-label-sm text-label-sm flex h-8 w-8 items-center justify-center rounded-lg font-bold"
+                          >LHR</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Heathrow Airport
+                          </div>
+                          <div
+                            class="font-label-sm text-label-sm text-on-surface-variant"
+                          >
+                            Terminals 2, 3, 4 &amp; 5 · ~16 miles
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £58
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £66
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-primary py-4 text-right font-semibold"
+                    >
+                      £78
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £75
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £89
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £165
+                    </td>
+                    <td class="px-space-md py-4 text-center">
+                      <a
+                        class="px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md inline-flex items-center justify-center rounded-lg py-1.5 transition-all"
+                        href="#"
+                        >Book</a
+                      >
+                    </td>
+                  </tr>
+                  <!-- Row 2: LGW -->
+                  <tr
+                    class="hover:bg-surface-container-high bg-surface-container-low transition-colors"
+                  >
+                    <td class="px-space-md py-4">
+                      <div class="gap-space-sm flex items-center">
+                        <span
+                          class="bg-surface-container text-primary font-label-sm text-label-sm flex h-8 w-8 items-center justify-center rounded-lg font-bold"
+                          >LGW</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Gatwick Airport
+                          </div>
+                          <div
+                            class="font-label-sm text-label-sm text-on-surface-variant"
+                          >
+                            North &amp; South Terminals · ~30 miles
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £84
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £92
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-primary py-4 text-right font-semibold"
+                    >
+                      £108
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £102
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £124
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £210
+                    </td>
+                    <td class="px-space-md py-4 text-center">
+                      <a
+                        class="px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md inline-flex items-center justify-center rounded-lg py-1.5 transition-all"
+                        href="#"
+                        >Book</a
+                      >
+                    </td>
+                  </tr>
+                  <!-- Row 3: STN -->
+                  <tr
+                    class="hover:bg-surface-container-high bg-surface-container-lowest transition-colors"
+                  >
+                    <td class="px-space-md py-4">
+                      <div class="gap-space-sm flex items-center">
+                        <span
+                          class="bg-surface-container text-primary font-label-sm text-label-sm flex h-8 w-8 items-center justify-center rounded-lg font-bold"
+                          >STN</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Stansted Airport
+                          </div>
+                          <div
+                            class="font-label-sm text-label-sm text-on-surface-variant"
+                          >
+                            Main Passenger Terminal · ~39 miles
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £89
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £98
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-primary py-4 text-right font-semibold"
+                    >
+                      £115
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £110
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £132
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £225
+                    </td>
+                    <td class="px-space-md py-4 text-center">
+                      <a
+                        class="px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md inline-flex items-center justify-center rounded-lg py-1.5 transition-all"
+                        href="#"
+                        >Book</a
+                      >
+                    </td>
+                  </tr>
+                  <!-- Row 4: LTN -->
+                  <tr
+                    class="hover:bg-surface-container-high bg-surface-container-low transition-colors"
+                  >
+                    <td class="px-space-md py-4">
+                      <div class="gap-space-sm flex items-center">
+                        <span
+                          class="bg-surface-container text-primary font-label-sm text-label-sm flex h-8 w-8 items-center justify-center rounded-lg font-bold"
+                          >LTN</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Luton Airport
+                          </div>
+                          <div
+                            class="font-label-sm text-label-sm text-on-surface-variant"
+                          >
+                            Drop-off &amp; Pickup Zone · ~34 miles
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £79
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £88
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-primary py-4 text-right font-semibold"
+                    >
+                      £104
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £99
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £120
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £198
+                    </td>
+                    <td class="px-space-md py-4 text-center">
+                      <a
+                        class="px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md inline-flex items-center justify-center rounded-lg py-1.5 transition-all"
+                        href="#"
+                        >Book</a
+                      >
+                    </td>
+                  </tr>
+                  <!-- Row 5: LCY -->
+                  <tr
+                    class="hover:bg-surface-container-high bg-surface-container-lowest transition-colors"
+                  >
+                    <td class="px-space-md py-4">
+                      <div class="gap-space-sm flex items-center">
+                        <span
+                          class="bg-surface-container text-primary font-label-sm text-label-sm flex h-8 w-8 items-center justify-center rounded-lg font-bold"
+                          >LCY</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            London City Airport
+                          </div>
+                          <div
+                            class="font-label-sm text-label-sm text-on-surface-variant"
+                          >
+                            Royal Docks Concourse · ~9 miles
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £48
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £55
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-primary py-4 text-right font-semibold"
+                    >
+                      £68
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £64
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £79
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £145
+                    </td>
+                    <td class="px-space-md py-4 text-center">
+                      <a
+                        class="px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md inline-flex items-center justify-center rounded-lg py-1.5 transition-all"
+                        href="#"
+                        >Book</a
+                      >
+                    </td>
+                  </tr>
+                  <!-- Row 6: SEN -->
+                  <tr
+                    class="hover:bg-surface-container-high bg-surface-container-low transition-colors"
+                  >
+                    <td class="px-space-md py-4">
+                      <div class="gap-space-sm flex items-center">
+                        <span
+                          class="bg-surface-container text-primary font-label-sm text-label-sm flex h-8 w-8 items-center justify-center rounded-lg font-bold"
+                          >SEN</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            London Southend Airport
+                          </div>
+                          <div
+                            class="font-label-sm text-label-sm text-on-surface-variant"
+                          >
+                            Terminal Forecourt · ~42 miles
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £105
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £115
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-primary py-4 text-right font-semibold"
+                    >
+                      £138
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £130
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £152
+                    </td>
+                    <td
+                      class="px-space-sm font-fare-tabular text-fare-tabular text-on-surface py-4 text-right font-medium"
+                    >
+                      £240
+                    </td>
+                    <td class="px-space-md py-4 text-center">
+                      <a
+                        class="px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md inline-flex items-center justify-center rounded-lg py-1.5 transition-all"
+                        href="#"
+                        >Book</a
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- Section 4: Side-by-Side Inclusions & Honest Extras (Equal Weight) -->
+          <section class="mb-space-xl w-full">
+            <div class="gap-space-lg grid grid-cols-1 lg:grid-cols-2">
+              <!-- Card 1: What's Included -->
+              <div
+                class="bg-surface-container-lowest p-space-lg flex flex-col justify-between rounded-xl shadow-sm"
+              >
+                <div>
+                  <div class="mb-space-md flex items-center justify-between">
+                    <div class="gap-space-sm flex items-center">
+                      <span
+                        class="bg-surface-container text-primary flex h-8 w-8 items-center justify-center rounded-full"
+                      >
+                        <span class="material-symbols-outlined text-lg"
+                          >check_circle</span
+                        >
+                      </span>
+                      <h3 class="font-headline-sm text-headline-sm text-on-surface">
+                        What's Included in Every Fare
+                      </h3>
+                    </div>
+                    <span
+                      class="bg-surface-container font-label-sm text-label-sm text-primary rounded-full px-3 py-1 font-semibold"
+                      >All Standard</span
+                    >
+                  </div>
+                  <div class="space-y-space-sm flex flex-col">
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start rounded-lg p-3"
+                    >
+                      <span
+                        class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                        >radar</span
+                      >
+                      <div>
+                        <div class="font-title-md text-title-md text-on-surface">
+                          Live Flight Radar Monitoring
+                        </div>
+                        <div class="font-body-sm text-body-sm text-on-surface-variant">
+                          Zero delay penalties regardless of inbound hold times or tarmac
+                          delays.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start rounded-lg p-3"
+                    >
+                      <span
+                        class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                        >schedule</span
+                      >
+                      <div>
+                        <div class="font-title-md text-title-md text-on-surface">
+                          60-Minute Airport Grace Period
+                        </div>
+                        <div class="font-body-sm text-body-sm text-on-surface-variant">
+                          Begins from touchdown timestamp; 15 minutes complimentary for
+                          hotel/home pickups.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start rounded-lg p-3"
+                    >
+                      <span
+                        class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                        >badge</span
+                      >
+                      <div>
+                        <div class="font-title-md text-title-md text-on-surface">
+                          Arrivals Hall Meet &amp; Greet
+                        </div>
+                        <div class="font-body-sm text-body-sm text-on-surface-variant">
+                          Uniformed driver waiting directly past customs with a
+                          personalized electronic tablet board.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start rounded-lg p-3"
+                    >
+                      <span
+                        class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                        >toll</span
+                      >
+                      <div>
+                        <div class="font-title-md text-title-md text-on-surface">
+                          Terminal Forecourt &amp; Drop Charges
+                        </div>
+                        <div class="font-body-sm text-body-sm text-on-surface-variant">
+                          All mandatory airport barrier access surcharges fully absorbed
+                          in the fixed price.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start rounded-lg p-3"
+                    >
+                      <span
+                        class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                        >eco</span
+                      >
+                      <div>
+                        <div class="font-title-md text-title-md text-on-surface">
+                          London Congestion &amp; ULEZ Fees
+                        </div>
+                        <div class="font-body-sm text-body-sm text-on-surface-variant">
+                          Central London municipal transport levies fully included with
+                          zero surcharge.
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start rounded-lg p-3"
+                    >
+                      <span
+                        class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                        >luggage</span
+                      >
+                      <div>
+                        <div class="font-title-md text-title-md text-on-surface">
+                          Complete Porterage Assistance
+                        </div>
+                        <div class="font-body-sm text-body-sm text-on-surface-variant">
+                          Assistance with loading, stowing, and unloading all baggage
+                          curbside or to your reception.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="mt-space-md pt-space-md font-label-sm text-label-sm text-on-surface-variant bg-surface-container flex items-center justify-between rounded-lg p-3"
+                >
+                  <span class="flex items-center gap-1"
+                    ><span class="material-symbols-outlined text-primary text-sm"
+                      >verified</span
+                    >
+                    TfL Compliant Standards</span
+                  >
+                  <span class="text-primary font-semibold">No Hidden Charges</span>
+                </div>
+              </div>
+              <!-- Card 2: Honest Extras -->
+              <div
+                class="bg-surface-container-lowest p-space-lg flex flex-col justify-between rounded-xl shadow-sm"
+              >
+                <div>
+                  <div class="mb-space-md flex items-center justify-between">
+                    <div class="gap-space-sm flex items-center">
+                      <span
+                        class="bg-surface-container text-primary flex h-8 w-8 items-center justify-center rounded-full"
+                      >
+                        <span class="material-symbols-outlined text-lg"
+                          >receipt_long</span
+                        >
+                      </span>
+                      <h3 class="font-headline-sm text-headline-sm text-on-surface">
+                        What Costs Extra (Honest &amp; Itemised)
+                      </h3>
+                    </div>
+                    <span
+                      class="bg-surface-container-high font-label-sm text-label-sm text-primary rounded-full px-3 py-1 font-semibold"
+                      >100% Itemised</span
+                    >
+                  </div>
+                  <div class="space-y-space-sm flex flex-col">
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start justify-between rounded-lg p-3"
+                    >
+                      <div class="gap-space-sm flex items-start">
+                        <span
+                          class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                          >child_care</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Sanitised Child Safety Seats
+                          </div>
+                          <div class="font-body-sm text-body-sm text-on-surface-variant">
+                            Rear-facing, forward-facing group 1-2, or booster cushion
+                            pre-installed.
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        class="font-fare-tabular text-fare-tabular text-on-surface flex-shrink-0 font-semibold"
+                        >£10.00</span
+                      >
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start justify-between rounded-lg p-3"
+                    >
+                      <div class="gap-space-sm flex items-start">
+                        <span
+                          class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                          >add_location_alt</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Additional Via Stops En-Route
+                          </div>
+                          <div class="font-body-sm text-body-sm text-on-surface-variant">
+                            Within 2 miles of direct corridor path (up to 10 minutes
+                            stopover).
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        class="font-fare-tabular text-fare-tabular text-on-surface flex-shrink-0 font-semibold"
+                        >£15.00</span
+                      >
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start justify-between rounded-lg p-3"
+                    >
+                      <div class="gap-space-sm flex items-start">
+                        <span
+                          class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                          >more_time</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Airport Overtime Waiting Rate
+                          </div>
+                          <div class="font-body-sm text-body-sm text-on-surface-variant">
+                            Billed in exact 15-minute increments after the initial 60
+                            minutes free.
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        class="font-fare-tabular text-fare-tabular text-on-surface flex-shrink-0 font-semibold"
+                        >£0.60/m</span
+                      >
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start justify-between rounded-lg p-3"
+                    >
+                      <div class="gap-space-sm flex items-start">
+                        <span
+                          class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                          >home_pin</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Address Overtime Waiting Rate
+                          </div>
+                          <div class="font-body-sm text-body-sm text-on-surface-variant">
+                            Applies after first 15 free minutes at residential or hotel
+                            departure points.
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        class="font-fare-tabular text-fare-tabular text-on-surface flex-shrink-0 font-semibold"
+                        >£0.60/m</span
+                      >
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start justify-between rounded-lg p-3"
+                    >
+                      <div class="gap-space-sm flex items-start">
+                        <span
+                          class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                          >bedtime</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Late Night &amp; Dawn Runs (23:30–05:00)
+                          </div>
+                          <div class="font-body-sm text-body-sm text-on-surface-variant">
+                            We do not penalise red-eye departures or delayed late-night
+                            touchdowns.
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        class="font-fare-tabular text-fare-tabular text-primary flex-shrink-0 font-semibold"
+                        >£0.00</span
+                      >
+                    </div>
+                    <div
+                      class="gap-space-sm bg-surface-container-low flex items-start justify-between rounded-lg p-3"
+                    >
+                      <div class="gap-space-sm flex items-start">
+                        <span
+                          class="material-symbols-outlined text-primary mt-0.5 flex-shrink-0 text-xl"
+                          >calendar_month</span
+                        >
+                        <div>
+                          <div class="font-title-md text-title-md text-on-surface">
+                            Bank Holidays &amp; Christmas Day
+                          </div>
+                          <div class="font-body-sm text-body-sm text-on-surface-variant">
+                            Flat driver compensation supplement clearly declared in
+                            booking checkout.
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        class="font-fare-tabular text-fare-tabular text-on-surface flex-shrink-0 font-semibold"
+                        >+25%</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="mt-space-md pt-space-md font-label-sm text-label-sm text-on-surface-variant bg-surface-container flex items-center justify-between rounded-lg p-3"
+                >
+                  <span class="flex items-center gap-1"
+                    ><span class="material-symbols-outlined text-primary text-sm"
+                      >lock</span
+                    >
+                    Price Locked Upon Dispatch</span
+                  >
+                  <span class="text-primary font-semibold">Pre-Quoted Invoices</span>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Section 5: Waiting-Time Policy Table -->
+          <section class="mb-space-xl w-full">
+            <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+              <div
+                class="gap-space-sm mb-space-md flex flex-col justify-between md:flex-row md:items-center"
+              >
+                <div>
+                  <h2 class="font-headline-md text-headline-md text-on-surface">
+                    Structured Waiting-Time Policy
+                  </h2>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                    Transparent protocols designed to give you total peace of mind through
+                    baggage collection and border control.
+                  </p>
+                </div>
+                <div
+                  class="bg-surface-container text-primary font-label-sm text-label-sm self-start rounded-full px-3 py-1 font-semibold md:self-auto"
+                >
+                  Overtime: £36.00 / hour prorated
+                </div>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-[700px] border-collapse text-left">
+                  <thead>
+                    <tr
+                      class="bg-surface-container text-on-surface font-label-md text-label-md tracking-wider uppercase"
+                    >
+                      <th class="px-space-md py-3 font-semibold">Transit Category</th>
+                      <th class="px-space-md py-3 font-semibold">Complimentary Buffer</th>
+                      <th class="px-space-md py-3 font-semibold">
+                        Chauffeur Meeting Protocol
+                      </th>
+                      <th class="px-space-md py-3 text-right font-semibold">
+                        Overstay Rate
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="font-body-sm text-body-sm">
+                    <tr class="bg-surface-container-lowest">
+                      <td class="px-space-md text-on-surface py-4 font-medium">
+                        <div class="gap-space-sm flex items-center">
+                          <span class="material-symbols-outlined text-primary text-xl"
+                            >flight_land</span
+                          >
+                          <div>
+                            <span class="font-title-md text-title-md"
+                              >Inbound Airport Flights</span
+                            >
+                            <span
+                              class="font-label-sm text-label-sm text-on-surface-variant block"
+                              >LHR, LGW, STN, LTN, LCY, SEN</span
+                            >
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-space-md text-primary py-4 font-semibold">
+                        60 Minutes Free
+                      </td>
+                      <td class="px-space-md text-on-surface-variant py-4">
+                        Driver enters arrival barrier 25 minutes after touch-down with
+                        welcome nameboard; monitors baggage carousel progress.
+                      </td>
+                      <td
+                        class="px-space-md font-fare-tabular text-fare-tabular text-on-surface py-4 text-right"
+                      >
+                        £0.60
+                        <span class="font-body-sm text-body-sm text-on-surface-variant"
+                          >/ min</span
+                        >
+                      </td>
+                    </tr>
+                    <tr class="bg-surface-container-low">
+                      <td class="px-space-md text-on-surface py-4 font-medium">
+                        <div class="gap-space-sm flex items-center">
+                          <span class="material-symbols-outlined text-primary text-xl"
+                            >directions_boat</span
+                          >
+                          <div>
+                            <span class="font-title-md text-title-md"
+                              >Cruise &amp; Seaports</span
+                            >
+                            <span
+                              class="font-label-sm text-label-sm text-on-surface-variant block"
+                              >Southampton, Dover, Harwich, Tilbury</span
+                            >
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-space-md text-primary py-4 font-semibold">
+                        45 Minutes Free
+                      </td>
+                      <td class="px-space-md text-on-surface-variant py-4">
+                        Chauffeur stations at primary passenger concourse barrier from
+                        published vessel disembarkation clearance time.
+                      </td>
+                      <td
+                        class="px-space-md font-fare-tabular text-fare-tabular text-on-surface py-4 text-right"
+                      >
+                        £0.60
+                        <span class="font-body-sm text-body-sm text-on-surface-variant"
+                          >/ min</span
+                        >
+                      </td>
+                    </tr>
+                    <tr class="bg-surface-container-lowest">
+                      <td class="px-space-md text-on-surface py-4 font-medium">
+                        <div class="gap-space-sm flex items-center">
+                          <span class="material-symbols-outlined text-primary text-xl"
+                            >apartment</span
+                          >
+                          <div>
+                            <span class="font-title-md text-title-md"
+                              >Hotels, Addresses &amp; Rail</span
+                            >
+                            <span
+                              class="font-label-sm text-label-sm text-on-surface-variant block"
+                              >St Pancras Int., Euston, Residential postcodes</span
+                            >
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-space-md text-primary py-4 font-semibold">
+                        15 Minutes Free
+                      </td>
+                      <td class="px-space-md text-on-surface-variant py-4">
+                        Driver arrives 5 minutes prior to booked slot, announces arrival
+                        via SMS/direct call, and coordinates concierge handoff.
+                      </td>
+                      <td
+                        class="px-space-md font-fare-tabular text-fare-tabular text-on-surface py-4 text-right"
+                      >
+                        £0.60
+                        <span class="font-body-sm text-body-sm text-on-surface-variant"
+                          >/ min</span
+                        >
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+          <!-- Section 6: FAQ Accordion -->
+          <section class="mb-space-xl w-full">
+            <div class="mx-auto max-w-3xl">
+              <div class="mb-space-lg text-center">
+                <span
+                  class="font-label-sm text-label-sm text-primary font-semibold tracking-wider uppercase"
+                  >Clear Terms</span
+                >
+                <h2 class="font-headline-lg text-headline-lg text-on-surface mt-1">
+                  Frequently Asked Questions
+                </h2>
+                <p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">
+                  Everything you need to know about our billing standards, card
+                  pre-authorisations, and booking assurances.
+                </p>
+              </div>
+              <div class="space-y-space-sm" id="fare-faq">
+                <!-- Q1 -->
+                <div
+                  class="bg-surface-container-lowest overflow-hidden rounded-xl shadow-sm"
+                >
+                  <button
+                    class="faq-toggle p-space-md gap-space-md hover:bg-surface-container-low flex w-full items-center justify-between text-left transition-colors"
+                    type="button"
+                  >
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >When is my card charged for the transfer?</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-primary faq-icon transition-transform"
+                      >expand_more</span
+                    >
+                  </button>
+                  <div
+                    class="faq-content px-space-md pb-space-md font-body-sm text-body-sm text-on-surface-variant hidden"
+                  >
+                    Your card is merely pre-authorised 24 hours prior to pickup to verify
+                    funds. The actual final charge is only settled upon safe completion of
+                    the journey, ensuring any verified schedule adjustments are accurately
+                    reflected.
+                  </div>
+                </div>
+                <!-- Q2 -->
+                <div
+                  class="bg-surface-container-lowest overflow-hidden rounded-xl shadow-sm"
+                >
+                  <button
+                    class="faq-toggle p-space-md gap-space-md hover:bg-surface-container-low flex w-full items-center justify-between text-left transition-colors"
+                    type="button"
+                  >
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >What happens if my flight is delayed by several hours or
+                      diverted?</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-primary faq-icon transition-transform"
+                      >expand_more</span
+                    >
+                  </button>
+                  <div
+                    class="faq-content px-space-md pb-space-md font-body-sm text-body-sm text-on-surface-variant hidden"
+                  >
+                    Because our automated dispatch system syncs with real-time ADS-B
+                    transponder data, your chauffeur is never dispatched prematurely. If
+                    your flight is delayed by 30 minutes or 5 hours, your pickup schedule
+                    shifts accordingly at zero additional penalty. In the rare event of a
+                    flight diversion, our 24/7 central desk contacts you immediately to
+                    arrange alternative collection or offer a 100% refund.
+                  </div>
+                </div>
+                <!-- Q3 -->
+                <div
+                  class="bg-surface-container-lowest overflow-hidden rounded-xl shadow-sm"
+                >
+                  <button
+                    class="faq-toggle p-space-md gap-space-md hover:bg-surface-container-low flex w-full items-center justify-between text-left transition-colors"
+                    type="button"
+                  >
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Are airport drop-off barrier charges and tolls included in the
+                      fare?</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-primary faq-icon transition-transform"
+                      >expand_more</span
+                    >
+                  </button>
+                  <div
+                    class="faq-content px-space-md pb-space-md font-body-sm text-body-sm text-on-surface-variant hidden"
+                  >
+                    Yes. Every quotation strictly encompasses official airport forecourt
+                    drop-off barriers, short-stay parking entry fees for the
+                    meet-and-greet buffer, as well as TfL Congestion Charge and Ultra Low
+                    Emission Zone (ULEZ) daily levies. The price shown is the total price
+                    paid.
+                  </div>
+                </div>
+                <!-- Q4 -->
+                <div
+                  class="bg-surface-container-lowest overflow-hidden rounded-xl shadow-sm"
+                >
+                  <button
+                    class="faq-toggle p-space-md gap-space-md hover:bg-surface-container-low flex w-full items-center justify-between text-left transition-colors"
+                    type="button"
+                  >
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Can I request an invoice or VAT receipt for corporate
+                      expenses?</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-primary faq-icon transition-transform"
+                      >expand_more</span
+                    >
+                  </button>
+                  <div
+                    class="faq-content px-space-md pb-space-md font-body-sm text-body-sm text-on-surface-variant hidden"
+                  >
+                    Immediately following the journey, an automated PDF VAT receipt
+                    containing complete route breakdowns, vehicle license details, driver
+                    ID, and HMRC-compliant VAT breakdowns is dispatched directly to your
+                    designated accounting email address.
+                  </div>
+                </div>
+                <!-- Q5 -->
+                <div
+                  class="bg-surface-container-lowest overflow-hidden rounded-xl shadow-sm"
+                >
+                  <button
+                    class="faq-toggle p-space-md gap-space-md hover:bg-surface-container-low flex w-full items-center justify-between text-left transition-colors"
+                    type="button"
+                  >
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >What is your cancellation policy?</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-primary faq-icon transition-transform"
+                      >expand_more</span
+                    >
+                  </button>
+                  <div
+                    class="faq-content px-space-md pb-space-md font-body-sm text-body-sm text-on-surface-variant hidden"
+                  >
+                    Standard bookings may be cancelled free of charge up to 3 hours prior
+                    to scheduled collection. For executive and multi-passenger minibus
+                    bookings, cancellations are fully refundable up to 12 hours before
+                    dispatch. Cancellations can be completed with a single tap in your
+                    confirmation email or SMS.
+                  </div>
+                </div>
+                <!-- Q6 -->
+                <div
+                  class="bg-surface-container-lowest overflow-hidden rounded-xl shadow-sm"
+                >
+                  <button
+                    class="faq-toggle p-space-md gap-space-md hover:bg-surface-container-low flex w-full items-center justify-between text-left transition-colors"
+                    type="button"
+                  >
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Can I amend my journey time or destination after booking?</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-primary faq-icon transition-transform"
+                      >expand_more</span
+                    >
+                  </button>
+                  <div
+                    class="faq-content px-space-md pb-space-md font-body-sm text-body-sm text-on-surface-variant hidden"
+                  >
+                    Yes. You may modify flight numbers, pickup addresses, or timings at no
+                    extra administrative charge. If the destination changes your mileage
+                    bracket, the difference is recalculated automatically and displayed
+                    clearly for your approval before reconfirmation.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Section 7: Closing Trust & Booking Call-to-Action Strip -->
+          <section class="mb-space-xl w-full">
+            <div
+              class="bg-primary text-on-primary p-space-lg relative overflow-hidden rounded-xl shadow-md md:p-10"
+            >
+              <!-- Ambient decorative gradient graphic -->
+              <div
+                class="bg-surface-tint/30 pointer-events-none absolute -right-16 -bottom-16 h-80 w-80 rounded-full blur-2xl"
+              ></div>
+              <div
+                class="gap-space-lg relative z-10 flex flex-col items-center justify-between lg:flex-row"
+              >
+                <div class="max-w-xl text-center lg:text-left">
+                  <div
+                    class="gap-space-xs bg-primary-container text-on-primary-container font-label-sm text-label-sm mb-space-xs inline-flex items-center rounded-full px-2.5 py-1 font-semibold"
+                  >
+                    <span class="material-symbols-outlined text-sm">verified</span>
+                    Direct Transport for London Operator
+                  </div>
+                  <h2 class="font-headline-lg text-headline-lg text-on-primary">
+                    Ready to secure your guaranteed airport transfer?
+                  </h2>
+                  <p class="font-body-md text-body-md text-on-primary/80 mt-space-xs">
+                    Reserve online in under 90 seconds. Receive immediate instant email
+                    voucher confirmation and direct chauffeur assignment.
+                  </p>
+                </div>
+                <div
+                  class="gap-space-md flex w-full flex-shrink-0 flex-col items-center sm:flex-row lg:w-auto"
+                >
+                  <a
+                    class="px-space-lg bg-surface text-primary font-label-md text-label-md hover:bg-surface-bright w-full rounded-lg py-3 text-center font-semibold shadow-sm transition-all sm:w-auto"
+                    href="tel:+442079460812"
+                  >
+                    Call Dispatch (+44 20 7946 0812)
+                  </a>
+                  <a
+                    class="px-space-lg bg-primary-container text-on-primary font-label-md text-label-md hover:bg-surface-tint w-full rounded-lg py-3 text-center font-semibold shadow-sm transition-all sm:w-auto"
+                    href="#"
+                  >
+                    Get Instant Quote
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <script>
+          (function () {
+            const faqContainer = document.getElementById("fare-faq");
+            if (!faqContainer) return;
+
+            faqContainer.addEventListener("click", (e) => {
+              const button = e.target.closest(".faq-toggle");
+              if (!button) return;
+
+              const content = button.nextElementSibling;
+              const icon = button.querySelector(".faq-icon");
+
+              const isHidden = content.classList.contains("hidden");
+
+              // Close other accordions
+              faqContainer
+                .querySelectorAll(".faq-content")
+                .forEach((el) => el.classList.add("hidden"));
+              faqContainer
+                .querySelectorAll(".faq-icon")
+                .forEach((el) => el.classList.remove("rotate-180"));
+
+              if (isHidden) {
+                content.classList.remove("hidden");
+                icon.classList.add("rotate-180");
+              }
+            });
+          })();
+        </script>
+      </div>
+    </main>
+    <footer
+      class="bg-surface-container-lowest mt-space-xl w-full pt-16 pb-12 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"
+    >
+      <div class="px-gutter mx-auto max-w-[1200px]">
+        <div class="gap-space-xl mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Airports
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="heathrow-transfers"
+                  href="#"
+                  >Heathrow Airport (LHR)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="gatwick-transfers"
+                  href="#"
+                  >Gatwick Airport (LGW)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="stansted-transfers"
+                  href="#"
+                  >Stansted Airport (STN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="luton-transfers"
+                  href="#"
+                  >Luton Airport (LTN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="london-city-transfers"
+                  href="#"
+                  >London City Airport (LCY)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="southend-transfers"
+                  href="#"
+                  >Southend Airport (SEN)</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Services
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airport-transfers"
+                  href="#"
+                  >Airport Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="corporate-accounts"
+                  href="#"
+                  >Corporate Accounts</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="executive-fleet"
+                  href="#"
+                  >Executive Fleet</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="group-travel"
+                  href="#"
+                  >Group Travel</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="cruise-transfers"
+                  href="#"
+                  >Cruise Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="private-sightseeing"
+                  href="#"
+                  >Private Sightseeing</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Legal &amp; Company
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="about-cityline"
+                  href="#"
+                  >About Cityline</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="tfl-licensing-compliance"
+                  href="#"
+                  >TfL Licensing &amp; Compliance</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="terms-conditions"
+                  href="#"
+                  >Terms &amp; Conditions</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="privacy-policy"
+                  href="#"
+                  >Privacy Policy</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="cookie-settings"
+                  href="#"
+                  >Cookie Settings</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Help &amp; Support
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="contact-dispatch"
+                  href="#"
+                  >Contact Dispatch</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="flight-delay-guarantee"
+                  href="#"
+                  >Flight Delay Guarantee</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="meeting-point-guides"
+                  href="#"
+                  >Meeting Point Guides</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="luggage-guidelines"
+                  href="#"
+                  >Luggage Guidelines</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="faq" href="#"
+                  >Frequently Asked Questions</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="pt-space-lg gap-space-md flex flex-col items-center justify-between md:flex-row"
+        >
+          <div
+            class="gap-space-sm text-on-surface-variant font-label-sm text-label-sm flex items-center"
+          >
+            <span class="material-symbols-outlined text-primary text-base">verified</span
+            ><span
+              >TfL PH Operator Lic. #008942/01. Cityline Transfers Ltd, Registered in
+              England &amp; Wales. London, UK.</span
+            >
+          </div>
+          <div class="gap-space-xs flex items-center">
+            <span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >VISA</span
+            ><span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >MC</span
+            ><span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >AMEX</span
+            ><span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >APPLE PAY</span
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

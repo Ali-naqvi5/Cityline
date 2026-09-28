@@ -1,0 +1,1599 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="web_standard" name="shell-type" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#005229",
+              primary: "#005128",
+              "inverse-surface": "#27332c",
+              "on-surface": "#121e18",
+              "on-secondary": "#ffffff",
+              "surface-variant": "#d8e6db",
+              background: "#effdf2",
+              "secondary-fixed-dim": "#69dd92",
+              "tertiary-container": "#006c20",
+              "on-tertiary-container": "#8deb8d",
+              "secondary-container": "#83f7a9",
+              "on-tertiary-fixed-variant": "#005316",
+              error: "#ba1a1a",
+              "primary-fixed": "#a0f5b5",
+              "surface-tint": "#116c3a",
+              surface: "#effdf2",
+              "surface-bright": "#effdf2",
+              "on-secondary-container": "#00723d",
+              "surface-container-low": "#e9f7ec",
+              "inverse-primary": "#84d89b",
+              "surface-container-high": "#ddece1",
+              "secondary-fixed": "#85faac",
+              "on-surface-variant": "#3f4940",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              tertiary: "#005116",
+              "surface-container-highest": "#d8e6db",
+              "on-primary-fixed": "#00210d",
+              "primary-fixed-dim": "#84d89b",
+              "on-secondary-fixed": "#00210e",
+              secondary: "#006d3a",
+              "on-tertiary-fixed": "#002105",
+              "surface-container": "#e3f1e7",
+              "on-background": "#121e18",
+              outline: "#6f7a6f",
+              "on-primary": "#ffffff",
+              "outline-variant": "#bfc9bd",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "tertiary-fixed-dim": "#7edb7f",
+              "surface-dim": "#cfded3",
+              "on-secondary-fixed-variant": "#00522a",
+              "primary-container": "#0e6b39",
+              "tertiary-fixed": "#99f899",
+              "on-primary-container": "#94e9aa",
+              "inverse-on-surface": "#e6f4e9",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "space-lg": "1.5rem",
+              "space-xl": "2rem",
+              "space-md": "1rem",
+              gutter: "1.5rem",
+              "space-sm": "0.5rem",
+              margin: "2rem",
+              "space-xs": "0.25rem",
+              "gutter-sm": "1rem",
+              "margin-desktop": "7.5rem",
+            },
+            fontFamily: {
+              "body-sm": ["Inter"],
+              "body-md": ["Inter"],
+              "display-lg-mobile": ["Inter"],
+              "headline-md": ["Inter"],
+              "display-lg": ["Inter"],
+              "headline-lg": ["Inter"],
+              "label-sm": ["Inter"],
+              "label-md": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "fare-tabular": ["Inter"],
+              "headline-sm": ["Inter"],
+              "title-md": ["Inter"],
+              "body-lg": ["Inter"],
+            },
+            fontSize: {
+              "body-sm": [
+                "13px",
+                { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" },
+              ],
+              "body-md": [
+                "15px",
+                { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-lg-mobile": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "display-lg": [
+                "48px",
+                { lineHeight: "56px", letterSpacing: "-0.025em", fontWeight: "600" },
+              ],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "label-sm": [
+                "12px",
+                { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "600" },
+              ],
+              "label-md": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500" },
+              ],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "fare-tabular": [
+                "22px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "600" },
+              ],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" },
+              ],
+              "title-md": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background font-body-md text-on-surface">
+    <header
+      class="bg-surface/90 fixed top-0 z-50 w-full shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl"
+    >
+      <div
+        class="px-gutter gap-space-md mx-auto flex h-20 max-w-[1200px] items-center justify-between"
+      >
+        <div class="gap-space-md flex flex-shrink-0 items-center">
+          <div class="gap-space-sm flex items-center">
+            <div class="bg-surface-container rounded-lg p-1">
+              <img
+                alt="Profile"
+                class="h-8 w-8 rounded-full object-cover"
+                src="https://lh3.googleusercontent.com/aida/AEtjO1Wo22GfjdFIHzeGon_3-qDYCbJ8zfGVPUbhyXvOo9JbmvAcXmgXfQMwgnJ4Wxogy2UM4FIGHiDezMQXtAw2SfVt6DhwgY3Qq1zNQg3KKOybc60shelsIWUoRYgyQGV65-lKSkkEImO86wU5QYICG2Y39soqob3WsMYuAO9ZSORsTwxoihDjWNbC7ItIMwMdRgAps-bkrW8eEj975ndX4P_k7BVhauMa7relA-Js419ty9Xa_joxr74MANuCv9-WhURwraMjiffCDg"
+              />
+            </div>
+            <div class="flex flex-col">
+              <span
+                class="font-headline-sm text-headline-sm text-primary leading-none tracking-tight"
+                >CITYLINE</span
+              ><span
+                class="font-label-sm text-label-sm text-on-surface-variant mt-0.5 tracking-wider uppercase"
+                >AIRPORT TRANSFERS · LONDON</span
+              >
+            </div>
+          </div>
+        </div>
+        <nav
+          class="gap-space-xs hidden items-center lg:flex"
+          data-active-classes="bg-surface-container-high text-primary font-title-md"
+        >
+          <a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="airports"
+            href="#"
+            >Airports</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="services"
+            href="#"
+            >Services</a
+          ><a
+            aria-current="page"
+            class="bg-surface-container-high text-primary font-title-md rounded-lg px-3 py-2 transition-all"
+            data-path="fleet"
+            href="#"
+            >Fleet</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="fares"
+            href="#"
+            >Fares</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="help"
+            href="#"
+            >Help</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="contact"
+            href="#"
+            >Contact</a
+          >
+        </nav>
+        <div class="gap-space-md flex flex-shrink-0 items-center">
+          <div class="hidden flex-col items-end xl:flex">
+            <span
+              class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+              >24/7 UK Dispatch</span
+            ><a
+              class="font-label-md text-label-md text-on-surface hover:text-primary tabular-nums transition-colors"
+              href="tel:+442079460812"
+              >+44 (0)20 7946 0812</a
+            >
+          </div>
+          <a
+            class="px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center rounded-lg py-2.5 shadow-[0_1px_3px_rgba(15,26,20,0.04)] transition-all hover:shadow-[0_8px_24px_rgba(14,107,57,0.08)]"
+            data-path="book-now"
+            href="#"
+            >Book now</a
+          >
+        </div>
+      </div>
+    </header>
+    <main class="bg-background w-full pt-20">
+      <div class="px-gutter mx-auto max-w-[1200px]">
+        <div class="flex w-full flex-col">
+          <!-- SECTION 1: Page Header & Context Breadcrumb -->
+          <section class="py-space-lg">
+            <nav
+              aria-label="Breadcrumb"
+              class="gap-space-xs font-label-sm text-label-sm text-on-surface-variant mb-space-sm flex items-center"
+            >
+              <a class="hover:text-primary transition-colors" href="#">Home</a>
+              <span class="material-symbols-outlined text-xs">chevron_right</span>
+              <span class="text-primary font-semibold">Fleet</span>
+            </nav>
+            <div
+              class="gap-space-md flex flex-col justify-between md:flex-row md:items-end"
+            >
+              <div>
+                <h1
+                  class="font-display-lg text-display-lg text-on-surface leading-tight tracking-tight"
+                >
+                  Our London Fleet
+                </h1>
+                <p
+                  class="font-body-lg text-body-lg text-on-surface-variant mt-space-xs max-w-2xl"
+                >
+                  Every vehicle is TfL-licensed, impeccably maintained, air-conditioned,
+                  and driven by a professional career chauffeur.
+                </p>
+              </div>
+              <div
+                class="px-space-md bg-surface-container-high text-primary font-label-md text-label-md inline-flex shrink-0 items-center gap-2 rounded-full py-2"
+              >
+                <span class="bg-secondary h-2 w-2 rounded-full"></span>
+                <span>100% Fixed Rates · No Surge Pricing</span>
+              </div>
+            </div>
+          </section>
+          <!-- SECTION 2: Six Vehicle Cards Grid -->
+          <section class="gap-space-xl mb-16 grid grid-cols-1 lg:grid-cols-2">
+            <!-- Vehicle 1: Standard Saloon -->
+            <article
+              class="bg-surface-container-lowest flex flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-md"
+            >
+              <div
+                class="bg-surface-container-low p-space-lg group relative flex min-h-[220px] items-center justify-center overflow-hidden"
+              >
+                <div
+                  class="from-surface-variant/30 pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
+                ></div>
+                <img
+                  alt="Standard Saloon vehicle silhouette"
+                  class="h-auto w-full max-w-[360px] object-contain transition-transform duration-300 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida/AEtjO1Xi8MnF6YCFYx5_AStag4EtSXbzBaWJ9hFjhCKQz0l6bRl_i1b1k3x9Udprwl-ZNb1OuREVAa9HMEz4_v9i6QvIkff7YkhXIiQfZgvTZQykQE3qnmahKiOuMs7zk19VpBKOM6r221KkimRiCUmk10btYyZK6d-D1JEfvWIQXQt-kfRZDjrygZVJl-GQDFn278DWgqpeeGtTp84bru9522dgVQQbYZf9fFxkCeDGzxDow8cuIL_c1Q6au1U"
+                />
+                <span
+                  class="bg-surface-container-lowest/80 font-label-sm text-label-sm text-on-surface-variant absolute top-4 right-4 rounded-full px-2.5 py-1 tracking-wider uppercase backdrop-blur-md"
+                  >Most Popular</span
+                >
+              </div>
+              <div
+                class="p-space-lg gap-space-md flex flex-grow flex-col justify-between"
+              >
+                <div>
+                  <div class="mb-space-xs flex items-baseline justify-between">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">
+                      Standard Saloon
+                    </h3>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant font-medium"
+                      >Saloon Tier</span
+                    >
+                  </div>
+                  <p
+                    class="font-body-sm text-body-sm text-on-surface-variant mb-space-md"
+                  >
+                    Up to 4 Passengers · 2 Large Cases · 2 Hand Luggage
+                  </p>
+                  <div
+                    class="gap-space-xs py-space-sm bg-surface-container-low/60 px-space-sm mb-space-md grid grid-cols-3 rounded-lg"
+                  >
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >person</span
+                      >
+                      <span>4 Passengers</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >luggage</span
+                      >
+                      <span>2 Check-in</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >shopping_bag</span
+                      >
+                      <span>2 Cabin bags</span>
+                    </div>
+                  </div>
+                  <div class="mb-space-md flex flex-wrap gap-1.5">
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Ideal for solo &amp; couples</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Complimentary 4G Wi-Fi</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Bottled water included</span
+                    >
+                  </div>
+                </div>
+                <div class="pt-space-md flex items-center justify-between">
+                  <div>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant block uppercase"
+                      >Fixed Airport Fare</span
+                    >
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface text-primary"
+                      >From £48.00</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg px-6 py-2.5 shadow-sm transition-all"
+                    href="#"
+                  >
+                    Book this class
+                  </a>
+                </div>
+              </div>
+            </article>
+            <!-- Vehicle 2: Estate -->
+            <article
+              class="bg-surface-container-lowest flex flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-md"
+            >
+              <div
+                class="bg-surface-container-low p-space-lg group relative flex min-h-[220px] items-center justify-center overflow-hidden"
+              >
+                <div
+                  class="from-surface-variant/30 pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
+                ></div>
+                <img
+                  alt="Estate vehicle silhouette"
+                  class="h-auto w-full max-w-[360px] object-contain transition-transform duration-300 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida/AEtjO1XV2SWcx5iSSr3RMIq_7u52ylaGXTYVrA2v9WVFFh6iuwuDeHT0aOsCHJ4Bc_rJDpAi24V6FuMhHabQyDWBbX-einug_t5IY_-ZyKObhOLCfy2knHL92AqUUHbnIqCneLbgkE3M3IK8-F3ph_9nfZbo-anQ339rSqDqwK5jxGQX-NF5AJsY7YJwsJt7Gdy_IF87FsPGOmMvHTd_bf1ZesK245XVDWQnXlEOcqGBOpV_VZr3Zb6lRIUFOjk"
+                />
+                <span
+                  class="bg-surface-container-lowest/80 font-label-sm text-label-sm text-on-surface-variant absolute top-4 right-4 rounded-full px-2.5 py-1 tracking-wider uppercase backdrop-blur-md"
+                  >Extra Boot Space</span
+                >
+              </div>
+              <div
+                class="p-space-lg gap-space-md flex flex-grow flex-col justify-between"
+              >
+                <div>
+                  <div class="mb-space-xs flex items-baseline justify-between">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">
+                      Estate
+                    </h3>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant font-medium"
+                      >Estate Tier</span
+                    >
+                  </div>
+                  <p
+                    class="font-body-sm text-body-sm text-on-surface-variant mb-space-md"
+                  >
+                    Up to 4 Passengers · 3 Large Cases · 2 Hand Luggage
+                  </p>
+                  <div
+                    class="gap-space-xs py-space-sm bg-surface-container-low/60 px-space-sm mb-space-md grid grid-cols-3 rounded-lg"
+                  >
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >person</span
+                      >
+                      <span>4 Passengers</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >luggage</span
+                      >
+                      <span>3 Check-in</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >shopping_bag</span
+                      >
+                      <span>2 Cabin bags</span>
+                    </div>
+                  </div>
+                  <div class="mb-space-md flex flex-wrap gap-1.5">
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Extended cargo boot</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Ideal for long-haul luggage</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Fold-flat split rear seats</span
+                    >
+                  </div>
+                </div>
+                <div class="pt-space-md flex items-center justify-between">
+                  <div>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant block uppercase"
+                      >Fixed Airport Fare</span
+                    >
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface text-primary"
+                      >From £56.00</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg px-6 py-2.5 shadow-sm transition-all"
+                    href="#"
+                  >
+                    Book this class
+                  </a>
+                </div>
+              </div>
+            </article>
+            <!-- Vehicle 3: Executive Saloon -->
+            <article
+              class="bg-surface-container-lowest flex flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-md"
+            >
+              <div
+                class="bg-surface-container-low p-space-lg group relative flex min-h-[220px] items-center justify-center overflow-hidden"
+              >
+                <div
+                  class="from-surface-variant/30 pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
+                ></div>
+                <img
+                  alt="Executive Saloon vehicle silhouette"
+                  class="h-auto w-full max-w-[360px] object-contain transition-transform duration-300 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida/AEtjO1XFbXErLJZFxTrQTii8VzpkJSXw8lH-VU7SQVbcZKkR3KRcamvMIUKqoROiByAUlgm7lRD6SCW21lLp54O2z0fH4oMdArxjKo54VlJf0nMl1B-RO_e9qTW2pPztMuK7UcOAgNLnEk4DHkHakIVfoxznK4TFA0VvRos7M4i2TkvniOHrm7pR0IS8BhHeG9wAcjbSAsxRO3MKGHU6KrU9fFFkUzoN8tLqI7OpAX_r2UAMmgd5j_BMgbSeS1Y"
+                />
+                <span
+                  class="bg-primary text-on-primary font-label-sm text-label-sm absolute top-4 right-4 rounded-full px-2.5 py-1 font-semibold tracking-wider uppercase"
+                  >Chauffeur Tier</span
+                >
+              </div>
+              <div
+                class="p-space-lg gap-space-md flex flex-grow flex-col justify-between"
+              >
+                <div>
+                  <div class="mb-space-xs flex items-baseline justify-between">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">
+                      Executive Saloon
+                    </h3>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant font-medium"
+                      >Business Class</span
+                    >
+                  </div>
+                  <p
+                    class="font-body-sm text-body-sm text-on-surface-variant mb-space-md"
+                  >
+                    Up to 3 Passengers · 2 Large Cases · 2 Hand Luggage
+                  </p>
+                  <div
+                    class="gap-space-xs py-space-sm bg-surface-container-low/60 px-space-sm mb-space-md grid grid-cols-3 rounded-lg"
+                  >
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >person</span
+                      >
+                      <span>3 Passengers</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >luggage</span
+                      >
+                      <span>2 Check-in</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >shopping_bag</span
+                      >
+                      <span>2 Cabin bags</span>
+                    </div>
+                  </div>
+                  <div class="mb-space-md flex flex-wrap gap-1.5">
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Mercedes E-Class / BMW 5 Series</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Leather &amp; privacy glass</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >In-car device chargers</span
+                    >
+                  </div>
+                </div>
+                <div class="pt-space-md flex items-center justify-between">
+                  <div>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant block uppercase"
+                      >Fixed Airport Fare</span
+                    >
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface text-primary"
+                      >From £68.00</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg px-6 py-2.5 shadow-sm transition-all"
+                    href="#"
+                  >
+                    Book this class
+                  </a>
+                </div>
+              </div>
+            </article>
+            <!-- Vehicle 4: MPV 5 (People Carrier) -->
+            <article
+              class="bg-surface-container-lowest flex flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-md"
+            >
+              <div
+                class="bg-surface-container-low p-space-lg group relative flex min-h-[220px] items-center justify-center overflow-hidden"
+              >
+                <div
+                  class="from-surface-variant/30 pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
+                ></div>
+                <img
+                  alt="MPV 5 vehicle silhouette"
+                  class="h-auto w-full max-w-[360px] object-contain transition-transform duration-300 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida/AEtjO1WKfB1XXckognriJpJU3aBuFse5GMSInpUyfI82qJ7kxtXMkr2lkQxoKAtiF7hS0MOE8AqAeqVM9L4XwGimHQi5PBHTQZaFrp2YmUKejyfOxkFbYd3t-FOs80KVfEqebFfoZzvKX06u3rELU63LrJ3a4h9g_OYTX8tqPieN8vRAva2lXjmFxFIoL3xKyGutP7zlacW044wg8DRQvIGj-iBtNVp_yaksqsMwWuX51Ii_Wt0bz3Nc0NLHfUw"
+                />
+                <span
+                  class="bg-surface-container-lowest/80 font-label-sm text-label-sm text-on-surface-variant absolute top-4 right-4 rounded-full px-2.5 py-1 tracking-wider uppercase backdrop-blur-md"
+                  >Family Comfort</span
+                >
+              </div>
+              <div
+                class="p-space-lg gap-space-md flex flex-grow flex-col justify-between"
+              >
+                <div>
+                  <div class="mb-space-xs flex items-baseline justify-between">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">
+                      MPV 5
+                    </h3>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant font-medium"
+                      >People Carrier</span
+                    >
+                  </div>
+                  <p
+                    class="font-body-sm text-body-sm text-on-surface-variant mb-space-md"
+                  >
+                    Up to 5 Passengers · 4 Large Cases · 3 Hand Luggage
+                  </p>
+                  <div
+                    class="gap-space-xs py-space-sm bg-surface-container-low/60 px-space-sm mb-space-md grid grid-cols-3 rounded-lg"
+                  >
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >person</span
+                      >
+                      <span>5 Passengers</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >luggage</span
+                      >
+                      <span>4 Check-in</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >shopping_bag</span
+                      >
+                      <span>3 Cabin bags</span>
+                    </div>
+                  </div>
+                  <div class="mb-space-md flex flex-wrap gap-1.5">
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Elevated ride height</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Family &amp; small group transfer</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Rear climate control</span
+                    >
+                  </div>
+                </div>
+                <div class="pt-space-md flex items-center justify-between">
+                  <div>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant block uppercase"
+                      >Fixed Airport Fare</span
+                    >
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface text-primary"
+                      >From £65.00</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg px-6 py-2.5 shadow-sm transition-all"
+                    href="#"
+                  >
+                    Book this class
+                  </a>
+                </div>
+              </div>
+            </article>
+            <!-- Vehicle 5: MPV 8 (Large People Carrier) -->
+            <article
+              class="bg-surface-container-lowest flex flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-md"
+            >
+              <div
+                class="bg-surface-container-low p-space-lg group relative flex min-h-[220px] items-center justify-center overflow-hidden"
+              >
+                <div
+                  class="from-surface-variant/30 pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
+                ></div>
+                <img
+                  alt="MPV 8 vehicle silhouette"
+                  class="h-auto w-full max-w-[360px] object-contain transition-transform duration-300 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida/AEtjO1Xxh4OG_YDzRwBv1hlKB_J3YNQ6WDoJdSlsZLOsiUKm3c1cXUiMP4645dRLTtmWFkoT2-GE810zu-nwt8obOjxSGsf5ltR26S81kTQKrShSNZNQtM1k7NZrlFMhYzbvZYR4MsMcf3dw_oTllRWnu-WguWAEN_5NeKm-8rImeQvdzPOeQmGi7QR2kP3ngpos5aJ7yoEjef9woUdPF21OkQVXxS6XLxFaaoNJkoletmkS4Eg3AaLPQU7T0B4"
+                />
+                <span
+                  class="bg-surface-container-lowest/80 font-label-sm text-label-sm text-on-surface-variant absolute top-4 right-4 rounded-full px-2.5 py-1 tracking-wider uppercase backdrop-blur-md"
+                  >Group Transit</span
+                >
+              </div>
+              <div
+                class="p-space-lg gap-space-md flex flex-grow flex-col justify-between"
+              >
+                <div>
+                  <div class="mb-space-xs flex items-baseline justify-between">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">
+                      MPV 8
+                    </h3>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant font-medium"
+                      >Large Van / MPV</span
+                    >
+                  </div>
+                  <p
+                    class="font-body-sm text-body-sm text-on-surface-variant mb-space-md"
+                  >
+                    Up to 8 Passengers · 5 Large Cases · 4 Hand Luggage
+                  </p>
+                  <div
+                    class="gap-space-xs py-space-sm bg-surface-container-low/60 px-space-sm mb-space-md grid grid-cols-3 rounded-lg"
+                  >
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >person</span
+                      >
+                      <span>8 Passengers</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >luggage</span
+                      >
+                      <span>5 Check-in</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >shopping_bag</span
+                      >
+                      <span>4 Cabin bags</span>
+                    </div>
+                  </div>
+                  <div class="mb-space-md flex flex-wrap gap-1.5">
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Mercedes-Benz Vito / V-Class</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Huge luggage bay</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Conference seating option</span
+                    >
+                  </div>
+                </div>
+                <div class="pt-space-md flex items-center justify-between">
+                  <div>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant block uppercase"
+                      >Fixed Airport Fare</span
+                    >
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface text-primary"
+                      >From £78.00</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg px-6 py-2.5 shadow-sm transition-all"
+                    href="#"
+                  >
+                    Book this class
+                  </a>
+                </div>
+              </div>
+            </article>
+            <!-- Vehicle 6: 16-Seater Minibus -->
+            <article
+              class="bg-surface-container-lowest flex flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-md"
+            >
+              <div
+                class="bg-surface-container-low p-space-lg group relative flex min-h-[220px] items-center justify-center overflow-hidden"
+              >
+                <div
+                  class="from-surface-variant/30 pointer-events-none absolute inset-0 bg-gradient-to-tr to-transparent"
+                ></div>
+                <img
+                  alt="16-Seater Minibus vehicle silhouette"
+                  class="h-auto w-full max-w-[360px] object-contain transition-transform duration-300 group-hover:scale-105"
+                  src="https://lh3.googleusercontent.com/aida/AEtjO1XwQwEpdRo2viMP5D5Qo3FSYQoXE6i4kELnGQnfAdGeD6FxStfWGiHuOfqeDlT1VMKDaP68ft-kSj9nRmJ6rcsvkR9lG4rd-xAZRwQrN4T8MKipJZzKkZjWZL_1EGsZgYIzPOVPVXqJWTsh2OIRiJjZn8A2Gt1LzGyTt2GI4syW9jIqXulAXll7qwUdJcMxQRFoHlalHYxcTRrbSUM6U1KKnPTYV-cohTrIeJTrehECnImpGSMWomGwuA"
+                />
+                <span
+                  class="bg-surface-container-lowest/80 font-label-sm text-label-sm text-on-surface-variant absolute top-4 right-4 rounded-full px-2.5 py-1 tracking-wider uppercase backdrop-blur-md"
+                  >Maximum Capacity</span
+                >
+              </div>
+              <div
+                class="p-space-lg gap-space-md flex flex-grow flex-col justify-between"
+              >
+                <div>
+                  <div class="mb-space-xs flex items-baseline justify-between">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">
+                      16-Seater Minibus
+                    </h3>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant font-medium"
+                      >Coach &amp; Tour</span
+                    >
+                  </div>
+                  <p
+                    class="font-body-sm text-body-sm text-on-surface-variant mb-space-md"
+                  >
+                    Up to 16 Passengers · 14 Large Cases · 10 Hand Luggage
+                  </p>
+                  <div
+                    class="gap-space-xs py-space-sm bg-surface-container-low/60 px-space-sm mb-space-md grid grid-cols-3 rounded-lg"
+                  >
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >person</span
+                      >
+                      <span>16 Passengers</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >luggage</span
+                      >
+                      <span>14 Check-in</span>
+                    </div>
+                    <div
+                      class="font-body-sm text-body-sm text-on-surface flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base"
+                        >shopping_bag</span
+                      >
+                      <span>10 Cabin bags</span>
+                    </div>
+                  </div>
+                  <div class="mb-space-md flex flex-wrap gap-1.5">
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Dedicated rear luggage hold</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Corporate &amp; tour groups</span
+                    >
+                    <span
+                      class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full px-3 py-1"
+                      >Public address system</span
+                    >
+                  </div>
+                </div>
+                <div class="pt-space-md flex items-center justify-between">
+                  <div>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant block uppercase"
+                      >Fixed Airport Fare</span
+                    >
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-on-surface text-primary"
+                      >From £145.00</span
+                    >
+                  </div>
+                  <a
+                    class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg px-6 py-2.5 shadow-sm transition-all"
+                    href="#"
+                  >
+                    Book this class
+                  </a>
+                </div>
+              </div>
+            </article>
+          </section>
+          <!-- SECTION 3: Luggage-Fit Helper Section -->
+          <section
+            class="bg-surface-container-lowest p-space-lg md:p-space-xl mb-16 rounded-xl shadow-sm"
+          >
+            <div
+              class="gap-space-sm mb-space-lg flex flex-col justify-between md:flex-row md:items-center"
+            >
+              <div>
+                <div class="mb-1 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary">analytics</span>
+                  <span
+                    class="font-label-sm text-label-sm text-primary font-semibold tracking-wider uppercase"
+                    >TfL Boot Dimension Standards</span
+                  >
+                </div>
+                <h2 class="font-headline-lg text-headline-lg text-on-surface">
+                  Luggage Capacity Comparison
+                </h2>
+                <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+                  Visual guide to luggage dimensions and real boot capacities across all
+                  vehicle categories.
+                </p>
+              </div>
+              <a
+                class="font-title-md text-title-md text-primary hover:text-secondary flex items-center gap-1.5 self-start transition-colors md:self-auto"
+                href="#"
+              >
+                <span>Not sure? Use the luggage guide</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+              </a>
+            </div>
+            <!-- Responsive Luggage Matrix Vector Graphic -->
+            <div
+              class="bg-surface-container-low p-space-md md:p-space-lg w-full overflow-x-auto rounded-xl"
+            >
+              <div class="min-w-[720px]">
+                <!-- 6 column visual luggage breakdown mimicking the capacity grid -->
+                <div
+                  class="border-outline-variant/30 grid grid-cols-6 gap-3 border-b pb-6"
+                >
+                  <!-- Col 1: Saloon -->
+                  <div
+                    class="bg-surface-container-lowest flex flex-col items-center rounded-xl p-3 shadow-xs"
+                  >
+                    <div class="bg-surface-container mb-3 h-3 w-full rounded-full"></div>
+                    <div class="flex h-56 w-full flex-col items-center justify-end gap-2">
+                      <div class="flex gap-1.5">
+                        <div
+                          class="bg-secondary-fixed flex h-11 w-9 flex-col items-center justify-center gap-1 rounded shadow-xs"
+                        >
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                        </div>
+                        <div
+                          class="bg-secondary-fixed flex h-11 w-9 flex-col items-center justify-center gap-1 rounded shadow-xs"
+                        >
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                        </div>
+                      </div>
+                      <div class="flex gap-1.5">
+                        <div
+                          class="bg-primary flex h-16 w-11 flex-col items-center justify-center gap-1.5 rounded-md shadow-xs"
+                        >
+                          <div class="bg-primary-fixed/40 h-0.5 w-5 rounded-full"></div>
+                          <div class="bg-primary-fixed/40 h-0.5 w-5 rounded-full"></div>
+                        </div>
+                        <div
+                          class="bg-primary flex h-16 w-11 flex-col items-center justify-center gap-1.5 rounded-md shadow-xs"
+                        >
+                          <div class="bg-primary-fixed/40 h-0.5 w-5 rounded-full"></div>
+                          <div class="bg-primary-fixed/40 h-0.5 w-5 rounded-full"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="bg-on-surface-variant/20 mt-2 h-0.5 w-full"></div>
+                  </div>
+                  <!-- Col 2: Estate -->
+                  <div
+                    class="bg-surface-container-lowest flex flex-col items-center rounded-xl p-3 shadow-xs"
+                  >
+                    <div class="bg-surface-container mb-3 h-3 w-full rounded-full"></div>
+                    <div class="flex h-56 w-full flex-col items-center justify-end gap-2">
+                      <div class="flex gap-1.5">
+                        <div
+                          class="bg-secondary-fixed flex h-11 w-9 flex-col items-center justify-center gap-1 rounded shadow-xs"
+                        >
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                        </div>
+                        <div
+                          class="bg-secondary-fixed flex h-11 w-9 flex-col items-center justify-center gap-1 rounded shadow-xs"
+                        >
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                        </div>
+                      </div>
+                      <div class="flex gap-1">
+                        <div
+                          class="bg-primary flex h-16 w-9 flex-col items-center justify-center gap-1.5 rounded-md shadow-xs"
+                        >
+                          <div class="bg-primary-fixed/40 h-0.5 w-4 rounded-full"></div>
+                          <div class="bg-primary-fixed/40 h-0.5 w-4 rounded-full"></div>
+                        </div>
+                        <div
+                          class="bg-primary flex h-16 w-9 flex-col items-center justify-center gap-1.5 rounded-md shadow-xs"
+                        >
+                          <div class="bg-primary-fixed/40 h-0.5 w-4 rounded-full"></div>
+                          <div class="bg-primary-fixed/40 h-0.5 w-4 rounded-full"></div>
+                        </div>
+                        <div
+                          class="bg-primary flex h-16 w-9 flex-col items-center justify-center gap-1.5 rounded-md shadow-xs"
+                        >
+                          <div class="bg-primary-fixed/40 h-0.5 w-4 rounded-full"></div>
+                          <div class="bg-primary-fixed/40 h-0.5 w-4 rounded-full"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="bg-on-surface-variant/20 mt-2 h-0.5 w-full"></div>
+                  </div>
+                  <!-- Col 3: Executive -->
+                  <div
+                    class="bg-surface-container-lowest flex flex-col items-center rounded-xl p-3 shadow-xs"
+                  >
+                    <div class="bg-surface-container mb-3 h-3 w-full rounded-full"></div>
+                    <div class="flex h-56 w-full flex-col items-center justify-end gap-2">
+                      <div class="flex gap-1.5">
+                        <div
+                          class="bg-secondary-fixed flex h-11 w-9 flex-col items-center justify-center gap-1 rounded shadow-xs"
+                        >
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                        </div>
+                        <div
+                          class="bg-secondary-fixed flex h-11 w-9 flex-col items-center justify-center gap-1 rounded shadow-xs"
+                        >
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                          <div
+                            class="bg-on-secondary-fixed/30 h-0.5 w-4 rounded-full"
+                          ></div>
+                        </div>
+                      </div>
+                      <div class="flex gap-1.5">
+                        <div
+                          class="bg-primary flex h-16 w-11 flex-col items-center justify-center gap-1.5 rounded-md shadow-xs"
+                        >
+                          <div class="bg-primary-fixed/40 h-0.5 w-5 rounded-full"></div>
+                          <div class="bg-primary-fixed/40 h-0.5 w-5 rounded-full"></div>
+                        </div>
+                        <div
+                          class="bg-primary flex h-16 w-11 flex-col items-center justify-center gap-1.5 rounded-md shadow-xs"
+                        >
+                          <div class="bg-primary-fixed/40 h-0.5 w-5 rounded-full"></div>
+                          <div class="bg-primary-fixed/40 h-0.5 w-5 rounded-full"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="bg-on-surface-variant/20 mt-2 h-0.5 w-full"></div>
+                  </div>
+                  <!-- Col 4: MPV 5 -->
+                  <div
+                    class="bg-surface-container-lowest flex flex-col items-center rounded-xl p-3 shadow-xs"
+                  >
+                    <div class="bg-surface-container mb-3 h-3 w-full rounded-full"></div>
+                    <div class="flex h-56 w-full flex-col items-center justify-end gap-2">
+                      <div class="flex gap-1">
+                        <div
+                          class="bg-secondary-fixed flex h-10 w-8 flex-col items-center justify-center gap-1 rounded shadow-xs"
+                        ></div>
+                        <div
+                          class="bg-secondary-fixed flex h-10 w-8 flex-col items-center justify-center gap-1 rounded shadow-xs"
+                        ></div>
+                        <div
+                          class="bg-secondary-fixed flex h-10 w-8 flex-col items-center justify-center gap-1 rounded shadow-xs"
+                        ></div>
+                      </div>
+                      <div class="grid grid-cols-2 gap-1.5">
+                        <div
+                          class="bg-primary flex h-14 w-12 flex-col items-center justify-center rounded-md shadow-xs"
+                        ></div>
+                        <div
+                          class="bg-primary flex h-14 w-12 flex-col items-center justify-center rounded-md shadow-xs"
+                        ></div>
+                        <div
+                          class="bg-primary flex h-14 w-12 flex-col items-center justify-center rounded-md shadow-xs"
+                        ></div>
+                        <div
+                          class="bg-primary flex h-14 w-12 flex-col items-center justify-center rounded-md shadow-xs"
+                        ></div>
+                      </div>
+                    </div>
+                    <div class="bg-on-surface-variant/20 mt-2 h-0.5 w-full"></div>
+                  </div>
+                  <!-- Col 5: MPV 8 -->
+                  <div
+                    class="bg-surface-container-lowest flex flex-col items-center rounded-xl p-3 shadow-xs"
+                  >
+                    <div class="bg-surface-container mb-3 h-3 w-full rounded-full"></div>
+                    <div class="flex h-56 w-full flex-col items-center justify-end gap-2">
+                      <div class="flex gap-1">
+                        <div class="bg-secondary-fixed h-9 w-6 rounded shadow-xs"></div>
+                        <div class="bg-secondary-fixed h-9 w-6 rounded shadow-xs"></div>
+                        <div class="bg-secondary-fixed h-9 w-6 rounded shadow-xs"></div>
+                        <div class="bg-secondary-fixed h-9 w-6 rounded shadow-xs"></div>
+                      </div>
+                      <div class="flex gap-1">
+                        <div class="bg-primary h-14 w-13 rounded-md shadow-xs"></div>
+                        <div class="bg-primary h-14 w-13 rounded-md shadow-xs"></div>
+                      </div>
+                      <div class="flex gap-1">
+                        <div class="bg-primary h-14 w-9 rounded-md shadow-xs"></div>
+                        <div class="bg-primary h-14 w-9 rounded-md shadow-xs"></div>
+                        <div class="bg-primary h-14 w-9 rounded-md shadow-xs"></div>
+                      </div>
+                    </div>
+                    <div class="bg-on-surface-variant/20 mt-2 h-0.5 w-full"></div>
+                  </div>
+                  <!-- Col 6: 16-Seater Minibus -->
+                  <div
+                    class="bg-surface-container-lowest flex flex-col items-center rounded-xl p-3 shadow-xs"
+                  >
+                    <div class="bg-surface-container mb-3 h-3 w-full rounded-full"></div>
+                    <div
+                      class="flex h-56 w-full flex-col items-center justify-end gap-1.5"
+                    >
+                      <div class="grid grid-cols-5 gap-0.5">
+                        <div class="bg-secondary-fixed h-6 w-4 rounded-xs"></div>
+                        <div class="bg-secondary-fixed h-6 w-4 rounded-xs"></div>
+                        <div class="bg-secondary-fixed h-6 w-4 rounded-xs"></div>
+                        <div class="bg-secondary-fixed h-6 w-4 rounded-xs"></div>
+                        <div class="bg-secondary-fixed h-6 w-4 rounded-xs"></div>
+                      </div>
+                      <div class="grid grid-cols-3 gap-1">
+                        <div class="bg-primary h-11 w-7 rounded"></div>
+                        <div class="bg-primary h-11 w-7 rounded"></div>
+                        <div class="bg-primary h-11 w-7 rounded"></div>
+                        <div class="bg-primary h-11 w-7 rounded"></div>
+                        <div class="bg-primary h-11 w-7 rounded"></div>
+                        <div class="bg-primary h-11 w-7 rounded"></div>
+                        <div class="bg-primary h-11 w-7 rounded"></div>
+                        <div class="bg-primary h-11 w-7 rounded"></div>
+                        <div class="bg-primary h-11 w-7 rounded"></div>
+                      </div>
+                    </div>
+                    <div class="bg-on-surface-variant/20 mt-2 h-0.5 w-full"></div>
+                  </div>
+                </div>
+                <!-- 6-column labels under diagram -->
+                <div class="grid grid-cols-6 gap-3 pt-4 text-center">
+                  <div class="flex flex-col items-center">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Saloon</span
+                    >
+                    <span
+                      class="font-body-sm text-body-sm text-primary mt-0.5 font-semibold"
+                      >2 Large + 2 Cabin</span
+                    >
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Estate</span
+                    >
+                    <span
+                      class="font-body-sm text-body-sm text-primary mt-0.5 font-semibold"
+                      >3 Large + 2 Cabin</span
+                    >
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Executive</span
+                    >
+                    <span
+                      class="font-body-sm text-body-sm text-primary mt-0.5 font-semibold"
+                      >2 Large + 2 Cabin</span
+                    >
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <span class="font-title-md text-title-md text-on-surface">MPV 5</span>
+                    <span
+                      class="font-body-sm text-body-sm text-primary mt-0.5 font-semibold"
+                      >4 Large + 3 Cabin</span
+                    >
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <span class="font-title-md text-title-md text-on-surface">MPV 8</span>
+                    <span
+                      class="font-body-sm text-body-sm text-primary mt-0.5 font-semibold"
+                      >5 Large + 4 Cabin</span
+                    >
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >16-Seater</span
+                    >
+                    <span
+                      class="font-body-sm text-body-sm text-primary mt-0.5 font-semibold"
+                      >14 Large + 10 Cabin</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Legend Key -->
+            <div
+              class="gap-space-lg mt-space-md pt-space-sm flex flex-wrap items-center justify-center"
+            >
+              <div class="flex items-center gap-2">
+                <span class="bg-primary h-4 w-4 rounded"></span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant"
+                  >Large check-in case (up to 75cm / 23kg max)</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="bg-secondary-fixed h-4 w-4 rounded"></span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant"
+                  >Cabin case / hand luggage (55 × 40 × 20cm)</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-sm">info</span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant"
+                  >Child seats provided complimentary on request</span
+                >
+              </div>
+            </div>
+          </section>
+          <!-- SECTION 4: Trust & TfL Standards Banner -->
+          <section class="gap-space-md mb-8 grid grid-cols-1 md:grid-cols-3">
+            <div
+              class="p-space-lg bg-surface-container-low gap-space-md flex flex-col justify-between rounded-xl"
+            >
+              <div class="gap-space-sm flex items-center">
+                <div
+                  class="bg-surface-container-high text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-2xl">verified_user</span>
+                </div>
+                <div>
+                  <span
+                    class="font-label-sm text-label-sm text-primary block font-bold tracking-wider uppercase"
+                    >Compliance</span
+                  >
+                  <h4 class="font-title-md text-title-md text-on-surface">
+                    TfL Licensed Operators
+                  </h4>
+                </div>
+              </div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Every vehicle undergoes stringent bi-annual safety audits. Chauffeurs are
+                enhanced DBS-checked and professionally licensed by Transport for London.
+              </p>
+              <span class="font-label-sm text-label-sm text-on-surface font-mono"
+                >PH Operator Lic #008942/01</span
+              >
+            </div>
+            <div
+              class="p-space-lg bg-surface-container-low gap-space-md flex flex-col justify-between rounded-xl"
+            >
+              <div class="gap-space-sm flex items-center">
+                <div
+                  class="bg-surface-container-high text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-2xl">price_check</span>
+                </div>
+                <div>
+                  <span
+                    class="font-label-sm text-label-sm text-primary block font-bold tracking-wider uppercase"
+                    >Transparency</span
+                  >
+                  <h4 class="font-title-md text-title-md text-on-surface">
+                    All-Inclusive Fixed Fares
+                  </h4>
+                </div>
+              </div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Zero hidden congestion fees, clean air charges, or flight delay penalty
+                rates. The price confirmed during vehicle selection is the exact fare you
+                pay.
+              </p>
+              <span class="font-label-sm text-label-sm text-on-surface font-semibold"
+                >Tolls &amp; Drop-off fees included</span
+              >
+            </div>
+            <div
+              class="p-space-lg bg-surface-container-low gap-space-md flex flex-col justify-between rounded-xl"
+            >
+              <div class="gap-space-sm flex items-center">
+                <div
+                  class="bg-surface-container-high text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-2xl">flight_land</span>
+                </div>
+                <div>
+                  <span
+                    class="font-label-sm text-label-sm text-primary block font-bold tracking-wider uppercase"
+                    >Punctuality</span
+                  >
+                  <h4 class="font-title-md text-title-md text-on-surface">
+                    60 Mins Free Waiting Time
+                  </h4>
+                </div>
+              </div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Direct flight telemetry integration tracks your arrival in real-time.
+                Chauffeur greets you in the terminal arrivals hall with a personalised
+                signboard.
+              </p>
+              <span class="font-label-sm text-label-sm text-on-surface font-semibold"
+                >Real-time ADS-B radar tracking</span
+              >
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer
+      class="bg-surface-container-lowest mt-space-xl w-full pt-16 pb-12 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"
+    >
+      <div class="px-gutter mx-auto max-w-[1200px]">
+        <div class="gap-space-xl mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Airports
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="heathrow-transfers"
+                  href="#"
+                  >Heathrow Airport (LHR)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="gatwick-transfers"
+                  href="#"
+                  >Gatwick Airport (LGW)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="stansted-transfers"
+                  href="#"
+                  >Stansted Airport (STN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="luton-transfers"
+                  href="#"
+                  >Luton Airport (LTN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="london-city-transfers"
+                  href="#"
+                  >London City Airport (LCY)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="southend-transfers"
+                  href="#"
+                  >Southend Airport (SEN)</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Services
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airport-transfers"
+                  href="#"
+                  >Airport Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="corporate-accounts"
+                  href="#"
+                  >Corporate Accounts</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="executive-fleet"
+                  href="#"
+                  >Executive Fleet</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="group-travel"
+                  href="#"
+                  >Group Travel</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="cruise-transfers"
+                  href="#"
+                  >Cruise Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="private-sightseeing"
+                  href="#"
+                  >Private Sightseeing</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Legal &amp; Company
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="about-cityline"
+                  href="#"
+                  >About Cityline</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="tfl-licensing-compliance"
+                  href="#"
+                  >TfL Licensing &amp; Compliance</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="terms-conditions"
+                  href="#"
+                  >Terms &amp; Conditions</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="privacy-policy"
+                  href="#"
+                  >Privacy Policy</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="cookie-settings"
+                  href="#"
+                  >Cookie Settings</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Help &amp; Support
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="contact-dispatch"
+                  href="#"
+                  >Contact Dispatch</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="flight-delay-guarantee"
+                  href="#"
+                  >Flight Delay Guarantee</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="meeting-point-guides"
+                  href="#"
+                  >Meeting Point Guides</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="luggage-guidelines"
+                  href="#"
+                  >Luggage Guidelines</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="faq" href="#"
+                  >Frequently Asked Questions</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="pt-space-lg gap-space-md flex flex-col items-center justify-between md:flex-row"
+        >
+          <div
+            class="gap-space-sm text-on-surface-variant font-label-sm text-label-sm flex items-center"
+          >
+            <span class="material-symbols-outlined text-primary text-base">verified</span
+            ><span
+              >TfL PH Operator Lic. #008942/01. Cityline Transfers Ltd, Registered in
+              England &amp; Wales. London, UK.</span
+            >
+          </div>
+          <div class="gap-space-xs flex items-center">
+            <span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >VISA</span
+            ><span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >MC</span
+            ><span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >AMEX</span
+            ><span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >APPLE PAY</span
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

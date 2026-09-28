@@ -1,0 +1,103 @@
+# Production stack on the IONOS VPS (§12).
+#
+# NEVER run `docker compose down -v` or `docker volume prune` here — that
+# destroys pg_data and storage (DATA-05). Deployments only replace `app` and
+# `worker`.
+
+name: cityline
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+    depends_on:
+      - app
+
+  app:
+    image: ghcr.io/${GHCR_OWNER:-cityline}/cityline-web:${APP_TAG:-latest}
+    restart: unless-stopped
+    env_file: .env.production
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  worker:
+    image: ghcr.io/${GHCR_OWNER:-cityline}/cityline-web:${APP_TAG:-latest}
+    restart: unless-stopped
+    command: ["node", "dist/worker.js"]
+    env_file: .env.production
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    # No `ports:` — Postgres is never exposed to the internet (NFR-04).
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cityline}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-cityline}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cityline}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backup:
+    build: ./docker/pg-backup
+    image: cityline/pg-backup:local
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-cityline}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      PGDATABASE: ${POSTGRES_DB:-cityline}
+    volumes:
+      - backups:/backups
+      - storage:/srv/storage:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pg_data:
+  storage:
+  backups:
+  caddy_data:
+  caddy_config:
+  caddy_logs:

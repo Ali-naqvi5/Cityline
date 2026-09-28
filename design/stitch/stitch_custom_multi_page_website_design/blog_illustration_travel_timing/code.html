@@ -1,0 +1,75 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 800 600"
+  width="800"
+  height="600"
+  fill="none"
+>
+  <!-- Background -->
+  <rect width="800" height="600" fill="#FAFCFA" />
+  <rect
+    x="20"
+    y="20"
+    width="760"
+    height="560"
+    rx="16"
+    fill="#F2FBF3"
+    stroke="#DDE8DF"
+    stroke-width="2"
+  />
+
+  <!-- Journey timing curve / road timeline -->
+  <path
+    d="M100 450 C220 450 200 240 380 240 C520 240 560 380 700 200"
+    stroke="#0E6B39"
+    stroke-width="4"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Speed / timing interval rings -->
+  <circle cx="280" cy="310" r="65" fill="#FFFFFF" stroke="#DDE8DF" stroke-width="2" />
+  <circle cx="280" cy="310" r="45" fill="#F2FBF3" stroke="#90EE90" stroke-width="3" />
+  <!-- Clock hands at 35 min buffer -->
+  <line
+    x1="280"
+    y1="310"
+    x2="280"
+    y2="280"
+    stroke="#0E6B39"
+    stroke-width="3"
+    stroke-linecap="round"
+  />
+  <line
+    x1="280"
+    y1="310"
+    x2="305"
+    y2="325"
+    stroke="#0E6B39"
+    stroke-width="3"
+    stroke-linecap="round"
+  />
+
+  <!-- Route departure pin node -->
+  <g transform="translate(140, 450)">
+    <circle cx="0" cy="0" r="16" fill="#90EE90" stroke="#0E6B39" stroke-width="2" />
+    <circle cx="0" cy="0" r="6" fill="#0E6B39" />
+  </g>
+
+  <!-- Route flight destination node -->
+  <g transform="translate(680, 200)">
+    <circle cx="0" cy="0" r="30" fill="#FFFFFF" stroke="#0E6B39" stroke-width="3" />
+    <circle cx="0" cy="0" r="22" fill="#90EE90" />
+    <!-- Plane takeoff icon -->
+    <path
+      d="M-2 -8 L2 -3 L9 -1 L2 2 L2 7 L4 9 L4 10 L0 9 L-4 10 L-4 9 L-2 7 L-2 2 L-9 -1 L-2 -3 Z"
+      fill="#0E6B39"
+      transform="scale(1.3) rotate(35)"
+    />
+  </g>
+
+  <!-- Traffic peak window bar indicators -->
+  <rect x="420" y="320" width="180" height="18" rx="9" fill="#0E6B39" />
+  <rect x="420" y="350" width="120" height="18" rx="9" fill="#90EE90" />
+  <rect x="420" y="380" width="150" height="18" rx="9" fill="#DDE8DF" />
+</svg>

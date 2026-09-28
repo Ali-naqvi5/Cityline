@@ -1,0 +1,1701 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#8deb8d",
+              "on-error": "#ffffff",
+              background: "#effdf2",
+              "tertiary-container": "#006c20",
+              "secondary-fixed": "#85faac",
+              "on-tertiary": "#ffffff",
+              "primary-fixed": "#a0f5b5",
+              error: "#ba1a1a",
+              "surface-container": "#e3f1e7",
+              "on-primary-fixed": "#00210d",
+              "on-primary": "#ffffff",
+              "tertiary-fixed-dim": "#7edb7f",
+              "primary-container": "#0e6b39",
+              "outline-variant": "#bfc9bd",
+              outline: "#6f7a6f",
+              "secondary-fixed-dim": "#69dd92",
+              "on-tertiary-fixed": "#002105",
+              "secondary-container": "#83f7a9",
+              primary: "#005128",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed-variant": "#005316",
+              "surface-variant": "#d8e6db",
+              "surface-container-high": "#ddece1",
+              "on-surface": "#121e18",
+              "surface-container-highest": "#d8e6db",
+              "inverse-on-surface": "#e6f4e9",
+              "on-error-container": "#93000a",
+              "surface-dim": "#cfded3",
+              "surface-container-low": "#e9f7ec",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#00723d",
+              "surface-bright": "#effdf2",
+              "on-secondary-fixed": "#00210e",
+              "primary-fixed-dim": "#84d89b",
+              "on-secondary-fixed-variant": "#00522a",
+              "on-background": "#121e18",
+              "inverse-primary": "#84d89b",
+              "inverse-surface": "#27332c",
+              surface: "#effdf2",
+              tertiary: "#005116",
+              "on-surface-variant": "#3f4940",
+              "tertiary-fixed": "#99f899",
+              "on-primary-container": "#94e9aa",
+              "on-secondary": "#ffffff",
+              "surface-tint": "#116c3a",
+              "on-primary-fixed-variant": "#005229",
+              secondary: "#006d3a",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "space-xs": "0.25rem",
+              "space-sm": "0.5rem",
+              "margin-desktop": "7.5rem",
+              "gutter-sm": "1rem",
+              "space-lg": "1.5rem",
+              margin: "2rem",
+              "space-md": "1rem",
+              gutter: "1.5rem",
+              "space-xl": "2rem",
+            },
+            fontFamily: {
+              "headline-sm": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "label-md": ["Inter"],
+              "body-sm": ["Inter"],
+              "title-md": ["Inter"],
+              "label-sm": ["Inter"],
+              "display-lg": ["Inter"],
+              "display-lg-mobile": ["Inter"],
+              "headline-md": ["Inter"],
+              "body-lg": ["Inter"],
+              "fare-tabular": ["Inter"],
+              "headline-lg": ["Inter"],
+              "body-md": ["Inter"],
+            },
+            fontSize: {
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" },
+              ],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "label-md": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500" },
+              ],
+              "body-sm": [
+                "13px",
+                { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" },
+              ],
+              "title-md": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" },
+              ],
+              "label-sm": [
+                "12px",
+                { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "600" },
+              ],
+              "display-lg": [
+                "48px",
+                { lineHeight: "56px", letterSpacing: "-0.025em", fontWeight: "600" },
+              ],
+              "display-lg-mobile": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "fare-tabular": [
+                "22px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "600" },
+              ],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "body-md": [
+                "15px",
+                { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <meta content="web_standard" name="shell-type" />
+  </head>
+  <body class="bg-surface font-body-md text-on-surface antialiased">
+    <header
+      class="bg-surface-container-lowest/95 fixed top-0 z-50 w-full shadow-[0_1px_8px_rgba(15,26,20,0.06)] backdrop-blur-md"
+    >
+      <div
+        class="px-gutter mx-auto flex h-20 max-w-[1200px] items-center justify-between"
+      >
+        <a class="gap-space-sm group flex items-center" data-path="home" href="#"
+          ><img
+            alt="Cityline London"
+            class="h-8 w-8 rounded-full object-cover"
+            src="https://lh3.googleusercontent.com/aida/AEtjO1Wo22GfjdFIHzeGon_3-qDYCbJ8zfGVPUbhyXvOo9JbmvAcXmgXfQMwgnJ4Wxogy2UM4FIGHiDezMQXtAw2SfVt6DhwgY3Qq1zNQg3KKOybc60shelsIWUoRYgyQGV65-lKSkkEImO86wU5QYICG2Y39soqob3WsMYuAO9ZSORsTwxoihDjWNbC7ItIMwMdRgAps-bkrW8eEj975ndX4P_k7BVhauMa7relA-Js419ty9Xa_joxr74MANuCv9-WhURwraMjiffCDg"
+          />
+          <div class="flex flex-col">
+            <span
+              class="font-title-md text-title-md text-on-surface group-hover:text-primary leading-none tracking-tight transition-colors"
+              >Cityline</span
+            ><span
+              class="font-label-sm text-label-sm text-on-surface-variant text-[10px] leading-tight tracking-wider uppercase"
+              >Airport Transfers · London</span
+            >
+          </div></a
+        >
+        <nav
+          class="gap-space-md lg:gap-space-lg hidden items-center md:flex"
+          data-active-classes="text-primary font-semibold"
+        >
+          <a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="airports"
+            href="#"
+            >Airports</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="services"
+            href="#"
+            >Services</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="fleet"
+            href="#"
+            >Fleet</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="fares"
+            href="#"
+            >Fares</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="about"
+            href="#"
+            >About</a
+          ><a
+            aria-current="page"
+            class="py-space-xs text-primary font-semibold transition-colors"
+            data-path="reviews"
+            href="#"
+            >Reviews</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="contact"
+            href="#"
+            >Contact</a
+          >
+        </nav>
+        <div class="gap-space-md flex items-center">
+          <div class="hidden flex-col text-right lg:flex">
+            <span
+              class="font-label-sm text-label-sm text-on-surface-variant text-[10px] tracking-wider uppercase"
+              >24/7 Dispatch</span
+            ><a
+              class="font-label-md text-label-md text-on-surface hover:text-primary font-semibold tabular-nums transition-colors"
+              href="tel:+442079460812"
+              >+44 (0)20 7946 0812</a
+            >
+          </div>
+          <a
+            class="bg-primary-container text-on-primary font-label-md text-label-md px-space-lg py-space-sm hover:bg-secondary inline-flex items-center justify-center rounded-lg font-semibold shadow-[0_1px_3px_rgba(15,26,20,0.08)] transition-colors"
+            data-path="booking"
+            href="#"
+            >Book now</a
+          >
+        </div>
+      </div>
+    </header>
+    <main class="bg-surface min-h-[calc(100vh-20rem)] w-full pt-20">
+      <div class="flex w-full flex-col">
+        <!-- Subtle Ambient Glow Canvas -->
+        <div class="bg-surface relative w-full overflow-hidden pb-16">
+          <div
+            class="bg-primary-fixed-dim/20 pointer-events-none absolute -top-40 right-10 h-96 w-96 rounded-full blur-3xl"
+          ></div>
+          <div
+            class="bg-secondary-fixed/25 pointer-events-none absolute top-80 -left-20 h-80 w-80 rounded-full blur-3xl"
+          ></div>
+          <div class="px-gutter relative z-10 mx-auto max-w-[1200px] pt-10">
+            <!-- Breadcrumbs & Status Tag -->
+            <div class="mb-6 flex items-center justify-between gap-4">
+              <div
+                class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-2"
+              >
+                <a class="hover:text-primary transition-colors" href="#">Home</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-primary font-semibold">Customer Reviews</span>
+              </div>
+              <div
+                class="bg-surface-container text-primary font-label-sm text-label-sm hidden items-center gap-2 rounded-full px-3 py-1 sm:inline-flex"
+              >
+                <span
+                  class="bg-primary-fixed-dim h-2 w-2 animate-pulse rounded-full"
+                ></span>
+                <span>Live Feed • Updated Hourly</span>
+              </div>
+            </div>
+            <!-- Header & Intro -->
+            <div class="mb-12 max-w-3xl">
+              <span
+                class="font-label-sm text-label-sm text-primary bg-surface-container rounded px-2.5 py-1 font-semibold tracking-widest uppercase"
+                >London Municipal Transit Standards</span
+              >
+              <h1
+                class="font-display-lg text-display-lg text-on-surface mt-3 mb-3 tracking-tight"
+              >
+                Verified Passenger Reviews
+              </h1>
+              <p class="font-body-lg text-body-lg text-on-surface-variant">
+                Independent feedback from travellers, corporate bookers, and families
+                transferring across London's airports. Fixed fares, guaranteed flight
+                tracking, and vetted professional drivers.
+              </p>
+            </div>
+            <!-- Big Rating & Distribution Panel -->
+            <section
+              class="bg-surface-container-lowest mb-10 rounded-xl p-6 shadow-sm sm:p-8"
+            >
+              <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-12">
+                <!-- Left Sub-Panel: Aggregate Score -->
+                <div
+                  class="border-outline-variant/30 flex flex-col justify-center border-b pb-8 lg:col-span-5 lg:border-r lg:border-b-0 lg:pr-10 lg:pb-0"
+                >
+                  <div class="mb-2 flex items-baseline gap-3">
+                    <span
+                      class="font-display-lg text-primary text-[64px] leading-none font-bold tracking-tight tabular-nums"
+                      >4.94</span
+                    >
+                    <span
+                      class="font-headline-sm text-headline-sm text-on-surface-variant"
+                      >/ 5.0</span
+                    >
+                  </div>
+                  <!-- Deep Green Stars -->
+                  <div class="text-primary mb-3 flex items-center gap-1">
+                    <span
+                      class="material-symbols-outlined text-[28px]"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-[28px]"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-[28px]"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-[28px]"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-[28px]"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >star</span
+                    >
+                  </div>
+                  <p class="font-title-md text-title-md text-on-surface mb-1">
+                    Uncompromising Punctuality Standard
+                  </p>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant mb-6">
+                    Based on 2,840+ verified passenger journeys logged under TfL License
+                    #008942/01.
+                  </p>
+                  <!-- Mini Trust KPI Badges -->
+                  <div
+                    class="border-outline-variant/20 grid grid-cols-2 gap-3 border-t pt-4"
+                  >
+                    <div class="bg-surface-container-low rounded-lg p-3">
+                      <span
+                        class="font-label-sm text-label-sm text-on-surface-variant block tracking-wider uppercase"
+                        >Flight On-Time Match</span
+                      >
+                      <span
+                        class="font-headline-sm text-headline-sm text-primary tabular-nums"
+                        >99.8%</span
+                      >
+                    </div>
+                    <div class="bg-surface-container-low rounded-lg p-3">
+                      <span
+                        class="font-label-sm text-label-sm text-on-surface-variant block tracking-wider uppercase"
+                        >Fixed Fare Accuracy</span
+                      >
+                      <span
+                        class="font-headline-sm text-headline-sm text-primary tabular-nums"
+                        >100%</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <!-- Right Sub-Panel: Distribution Bar Breakdown -->
+                <div class="flex flex-col justify-center gap-3.5 lg:col-span-7">
+                  <div class="mb-1 flex items-center justify-between">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Rating Breakdown</span
+                    >
+                    <span class="font-label-sm text-label-sm text-on-surface-variant"
+                      >Verified booking telemetry</span
+                    >
+                  </div>
+                  <!-- 5 Stars Row -->
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="text-on-surface font-label-md text-label-md flex w-16 items-center gap-1"
+                    >
+                      <span>5</span>
+                      <span
+                        class="material-symbols-outlined text-primary text-[16px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div
+                      class="bg-surface-container h-3 flex-1 overflow-hidden rounded-full"
+                    >
+                      <div
+                        class="bg-primary-fixed-dim h-full rounded-full transition-all duration-500"
+                        style="width: 92%"
+                      ></div>
+                    </div>
+                    <span
+                      class="font-label-md text-label-md text-on-surface w-12 text-right font-semibold tabular-nums"
+                      >92%</span
+                    >
+                  </div>
+                  <!-- 4 Stars Row -->
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="text-on-surface font-label-md text-label-md flex w-16 items-center gap-1"
+                    >
+                      <span>4</span>
+                      <span
+                        class="material-symbols-outlined text-primary text-[16px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div
+                      class="bg-surface-container h-3 flex-1 overflow-hidden rounded-full"
+                    >
+                      <div
+                        class="bg-primary-fixed-dim h-full rounded-full transition-all duration-500"
+                        style="width: 6%"
+                      ></div>
+                    </div>
+                    <span
+                      class="font-label-md text-label-md text-on-surface w-12 text-right font-semibold tabular-nums"
+                      >6%</span
+                    >
+                  </div>
+                  <!-- 3 Stars Row -->
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="text-on-surface font-label-md text-label-md flex w-16 items-center gap-1"
+                    >
+                      <span>3</span>
+                      <span
+                        class="material-symbols-outlined text-primary text-[16px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div
+                      class="bg-surface-container h-3 flex-1 overflow-hidden rounded-full"
+                    >
+                      <div
+                        class="bg-primary/40 h-full rounded-full"
+                        style="width: 1.2%"
+                      ></div>
+                    </div>
+                    <span
+                      class="font-label-md text-label-md text-on-surface-variant w-12 text-right tabular-nums"
+                      >1.2%</span
+                    >
+                  </div>
+                  <!-- 2 Stars Row -->
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="text-on-surface font-label-md text-label-md flex w-16 items-center gap-1"
+                    >
+                      <span>2</span>
+                      <span
+                        class="material-symbols-outlined text-primary text-[16px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div
+                      class="bg-surface-container h-3 flex-1 overflow-hidden rounded-full"
+                    >
+                      <div
+                        class="bg-primary/30 h-full rounded-full"
+                        style="width: 0.5%"
+                      ></div>
+                    </div>
+                    <span
+                      class="font-label-md text-label-md text-on-surface-variant w-12 text-right tabular-nums"
+                      >0.5%</span
+                    >
+                  </div>
+                  <!-- 1 Star Row -->
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="text-on-surface font-label-md text-label-md flex w-16 items-center gap-1"
+                    >
+                      <span>1</span>
+                      <span
+                        class="material-symbols-outlined text-primary text-[16px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div
+                      class="bg-surface-container h-3 flex-1 overflow-hidden rounded-full"
+                    >
+                      <div
+                        class="bg-primary/20 h-full rounded-full"
+                        style="width: 0.3%"
+                      ></div>
+                    </div>
+                    <span
+                      class="font-label-md text-label-md text-on-surface-variant w-12 text-right tabular-nums"
+                      >0.3%</span
+                    >
+                  </div>
+                  <div
+                    class="text-on-surface-variant flex items-center justify-between pt-2 text-[11px]"
+                  >
+                    <span>98.0% positive customer sentiment score</span>
+                    <span>Audited monthly by TfL Passenger Compliance</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <!-- Filter Chips Row -->
+            <section class="mb-8 scrollbar-none overflow-x-auto pb-2">
+              <div class="flex min-w-max items-center gap-2.5" id="reviewsFilterGroup">
+                <button
+                  class="filter-btn font-label-md text-label-md bg-primary-container text-on-primary h-9 rounded-full px-4 font-semibold shadow-sm transition-all"
+                  data-category="all"
+                  type="button"
+                >
+                  All Reviews (2,840+)
+                </button>
+                <button
+                  class="filter-btn font-label-md text-label-md bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container h-9 rounded-full px-4 font-medium transition-all"
+                  data-category="heathrow"
+                  type="button"
+                >
+                  Heathrow Airport (1,140)
+                </button>
+                <button
+                  class="filter-btn font-label-md text-label-md bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container h-9 rounded-full px-4 font-medium transition-all"
+                  data-category="gatwick"
+                  type="button"
+                >
+                  Gatwick Airport (680)
+                </button>
+                <button
+                  class="filter-btn font-label-md text-label-md bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container h-9 rounded-full px-4 font-medium transition-all"
+                  data-category="corporate"
+                  type="button"
+                >
+                  Corporate &amp; Business (420)
+                </button>
+                <button
+                  class="filter-btn font-label-md text-label-md bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container h-9 rounded-full px-4 font-medium transition-all"
+                  data-category="stansted-luton"
+                  type="button"
+                >
+                  Stansted &amp; Luton (390)
+                </button>
+                <button
+                  class="filter-btn font-label-md text-label-md bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container h-9 rounded-full px-4 font-medium transition-all"
+                  data-category="city-southend"
+                  type="button"
+                >
+                  London City &amp; Southend (210)
+                </button>
+              </div>
+            </section>
+            <!-- Two-Column Masonry of Review Cards (8 Comprehensive Authentic Reviews) -->
+            <!-- Monogram initials on #90EE90 background only (Strictly NO human photos) -->
+            <section class="mb-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <!-- Card 1 -->
+              <article
+                class="bg-surface-container-lowest flex flex-col justify-between rounded-xl p-6 shadow-sm transition-shadow hover:shadow-md"
+                data-category="heathrow corporate"
+              >
+                <div>
+                  <!-- Top Row -->
+                  <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="text-primary flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="bg-surface-container text-primary font-label-sm text-label-sm inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold"
+                      >
+                        <span class="material-symbols-outlined text-[14px]"
+                          >verified</span
+                        >
+                        Verified Journey
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >2 days ago</span
+                      >
+                    </div>
+                  </div>
+                  <!-- Review Title & Content -->
+                  <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                    Flawless Heathrow flight radar tracking during 90-min delay
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant mb-5">
+                    Our British Airways flight into Heathrow Terminal 5 was held on the
+                    tarmac for over an hour. When we finally cleared border control, our
+                    chauffeur Tariq was calmly waiting at Arrivals with an electronic
+                    nameboard. No frantic phone calls, zero parking surcharge surprises,
+                    and absolute composure in Friday evening M4 traffic.
+                  </p>
+                </div>
+                <!-- Bottom Attribution & Metadata -->
+                <div
+                  class="border-outline-variant/20 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-primary-fixed-dim text-on-surface font-title-md text-title-md flex h-10 w-10 items-center justify-center rounded-full font-bold tracking-tight"
+                    >
+                      DW
+                    </div>
+                    <div>
+                      <p
+                        class="font-title-md text-title-md text-on-surface leading-tight"
+                      >
+                        David W.
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Frequent Business Flyer
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="bg-surface-container-low text-primary font-label-sm text-label-sm inline-flex items-center gap-1.5 rounded px-3 py-1"
+                  >
+                    <span class="material-symbols-outlined text-[14px]">flight_land</span>
+                    <span>Heathrow T5 → Mayfair • Executive Saloon</span>
+                  </div>
+                </div>
+              </article>
+              <!-- Card 2 -->
+              <article
+                class="bg-surface-container-lowest flex flex-col justify-between rounded-xl p-6 shadow-sm transition-shadow hover:shadow-md"
+                data-category="gatwick corporate"
+              >
+                <div>
+                  <!-- Top Row -->
+                  <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="text-primary flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="bg-surface-container text-primary font-label-sm text-label-sm inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold"
+                      >
+                        <span class="material-symbols-outlined text-[14px]"
+                          >verified</span
+                        >
+                        Verified Journey
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >3 days ago</span
+                      >
+                    </div>
+                  </div>
+                  <!-- Review Title & Content -->
+                  <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                    Corporate accounts billing with zero friction
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant mb-5">
+                    We manage weekly transit between Gatwick North and our Canary Wharf
+                    legal offices for visiting partners. Cityline's fixed billing model
+                    eliminates unpredictable surge pricing completely. Cars are
+                    consistently immaculate E-Class Mercedes with on-board Wi-Fi and
+                    chilled water ready.
+                  </p>
+                </div>
+                <!-- Bottom Attribution & Metadata -->
+                <div
+                  class="border-outline-variant/20 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-primary-fixed-dim text-on-surface font-title-md text-title-md flex h-10 w-10 items-center justify-center rounded-full font-bold tracking-tight"
+                    >
+                      SK
+                    </div>
+                    <div>
+                      <p
+                        class="font-title-md text-title-md text-on-surface leading-tight"
+                      >
+                        Sarah K.
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Operations Director
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="bg-surface-container-low text-primary font-label-sm text-label-sm inline-flex items-center gap-1.5 rounded px-3 py-1"
+                  >
+                    <span class="material-symbols-outlined text-[14px]">flight_land</span>
+                    <span>Gatwick North → Canary Wharf • Estate</span>
+                  </div>
+                </div>
+              </article>
+              <!-- Card 3 -->
+              <article
+                class="bg-surface-container-lowest flex flex-col justify-between rounded-xl p-6 shadow-sm transition-shadow hover:shadow-md"
+                data-category="stansted-luton"
+              >
+                <div>
+                  <!-- Top Row -->
+                  <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="text-primary flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="bg-surface-container text-primary font-label-sm text-label-sm inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold"
+                      >
+                        <span class="material-symbols-outlined text-[14px]"
+                          >verified</span
+                        >
+                        Verified Journey
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >5 days ago</span
+                      >
+                    </div>
+                  </div>
+                  <!-- Review Title & Content -->
+                  <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                    Massive luggage capacity and generous child-seat support
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant mb-5">
+                    Travelling from Stansted into West London with twin toddlers, two
+                    buggies, and four large suitcases is usually an ordeal. Cityline
+                    dispatched an immaculate Mercedes V-Class with two pre-fitted Group 1
+                    car seats. Driver assisted right through to our hotel doorstep with
+                    utmost kindness.
+                  </p>
+                </div>
+                <!-- Bottom Attribution & Metadata -->
+                <div
+                  class="border-outline-variant/20 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-primary-fixed-dim text-on-surface font-title-md text-title-md flex h-10 w-10 items-center justify-center rounded-full font-bold tracking-tight"
+                    >
+                      AT
+                    </div>
+                    <div>
+                      <p
+                        class="font-title-md text-title-md text-on-surface leading-tight"
+                      >
+                        Alistair T.
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Family Holiday Traveller
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="bg-surface-container-low text-primary font-label-sm text-label-sm inline-flex items-center gap-1.5 rounded px-3 py-1"
+                  >
+                    <span class="material-symbols-outlined text-[14px]">flight_land</span>
+                    <span>Stansted → Kensington • MPV 8</span>
+                  </div>
+                </div>
+              </article>
+              <!-- Card 4 -->
+              <article
+                class="bg-surface-container-lowest flex flex-col justify-between rounded-xl p-6 shadow-sm transition-shadow hover:shadow-md"
+                data-category="city-southend corporate"
+              >
+                <div>
+                  <!-- Top Row -->
+                  <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="text-primary flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="bg-surface-container text-primary font-label-sm text-label-sm inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold"
+                      >
+                        <span class="material-symbols-outlined text-[14px]"
+                          >verified</span
+                        >
+                        Verified Journey
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >1 week ago</span
+                      >
+                    </div>
+                  </div>
+                  <!-- Review Title & Content -->
+                  <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                    Prompt terminal curbside link at London City Airport
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant mb-5">
+                    Land at LCY, walk out the door, and the driver is in contact via
+                    WhatsApp before your phone switches network. Driver took the Blackwall
+                    bypass seamlessly to Bank within 28 minutes flat. Highest civic
+                    standard I have seen in London private hire.
+                  </p>
+                </div>
+                <!-- Bottom Attribution & Metadata -->
+                <div
+                  class="border-outline-variant/20 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-primary-fixed-dim text-on-surface font-title-md text-title-md flex h-10 w-10 items-center justify-center rounded-full font-bold tracking-tight"
+                    >
+                      MR
+                    </div>
+                    <div>
+                      <p
+                        class="font-title-md text-title-md text-on-surface leading-tight"
+                      >
+                        Marcus R.
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Financial Analyst
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="bg-surface-container-low text-primary font-label-sm text-label-sm inline-flex items-center gap-1.5 rounded px-3 py-1"
+                  >
+                    <span class="material-symbols-outlined text-[14px]">flight_land</span>
+                    <span>London City → City of London • Saloon</span>
+                  </div>
+                </div>
+              </article>
+              <!-- Card 5 -->
+              <article
+                class="bg-surface-container-lowest flex flex-col justify-between rounded-xl p-6 shadow-sm transition-shadow hover:shadow-md"
+                data-category="heathrow"
+              >
+                <div>
+                  <!-- Top Row -->
+                  <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="text-primary flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="bg-surface-container text-primary font-label-sm text-label-sm inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold"
+                      >
+                        <span class="material-symbols-outlined text-[14px]"
+                          >verified</span
+                        >
+                        Verified Journey
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >1 week ago</span
+                      >
+                    </div>
+                  </div>
+                  <!-- Review Title & Content -->
+                  <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                    3:30 AM departure to Terminal 3 was ahead of time
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant mb-5">
+                    Nothing induces more anxiety than pre-dawn airport departures. Driver
+                    arrived 10 minutes prior to our 03:30 booking in Chelsea, sent a quiet
+                    text notification without ringing the doorbell, loaded all four heavy
+                    cases, and delivered us smoothly with zero stress.
+                  </p>
+                </div>
+                <!-- Bottom Attribution & Metadata -->
+                <div
+                  class="border-outline-variant/20 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-primary-fixed-dim text-on-surface font-title-md text-title-md flex h-10 w-10 items-center justify-center rounded-full font-bold tracking-tight"
+                    >
+                      EH
+                    </div>
+                    <div>
+                      <p
+                        class="font-title-md text-title-md text-on-surface leading-tight"
+                      >
+                        Elena H.
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Resident, SW3
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="bg-surface-container-low text-primary font-label-sm text-label-sm inline-flex items-center gap-1.5 rounded px-3 py-1"
+                  >
+                    <span class="material-symbols-outlined text-[14px]"
+                      >flight_takeoff</span
+                    >
+                    <span>Chelsea → Heathrow T3 • Executive Saloon</span>
+                  </div>
+                </div>
+              </article>
+              <!-- Card 6 -->
+              <article
+                class="bg-surface-container-lowest flex flex-col justify-between rounded-xl p-6 shadow-sm transition-shadow hover:shadow-md"
+                data-category="gatwick"
+              >
+                <div>
+                  <!-- Top Row -->
+                  <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="text-primary flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="bg-surface-container text-primary font-label-sm text-label-sm inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold"
+                      >
+                        <span class="material-symbols-outlined text-[14px]"
+                          >verified</span
+                        >
+                        Verified Journey
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >2 weeks ago</span
+                      >
+                    </div>
+                  </div>
+                  <!-- Review Title & Content -->
+                  <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                    Fixed pricing guarantee honouring massive M25 detour
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant mb-5">
+                    Major accident had closed parts of the southern orbital, requiring our
+                    driver to navigate alternative A-roads through Surrey. In standard app
+                    taxis the fare meter would have escalated significantly. Cityline
+                    respected the agreed £84 fixed rate down to the penny.
+                  </p>
+                </div>
+                <!-- Bottom Attribution & Metadata -->
+                <div
+                  class="border-outline-variant/20 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-primary-fixed-dim text-on-surface font-title-md text-title-md flex h-10 w-10 items-center justify-center rounded-full font-bold tracking-tight"
+                    >
+                      JL
+                    </div>
+                    <div>
+                      <p
+                        class="font-title-md text-title-md text-on-surface leading-tight"
+                      >
+                        Julian L.
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        International Consultant
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="bg-surface-container-low text-primary font-label-sm text-label-sm inline-flex items-center gap-1.5 rounded px-3 py-1"
+                  >
+                    <span class="material-symbols-outlined text-[14px]">flight_land</span>
+                    <span>Gatwick South → Fulham • Estate</span>
+                  </div>
+                </div>
+              </article>
+              <!-- Card 7 -->
+              <article
+                class="bg-surface-container-lowest flex flex-col justify-between rounded-xl p-6 shadow-sm transition-shadow hover:shadow-md"
+                data-category="stansted-luton corporate"
+              >
+                <div>
+                  <!-- Top Row -->
+                  <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="text-primary flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="bg-surface-container text-primary font-label-sm text-label-sm inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold"
+                      >
+                        <span class="material-symbols-outlined text-[14px]"
+                          >verified</span
+                        >
+                        Verified Journey
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >2 weeks ago</span
+                      >
+                    </div>
+                  </div>
+                  <!-- Review Title & Content -->
+                  <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                    Luton transfer for five executives returning from Zurich
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant mb-5">
+                    Booked an Executive MPV for our executive committee returning late
+                    into Luton Airport. Pristine leather seating, multiple USB-C charging
+                    points that worked, quiet climate control, and an immaculate driver
+                    suited in tie. Will be setting Cityline as preferred vendor across the
+                    firm.
+                  </p>
+                </div>
+                <!-- Bottom Attribution & Metadata -->
+                <div
+                  class="border-outline-variant/20 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-primary-fixed-dim text-on-surface font-title-md text-title-md flex h-10 w-10 items-center justify-center rounded-full font-bold tracking-tight"
+                    >
+                      RB
+                    </div>
+                    <div>
+                      <p
+                        class="font-title-md text-title-md text-on-surface leading-tight"
+                      >
+                        Richard B.
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Managing Partner
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="bg-surface-container-low text-primary font-label-sm text-label-sm inline-flex items-center gap-1.5 rounded px-3 py-1"
+                  >
+                    <span class="material-symbols-outlined text-[14px]">flight_land</span>
+                    <span>Luton Airport → Westminster • MPV 8</span>
+                  </div>
+                </div>
+              </article>
+              <!-- Card 8 -->
+              <article
+                class="bg-surface-container-lowest flex flex-col justify-between rounded-xl p-6 shadow-sm transition-shadow hover:shadow-md"
+                data-category="heathrow city-southend"
+              >
+                <div>
+                  <!-- Top Row -->
+                  <div class="mb-3 flex items-center justify-between gap-2">
+                    <div class="text-primary flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                      <span
+                        class="material-symbols-outlined text-[18px]"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >star</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="bg-surface-container text-primary font-label-sm text-label-sm inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold"
+                      >
+                        <span class="material-symbols-outlined text-[14px]"
+                          >verified</span
+                        >
+                        Verified Journey
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant"
+                        >3 weeks ago</span
+                      >
+                    </div>
+                  </div>
+                  <!-- Review Title & Content -->
+                  <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                    Warm welcome home after long-haul transpacific flight
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant mb-5">
+                    After 24 hours of travel from Singapore into Heathrow T2, walking out
+                    to a reliable, smartly turned out driver is worth every pound.
+                    Courteous handling of all luggage, zero small-talk pressure, smooth
+                    braking and driving style that allowed me to fall asleep peacefully
+                    until Richmond.
+                  </p>
+                </div>
+                <!-- Bottom Attribution & Metadata -->
+                <div
+                  class="border-outline-variant/20 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-primary-fixed-dim text-on-surface font-title-md text-title-md flex h-10 w-10 items-center justify-center rounded-full font-bold tracking-tight"
+                    >
+                      NC
+                    </div>
+                    <div>
+                      <p
+                        class="font-title-md text-title-md text-on-surface leading-tight"
+                      >
+                        Nicola C.
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Richmond Resident
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="bg-surface-container-low text-primary font-label-sm text-label-sm inline-flex items-center gap-1.5 rounded px-3 py-1"
+                  >
+                    <span class="material-symbols-outlined text-[14px]">flight_land</span>
+                    <span>Heathrow T2 → Richmond • Saloon</span>
+                  </div>
+                </div>
+              </article>
+            </section>
+            <!-- Load More Button -->
+            <div class="mb-16 flex flex-col items-center justify-center gap-2">
+              <button
+                class="bg-surface-container-lowest text-on-surface hover:bg-surface-container hover:text-primary font-label-md text-label-md inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3.5 font-semibold shadow-sm transition-all"
+                id="loadMoreBtn"
+                type="button"
+              >
+                <span>Load More Verified Reviews</span>
+                <span class="material-symbols-outlined text-[18px]">expand_more</span>
+              </button>
+              <span class="font-body-sm text-body-sm text-on-surface-variant"
+                >Showing 8 of 2,840 verified passenger submissions</span
+              >
+            </div>
+            <!-- Verified Standards & Guarantees Row -->
+            <section class="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+              <div class="bg-surface-container-low flex items-start gap-4 rounded-xl p-6">
+                <div
+                  class="bg-surface-container text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-[24px]">radar</span>
+                </div>
+                <div>
+                  <h4 class="font-title-md text-title-md text-on-surface mb-1">
+                    Flight Telemetry Assured
+                  </h4>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Automated tracking synchronises driver dispatch with live ATC radar.
+                    60 minutes complimentary wait time starting upon actual landing
+                    touchdown.
+                  </p>
+                </div>
+              </div>
+              <div class="bg-surface-container-low flex items-start gap-4 rounded-xl p-6">
+                <div
+                  class="bg-surface-container text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-[24px]">shield_person</span>
+                </div>
+                <div>
+                  <h4 class="font-title-md text-title-md text-on-surface mb-1">
+                    TfL Licensing &amp; Enhanced DBS
+                  </h4>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Operating under Transport for London Private Hire license #008942/01.
+                    Every driver undergoes continuous background checks and annual vehicle
+                    MOT testing.
+                  </p>
+                </div>
+              </div>
+              <div class="bg-surface-container-low flex items-start gap-4 rounded-xl p-6">
+                <div
+                  class="bg-surface-container text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                >
+                  <span class="material-symbols-outlined text-[24px]">lock_reset</span>
+                </div>
+                <div>
+                  <h4 class="font-title-md text-title-md text-on-surface mb-1">
+                    Zero Hidden Surcharges
+                  </h4>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Toll charges, airport terminal drop-off / pick-up tariffs, and
+                    congestion charges are strictly locked into the quote at the instant
+                    of booking.
+                  </p>
+                </div>
+              </div>
+            </section>
+            <!-- Closing Trust & Compliance Strip -->
+            <aside
+              class="bg-surface-container-lowest flex flex-col items-center justify-between gap-6 rounded-xl p-6 shadow-sm md:flex-row"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="bg-surface-container text-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
+                >
+                  <span
+                    class="material-symbols-outlined text-[28px]"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >verified_user</span
+                  >
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Cityline Quality Commitment</span
+                    >
+                    <span
+                      class="bg-secondary-fixed/50 text-on-secondary-fixed-variant rounded px-2 py-0.5 text-[11px] font-bold tracking-wider uppercase"
+                      >TfL #008942/01</span
+                    >
+                  </div>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    All passenger reviews are authenticated via confirmed booking
+                    reference codes prior to publication.
+                  </p>
+                </div>
+              </div>
+              <div class="flex w-full shrink-0 items-center gap-4 md:w-auto">
+                <a
+                  class="bg-primary-container text-on-primary hover:bg-secondary font-label-md text-label-md inline-flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold shadow-sm transition-colors md:w-auto"
+                  data-path="booking"
+                  href="#"
+                >
+                  <span>Book Your Fixed-Fare Transfer</span>
+                  <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </a>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const filterButtons = document.querySelectorAll(
+            "#reviewsFilterGroup .filter-btn",
+          );
+          const reviewCards = document.querySelectorAll("article[data-category]");
+          const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+          filterButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              // Reset all buttons
+              filterButtons.forEach((b) => {
+                b.className =
+                  "filter-btn h-9 px-4 rounded-full font-label-md text-label-md font-medium transition-all bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container";
+              });
+
+              // Set active style
+              btn.className =
+                "filter-btn h-9 px-4 rounded-full font-label-md text-label-md font-semibold transition-all bg-primary-container text-on-primary shadow-sm";
+
+              const category = btn.getAttribute("data-category");
+
+              reviewCards.forEach((card) => {
+                const cardCategories = card.getAttribute("data-category") || "";
+                if (category === "all" || cardCategories.includes(category)) {
+                  card.style.display = "flex";
+                } else {
+                  card.style.display = "none";
+                }
+              });
+            });
+          });
+
+          if (loadMoreBtn) {
+            loadMoreBtn.addEventListener("click", () => {
+              loadMoreBtn.innerHTML =
+                '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Loading Historical Archive...</span>';
+              setTimeout(() => {
+                loadMoreBtn.innerHTML =
+                  '<span>All 2,840 Verified Reviews Loaded</span><span class="material-symbols-outlined text-[18px]">check_circle</span>';
+                loadMoreBtn.classList.add("opacity-75", "cursor-default");
+                loadMoreBtn.disabled = true;
+              }, 800);
+            });
+          }
+        })();
+      </script>
+    </main>
+    <footer class="bg-surface-container-low pt-space-xl pb-space-lg mt-auto w-full">
+      <div class="px-gutter mx-auto max-w-[1200px]">
+        <div
+          class="gap-gutter mb-space-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+        >
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Airports
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Heathrow Airport (LHR)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Gatwick Airport (LGW)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Stansted Airport (STN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Luton Airport (LTN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >London City Airport (LCY)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >London Southend (SEN)</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Services
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Airport Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Corporate Accounts</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="fleet" href="#"
+                  >Executive Fleet</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Group Travel</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Cruise Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Private Sightseeing</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Legal &amp; Company
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="about" href="#"
+                  >About Cityline</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="reviews"
+                  href="#"
+                  >Passenger Reviews</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >TfL Licensing &amp; Compliance</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Terms &amp; Conditions</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Privacy Policy</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Help &amp; Support
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="contact"
+                  href="#"
+                  >Contact Dispatch</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Flight Delay Guarantee</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Meeting Point Guides</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Luggage Guidelines</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Frequently Asked Questions</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="pt-space-lg gap-space-md text-on-surface-variant font-body-sm text-body-sm flex flex-col items-start justify-between lg:flex-row lg:items-center"
+        >
+          <div
+            class="gap-space-xs sm:gap-space-md flex flex-col text-[12px] sm:flex-row sm:items-center"
+          >
+            <span
+              class="px-space-sm bg-surface-container text-on-surface inline-flex items-center rounded py-0.5 font-semibold"
+              >TfL PH Operator Lic. #008942/01</span
+            ><span
+              >Cityline Transfers Ltd, Registered in England &amp; Wales. London,
+              UK.</span
+            >
+          </div>
+          <div class="gap-space-sm flex items-center self-end lg:self-auto">
+            <span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Visa</span
+            ><span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Mastercard</span
+            ><span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Amex</span
+            ><span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Apple Pay</span
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

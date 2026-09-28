@@ -1,0 +1,19 @@
+* text=auto eol=lf
+
+# Shell scripts and Dockerfiles run inside Linux containers: CRLF would break
+# the shebang with "bad interpreter".
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+docker/Caddyfile text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary

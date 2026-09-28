@@ -1,26 +1,431 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+/*
+ ---break---
+ */
+@custom-variant dark (&:is(.dark *));
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Cityline theme — ported from the "Premium Transit Utility" design system
+ * (design/stitch/.../premium_transit_utility/DESIGN.md).
+ *
+ * Token NAMES are kept exactly as Stitch emitted them (Material 3 naming), so
+ * markup copied from the design exports translates one-to-one and stays
+ * reviewable against the source. Values are verbatim from the design — nothing
+ * here is invented.
+ *
+ * The design defines no dark palette, so the site is light-only. We do not
+ * invent one (§6).
+ */
+
+@theme {
+  /* --- Colour ------------------------------------------------------------ */
+  --color-surface: #effdf2;
+  --color-surface-dim: #cfded3;
+  --color-surface-bright: #effdf2;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #e9f7ec;
+  --color-surface-container: #e3f1e7;
+  --color-surface-container-high: #ddece1;
+  --color-surface-container-highest: #d8e6db;
+  --color-surface-variant: #d8e6db;
+  --color-surface-tint: #116c3a;
+
+  --color-on-surface: #121e18;
+  --color-on-surface-variant: #3f4940;
+
+  --color-inverse-surface: #27332c;
+  --color-inverse-on-surface: #e6f4e9;
+
+  --color-outline: #6f7a6f;
+  --color-outline-variant: #bfc9bd;
+
+  /* Deep British transport green. Note the design uses `primary-container`
+     (#0e6b39) for primary buttons, and `primary` (#005128) for text/anchors. */
+  --color-primary: #005128;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #0e6b39;
+  --color-on-primary-container: #94e9aa;
+  --color-inverse-primary: #84d89b;
+  --color-primary-fixed: #a0f5b5;
+  --color-primary-fixed-dim: #84d89b;
+  --color-on-primary-fixed: #00210d;
+  --color-on-primary-fixed-variant: #005229;
+
+  --color-secondary: #006d3a;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #83f7a9;
+  --color-on-secondary-container: #00723d;
+  --color-secondary-fixed: #85faac;
+  --color-secondary-fixed-dim: #69dd92;
+  --color-on-secondary-fixed: #00210e;
+  --color-on-secondary-fixed-variant: #00522a;
+
+  --color-tertiary: #005116;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #006c20;
+  --color-on-tertiary-container: #8deb8d;
+  --color-tertiary-fixed: #99f899;
+  --color-tertiary-fixed-dim: #7edb7f;
+  --color-on-tertiary-fixed: #002105;
+  --color-on-tertiary-fixed-variant: #005316;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  --color-background: #effdf2;
+  --color-on-background: #121e18;
+
+  /* --- Type -------------------------------------------------------------- */
+  /* Inter everywhere, self-hosted by next/font. Weights are restrained to
+     400 / 500 / 600 by the design; 700+ is deliberately not used. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 56px;
+  --text-display-lg--letter-spacing: -0.025em;
+  --text-display-lg--font-weight: 600;
+
+  --text-display-lg-mobile: 32px;
+  --text-display-lg-mobile--line-height: 40px;
+  --text-display-lg-mobile--letter-spacing: -0.02em;
+  --text-display-lg-mobile--font-weight: 600;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 600;
+
+  --text-headline-lg-mobile: 24px;
+  --text-headline-lg-mobile--line-height: 32px;
+  --text-headline-lg-mobile--letter-spacing: -0.015em;
+  --text-headline-lg-mobile--font-weight: 600;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--letter-spacing: -0.015em;
+  --text-headline-md--font-weight: 600;
+
+  --text-headline-sm: 20px;
+  --text-headline-sm--line-height: 28px;
+  --text-headline-sm--letter-spacing: -0.01em;
+  --text-headline-sm--font-weight: 600;
+
+  --text-title-md: 16px;
+  --text-title-md--line-height: 24px;
+  --text-title-md--letter-spacing: -0.005em;
+  --text-title-md--font-weight: 600;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-lg--letter-spacing: 0em;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-md: 15px;
+  --text-body-md--line-height: 22px;
+  --text-body-md--letter-spacing: 0em;
+  --text-body-md--font-weight: 400;
+
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 18px;
+  --text-body-sm--letter-spacing: 0.01em;
+  --text-body-sm--font-weight: 400;
+
+  /* Fares and any figure that must line up in a column. */
+  --text-fare-tabular: 22px;
+  --text-fare-tabular--line-height: 28px;
+  --text-fare-tabular--letter-spacing: 0em;
+  --text-fare-tabular--font-weight: 600;
+
+  --text-label-md: 14px;
+  --text-label-md--line-height: 20px;
+  --text-label-md--letter-spacing: 0.01em;
+  --text-label-md--font-weight: 500;
+
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--letter-spacing: 0.04em;
+  --text-label-sm--font-weight: 600;
+
+  /* --- Shape ------------------------------------------------------------- */
+  /* Buttons 10px, cards and inputs 12px, pills full (DESIGN.md "Shapes"). */
+  --radius-button: 10px;
+  --radius-card: 12px;
+  --radius-input: 12px;
+  --radius-sm: 0.25rem;
+  --radius-DEFAULT: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* --- Space ------------------------------------------------------------- */
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-xl: 2rem;
+  --spacing-gutter: 1.5rem;
+  --spacing-gutter-sm: 1rem;
+  --spacing-margin: 2rem;
+  --spacing-margin-desktop: 7.5rem;
+
+  /* Core content container — 1200px at every breakpoint (DESIGN.md "Layout"). */
+  --container-content: 1200px;
+
+  /* --- Elevation --------------------------------------------------------- */
+  /* Depth comes from colour planes, not floating shadows (DESIGN.md). */
+  --shadow-card: 0 1px 3px rgba(15, 26, 20, 0.04);
+  --shadow-card-hover: 0 8px 24px rgba(14, 107, 57, 0.08);
+  --shadow-header: 0 1px 8px rgba(15, 26, 20, 0.06);
+  --shadow-quote: 0 8px 30px rgba(15, 26, 20, 0.08);
+  --shadow-modal: 0 20px 48px rgba(15, 26, 20, 0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    color-scheme: light;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    font-size: var(--text-body-md);
+    line-height: var(--text-body-md--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /*
+   * Tabular numerals across fares, flight numbers, times and capacities, so
+   * figures line up in a column (DESIGN.md "Typography").
+   */
+  .tnum,
+  table,
+  time,
+  input[type="number"],
+  input[type="tel"] {
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * WCAG 2.2 AA: every control shows where focus is (NFR-05).
+   *
+   * DESIGN.md specifies a 3px #90EE90 ring. That is ~1.7:1 against the white
+   * card surface and fails the 3:1 focus-appearance requirement, so the ring
+   * uses the brand green instead (~6.5:1) at the specified 3px / 2px offset.
+   * Deviation is deliberate — accessibility is a hard requirement here.
+   */
+  :focus-visible {
+    outline: 3px solid var(--color-primary-container);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/*
+ * Smooth scrolling for in-page anchors, off for anyone who has asked their
+ * system to reduce motion.
+ *
+ * Scroll-triggered reveals are handled by Motion — see
+ * `src/components/motion/`. They are not duplicated here, or elements would
+ * animate twice and fight each other.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/*
+ * Native date and time inputs, brought into the theme.
+ *
+ * Applies everywhere these appear — the quote widget, booking step 1 — so the
+ * two never diverge.
+ *
+ * What can be styled and what cannot is worth stating plainly, because it is
+ * not obvious:
+ *
+ *   Styleable  the field itself, its font, its text colour, the segment
+ *              highlight, and the little calendar / clock button.
+ *   NOT        the popup calendar and the time list. Those are drawn by the
+ *              browser outside the page, and no CSS reaches them. They look
+ *              different in Chrome, Safari and Firefox, and on a phone they
+ *              become the OS wheel picker.
+ *
+ * The popup is left native on purpose. It is keyboard accessible, screen
+ * reader accessible, localised and free; a hand-built replacement is a large
+ * amount of code to get wrong. See docs/design-deviations.md if a fully themed
+ * picker is ever wanted.
+ */
+@layer base {
+  input[type="date"],
+  input[type="time"] {
+    position: relative;
+    font-family: inherit;
+    color: var(--color-on-surface);
+  }
+
+  /*
+   * The browser's own calendar / clock button is stretched over the whole
+   * field and made invisible, which does two things: it removes the second
+   * icon sitting next to ours, and it makes clicking anywhere in the field
+   * open the picker — previously only the tiny native icon did.
+   */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    color: transparent;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  /* An unfilled field reads as a placeholder rather than as content. */
+  input[type="date"]:invalid::-webkit-datetime-edit,
+  input[type="time"]:invalid::-webkit-datetime-edit {
+    color: color-mix(in srgb, var(--color-on-surface-variant) 60%, transparent);
+  }
+
+  /* Separators sit back; the numbers you set are the thing to read. */
+  input[type="date"]::-webkit-datetime-edit-text,
+  input[type="time"]::-webkit-datetime-edit-text {
+    color: var(--color-on-surface-variant);
+    padding: 0 0.1em;
+  }
+
+  /*
+   * Not styleable, and worth recording so nobody tries again: the highlight on
+   * the segment you are editing stays Chrome's blue. `::selection`,
+   * `::-webkit-datetime-edit-*-field:focus` and `accent-color` were all tested
+   * against Chrome and none of them touch it. It is drawn by the browser, like
+   * the popup itself.
+   */
+}
+/*
+ ---break---
+ */
+@theme inline {
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+/*
+ ---break---
+ */
+:root {
+  /*
+   * shadcn/ui's semantic tokens, mapped onto the Cityline palette above.
+   *
+   * shadcn components are written against these names (`bg-popover`,
+   * `border-border`, `text-muted-foreground` …). Pointing them at our own
+   * tokens means a component dropped in from the registry comes out in brand
+   * colours with no edits — and if the palette ever changes, it changes here
+   * once rather than in every component.
+   */
+  --background: var(--color-surface);
+  --foreground: var(--color-on-surface);
+  --card: var(--color-surface-container-lowest);
+  --card-foreground: var(--color-on-surface);
+  --popover: var(--color-surface-container-lowest);
+  --popover-foreground: var(--color-on-surface);
+  --primary: var(--color-primary-container);
+  --primary-foreground: var(--color-on-primary);
+  --secondary: var(--color-surface-container-low);
+  --secondary-foreground: var(--color-on-surface);
+  --muted: var(--color-surface-container-low);
+  --muted-foreground: var(--color-on-surface-variant);
+  --accent: var(--color-surface-container);
+  --accent-foreground: var(--color-on-surface);
+  --destructive: var(--color-error);
+  --destructive-foreground: var(--color-on-error);
+  --border: var(--color-outline-variant);
+  --input: var(--color-outline-variant);
+  --ring: var(--color-primary-container);
+  --radius: 12px;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+/*
+ ---break---
+ */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 }

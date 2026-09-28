@@ -1,0 +1,52 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 200 200"
+  width="200"
+  height="200"
+  fill="none"
+>
+  <!-- Radar-style circle in #F2FBF3 -->
+  <circle cx="100" cy="100" r="92" fill="#F2FBF3" stroke="#DDE8DF" stroke-width="1.5" />
+
+  <!-- Concentric radar arcs in #90EE90 and soft tones -->
+  <circle
+    cx="100"
+    cy="100"
+    r="68"
+    stroke="#90EE90"
+    stroke-width="2"
+    stroke-opacity="0.8"
+    stroke-dasharray="4 4"
+  />
+  <circle
+    cx="100"
+    cy="100"
+    r="44"
+    stroke="#90EE90"
+    stroke-width="2"
+    stroke-opacity="0.9"
+  />
+  <circle cx="100" cy="100" r="20" stroke="#1E9E5A" stroke-width="2" />
+  <circle cx="100" cy="100" r="4" fill="#0E6B39" />
+
+  <!-- Radar sweep line indicator -->
+  <line
+    x1="100"
+    y1="100"
+    x2="162"
+    y2="48"
+    stroke="#1E9E5A"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-opacity="0.6"
+  />
+  <path d="M100 100 L162 48 A92 92 0 0 0 135 18 Z" fill="#90EE90" fill-opacity="0.25" />
+
+  <!-- Small deep-green aeroplane silhouette on outer arc -->
+  <g transform="translate(142, 60) rotate(42)">
+    <path
+      d="M12 0 L15 8 L24 11 L15 13 L15 20 L18 23 L18 25 L12 23 L6 25 L6 23 L9 20 L9 13 L0 11 L9 8 Z"
+      fill="#0E6B39"
+    />
+  </g>
+</svg>

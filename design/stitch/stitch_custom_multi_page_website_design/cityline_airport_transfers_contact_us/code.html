@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#8deb8d",
+              "on-error": "#ffffff",
+              background: "#effdf2",
+              "tertiary-container": "#006c20",
+              "secondary-fixed": "#85faac",
+              "on-tertiary": "#ffffff",
+              "primary-fixed": "#a0f5b5",
+              error: "#ba1a1a",
+              "surface-container": "#e3f1e7",
+              "on-primary-fixed": "#00210d",
+              "on-primary": "#ffffff",
+              "tertiary-fixed-dim": "#7edb7f",
+              "primary-container": "#0e6b39",
+              "outline-variant": "#bfc9bd",
+              outline: "#6f7a6f",
+              "secondary-fixed-dim": "#69dd92",
+              "on-tertiary-fixed": "#002105",
+              "secondary-container": "#83f7a9",
+              primary: "#005128",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed-variant": "#005316",
+              "surface-variant": "#d8e6db",
+              "surface-container-high": "#ddece1",
+              "on-surface": "#121e18",
+              "surface-container-highest": "#d8e6db",
+              "inverse-on-surface": "#e6f4e9",
+              "on-error-container": "#93000a",
+              "surface-dim": "#cfded3",
+              "surface-container-low": "#e9f7ec",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#00723d",
+              "surface-bright": "#effdf2",
+              "on-secondary-fixed": "#00210e",
+              "primary-fixed-dim": "#84d89b",
+              "on-secondary-fixed-variant": "#00522a",
+              "on-background": "#121e18",
+              "inverse-primary": "#84d89b",
+              "inverse-surface": "#27332c",
+              surface: "#effdf2",
+              tertiary: "#005116",
+              "on-surface-variant": "#3f4940",
+              "tertiary-fixed": "#99f899",
+              "on-primary-container": "#94e9aa",
+              "on-secondary": "#ffffff",
+              "surface-tint": "#116c3a",
+              "on-primary-fixed-variant": "#005229",
+              secondary: "#006d3a",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "space-xs": "0.25rem",
+              "space-sm": "0.5rem",
+              "margin-desktop": "7.5rem",
+              "gutter-sm": "1rem",
+              "space-lg": "1.5rem",
+              margin: "2rem",
+              "space-md": "1rem",
+              gutter: "1.5rem",
+              "space-xl": "2rem",
+            },
+            fontFamily: {
+              "headline-sm": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "label-md": ["Inter"],
+              "body-sm": ["Inter"],
+              "title-md": ["Inter"],
+              "label-sm": ["Inter"],
+              "display-lg": ["Inter"],
+              "display-lg-mobile": ["Inter"],
+              "headline-md": ["Inter"],
+              "body-lg": ["Inter"],
+              "fare-tabular": ["Inter"],
+              "headline-lg": ["Inter"],
+              "body-md": ["Inter"],
+            },
+            fontSize: {
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" },
+              ],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "label-md": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500" },
+              ],
+              "body-sm": [
+                "13px",
+                { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" },
+              ],
+              "title-md": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" },
+              ],
+              "label-sm": [
+                "12px",
+                { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "600" },
+              ],
+              "display-lg": [
+                "48px",
+                { lineHeight: "56px", letterSpacing: "-0.025em", fontWeight: "600" },
+              ],
+              "display-lg-mobile": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "fare-tabular": [
+                "22px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "600" },
+              ],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "body-md": [
+                "15px",
+                { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <meta content="web_standard" name="shell-type" />
+  </head>
+  <body class="bg-surface font-body-md text-on-surface antialiased">
+    <header
+      class="bg-surface-container-lowest/95 fixed top-0 z-50 w-full shadow-[0_1px_8px_rgba(15,26,20,0.06)] backdrop-blur-md"
+    >
+      <div
+        class="px-gutter mx-auto flex h-20 max-w-[1200px] items-center justify-between"
+      >
+        <a class="gap-space-sm group flex items-center" data-path="home" href="#"
+          ><img
+            alt="Cityline London"
+            class="h-8 w-8 rounded-full object-cover"
+            src="https://lh3.googleusercontent.com/aida/AEtjO1Wo22GfjdFIHzeGon_3-qDYCbJ8zfGVPUbhyXvOo9JbmvAcXmgXfQMwgnJ4Wxogy2UM4FIGHiDezMQXtAw2SfVt6DhwgY3Qq1zNQg3KKOybc60shelsIWUoRYgyQGV65-lKSkkEImO86wU5QYICG2Y39soqob3WsMYuAO9ZSORsTwxoihDjWNbC7ItIMwMdRgAps-bkrW8eEj975ndX4P_k7BVhauMa7relA-Js419ty9Xa_joxr74MANuCv9-WhURwraMjiffCDg"
+          />
+          <div class="flex flex-col">
+            <span
+              class="font-title-md text-title-md text-on-surface group-hover:text-primary leading-none tracking-tight transition-colors"
+              >Cityline</span
+            ><span
+              class="font-label-sm text-label-sm text-on-surface-variant text-[10px] leading-tight tracking-wider uppercase"
+              >Airport Transfers · London</span
+            >
+          </div></a
+        >
+        <nav
+          class="gap-space-md lg:gap-space-lg hidden items-center md:flex"
+          data-active-classes="text-primary font-semibold"
+        >
+          <a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="airports"
+            href="#"
+            >Airports</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="services"
+            href="#"
+            >Services</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="fleet"
+            href="#"
+            >Fleet</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="fares"
+            href="#"
+            >Fares</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="about"
+            href="#"
+            >About</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-primary py-space-xs transition-colors"
+            data-path="reviews"
+            href="#"
+            >Reviews</a
+          ><a
+            aria-current="page"
+            class="py-space-xs text-primary font-semibold transition-colors"
+            data-path="contact"
+            href="#"
+            >Contact</a
+          >
+        </nav>
+        <div class="gap-space-md flex items-center">
+          <div class="hidden flex-col text-right lg:flex">
+            <span
+              class="font-label-sm text-label-sm text-on-surface-variant text-[10px] tracking-wider uppercase"
+              >24/7 Dispatch</span
+            ><a
+              class="font-label-md text-label-md text-on-surface hover:text-primary font-semibold tabular-nums transition-colors"
+              href="tel:+442079460812"
+              >+44 (0)20 7946 0812</a
+            >
+          </div>
+          <a
+            class="bg-primary-container text-on-primary font-label-md text-label-md px-space-lg py-space-sm hover:bg-secondary inline-flex items-center justify-center rounded-lg font-semibold shadow-[0_1px_3px_rgba(15,26,20,0.08)] transition-colors"
+            data-path="booking"
+            href="#"
+            >Book now</a
+          >
+        </div>
+      </div>
+    </header>
+    <main class="bg-surface min-h-[calc(100vh-20rem)] w-full pt-20">
+      <div class="flex w-full flex-col">
+        <div class="px-gutter py-space-xl mx-auto w-full max-w-[1200px]">
+          <!-- Top Header & Breadcrumb / Status -->
+          <div class="gap-space-xs mb-space-xl flex max-w-3xl flex-col">
+            <div class="gap-space-sm mb-space-xs flex items-center">
+              <span
+                class="bg-surface-container-high text-primary font-label-sm text-label-sm inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
+              >
+                <span class="bg-secondary h-2 w-2 animate-pulse rounded-full"></span>
+                Operations Center Online
+              </span>
+              <span
+                class="font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase"
+                >TfL Licensed Private Hire</span
+              >
+            </div>
+            <h1 class="font-display-lg text-display-lg text-on-surface tracking-tight">
+              Contact Our Central London Dispatch &amp; Operations Desk
+            </h1>
+            <p class="font-body-lg text-body-lg text-on-surface-variant">
+              24/7 direct telephone line, instant messaging, and email assistance for
+              bookings and corporate accounts.
+            </p>
+          </div>
+          <!-- Two Column Grid -->
+          <div
+            class="gap-gutter mb-space-xl grid grid-cols-1 items-start lg:grid-cols-12"
+          >
+            <!-- Left Column: Contact Methods Stacked Cards (5 cols on lg) -->
+            <div class="gap-space-md flex flex-col lg:col-span-5">
+              <!-- Card 1: 24/7 Telephone Operations -->
+              <div
+                class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm transition-all hover:shadow-md"
+              >
+                <div class="gap-space-sm mb-space-sm flex items-start justify-between">
+                  <div class="gap-space-sm flex items-center">
+                    <div
+                      class="bg-surface-container-low text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                    >
+                      <span class="material-symbols-outlined text-2xl">call</span>
+                    </div>
+                    <div>
+                      <span
+                        class="font-label-sm text-label-sm text-on-surface-variant block tracking-wider uppercase"
+                        >Priority Phone Line</span
+                      >
+                      <h3 class="font-title-md text-title-md text-on-surface">
+                        24/7 Telephone Operations
+                      </h3>
+                    </div>
+                  </div>
+                  <span
+                    class="bg-secondary-container/60 text-on-secondary-container font-label-sm text-label-sm inline-flex items-center gap-1 rounded-full px-2 py-0.5 whitespace-nowrap"
+                  >
+                    <span class="bg-primary h-1.5 w-1.5 rounded-full"></span> Live
+                  </span>
+                </div>
+                <a
+                  class="font-fare-tabular text-fare-tabular text-primary hover:text-secondary my-space-xs inline-block transition-colors"
+                  href="tel:+442079460812"
+                >
+                  +44 (0)20 7946 0812
+                </a>
+                <div
+                  class="mt-space-xs bg-surface-container-low text-on-surface font-body-sm text-body-sm inline-block rounded px-2.5 py-1"
+                >
+                  Live Chauffeur &amp; Flight Dispatch • Available 24/7/365
+                </div>
+              </div>
+              <!-- Card 2: Instant Messaging / WhatsApp -->
+              <div
+                class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm transition-all hover:shadow-md"
+              >
+                <div class="gap-space-sm mb-space-sm flex items-start justify-between">
+                  <div class="gap-space-sm flex items-center">
+                    <div
+                      class="bg-surface-container-low text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                    >
+                      <span class="material-symbols-outlined text-2xl">chat</span>
+                    </div>
+                    <div>
+                      <span
+                        class="font-label-sm text-label-sm text-on-surface-variant block tracking-wider uppercase"
+                        >Direct Mobile Concierge</span
+                      >
+                      <h3 class="font-title-md text-title-md text-on-surface">
+                        Instant Messaging / WhatsApp
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+                <a
+                  class="font-fare-tabular text-fare-tabular text-on-surface hover:text-primary my-space-xs inline-block transition-colors"
+                  href="https://wa.me/447700900812"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  +44 (0)7700 900812
+                </a>
+                <div
+                  class="mt-space-xs bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm inline-block rounded px-2.5 py-1"
+                >
+                  Typical reply in under 3 minutes • Ideal for transit updates
+                </div>
+              </div>
+              <!-- Card 3: Operations & Corporate Email -->
+              <div
+                class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm transition-all hover:shadow-md"
+              >
+                <div class="gap-space-sm mb-space-sm flex items-center">
+                  <div
+                    class="bg-surface-container-low text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                  >
+                    <span class="material-symbols-outlined text-2xl">mail</span>
+                  </div>
+                  <div>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant block tracking-wider uppercase"
+                      >Written Assistance</span
+                    >
+                    <h3 class="font-title-md text-title-md text-on-surface">
+                      Operations &amp; Corporate Email
+                    </h3>
+                  </div>
+                </div>
+                <div class="my-space-xs flex flex-col gap-1.5">
+                  <div class="text-on-surface flex items-center justify-between">
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >General Dispatch</span
+                    >
+                    <a
+                      class="font-title-md text-title-md text-primary hover:underline"
+                      href="mailto:dispatch@cityline-transfers.co.uk"
+                      >dispatch@cityline-transfers.co.uk</a
+                    >
+                  </div>
+                  <div class="text-on-surface flex items-center justify-between">
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >Corporate Accounts</span
+                    >
+                    <a
+                      class="font-title-md text-title-md text-primary hover:underline"
+                      href="mailto:corporate@cityline-transfers.co.uk"
+                      >corporate@cityline-transfers.co.uk</a
+                    >
+                  </div>
+                </div>
+                <div
+                  class="mt-space-xs bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm inline-block rounded px-2.5 py-1"
+                >
+                  Inquiries answered within 30 minutes
+                </div>
+              </div>
+              <!-- Card 4: Registered Operations Office -->
+              <div
+                class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm transition-all hover:shadow-md"
+              >
+                <div class="gap-space-sm mb-space-sm flex items-center">
+                  <div
+                    class="bg-surface-container-low text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                  >
+                    <span class="material-symbols-outlined text-2xl">location_city</span>
+                  </div>
+                  <div>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant block tracking-wider uppercase"
+                      >Headquarters</span
+                    >
+                    <h3 class="font-title-md text-title-md text-on-surface">
+                      Registered Operations Office
+                    </h3>
+                  </div>
+                </div>
+                <p
+                  class="font-body-md text-body-md text-on-surface mb-space-xs leading-relaxed"
+                >
+                  140 London Wall, London EC2Y 5DN, United Kingdom
+                </p>
+                <div
+                  class="pt-space-xs gap-x-space-md text-on-surface-variant font-body-sm text-body-sm flex flex-wrap gap-y-1"
+                >
+                  <span>Registered in England &amp; Wales No. 09843211</span>
+                  <span>•</span>
+                  <span class="text-primary font-semibold"
+                    >TfL PH Operator Licence #008942/01</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Right Column: Dispatch Enquiry Form (7 cols on lg) -->
+            <div
+              class="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm lg:col-span-7"
+            >
+              <div class="mb-space-lg">
+                <h2 class="font-headline-md text-headline-md text-on-surface mb-1">
+                  Send a Dispatch Enquiry
+                </h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Submit schedule modifications, quotes, or corporate support inquiries
+                  directly to our central desk.
+                </p>
+              </div>
+              <form
+                class="gap-space-md flex flex-col"
+                id="dispatch-form"
+                onsubmit="
+                  event.preventDefault();
+                  showConfirmation();
+                "
+              >
+                <div class="gap-space-md grid grid-cols-1 sm:grid-cols-2">
+                  <!-- Full Name -->
+                  <div class="flex flex-col gap-1.5">
+                    <label
+                      class="font-label-md text-label-md text-on-surface"
+                      for="full-name"
+                    >
+                      Full Name <span class="text-error">*</span>
+                    </label>
+                    <input
+                      class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest h-12 rounded-lg px-3.5 shadow-inner transition-colors focus:outline-none"
+                      id="full-name"
+                      placeholder="e.g. Eleanor Vance"
+                      required=""
+                      type="text"
+                    />
+                  </div>
+                  <!-- Email Address -->
+                  <div class="flex flex-col gap-1.5">
+                    <label
+                      class="font-label-md text-label-md text-on-surface"
+                      for="email-address"
+                    >
+                      Email Address <span class="text-error">*</span>
+                    </label>
+                    <input
+                      class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest h-12 rounded-lg px-3.5 shadow-inner transition-colors focus:outline-none"
+                      id="email-address"
+                      placeholder="e.g. e.vance@chambers.co.uk"
+                      required=""
+                      type="email"
+                    />
+                  </div>
+                </div>
+                <div class="gap-space-md grid grid-cols-1 sm:grid-cols-2">
+                  <!-- Contact Telephone -->
+                  <div class="flex flex-col gap-1.5">
+                    <label
+                      class="font-label-md text-label-md text-on-surface"
+                      for="telephone"
+                    >
+                      Contact Telephone <span class="text-error">*</span>
+                    </label>
+                    <input
+                      class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest h-12 rounded-lg px-3.5 tabular-nums shadow-inner transition-colors focus:outline-none"
+                      id="telephone"
+                      placeholder="+44 7911 123456"
+                      required=""
+                      type="tel"
+                    />
+                  </div>
+                  <!-- Reason for Contact -->
+                  <div class="flex flex-col gap-1.5">
+                    <label
+                      class="font-label-md text-label-md text-on-surface"
+                      for="contact-reason"
+                    >
+                      Reason for Contact <span class="text-error">*</span>
+                    </label>
+                    <div class="relative">
+                      <select
+                        class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest h-12 w-full cursor-pointer appearance-none rounded-lg px-3.5 pr-10 shadow-inner transition-colors focus:outline-none"
+                        id="contact-reason"
+                        onchange="toggleBookingRefField(this.value)"
+                        required=""
+                      >
+                        <option disabled="" selected="" value="">Select reason...</option>
+                        <option value="booking">Booking Enquiry</option>
+                        <option value="flight-change">
+                          Flight Change / Time Amendment
+                        </option>
+                        <option value="corporate">Corporate Account Onboarding</option>
+                        <option value="lost-property">Lost Property</option>
+                        <option value="query">Feedback or Query</option>
+                      </select>
+                      <span
+                        class="material-symbols-outlined text-on-surface-variant pointer-events-none absolute top-1/2 right-3 -translate-y-1/2"
+                      >
+                        expand_more
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Conditional Booking Reference input -->
+                <div class="flex flex-col gap-1.5" id="booking-ref-container">
+                  <div class="flex items-center justify-between">
+                    <label
+                      class="font-label-md text-label-md text-on-surface"
+                      for="booking-ref"
+                    >
+                      Booking Reference
+                    </label>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >Optional</span
+                    >
+                  </div>
+                  <input
+                    class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest h-12 rounded-lg px-3.5 tracking-wider uppercase shadow-inner transition-colors focus:outline-none"
+                    id="booking-ref"
+                    placeholder="e.g. CTL-94821"
+                    type="text"
+                  />
+                  <span class="font-body-sm text-body-sm text-on-surface-variant"
+                    >Optional — include if modifying an active journey or flight
+                    tracking.</span
+                  >
+                </div>
+                <!-- Message Textarea -->
+                <div class="flex flex-col gap-1.5">
+                  <label
+                    class="font-label-md text-label-md text-on-surface"
+                    for="message"
+                  >
+                    Message Details <span class="text-error">*</span>
+                  </label>
+                  <textarea
+                    class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest resize-none rounded-lg p-3.5 shadow-inner transition-colors focus:outline-none"
+                    id="message"
+                    placeholder="Provide flight details, terminal number, specific vehicle preferences, or corporate account requirements..."
+                    required=""
+                    rows="4"
+                  ></textarea>
+                </div>
+                <!-- Submit Button & Security Compliance Note -->
+                <div class="gap-space-sm pt-space-xs flex flex-col">
+                  <button
+                    class="gap-space-sm bg-primary-container text-on-primary font-label-md text-label-md px-space-lg hover:bg-secondary inline-flex h-12 w-full items-center justify-center rounded-lg font-semibold shadow-sm transition-colors active:scale-[0.99]"
+                    type="submit"
+                  >
+                    <span>Send Message to Dispatch Desk</span>
+                    <span class="material-symbols-outlined text-lg">send</span>
+                  </button>
+                  <div
+                    class="text-on-surface-variant font-body-sm text-body-sm flex items-center justify-center gap-1.5 text-center"
+                  >
+                    <span class="material-symbols-outlined text-primary text-sm"
+                      >lock</span
+                    >
+                    <span
+                      >Encrypted transmission. Your details are strictly used to
+                      coordinate your transfer.</span
+                    >
+                  </div>
+                </div>
+              </form>
+              <div
+                class="p-space-md mt-space-md bg-surface-container-high text-on-surface gap-space-sm flex hidden items-center rounded-lg"
+                id="form-success"
+              >
+                <span class="material-symbols-outlined text-primary">check_circle</span>
+                <span class="font-body-md text-body-md"
+                  >Thank you. Your message has reached Central Dispatch. A controller will
+                  respond promptly.</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- Below Grid: Map & Operational Advisory Section -->
+          <div class="gap-space-lg mb-space-xl flex flex-col">
+            <!-- Styled Location Map Illustration Card -->
+            <div
+              class="bg-surface-container-lowest relative flex w-full items-center justify-center overflow-hidden rounded-2xl p-0 shadow-sm"
+            >
+              <img
+                alt="Central London Operations Desk Map"
+                class="h-auto max-h-[500px] w-full object-cover"
+                src="https://lh3.googleusercontent.com/aida/AEtjO1VBnOUwbcW--oPpwKb1evfQGU0obbk9tmKd5UeUMNs9LqvlKmG_CYBMdyQzSvaqQfNyFOr3EGK1ccf6KY9gQYPGJHGx4AEUZuIyqYGG1OUxr52IcudKZ7-Yr9REdNfS_C8oJJwylAf_mxdfHtx35WFkkh0tbEzbwjbP7-e2P-w3C2-eMxIyNfgHIy-P2bqlaHDiR9iu2Ozby4UyeOowxXC5LX7FJyE_SAbIhXb4TjwPay6NHzqIS5k_fhs"
+              />
+              <!-- Floating Location Pin Tag -->
+              <div
+                class="top-space-md right-space-md bg-surface-container-lowest/95 px-space-md py-space-sm gap-space-sm absolute hidden items-center rounded-xl shadow-md backdrop-blur-md sm:flex"
+              >
+                <div
+                  class="bg-surface-container-high text-primary flex h-8 w-8 items-center justify-center rounded-full"
+                >
+                  <span class="material-symbols-outlined text-lg">domain</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface font-semibold"
+                    >Cityline HQ &amp; Dispatch</span
+                  >
+                  <span class="font-body-sm text-body-sm text-on-surface-variant"
+                    >140 London Wall • EC2Y</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Prominent Advisory Callout Note Box -->
+            <div
+              class="bg-surface-container-low p-space-lg gap-space-md relative flex w-full items-start overflow-hidden rounded-xl shadow-sm"
+            >
+              <!-- Vertical Accent Bar -->
+              <div class="bg-secondary-fixed absolute top-0 bottom-0 left-0 w-1.5"></div>
+              <div
+                class="bg-surface-container-lowest text-primary ml-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg shadow-sm"
+              >
+                <span class="material-symbols-outlined text-2xl">info</span>
+              </div>
+              <div class="text-on-surface flex flex-col gap-1">
+                <h4 class="font-title-md text-title-md text-on-surface font-semibold">
+                  Important Operational Notice
+                </h4>
+                <p
+                  class="font-body-md text-body-md text-on-surface-variant leading-relaxed"
+                >
+                  <strong class="text-on-surface font-semibold">Please Note:</strong>
+                  Cityline Airport Transfers is an office-based licensed Private Hire
+                  Operator and flight dispatch hub. To maintain passenger safety and
+                  security protocols, our London Wall location does not accommodate
+                  unscheduled walk-in bookings. All vehicle dispatches must be pre-booked
+                  online or via our 24/7 telephone operations desk.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script>
+          function toggleBookingRefField(val) {
+            const container = document.getElementById("booking-ref-container");
+            const input = document.getElementById("booking-ref");
+            if (val === "flight-change" || val === "lost-property") {
+              container.classList.remove("opacity-60");
+              input.placeholder = "Required for amendments: e.g. CTL-94821";
+            } else {
+              container.classList.add("opacity-100");
+              input.placeholder = "e.g. CTL-94821";
+            }
+          }
+
+          function showConfirmation() {
+            const form = document.getElementById("dispatch-form");
+            const success = document.getElementById("form-success");
+            form.classList.add("hidden");
+            success.classList.remove("hidden");
+          }
+        </script>
+      </div>
+    </main>
+    <footer class="bg-surface-container-low pt-space-xl pb-space-lg mt-auto w-full">
+      <div class="px-gutter mx-auto max-w-[1200px]">
+        <div
+          class="gap-gutter mb-space-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+        >
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Airports
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Heathrow Airport (LHR)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Gatwick Airport (LGW)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Stansted Airport (STN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >Luton Airport (LTN)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >London City Airport (LCY)</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airports"
+                  href="#"
+                  >London Southend (SEN)</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Services
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Airport Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Corporate Accounts</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="fleet" href="#"
+                  >Executive Fleet</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Group Travel</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Cruise Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="services"
+                  href="#"
+                  >Private Sightseeing</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Legal &amp; Company
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="about" href="#"
+                  >About Cityline</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="reviews"
+                  href="#"
+                  >Passenger Reviews</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >TfL Licensing &amp; Compliance</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Terms &amp; Conditions</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Privacy Policy</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="gap-space-sm flex flex-col">
+            <h3 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Help &amp; Support
+            </h3>
+            <ul
+              class="gap-space-xs font-body-sm text-body-sm text-on-surface-variant flex flex-col"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="contact"
+                  href="#"
+                  >Contact Dispatch</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Flight Delay Guarantee</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Meeting Point Guides</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Luggage Guidelines</a
+                >
+              </li>
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >Frequently Asked Questions</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="pt-space-lg gap-space-md text-on-surface-variant font-body-sm text-body-sm flex flex-col items-start justify-between lg:flex-row lg:items-center"
+        >
+          <div
+            class="gap-space-xs sm:gap-space-md flex flex-col text-[12px] sm:flex-row sm:items-center"
+          >
+            <span
+              class="px-space-sm bg-surface-container text-on-surface inline-flex items-center rounded py-0.5 font-semibold"
+              >TfL PH Operator Lic. #008942/01</span
+            ><span
+              >Cityline Transfers Ltd, Registered in England &amp; Wales. London,
+              UK.</span
+            >
+          </div>
+          <div class="gap-space-sm flex items-center self-end lg:self-auto">
+            <span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Visa</span
+            ><span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Mastercard</span
+            ><span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Amex</span
+            ><span
+              class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_2px_rgba(15,26,20,0.04)]"
+              >Apple Pay</span
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

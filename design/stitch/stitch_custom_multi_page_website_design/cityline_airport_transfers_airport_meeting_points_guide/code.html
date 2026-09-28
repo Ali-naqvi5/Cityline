@@ -1,0 +1,1142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="web_standard" name="shell-type" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#005229",
+              primary: "#005128",
+              "inverse-surface": "#27332c",
+              "on-surface": "#121e18",
+              "on-secondary": "#ffffff",
+              "surface-variant": "#d8e6db",
+              background: "#effdf2",
+              "secondary-fixed-dim": "#69dd92",
+              "tertiary-container": "#006c20",
+              "on-tertiary-container": "#8deb8d",
+              "secondary-container": "#83f7a9",
+              "on-tertiary-fixed-variant": "#005316",
+              error: "#ba1a1a",
+              "primary-fixed": "#a0f5b5",
+              "surface-tint": "#116c3a",
+              surface: "#effdf2",
+              "surface-bright": "#effdf2",
+              "on-secondary-container": "#00723d",
+              "surface-container-low": "#e9f7ec",
+              "inverse-primary": "#84d89b",
+              "surface-container-high": "#ddece1",
+              "secondary-fixed": "#85faac",
+              "on-surface-variant": "#3f4940",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              tertiary: "#005116",
+              "surface-container-highest": "#d8e6db",
+              "on-primary-fixed": "#00210d",
+              "primary-fixed-dim": "#84d89b",
+              "on-secondary-fixed": "#00210e",
+              secondary: "#006d3a",
+              "on-tertiary-fixed": "#002105",
+              "surface-container": "#e3f1e7",
+              "on-background": "#121e18",
+              outline: "#6f7a6f",
+              "on-primary": "#ffffff",
+              "outline-variant": "#bfc9bd",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "tertiary-fixed-dim": "#7edb7f",
+              "surface-dim": "#cfded3",
+              "on-secondary-fixed-variant": "#00522a",
+              "primary-container": "#0e6b39",
+              "tertiary-fixed": "#99f899",
+              "on-primary-container": "#94e9aa",
+              "inverse-on-surface": "#e6f4e9",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "space-lg": "1.5rem",
+              "space-xl": "2rem",
+              "space-md": "1rem",
+              gutter: "1.5rem",
+              "space-sm": "0.5rem",
+              margin: "2rem",
+              "space-xs": "0.25rem",
+              "gutter-sm": "1rem",
+              "margin-desktop": "7.5rem",
+            },
+            fontFamily: {
+              "body-sm": ["Inter"],
+              "body-md": ["Inter"],
+              "display-lg-mobile": ["Inter"],
+              "headline-md": ["Inter"],
+              "display-lg": ["Inter"],
+              "headline-lg": ["Inter"],
+              "label-sm": ["Inter"],
+              "label-md": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "fare-tabular": ["Inter"],
+              "headline-sm": ["Inter"],
+              "title-md": ["Inter"],
+              "body-lg": ["Inter"],
+            },
+            fontSize: {
+              "body-sm": [
+                "13px",
+                { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" },
+              ],
+              "body-md": [
+                "15px",
+                { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-lg-mobile": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "display-lg": [
+                "48px",
+                { lineHeight: "56px", letterSpacing: "-0.025em", fontWeight: "600" },
+              ],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "label-sm": [
+                "12px",
+                { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "600" },
+              ],
+              "label-md": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500" },
+              ],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "fare-tabular": [
+                "22px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "600" },
+              ],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" },
+              ],
+              "title-md": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background font-body-md text-on-surface">
+    <header
+      class="bg-surface/90 fixed top-0 z-50 w-full shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl"
+    >
+      <div
+        class="px-gutter gap-space-md mx-auto flex h-20 max-w-[1200px] items-center justify-between"
+      >
+        <div class="gap-space-md flex flex-shrink-0 items-center">
+          <div class="gap-space-sm flex items-center">
+            <div class="bg-surface-container rounded-lg p-1">
+              <img
+                alt="Cityline Transfers"
+                class="h-8 w-8 rounded-full object-cover"
+                src="https://lh3.googleusercontent.com/aida/AEtjO1Wo22GfjdFIHzeGon_3-qDYCbJ8zfGVPUbhyXvOo9JbmvAcXmgXfQMwgnJ4Wxogy2UM4FIGHiDezMQXtAw2SfVt6DhwgY3Qq1zNQg3KKOybc60shelsIWUoRYgyQGV65-lKSkkEImO86wU5QYICG2Y39soqob3WsMYuAO9ZSORsTwxoihDjWNbC7ItIMwMdRgAps-bkrW8eEj975ndX4P_k7BVhauMa7relA-Js419ty9Xa_joxr74MANuCv9-WhURwraMjiffCDg"
+              />
+            </div>
+            <div class="flex flex-col">
+              <span
+                class="font-headline-sm text-headline-sm text-primary leading-none tracking-tight"
+                >CITYLINE</span
+              ><span
+                class="font-label-sm text-label-sm text-on-surface-variant mt-0.5 tracking-wider uppercase"
+                >AIRPORT TRANSFERS · LONDON</span
+              >
+            </div>
+          </div>
+        </div>
+        <nav
+          class="gap-space-xs hidden items-center lg:flex"
+          data-active-classes="bg-surface-container-high text-primary font-title-md"
+        >
+          <a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="airports"
+            href="#"
+            >Airports</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="services"
+            href="#"
+            >Services</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="fleet"
+            href="#"
+            >Fleet</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="fares"
+            href="#"
+            >Fares</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="help"
+            href="#"
+            >Help</a
+          ><a
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg px-3 py-2 transition-all"
+            data-path="contact"
+            href="#"
+            >Contact</a
+          >
+        </nav>
+        <div class="gap-space-md flex flex-shrink-0 items-center">
+          <div class="hidden flex-col items-end xl:flex">
+            <span
+              class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+              >24/7 UK Dispatch</span
+            ><a
+              class="font-label-md text-label-md text-on-surface hover:text-primary tabular-nums transition-colors"
+              href="tel:+442079460812"
+              >+44 (0)20 7946 0812</a
+            >
+          </div>
+          <a
+            class="px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center rounded-lg py-2.5 shadow-[0_1px_3px_rgba(15,26,20,0.04)] transition-all hover:shadow-[0_8px_24px_rgba(14,107,57,0.08)]"
+            data-path="book-now"
+            href="#"
+            >Book now</a
+          >
+        </div>
+      </div>
+    </header>
+    <main class="bg-background w-full pt-20">
+      <div class="flex w-full flex-col">
+        <!-- Page Context & Terminal Selection Container -->
+        <div
+          class="bg-surface-container-lowest w-full pb-12 shadow-[0_1px_4px_rgba(18,30,24,0.03)]"
+        >
+          <div class="px-gutter mx-auto max-w-[1200px] pt-8">
+            <!-- Breadcrumb Hierarchy -->
+            <nav
+              aria-label="Breadcrumbs"
+              class="gap-space-xs font-label-sm text-label-sm text-on-surface-variant mb-6 flex items-center"
+            >
+              <a class="hover:text-primary transition-colors" href="#">Home</a>
+              <span class="material-symbols-outlined text-xs">chevron_right</span>
+              <a class="hover:text-primary transition-colors" href="#">Help Centre</a>
+              <span class="material-symbols-outlined text-xs">chevron_right</span>
+              <span class="text-on-surface-variant/80">At the airport</span>
+              <span class="material-symbols-outlined text-xs">chevron_right</span>
+              <span class="text-primary font-title-md">Meeting Points Guide</span>
+            </nav>
+            <!-- Editorial Header Section -->
+            <div
+              class="lg:gap-x-gutter grid grid-cols-1 items-end gap-y-6 pb-8 lg:grid-cols-12"
+            >
+              <div class="flex flex-col lg:col-span-8">
+                <div
+                  class="bg-surface-container mb-3 inline-flex w-fit items-center gap-2 rounded-full px-3 py-1"
+                >
+                  <span class="bg-primary h-2 w-2 animate-pulse rounded-full"></span>
+                  <span
+                    class="font-label-sm text-label-sm text-primary tracking-wider uppercase"
+                    >Arrivals Protocol · TfL Standard</span
+                  >
+                </div>
+                <h1
+                  class="font-display-lg text-display-lg text-on-surface leading-tight tracking-tight"
+                >
+                  Airport Meeting Points &amp; Chauffeur Walkthrough
+                </h1>
+              </div>
+              <div class="flex flex-col justify-end lg:col-span-4">
+                <p class="font-body-lg text-body-lg text-on-surface-variant">
+                  Clear, step-by-step visual guidance for locating your professional
+                  chauffeur inside the terminal after clearing customs.
+                </p>
+              </div>
+            </div>
+            <!-- Airport & Terminal Quick Selector Chips -->
+            <div class="pt-6">
+              <div class="mb-3 flex items-center justify-between gap-4">
+                <span
+                  class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+                  >Select London Terminal</span
+                >
+                <span
+                  class="font-label-sm text-label-sm text-primary flex items-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-sm">tune</span> Filter
+                  Active Hub
+                </span>
+              </div>
+              <div
+                class="flex scrollbar-none items-center gap-2 overflow-x-auto pb-2"
+                id="terminal-selector-chips"
+              >
+                <button
+                  class="terminal-btn bg-secondary-container text-on-secondary-container font-label-md text-label-md flex-shrink-0 rounded-full px-4 py-2 shadow-sm transition-all"
+                  data-terminal="LHR-T2"
+                >
+                  Heathrow Terminal 2
+                </button>
+                <button
+                  class="terminal-btn bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md flex-shrink-0 rounded-full px-4 py-2 transition-all"
+                  data-terminal="LHR-T3"
+                >
+                  Heathrow Terminal 3
+                </button>
+                <button
+                  class="terminal-btn bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md flex-shrink-0 rounded-full px-4 py-2 transition-all"
+                  data-terminal="LHR-T4"
+                >
+                  Heathrow Terminal 4
+                </button>
+                <button
+                  class="terminal-btn bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md flex-shrink-0 rounded-full px-4 py-2 transition-all"
+                  data-terminal="LHR-T5"
+                >
+                  Heathrow Terminal 5
+                </button>
+                <button
+                  class="terminal-btn bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md flex-shrink-0 rounded-full px-4 py-2 transition-all"
+                  data-terminal="LGW-N"
+                >
+                  Gatwick North
+                </button>
+                <button
+                  class="terminal-btn bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md flex-shrink-0 rounded-full px-4 py-2 transition-all"
+                  data-terminal="LGW-S"
+                >
+                  Gatwick South
+                </button>
+                <button
+                  class="terminal-btn bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md flex-shrink-0 rounded-full px-4 py-2 transition-all"
+                  data-terminal="LCY"
+                >
+                  London City
+                </button>
+                <button
+                  class="terminal-btn bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md flex-shrink-0 rounded-full px-4 py-2 transition-all"
+                  data-terminal="STN"
+                >
+                  Stansted Main
+                </button>
+                <button
+                  class="terminal-btn bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md flex-shrink-0 rounded-full px-4 py-2 transition-all"
+                  data-terminal="LTN"
+                >
+                  Luton Terminal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Primary Interactive Content Area -->
+        <div class="px-gutter mx-auto flex w-full max-w-[1200px] flex-col gap-12 py-12">
+          <!-- Meeting Summary Highlight Panel (Two-Tone Precision Card) -->
+          <section
+            class="bg-surface-container-low p-space-lg lg:p-space-xl relative overflow-hidden rounded-xl shadow-sm"
+          >
+            <div
+              class="relative z-10 flex flex-col items-stretch justify-between gap-8 lg:flex-row"
+            >
+              <!-- Left: Location & Chauffeur Identification Specs -->
+              <div class="flex flex-1 flex-col justify-between space-y-6">
+                <div class="flex items-center gap-3">
+                  <span
+                    class="bg-primary text-on-primary flex items-center justify-center rounded-lg p-2"
+                  >
+                    <span class="material-symbols-outlined text-xl">location_on</span>
+                  </span>
+                  <div>
+                    <span
+                      class="font-label-sm text-label-sm text-primary block tracking-widest uppercase"
+                      >Designated Rendezvous Spot</span
+                    >
+                    <h2
+                      class="font-headline-sm text-headline-sm text-on-surface"
+                      id="active-terminal-title"
+                    >
+                      Heathrow Terminal 2 — Arrival Hall
+                    </h2>
+                  </div>
+                </div>
+                <div class="space-y-4">
+                  <div class="bg-surface-container-lowest rounded-lg p-4 shadow-sm">
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant mb-1 block tracking-wider uppercase"
+                      >Exact Meeting Location</span
+                    >
+                    <p
+                      class="font-title-md text-title-md text-on-surface"
+                      id="active-exact-location"
+                    >
+                      Public Arrivals Concourse (Level 0), directly opposite Customs Exit
+                      by Marker 3 / Travelex kiosk
+                    </p>
+                  </div>
+                  <div
+                    class="bg-surface-container-lowest flex items-start gap-3 rounded-lg p-4 shadow-sm"
+                  >
+                    <span class="material-symbols-outlined text-primary mt-0.5"
+                      >badge</span
+                    >
+                    <div>
+                      <span
+                        class="font-label-sm text-label-sm text-on-surface-variant mb-0.5 block tracking-wider uppercase"
+                        >Chauffeur Identification</span
+                      >
+                      <p class="font-body-md text-body-md text-on-surface">
+                        Your driver will hold a clean electronic name board displaying
+                        your name or company booking reference.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Right: Real-time Telemetry & Free Waiting Card -->
+              <div
+                class="bg-surface-container-lowest flex flex-shrink-0 flex-col justify-between rounded-xl p-6 shadow-sm lg:w-80"
+              >
+                <div>
+                  <div class="flex items-center justify-between pb-4">
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+                      >Grace Period</span
+                    >
+                    <span
+                      class="font-label-sm text-label-sm text-primary inline-flex items-center gap-1 font-bold"
+                    >
+                      <span class="bg-primary h-1.5 w-1.5 rounded-full"></span> Guaranteed
+                    </span>
+                  </div>
+                  <div class="py-2">
+                    <span
+                      class="font-fare-tabular text-fare-tabular text-primary block text-4xl leading-none font-bold"
+                    >
+                      60 Min Free
+                    </span>
+                    <span
+                      class="font-label-sm text-label-sm text-on-surface-variant mt-2 block"
+                    >
+                      £0.00 charge until 60 minutes post-touchdown (flight wheels down)
+                    </span>
+                  </div>
+                </div>
+                <div class="mt-4 pt-6">
+                  <span
+                    class="font-label-sm text-label-sm text-on-surface-variant mb-1.5 block tracking-wider uppercase"
+                    >Direct Terminal Coordinator</span
+                  >
+                  <a
+                    class="bg-surface-container hover:bg-surface-container-high group flex items-center justify-between rounded-lg p-3 transition-colors"
+                    href="tel:+442079460812"
+                  >
+                    <span
+                      class="font-title-md text-title-md text-on-surface group-hover:text-primary tabular-nums transition-colors"
+                      >+44 (0)20 7946 0812</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-primary text-sm transition-transform group-hover:translate-x-0.5"
+                      >call</span
+                    >
+                  </a>
+                  <span
+                    class="font-label-sm text-label-sm text-on-surface-variant/80 mt-2 block text-center"
+                    >Available 24/7 for arrivals coordination</span
+                  >
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Three-Step Visual Chauffeur Walkthrough -->
+          <section class="flex flex-col gap-8">
+            <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                <span
+                  class="font-label-sm text-label-sm text-primary font-bold tracking-widest uppercase"
+                  >Step-by-Step Trajectory</span
+                >
+                <h2
+                  class="font-headline-lg text-headline-lg text-on-surface mt-1 tracking-tight"
+                >
+                  Arrivals Concourse Walkthrough
+                </h2>
+              </div>
+              <div
+                class="text-on-surface-variant font-label-md text-label-md flex items-center gap-2"
+              >
+                <span class="material-symbols-outlined text-primary text-base"
+                  >verified_user</span
+                >
+                <span>Verified passenger path for Heathrow Terminal 2</span>
+              </div>
+            </div>
+            <div class="gap-space-lg grid grid-cols-1 lg:grid-cols-3">
+              <!-- Step 1 Card -->
+              <article
+                class="bg-surface-container-lowest group flex flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-md"
+              >
+                <div
+                  class="bg-surface-container relative aspect-[4/3] w-full overflow-hidden"
+                >
+                  <img
+                    alt="Baggage reclaim corridor leading toward UK customs channels"
+                    class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9c38-Bp75xBbo5YEC4gCDNwmIL-Motg5ZaVd1mfkRkZhkrLWfxcHL9JTDfb39eosBA_1TVx9xySdVlbTBVPWvA1fFjPmSH6B2qVfj0ss3ROy8kvo0aK29y5YTEZXNCooWuCqgwH1EJSMkACRaPR_lE_zOASihrHOvprZgN21f9t6uXnuBtW_pqTv1jEfpNduE236jf7BGQRZ8mK3eN338XHJ3rBfBF9puvIg5HHo-q7C3--17lGQ_"
+                  />
+                  <div
+                    class="bg-primary text-on-primary font-label-sm text-label-sm absolute top-4 left-4 rounded-full px-3 py-1 font-bold tracking-wider uppercase shadow-sm"
+                  >
+                    Stage 01
+                  </div>
+                </div>
+                <div class="flex flex-1 flex-col justify-between space-y-4 p-6">
+                  <div>
+                    <div
+                      class="text-primary font-label-sm text-label-sm mb-2 flex items-center gap-2 font-semibold"
+                    >
+                      <span class="material-symbols-outlined text-sm">luggage</span>
+                      <span>Baggage Hall &amp; Customs Channel</span>
+                    </div>
+                    <h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">
+                      Collect Luggage &amp; Proceed to Customs
+                    </h3>
+                    <p class="font-body-md text-body-md text-on-surface-variant">
+                      After collecting your luggage from carousels 1–6, follow the
+                      illuminated overhead signs through the green 'Nothing to Declare' or
+                      red customs clearance channel.
+                    </p>
+                  </div>
+                  <div
+                    class="text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between pt-4"
+                  >
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs">timer</span> Est.
+                      10–25 mins
+                    </span>
+                    <span class="text-primary font-semibold">Step 1 of 3</span>
+                  </div>
+                </div>
+              </article>
+              <!-- Step 2 Card -->
+              <article
+                class="bg-surface-container-lowest group flex flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-md"
+              >
+                <div
+                  class="bg-surface-container relative aspect-[4/3] w-full overflow-hidden"
+                >
+                  <img
+                    alt="Mouth of airport public arrivals hall emerging past brushed steel barriers"
+                    class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0wRx2jdPnDRiy3kZJvDui4wMcOIIL34mrs-1-VaBLa9Ulk80Wn607qN1Zy6qQ1FaG2bdXxSUfFBkHYWy-to336pa84MxVVjDdR6EXcN6Mv9G6b8X_YolvvcUdDxoqu0B5V7QCzmoRo24BkIZZRup1OjXokPUoTnM8vgyutaL06p-0RKDR3Zn61LWstGSzDG14sbB-H3XHPtGwAChFFVVdRlf6lwIrJNv36tgeZun5bhMQqn4jqo4N"
+                  />
+                  <div
+                    class="bg-primary text-on-primary font-label-sm text-label-sm absolute top-4 left-4 rounded-full px-3 py-1 font-bold tracking-wider uppercase shadow-sm"
+                  >
+                    Stage 02
+                  </div>
+                </div>
+                <div class="flex flex-1 flex-col justify-between space-y-4 p-6">
+                  <div>
+                    <div
+                      class="text-primary font-label-sm text-label-sm mb-2 flex items-center gap-2 font-semibold"
+                    >
+                      <span class="material-symbols-outlined text-sm">meeting_room</span>
+                      <span>Terminal Exit Threshold</span>
+                    </div>
+                    <h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">
+                      Exit into the Public Concourse
+                    </h3>
+                    <p class="font-body-md text-body-md text-on-surface-variant">
+                      Walk through the double automatic sliding glass doors into the main
+                      public concourse. Look immediately forward toward the primary
+                      arrival greeting barrier.
+                    </p>
+                  </div>
+                  <div
+                    class="text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between pt-4"
+                  >
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs"
+                        >directions_walk</span
+                      >
+                      Level 0 Concourse
+                    </span>
+                    <span class="text-primary font-semibold">Step 2 of 3</span>
+                  </div>
+                </div>
+              </article>
+              <!-- Step 3 Card -->
+              <article
+                class="bg-surface-container-lowest group flex flex-col overflow-hidden rounded-xl shadow-sm transition-all hover:shadow-md"
+              >
+                <div
+                  class="bg-surface-container relative aspect-[4/3] w-full overflow-hidden"
+                >
+                  <img
+                    alt="Professional chauffeur standing at meeting barrier holding white digital name board"
+                    class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7ZdrpjenJ0wkQFhu6s7I9eT0CaFSwvGTKgfdhJYKI1ERNckcOV7NP7eSuZU52M12KQklEBz3J0gLPERN-hHLBILsRF4_Jf3NVEebyGEVrvxdxAWVsvC7_XchyV4Ps0O0VhGXrkn6lVLh3seaX3qXClokkOlL_4jmGpoOMfOs2oSqfmGun8tPP6BNLXvufiMs-U9A46BbWVzh4EhZUBkQDuUAXVix-802Pdk0SUF7XtYpMLnB9MTRW"
+                  />
+                  <div
+                    class="bg-primary text-on-primary font-label-sm text-label-sm absolute top-4 left-4 rounded-full px-3 py-1 font-bold tracking-wider uppercase shadow-sm"
+                  >
+                    Stage 03
+                  </div>
+                </div>
+                <div class="flex flex-1 flex-col justify-between space-y-4 p-6">
+                  <div>
+                    <div
+                      class="text-primary font-label-sm text-label-sm mb-2 flex items-center gap-2 font-semibold"
+                    >
+                      <span class="material-symbols-outlined text-sm">person_pin</span>
+                      <span>Chauffeur Reception</span>
+                    </div>
+                    <h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">
+                      Locate Your Chauffeur at Barrier
+                    </h3>
+                    <p class="font-body-md text-body-md text-on-surface-variant">
+                      Your chauffeur will be waiting directly beside the greeting barrier
+                      holding your personalised name board. They will introduce
+                      themselves, verify your destination, and assist with your luggage to
+                      the vehicle.
+                    </p>
+                  </div>
+                  <div
+                    class="text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between pt-4"
+                  >
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs">check_circle</span>
+                      Escort to vehicle
+                    </span>
+                    <span class="text-primary font-semibold">Step 3 of 3</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+          <!-- Practical Terminal Essentials Strip (3 Columns) -->
+          <section
+            class="bg-surface-container-lowest p-space-lg lg:p-space-xl rounded-xl shadow-sm"
+          >
+            <div class="mb-8">
+              <span
+                class="font-label-sm text-label-sm text-primary font-bold tracking-widest uppercase"
+                >Comprehensive Assurance</span
+              >
+              <h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">
+                Practical Terminal Essentials
+              </h2>
+            </div>
+            <div class="gap-space-lg grid grid-cols-1 md:grid-cols-3">
+              <!-- Column 1: Flight Delays -->
+              <div
+                class="bg-surface-container-low flex flex-col justify-between rounded-lg p-6"
+              >
+                <div class="space-y-3">
+                  <div
+                    class="bg-surface-container text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                  >
+                    <span class="material-symbols-outlined text-xl">flight_land</span>
+                  </div>
+                  <h3 class="font-title-md text-title-md text-on-surface">
+                    Flight Delays &amp; Early Landings
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant">
+                    Monitored automatically via ADS-B radar; driver coordinates arrival
+                    for when your flight actually lands.
+                  </p>
+                </div>
+                <div
+                  class="text-primary font-label-sm text-label-sm mt-6 flex items-center gap-1 pt-4"
+                >
+                  <span class="material-symbols-outlined text-sm">sync</span>
+                  <span>Live Air Traffic Telemetry</span>
+                </div>
+              </div>
+              <!-- Column 2: Delayed Luggage -->
+              <div
+                class="bg-surface-container-low flex flex-col justify-between rounded-lg p-6"
+              >
+                <div class="space-y-3">
+                  <div
+                    class="bg-surface-container text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                  >
+                    <span class="material-symbols-outlined text-xl">work_history</span>
+                  </div>
+                  <h3 class="font-title-md text-title-md text-on-surface">
+                    Delayed Luggage Assistance
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant">
+                    If your bags are delayed at the carousel, send a quick SMS to your
+                    driver or dispatch to extend waiting time.
+                  </p>
+                </div>
+                <div
+                  class="text-primary font-label-sm text-label-sm mt-6 flex items-center gap-1 pt-4"
+                >
+                  <span class="material-symbols-outlined text-sm">chat</span>
+                  <span>Direct Two-Way Communication</span>
+                </div>
+              </div>
+              <!-- Column 3: Terminal Parking -->
+              <div
+                class="bg-surface-container-low flex flex-col justify-between rounded-lg p-6"
+              >
+                <div class="space-y-3">
+                  <div
+                    class="bg-surface-container text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+                  >
+                    <span class="material-symbols-outlined text-xl">local_parking</span>
+                  </div>
+                  <h3 class="font-title-md text-title-md text-on-surface">
+                    Terminal Parking &amp; Forecourts
+                  </h3>
+                  <p class="font-body-md text-body-md text-on-surface-variant">
+                    All airport terminal barrier parking charges and forecourt fees are
+                    100% prepaid and included in your fare.
+                  </p>
+                </div>
+                <div
+                  class="text-primary font-label-sm text-label-sm mt-6 flex items-center gap-1 pt-4"
+                >
+                  <span class="material-symbols-outlined text-sm">receipt_long</span>
+                  <span>Zero Surcharges at Terminal</span>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Closing Assistance Band (Interactive & Dispatch Hotline) -->
+          <section
+            class="bg-surface-container-low p-space-lg lg:p-space-xl flex flex-col items-center justify-between gap-6 rounded-xl shadow-sm md:flex-row"
+          >
+            <div class="flex max-w-2xl items-start gap-4">
+              <div
+                class="bg-primary text-on-primary flex flex-shrink-0 items-center justify-center rounded-xl p-3"
+              >
+                <span class="material-symbols-outlined text-2xl">support_agent</span>
+              </div>
+              <div>
+                <h3 class="font-title-md text-title-md text-on-surface mb-1">
+                  Can't locate your chauffeur in the arrivals hall?
+                </h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                  Call our 24/7 dedicated dispatch coordinator on
+                  <a
+                    class="text-primary font-semibold hover:underline"
+                    href="tel:+442079460812"
+                    >+44 (0)20 7946 0812</a
+                  >
+                  or WhatsApp message your assigned driver directly through your booking
+                  confirmation link.
+                </p>
+              </div>
+            </div>
+            <div class="flex w-full flex-shrink-0 items-center gap-3 md:w-auto">
+              <a
+                class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex flex-1 items-center justify-center gap-2 rounded-lg px-5 py-3 text-center shadow-sm transition-all md:flex-initial"
+                href="tel:+442079460812"
+              >
+                <span class="material-symbols-outlined text-sm">phone_in_talk</span>
+                <span>Call Dispatch Now</span>
+              </a>
+              <a
+                class="bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex flex-1 items-center justify-center gap-2 rounded-lg px-5 py-3 text-center transition-all md:flex-initial"
+                href="#"
+              >
+                <span class="material-symbols-outlined text-sm">chat_bubble</span>
+                <span>WhatsApp Driver</span>
+              </a>
+            </div>
+          </section>
+        </div>
+        <!-- Interactive Terminal Switcher Behavior -->
+        <script>
+          (function () {
+            const terminalData = {
+              "LHR-T2": {
+                title: "Heathrow Terminal 2 — Arrival Hall",
+                location:
+                  "Public Arrivals Concourse (Level 0), directly opposite Customs Exit by Marker 3 / Travelex kiosk",
+              },
+              "LHR-T3": {
+                title: "Heathrow Terminal 3 — Arrival Hall",
+                location:
+                  "Public Concourse, immediately adjacent to the central seating plaza and WHSmith kiosk",
+              },
+              "LHR-T4": {
+                title: "Heathrow Terminal 4 — Arrival Hall",
+                location:
+                  "Ground Floor Arrivals, directly across from the Costa Coffee meeting pillar",
+              },
+              "LHR-T5": {
+                title: "Heathrow Terminal 5 — Arrival Hall",
+                location:
+                  "Ground Floor Public Arrivals, directly outside Customs by the North or South greeting barriers (per flight origin)",
+              },
+              "LGW-N": {
+                title: "Gatwick North Terminal — Arrival Concourse",
+                location:
+                  "International Arrivals Exit, directly alongside the central passenger greeting rail near Boots",
+              },
+              "LGW-S": {
+                title: "Gatwick South Terminal — Arrival Concourse",
+                location:
+                  "Main Public Arrivals area opposite Customs clearance gate, next to the terminal information point",
+              },
+              LCY: {
+                title: "London City Airport — Main Terminal",
+                location:
+                  "Single Terminal Exit gate, directly adjacent to the executive passenger waiting bay",
+              },
+              STN: {
+                title: "Stansted Main Terminal — Arrival Hall",
+                location:
+                  "International Arrivals Concourse, opposite Burger King and the railway transit portal",
+              },
+              LTN: {
+                title: "Luton Main Terminal — Arrivals Hall",
+                location:
+                  "Public Greeting Barrier immediately following customs exit, adjacent to Pret A Manger",
+              },
+            };
+
+            const buttons = document.querySelectorAll(".terminal-btn");
+            const titleEl = document.getElementById("active-terminal-title");
+            const locationEl = document.getElementById("active-exact-location");
+
+            buttons.forEach((btn) => {
+              btn.addEventListener("click", () => {
+                // Reset classes
+                buttons.forEach((b) => {
+                  b.classList.remove(
+                    "bg-secondary-container",
+                    "text-on-secondary-container",
+                    "shadow-sm",
+                  );
+                  b.classList.add("bg-surface-container-low", "text-on-surface-variant");
+                });
+
+                // Activate clicked button
+                btn.classList.remove(
+                  "bg-surface-container-low",
+                  "text-on-surface-variant",
+                );
+                btn.classList.add(
+                  "bg-secondary-container",
+                  "text-on-secondary-container",
+                  "shadow-sm",
+                );
+
+                // Update info with gentle transition
+                const code = btn.getAttribute("data-terminal");
+                if (terminalData[code]) {
+                  titleEl.textContent = terminalData[code].title;
+                  locationEl.textContent = terminalData[code].location;
+                }
+              });
+            });
+          })();
+        </script>
+      </div>
+    </main>
+    <footer
+      class="bg-surface-container-lowest mt-space-xl w-full pt-16 pb-12 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"
+    >
+      <div class="px-gutter mx-auto max-w-[1200px]">
+        <div class="gap-space-xl mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Airports
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="heathrow-transfers"
+                  href="#"
+                  >Heathrow Airport</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="gatwick-transfers"
+                  href="#"
+                  >Gatwick Airport</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="stansted-transfers"
+                  href="#"
+                  >Stansted Airport</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="luton-transfers"
+                  href="#"
+                  >Luton Airport</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="london-city-transfers"
+                  href="#"
+                  >London City Airport</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="southend-transfers"
+                  href="#"
+                  >Southend Airport</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Services
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="airport-transfers"
+                  href="#"
+                  >Airport Transfers</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="corporate-chauffeur"
+                  href="#"
+                  >Corporate Chauffeur</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="flight-delay-monitoring"
+                  href="#"
+                  >Flight Delay Monitoring</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="meet-and-greet"
+                  href="#"
+                  >Meet &amp; Greet</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="executive-mpv"
+                  href="#"
+                  >Executive MPV</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">
+              Help Centre
+            </h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a class="hover:text-primary transition-colors" data-path="help" href="#"
+                  >All Topics</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="help-meeting-points"
+                  href="#"
+                  >Meeting Points</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="luggage-policy"
+                  href="#"
+                  >Luggage Policy</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="child-seat-regulations"
+                  href="#"
+                  >Child Seat Regulations</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="cancellation-policy"
+                  href="#"
+                  >Cancellation Policy</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="contact"
+                  href="#"
+                  >24/7 Dispatch</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="space-y-space-sm flex flex-col">
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-xs">Legal</h4>
+            <ul
+              class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="about-cityline"
+                  href="#"
+                  >About</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="tfl-licensing-compliance"
+                  href="#"
+                  >TfL Licensing #008942/01</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="terms-conditions"
+                  href="#"
+                  >Terms</a
+                >
+              </li>
+              <li>
+                <a
+                  class="hover:text-primary transition-colors"
+                  data-path="privacy-policy"
+                  href="#"
+                  >Privacy</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="pt-space-lg gap-space-md flex flex-col items-center justify-between md:flex-row"
+        >
+          <div
+            class="gap-space-sm text-on-surface-variant font-label-sm text-label-sm flex items-center"
+          >
+            <span class="material-symbols-outlined text-primary text-base">verified</span
+            ><span
+              >© Cityline Transfers Ltd. TfL PH Operator Lic. #008942/01. Registered in
+              England &amp; Wales. London, UK.</span
+            >
+          </div>
+          <div class="gap-space-xs flex items-center">
+            <span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >VISA</span
+            ><span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >MC</span
+            ><span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >AMEX</span
+            ><span
+              class="bg-surface-container font-label-sm text-label-sm text-on-surface rounded px-2 py-1 font-bold tracking-wider"
+              >APPLE PAY</span
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

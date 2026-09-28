@@ -1,0 +1,1307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-container": "#0e6b39",
+              "secondary-container": "#83f7a9",
+              "on-tertiary-fixed": "#002105",
+              "surface-container-lowest": "#ffffff",
+              "surface-tint": "#116c3a",
+              outline: "#6f7a6f",
+              "on-secondary-fixed": "#00210e",
+              "on-error-container": "#93000a",
+              background: "#effdf2",
+              secondary: "#006d3a",
+              "on-primary-fixed": "#00210d",
+              "surface-bright": "#effdf2",
+              "on-surface-variant": "#3f4940",
+              "on-background": "#121e18",
+              "surface-dim": "#cfded3",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#94e9aa",
+              "primary-fixed": "#a0f5b5",
+              "tertiary-fixed-dim": "#7edb7f",
+              "tertiary-fixed": "#99f899",
+              "primary-fixed-dim": "#84d89b",
+              "surface-container-low": "#e9f7ec",
+              "tertiary-container": "#006c20",
+              "surface-container": "#e3f1e7",
+              "on-secondary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              primary: "#005128",
+              "outline-variant": "#bfc9bd",
+              "secondary-fixed-dim": "#69dd92",
+              "on-secondary-container": "#00723d",
+              "error-container": "#ffdad6",
+              tertiary: "#005116",
+              "inverse-on-surface": "#e6f4e9",
+              "on-tertiary-fixed-variant": "#005316",
+              surface: "#effdf2",
+              "secondary-fixed": "#85faac",
+              "surface-container-highest": "#d8e6db",
+              "inverse-primary": "#84d89b",
+              "on-primary-fixed-variant": "#005229",
+              "surface-container-high": "#ddece1",
+              "on-secondary-fixed-variant": "#00522a",
+              error: "#ba1a1a",
+              "on-surface": "#121e18",
+              "surface-variant": "#d8e6db",
+              "on-tertiary-container": "#8deb8d",
+              "on-error": "#ffffff",
+              "inverse-surface": "#27332c",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "margin-desktop": "7.5rem",
+              "space-md": "1rem",
+              "space-xl": "2rem",
+              "space-lg": "1.5rem",
+              "space-sm": "0.5rem",
+              "space-xs": "0.25rem",
+              gutter: "1.5rem",
+              "gutter-sm": "1rem",
+              margin: "2rem",
+            },
+            fontFamily: {
+              "label-sm": ["Inter"],
+              "label-md": ["Inter"],
+              "body-lg": ["Inter"],
+              "display-lg": ["Inter"],
+              "body-sm": ["Inter"],
+              "fare-tabular": ["Inter"],
+              "headline-sm": ["Inter"],
+              "headline-lg": ["Inter"],
+              "headline-md": ["Inter"],
+              "body-md": ["Inter"],
+              "display-lg-mobile": ["Inter"],
+              "title-md": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+            },
+            fontSize: {
+              "label-sm": [
+                "12px",
+                { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "600" },
+              ],
+              "label-md": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500" },
+              ],
+              "body-lg": [
+                "18px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-lg": [
+                "48px",
+                { lineHeight: "56px", letterSpacing: "-0.025em", fontWeight: "600" },
+              ],
+              "body-sm": [
+                "13px",
+                { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" },
+              ],
+              "fare-tabular": [
+                "22px",
+                { lineHeight: "28px", letterSpacing: "0em", fontWeight: "600" },
+              ],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" },
+              ],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+              "body-md": [
+                "15px",
+                { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" },
+              ],
+              "display-lg-mobile": [
+                "32px",
+                { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+              ],
+              "title-md": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" },
+              ],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <meta content="web_standard" name="shell-type" />
+  </head>
+  <body class="bg-surface-container-lowest font-body-md text-on-surface antialiased">
+    <header
+      class="bg-surface-container-lowest/95 fixed top-0 right-0 left-0 z-50 w-full shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-md"
+    >
+      <div
+        class="px-gutter mx-auto flex h-20 max-w-[1200px] items-center justify-between"
+      >
+        <div class="gap-space-lg flex items-center">
+          <a class="gap-space-sm flex items-center" data-path="home" href="#"
+            ><div
+              class="bg-primary text-on-primary flex h-9 w-9 items-center justify-center rounded-lg"
+            >
+              <span class="material-symbols-outlined text-title-md font-title-md"
+                >local_taxi</span
+              >
+            </div>
+            <div class="flex flex-col">
+              <span
+                class="font-title-md text-title-md text-on-surface leading-none tracking-tight"
+                >Cityline</span
+              ><span
+                class="font-label-sm text-label-sm text-on-surface-variant mt-space-xs leading-none"
+                >Airport Transfers</span
+              >
+            </div></a
+          >
+          <nav
+            class="gap-space-xs hidden items-center xl:flex"
+            data-active-classes="bg-surface-container text-primary font-bold"
+          >
+            <a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="airports"
+              href="#"
+              >Airports</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="services"
+              href="#"
+              >Services</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="fleet"
+              href="#"
+              >Fleet</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="fares"
+              href="#"
+              >Fares</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="help"
+              href="#"
+              >Help</a
+            ><a
+              class="px-space-md py-space-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface rounded-lg transition-all"
+              data-path="contact"
+              href="#"
+              >Contact</a
+            >
+          </nav>
+        </div>
+        <div class="gap-space-lg flex items-center">
+          <div class="gap-space-sm text-on-surface-variant hidden items-center lg:flex">
+            <span
+              class="material-symbols-outlined text-primary text-title-md font-title-md"
+              >headset_mic</span
+            >
+            <div class="flex flex-col">
+              <span
+                class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+                >24/7 UK Dispatch</span
+              ><a
+                class="font-label-md text-label-md text-on-surface hover:text-primary font-medium transition-colors"
+                href="tel:+442079460812"
+                >+44 (0)20 7946 0812</a
+              >
+            </div>
+          </div>
+          <a
+            class="px-space-lg py-space-sm bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md hidden items-center justify-center rounded-lg shadow-sm transition-colors sm:inline-flex"
+            data-path="booking"
+            href="#"
+            >Book now</a
+          >
+          <div class="gap-space-sm pl-space-sm flex items-center">
+            <img
+              alt="Profile"
+              class="h-8 w-8 rounded-full object-cover"
+              src="https://lh3.googleusercontent.com/aida/AEtjO1Wo22GfjdFIHzeGon_3-qDYCbJ8zfGVPUbhyXvOo9JbmvAcXmgXfQMwgnJ4Wxogy2UM4FIGHiDezMQXtAw2SfVt6DhwgY3Qq1zNQg3KKOybc60shelsIWUoRYgyQGV65-lKSkkEImO86wU5QYICG2Y39soqob3WsMYuAO9ZSORsTwxoihDjWNbC7ItIMwMdRgAps-bkrW8eEj975ndX4P_k7BVhauMa7relA-Js419ty9Xa_joxr74MANuCv9-WhURwraMjiffCDg"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="bg-surface-container-lowest w-full pt-20">
+      <div class="flex w-full flex-col">
+        <!-- SECTION 1: HERO SECTION -->
+        <section class="px-gutter w-full py-16">
+          <div
+            class="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-12 lg:grid-cols-12"
+          >
+            <!-- Left Column (approx 55% width: 7 cols) -->
+            <div class="flex flex-col items-start lg:col-span-7">
+              <!-- Service Pill -->
+              <div
+                class="bg-surface-container-low text-primary-container font-label-sm text-label-sm mb-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 shadow-sm"
+              >
+                <span class="bg-secondary-fixed h-2 w-2 rounded-full"></span>
+                <span>CORPORATE &amp; BUSINESS TRAVEL</span>
+              </div>
+              <!-- H1 Heading -->
+              <h1
+                class="font-display-lg text-display-lg text-on-surface mb-6 font-semibold tracking-tight"
+              >
+                Corporate ground transport built around your business schedule.
+              </h1>
+              <!-- Subcopy -->
+              <p class="font-body-lg text-body-lg text-on-surface-variant mb-8 max-w-xl">
+                Consolidated monthly invoicing, guaranteed vehicle availability, and
+                dedicated dispatch coordinators for executive assistants and corporate
+                travel managers.
+              </p>
+              <!-- CTA Buttons -->
+              <div class="mb-6 flex flex-wrap items-center gap-4">
+                <a
+                  class="bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md inline-flex items-center justify-center gap-2 rounded-lg px-7 py-3.5 shadow-sm transition-colors duration-150"
+                  href="#apply-form"
+                >
+                  <span>Open a business account</span>
+                  <span class="material-symbols-outlined text-label-md"
+                    >arrow_forward</span
+                  >
+                </a>
+                <a
+                  class="bg-surface-container-lowest text-primary-container hover:bg-surface-container-low font-label-md text-label-md inline-flex items-center justify-center rounded-lg px-7 py-3.5 shadow-sm transition-colors duration-150"
+                  href="#apply-form"
+                >
+                  Get a quote
+                </a>
+              </div>
+              <!-- Quick Reassurance -->
+              <div
+                class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-2"
+              >
+                <span
+                  class="material-symbols-outlined text-primary text-title-md font-title-md"
+                  >verified_user</span
+                >
+                <span
+                  >No minimum monthly spend · 30-day payment terms · TfL Lic.
+                  #008942/01</span
+                >
+              </div>
+            </div>
+            <!-- Right Column (approx 45% width: 5 cols) -->
+            <div class="relative w-full lg:col-span-5">
+              <!-- Layered Mint Accent Block -->
+              <div
+                class="bg-secondary-container/40 absolute -right-4 -bottom-4 -z-10 h-full w-full rounded-2xl"
+              ></div>
+              <!-- Photograph Frame -->
+              <div
+                class="bg-surface-container-high relative aspect-[4/3] w-full overflow-hidden rounded-xl shadow-md"
+              >
+                <img
+                  class="h-full w-full object-cover object-center"
+                  data-alt="Two well-dressed corporate executives in tailored dark overcoats walking down a quiet London financial district street pulling sleek rolling executive luggage next to a polished black luxury chauffeur sedan on a misty morning with soft ambient city lighting."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_af5edLnHfqatPvD7e9F6jc4dljUx_qZRs3umFgczXjBtUnxEw0ONt6rpLRcKLM8Ptjwgg7-zQcs95734OEFwOkffiuLGLuBjkMbJ4WJIX5cD7PdqhQGaTpoyFs4aUAoqMm75TCifdKFFqYdrNeQ78g3W_Ie0ZoYZXWawdI4Vcv-X5cjlDfUW7nm9ibetY0e4fq48OaKzgVHhrcD8Tz68L82Qi2pGvsl4dW858HyRkEEQ77LPwKhL"
+                />
+                <!-- Subtle corner reassurance badge -->
+                <div
+                  class="bg-surface-container-lowest/95 absolute bottom-4 left-4 flex items-center gap-2.5 rounded-lg px-3.5 py-2 shadow-sm backdrop-blur-md"
+                >
+                  <span class="bg-secondary-fixed h-2.5 w-2.5 rounded-full"></span>
+                  <span class="font-label-sm text-label-sm text-on-surface"
+                    >London City &amp; Airport Transit Fleet</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- SECTION 2: THREE BENEFIT COLUMNS -->
+        <section class="px-gutter bg-surface-container-low w-full py-16">
+          <div class="mx-auto flex max-w-[1200px] flex-col gap-10">
+            <div class="flex flex-col items-center text-center">
+              <span
+                class="font-label-sm text-label-sm text-primary mb-2 tracking-wider uppercase"
+                >Built for executive operations</span
+              >
+              <h2
+                class="font-headline-lg text-headline-lg text-on-surface tracking-tight"
+              >
+                Why leading London businesses choose Cityline
+              </h2>
+            </div>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <!-- Column 1 -->
+              <div
+                class="bg-surface-container-lowest flex flex-col rounded-xl p-8 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div
+                  class="bg-surface-container-low mb-6 flex h-14 w-14 items-center justify-center rounded-lg p-2"
+                >
+                  <img
+                    alt="Monthly Invoicing Icon"
+                    class="h-full w-full object-contain"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1XA4ijID2CW27SYJrhqoQhWbQhP94t1qNN_AsPw_hGEWtB5u5zyPO0bL8Sm3Rga6rdFCQEWPz0ZoKpKxP9sE0vEua-aSCdXAMU_ESZcngJQFwSUVzYIebPsREDb4NARGejvYWu8vpglDyl7Pv9xPOyoOEKi1wcAfVBCNcv1oVWzoRxiYZJjIwGqcl04xGqkzL3O2YLGdzKEJ-f1DKv43Xg9zmKW6PRM8gXng2nYRGWLpoH0Pt1AO5jf6Ug"
+                  />
+                </div>
+                <h3 class="font-title-md text-title-md text-on-surface mb-3">
+                  Monthly consolidated invoicing
+                </h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                  Replace messy expensing and individual card charges. Receive a single
+                  itemised monthly VAT invoice broken down by employee, cost centre, and
+                  journey code.
+                </p>
+              </div>
+              <!-- Column 2 -->
+              <div
+                class="bg-surface-container-lowest flex flex-col rounded-xl p-8 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div
+                  class="bg-surface-container-low mb-6 flex h-14 w-14 items-center justify-center rounded-lg p-2"
+                >
+                  <img
+                    alt="Account Manager Icon"
+                    class="h-full w-full object-contain"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1UPgUWGBS9w7VjaVDZXOVBcULFJ2oAaioOijhlMagRqKyBhHI3ZDUI0ZAxrCOQfd4Qonn15wDvntgT6msHI2iti2vf4sdyDm-WHMfzpX60_kk8WD6eJ72ql90Ft1WdXqQ3x4RZHHilk7pE3DpQYJRzQ9fNvqQZmDvXg0WUzwyQTRwAwCcN2CKYh8gTRG_TI51BACprmP75cDamsCAM6unmTV-zVVpQ9Z8Fj-HscgYBxvDuS3s7QP36kffo"
+                  />
+                </div>
+                <h3 class="font-title-md text-title-md text-on-surface mb-3">
+                  Dedicated account manager
+                </h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                  Direct direct-dial telephone and WhatsApp access to your assigned London
+                  dispatch coordinator for priority bookings, last-minute VIP changes, and
+                  multi-car itineraries.
+                </p>
+              </div>
+              <!-- Column 3 -->
+              <div
+                class="bg-surface-container-lowest flex flex-col rounded-xl p-8 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div
+                  class="bg-surface-container-low mb-6 flex h-14 w-14 items-center justify-center rounded-lg p-2"
+                >
+                  <img
+                    alt="Book for Colleagues Icon"
+                    class="h-full w-full object-contain"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1VW6A31stkw2zc2nqXWNcsMyLoCFxOvnMNrhWrFDCH3lguKIlqxVjZvb7jRNeQlWDw4yC5BousV8UVAjABmp0fFiZCu20I2xu3v7HzUYKPHwFGLzsKV5Un2HAot4gHLCLmstIUu_d-dn2ip4HRCY3GYqwCHWV25Cpk5zCI7CItoE01nc2xX4bejf7EeAhZ0vflctb6cPK9suFk86hZwHmIOluJd7MJsLmXU_vLRiNwtk2WF2wcdIkaUUL0"
+                  />
+                </div>
+                <h3 class="font-title-md text-title-md text-on-surface mb-3">
+                  Book on behalf of colleagues &amp; clients
+                </h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                  Centralised web portal allowing executive assistants to book, track live
+                  flight status, and receive driver arrival alerts on behalf of travelling
+                  directors and international visitors.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- SECTION 3: HOW IT WORKS (FOUR NUMBERED STEPS) -->
+        <section class="px-gutter bg-surface-container-lowest w-full py-20">
+          <div class="mx-auto flex max-w-[1200px] flex-col gap-14">
+            <div class="mx-auto flex max-w-2xl flex-col items-center text-center">
+              <span
+                class="font-label-sm text-label-sm text-primary mb-2 tracking-wider uppercase"
+                >Frictionless onboarding</span
+              >
+              <h2
+                class="font-headline-lg text-headline-lg text-on-surface mb-3 tracking-tight"
+              >
+                How corporate accounts work
+              </h2>
+              <p class="font-body-md text-body-md text-on-surface-variant">
+                Four straightforward steps from account setup to your first chauffeur
+                journey.
+              </p>
+            </div>
+            <!-- Process container with connecting track -->
+            <div class="relative grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+              <!-- Thin horizontal connecting line across desktop -->
+              <div
+                class="bg-surface-container-highest absolute top-6 right-12 left-12 -z-0 hidden h-0.5 lg:block"
+              ></div>
+              <!-- Step 1 -->
+              <div
+                class="bg-surface-container-lowest relative z-10 flex flex-col items-start p-4 lg:p-0"
+              >
+                <div
+                  class="font-headline-sm text-headline-sm text-on-surface bg-secondary-container mb-5 flex h-12 w-12 items-center justify-center rounded-full shadow-sm"
+                >
+                  1
+                </div>
+                <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                  Submit company details
+                </h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Fill out our short 2-minute form with your billing details and estimated
+                  monthly travel volume.
+                </p>
+              </div>
+              <!-- Step 2 -->
+              <div
+                class="bg-surface-container-lowest relative z-10 flex flex-col items-start p-4 lg:p-0"
+              >
+                <div
+                  class="font-headline-sm text-headline-sm text-on-surface bg-secondary-container mb-5 flex h-12 w-12 items-center justify-center rounded-full shadow-sm"
+                >
+                  2
+                </div>
+                <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                  Account activation in 2h
+                </h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Your corporate account is verified and credit limits are approved on
+                  standard 30-day net terms.
+                </p>
+              </div>
+              <!-- Step 3 -->
+              <div
+                class="bg-surface-container-lowest relative z-10 flex flex-col items-start p-4 lg:p-0"
+              >
+                <div
+                  class="font-headline-sm text-headline-sm text-on-surface bg-secondary-container mb-5 flex h-12 w-12 items-center justify-center rounded-full shadow-sm"
+                >
+                  3
+                </div>
+                <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                  Invite team bookers
+                </h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Add authorized executive assistants or travel managers with custom
+                  departmental spend controls.
+                </p>
+              </div>
+              <!-- Step 4 -->
+              <div
+                class="bg-surface-container-lowest relative z-10 flex flex-col items-start p-4 lg:p-0"
+              >
+                <div
+                  class="font-headline-sm text-headline-sm text-on-surface bg-secondary-container mb-5 flex h-12 w-12 items-center justify-center rounded-full shadow-sm"
+                >
+                  4
+                </div>
+                <h3 class="font-title-md text-title-md text-on-surface mb-2">
+                  Book on account
+                </h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Book immediately via telephone, email, or online portal with zero surge
+                  pricing and automated receipts.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- SECTION 4: FEATURES CHECKLIST IN TWO COLUMNS -->
+        <section class="px-gutter bg-surface-container-low w-full py-16">
+          <div class="mx-auto flex max-w-[1200px] flex-col gap-10">
+            <div class="flex flex-col items-start">
+              <span
+                class="font-label-sm text-label-sm text-primary mb-2 tracking-wider uppercase"
+                >Operational guarantees</span
+              >
+              <h2
+                class="font-headline-lg text-headline-lg text-on-surface tracking-tight"
+              >
+                Corporate account features &amp; guarantees
+              </h2>
+            </div>
+            <div class="grid grid-cols-1 gap-x-12 gap-y-6 md:grid-cols-2">
+              <!-- Column 1 -->
+              <div class="flex flex-col gap-5">
+                <!-- Item 1 -->
+                <div
+                  class="bg-surface-container-lowest flex items-start gap-4 rounded-xl p-4 shadow-sm"
+                >
+                  <div
+                    class="bg-secondary-container/40 text-primary-container mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <span class="material-symbols-outlined text-label-md">check</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Fixed corporate pricing</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5"
+                      >Lock in standard airport and inter-city rates with zero surge
+                      during peak hours or rail strikes.</span
+                    >
+                  </div>
+                </div>
+                <!-- Item 2 -->
+                <div
+                  class="bg-surface-container-lowest flex items-start gap-4 rounded-xl p-4 shadow-sm"
+                >
+                  <div
+                    class="bg-secondary-container/40 text-primary-container mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <span class="material-symbols-outlined text-label-md">check</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Automated flight tracking</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5"
+                      >Inbound flights tracked via live ADS-B radar; chauffeur arrival
+                      adjusts seamlessly for delays.</span
+                    >
+                  </div>
+                </div>
+                <!-- Item 3 -->
+                <div
+                  class="bg-surface-container-lowest flex items-start gap-4 rounded-xl p-4 shadow-sm"
+                >
+                  <div
+                    class="bg-secondary-container/40 text-primary-container mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <span class="material-symbols-outlined text-label-md">check</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >60 minutes complimentary waiting</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5"
+                      >Generous terminal buffer included on all international arrivals
+                      with zero overtime penalty.</span
+                    >
+                  </div>
+                </div>
+                <!-- Item 4 -->
+                <div
+                  class="bg-surface-container-lowest flex items-start gap-4 rounded-xl p-4 shadow-sm"
+                >
+                  <div
+                    class="bg-secondary-container/40 text-primary-container mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <span class="material-symbols-outlined text-label-md">check</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Executive vehicle fleet</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5"
+                      >Mercedes-Benz E-Class, S-Class, V-Class MPVs, and executive
+                      minibuses under 3 years old.</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <!-- Column 2 -->
+              <div class="flex flex-col gap-5">
+                <!-- Item 5 -->
+                <div
+                  class="bg-surface-container-lowest flex items-start gap-4 rounded-xl p-4 shadow-sm"
+                >
+                  <div
+                    class="bg-secondary-container/40 text-primary-container mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <span class="material-symbols-outlined text-label-md">check</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Meet &amp; greet in arrivals hall</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5"
+                      >Chauffeurs hold bespoke branded digital or card name boards inside
+                      the terminal concourse.</span
+                    >
+                  </div>
+                </div>
+                <!-- Item 6 -->
+                <div
+                  class="bg-surface-container-lowest flex items-start gap-4 rounded-xl p-4 shadow-sm"
+                >
+                  <div
+                    class="bg-secondary-container/40 text-primary-container mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <span class="material-symbols-outlined text-label-md">check</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >TfL licensed &amp; fully vetted</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5"
+                      >Every driver is fully licensed by Transport for London with
+                      enhanced background checks.</span
+                    >
+                  </div>
+                </div>
+                <!-- Item 7 -->
+                <div
+                  class="bg-surface-container-lowest flex items-start gap-4 rounded-xl p-4 shadow-sm"
+                >
+                  <div
+                    class="bg-secondary-container/40 text-primary-container mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <span class="material-symbols-outlined text-label-md">check</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >Multi-passenger group coordination</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5"
+                      >Coordinated multi-vehicle transfers for corporate offsites,
+                      roadshows, and board meetings.</span
+                    >
+                  </div>
+                </div>
+                <!-- Item 8 -->
+                <div
+                  class="bg-surface-container-lowest flex items-start gap-4 rounded-xl p-4 shadow-sm"
+                >
+                  <div
+                    class="bg-secondary-container/40 text-primary-container mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                  >
+                    <span class="material-symbols-outlined text-label-md">check</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-title-md text-title-md text-on-surface"
+                      >24/7 priority dispatch desk</span
+                    >
+                    <span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5"
+                      >Real humans in London available around the clock to support urgent
+                      itinerary adjustments.</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- SECTION 5: CASE STUDY CARD -->
+        <section class="px-gutter bg-surface-container-lowest w-full py-16">
+          <div class="relative mx-auto max-w-[1200px]">
+            <!-- Decorative Backdrop Asset -->
+            <div
+              class="pointer-events-none absolute -top-10 -right-10 h-72 w-72 opacity-40"
+            >
+              <img
+                alt="Case Study Accent Shape"
+                class="h-full w-full object-contain"
+                src="https://lh3.googleusercontent.com/aida/AEtjO1XAcW9a0YLoBIB_KdpfGnsEygCMSegoamqGQ2VXF7fLCnKvNsFaueRKDDlJEorxhmGwtfe0c6mZzMc8YTzVhg2y-B0DkwqDTdSbm4jJmwZy9CJ4RDbiGzbdicbG7q5A_3sZq9O3mlz1-LH0yh43MkwahEROrykP6h4Xtg3Jgl0n29XgN-4Yw50JRCLadDAwULozlkdSSmezKicQot03Qtaxejxow2flTPzb_gSK9UiXQSaeyNFYsn6Tjw"
+              />
+            </div>
+            <!-- Case Study Elevated Card -->
+            <div
+              class="bg-surface-container-low relative z-10 flex flex-col gap-8 rounded-2xl p-8 shadow-sm md:p-12"
+            >
+              <div
+                class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
+              >
+                <span
+                  class="bg-surface-container-lowest text-primary-container font-label-sm text-label-sm inline-flex w-fit items-center rounded-full px-3 py-1 tracking-wider uppercase shadow-xs"
+                >
+                  CASE STUDY · INVESTMENT MANAGEMENT FIRM
+                </span>
+                <div class="text-primary flex items-center gap-1">
+                  <span
+                    class="material-symbols-outlined text-title-md"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >star</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-title-md"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >star</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-title-md"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >star</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-title-md"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >star</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-title-md"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >star</span
+                  >
+                </div>
+              </div>
+              <blockquote
+                class="font-headline-md text-headline-md text-on-surface font-normal italic"
+              >
+                “Cityline streamlined our European partner transfers completely. Our
+                executive assistants save hours each week by not having to chase driver
+                updates or reconcile individual taxi receipts, and our visiting directors
+                are met reliably on the concourse every single time.”
+              </blockquote>
+              <div class="flex flex-col">
+                <span class="font-title-md text-title-md text-on-surface"
+                  >Head of Facilities &amp; Corporate Travel</span
+                >
+                <span class="font-body-sm text-body-sm text-on-surface-variant"
+                  >Leading Mayfair Private Equity Firm</span
+                >
+              </div>
+              <!-- 3 Stat Callouts -->
+              <div
+                class="bg-surface-container-lowest/60 grid grid-cols-1 gap-6 rounded-xl p-6 pt-6 sm:grid-cols-3"
+              >
+                <div class="flex flex-col">
+                  <span
+                    class="font-display-lg text-display-lg text-primary font-semibold tracking-tight"
+                    >100%</span
+                  >
+                  <span class="font-body-sm text-body-sm text-on-surface-variant mt-1"
+                    >On-time terminal collection rate across 340+ annual journeys</span
+                  >
+                </div>
+                <div class="flex flex-col">
+                  <span
+                    class="font-display-lg text-display-lg text-primary font-semibold tracking-tight"
+                    >£14,200</span
+                  >
+                  <span class="font-body-sm text-body-sm text-on-surface-variant mt-1"
+                    >Annual spend consolidated into single monthly VAT receipts</span
+                  >
+                </div>
+                <div class="flex flex-col">
+                  <span
+                    class="font-display-lg text-display-lg text-primary font-semibold tracking-tight"
+                    >4.98<span
+                      class="font-title-md text-title-md text-on-surface-variant font-normal"
+                    >
+                      / 5</span
+                    ></span
+                  >
+                  <span class="font-body-sm text-body-sm text-on-surface-variant mt-1"
+                    >Internal visiting director satisfaction rating</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- SECTION 6: COMPACT ENQUIRY FORM -->
+        <section class="px-gutter bg-surface-container-low w-full py-16" id="apply-form">
+          <div
+            class="bg-surface-container-lowest mx-auto flex max-w-[800px] flex-col rounded-2xl p-8 shadow-sm sm:p-12"
+          >
+            <div class="mb-8 flex flex-col items-center text-center">
+              <span
+                class="font-label-sm text-label-sm text-primary mb-2 tracking-wider uppercase"
+                >Corporate Onboarding</span
+              >
+              <h2
+                class="font-headline-lg text-headline-lg text-on-surface mb-2 tracking-tight"
+              >
+                Open your Cityline corporate account today
+              </h2>
+              <p class="font-body-md text-body-md text-on-surface-variant">
+                Apply in 2 minutes. Our corporate team will activate your credit facility
+                within 2 hours.
+              </p>
+            </div>
+            <form
+              class="flex flex-col gap-5"
+              onsubmit="
+                event.preventDefault();
+                document.getElementById('form-success').classList.remove('hidden');
+              "
+            >
+              <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <!-- Company Name -->
+                <div class="flex flex-col gap-1.5">
+                  <label class="font-label-md text-label-md text-on-surface"
+                    >Company Name</label
+                  >
+                  <input
+                    class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-primary placeholder:text-on-surface-variant/60 h-12 rounded-xl px-4 shadow-xs outline-none focus:ring-2"
+                    placeholder="e.g. Berkeley Capital Partners Ltd"
+                    required=""
+                    type="text"
+                  />
+                </div>
+                <!-- Contact Name -->
+                <div class="flex flex-col gap-1.5">
+                  <label class="font-label-md text-label-md text-on-surface"
+                    >Contact Name</label
+                  >
+                  <input
+                    class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-primary placeholder:text-on-surface-variant/60 h-12 rounded-xl px-4 shadow-xs outline-none focus:ring-2"
+                    placeholder="e.g. Sarah Jenkins"
+                    required=""
+                    type="text"
+                  />
+                </div>
+                <!-- Work Email -->
+                <div class="flex flex-col gap-1.5">
+                  <label class="font-label-md text-label-md text-on-surface"
+                    >Work Email</label
+                  >
+                  <input
+                    class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-primary placeholder:text-on-surface-variant/60 h-12 rounded-xl px-4 shadow-xs outline-none focus:ring-2"
+                    placeholder="e.g. s.jenkins@berkeleycap.co.uk"
+                    required=""
+                    type="email"
+                  />
+                </div>
+                <!-- Contact Phone -->
+                <div class="flex flex-col gap-1.5">
+                  <label class="font-label-md text-label-md text-on-surface"
+                    >Contact Telephone</label
+                  >
+                  <input
+                    class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-primary placeholder:text-on-surface-variant/60 h-12 rounded-xl px-4 shadow-xs outline-none focus:ring-2"
+                    placeholder="e.g. +44 20 7946 0812"
+                    required=""
+                    type="tel"
+                  />
+                </div>
+              </div>
+              <!-- Monthly Journeys Select -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-label-md text-on-surface"
+                  >Estimated Monthly Journeys</label
+                >
+                <select
+                  class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-primary h-12 rounded-xl px-4 shadow-xs outline-none focus:ring-2"
+                >
+                  <option value="1-10">1–10 journeys / month</option>
+                  <option selected="" value="11-30">11–30 journeys / month</option>
+                  <option value="31-75">31–75 journeys / month</option>
+                  <option value="75+">75+ journeys / month (Enterprise)</option>
+                </select>
+              </div>
+              <!-- Requirements Message -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-label-md text-on-surface"
+                  >Specific Travel Requirements</label
+                >
+                <textarea
+                  class="bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-primary placeholder:text-on-surface-variant/60 resize-none rounded-xl p-4 shadow-xs outline-none focus:ring-2"
+                  placeholder="Tell us about your frequent routes, VIP requirements, or current travel pain points..."
+                  rows="3"
+                ></textarea>
+              </div>
+              <!-- Success Toast Mock -->
+              <div
+                class="bg-secondary-container text-on-secondary-container font-label-md text-label-md flex hidden items-center gap-2 rounded-xl p-4"
+                id="form-success"
+              >
+                <span class="material-symbols-outlined text-title-md">check_circle</span>
+                <span
+                  >Application received. Your corporate coordinator will reach out within
+                  2 hours with account terms.</span
+                >
+              </div>
+              <!-- Submit Button -->
+              <button
+                class="bg-primary-container hover:bg-secondary text-on-primary font-label-md text-label-md mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl shadow-sm transition-colors"
+                type="submit"
+              >
+                <span>Submit corporate account application</span>
+                <span class="material-symbols-outlined text-label-md">arrow_forward</span>
+              </button>
+              <!-- Trust Note -->
+              <p
+                class="font-body-sm text-body-sm text-on-surface-variant mt-2 text-center"
+              >
+                No setup fees or ongoing account maintenance charges · 30-day net payment
+                terms · TfL Operator Lic. #008942/01
+              </p>
+            </form>
+          </div>
+        </section>
+        <!-- SECTION 7: FAQ ACCORDION -->
+        <section class="px-gutter bg-surface-container-lowest w-full py-20">
+          <div class="mx-auto flex max-w-[800px] flex-col gap-8">
+            <div class="flex flex-col items-center text-center">
+              <span
+                class="font-label-sm text-label-sm text-primary mb-2 tracking-wider uppercase"
+                >Operational clarifications</span
+              >
+              <h2
+                class="font-headline-lg text-headline-lg text-on-surface tracking-tight"
+              >
+                Frequently asked corporate questions
+              </h2>
+            </div>
+            <div class="flex flex-col gap-4">
+              <!-- Item 1 -->
+              <div class="bg-surface-container-low overflow-hidden rounded-xl shadow-xs">
+                <button
+                  class="font-title-md text-title-md text-on-surface flex w-full items-center justify-between px-6 py-5 text-left"
+                  onclick="toggleFaq(this)"
+                  type="button"
+                >
+                  <span>How does monthly billing work for corporate accounts?</span>
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant transform transition-transform duration-200"
+                    >expand_more</span
+                  >
+                </button>
+                <div
+                  class="font-body-md text-body-md text-on-surface-variant hidden px-6 pb-5"
+                >
+                  All journeys taken during the calendar month are consolidated onto a
+                  single itemised VAT invoice issued on the 1st of the following month,
+                  with standard 30-day payment terms payable via BACS or direct debit.
+                </div>
+              </div>
+              <!-- Item 2 -->
+              <div class="bg-surface-container-low overflow-hidden rounded-xl shadow-xs">
+                <button
+                  class="font-title-md text-title-md text-on-surface flex w-full items-center justify-between px-6 py-5 text-left"
+                  onclick="toggleFaq(this)"
+                  type="button"
+                >
+                  <span
+                    >Can our executive assistants book on behalf of travelling directors
+                    or visiting clients?</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant transform transition-transform duration-200"
+                    >expand_more</span
+                  >
+                </button>
+                <div
+                  class="font-body-md text-body-md text-on-surface-variant hidden px-6 pb-5"
+                >
+                  Yes. Our portal and dispatch team allow multiple authorized bookers to
+                  manage reservations. The passenger receives SMS driver details, while
+                  the booker receives full status alerts and billing receipts.
+                </div>
+              </div>
+              <!-- Item 3 -->
+              <div class="bg-surface-container-low overflow-hidden rounded-xl shadow-xs">
+                <button
+                  class="font-title-md text-title-md text-on-surface flex w-full items-center justify-between px-6 py-5 text-left"
+                  onclick="toggleFaq(this)"
+                  type="button"
+                >
+                  <span
+                    >What happens if a travelling director's flight is delayed or
+                    diverted?</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant transform transition-transform duration-200"
+                    >expand_more</span
+                  >
+                </button>
+                <div
+                  class="font-body-md text-body-md text-on-surface-variant hidden px-6 pb-5"
+                >
+                  We monitor all commercial and private flights in real time. Chauffeur
+                  dispatch times are automatically recalibrated to the actual touchdown
+                  time, with 60 minutes of complimentary waiting time included from
+                  touchdown.
+                </div>
+              </div>
+              <!-- Item 4 -->
+              <div class="bg-surface-container-low overflow-hidden rounded-xl shadow-xs">
+                <button
+                  class="font-title-md text-title-md text-on-surface flex w-full items-center justify-between px-6 py-5 text-left"
+                  onclick="toggleFaq(this)"
+                  type="button"
+                >
+                  <span>Is there a minimum monthly spend or contract commitment?</span>
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant transform transition-transform duration-200"
+                    >expand_more</span
+                  >
+                </button>
+                <div
+                  class="font-body-md text-body-md text-on-surface-variant hidden px-6 pb-5"
+                >
+                  No. There are no setup fees, monthly maintenance fees, or minimum trip
+                  requirements. You only pay for the journeys your organisation books at
+                  our pre-agreed fixed account rates.
+                </div>
+              </div>
+              <!-- Item 5 -->
+              <div class="bg-surface-container-low overflow-hidden rounded-xl shadow-xs">
+                <button
+                  class="font-title-md text-title-md text-on-surface flex w-full items-center justify-between px-6 py-5 text-left"
+                  onclick="toggleFaq(this)"
+                  type="button"
+                >
+                  <span>What vehicles are available for corporate travel?</span>
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant transform transition-transform duration-200"
+                    >expand_more</span
+                  >
+                </button>
+                <div
+                  class="font-body-md text-body-md text-on-surface-variant hidden px-6 pb-5"
+                >
+                  Our corporate fleet consists of executive saloons (Mercedes-Benz
+                  E-Class), luxury flagship saloons (Mercedes-Benz S-Class), luxury people
+                  carriers (Mercedes-Benz V-Class MPVs for up to 7 passengers with
+                  luggage), and executive 16-seater minibuses.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Interactive Accordion Script -->
+        <script>
+          function toggleFaq(btn) {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector(".material-symbols-outlined");
+            const isHidden = content.classList.contains("hidden");
+
+            // Close all other FAQs in same parent
+            const parent = btn.closest(".flex-col");
+            parent
+              .querySelectorAll(".font-body-md")
+              .forEach((el) => el.classList.add("hidden"));
+            parent
+              .querySelectorAll(".material-symbols-outlined")
+              .forEach((ic) => ic.classList.remove("rotate-180"));
+
+            if (isHidden) {
+              content.classList.remove("hidden");
+              icon.classList.add("rotate-180");
+            } else {
+              content.classList.add("hidden");
+              icon.classList.remove("rotate-180");
+            }
+          }
+        </script>
+      </div>
+    </main>
+    <footer class="bg-surface-container-low w-full">
+      <div class="px-gutter pt-space-xl pb-space-lg mx-auto max-w-[1200px]">
+        <div
+          class="gap-space-xl pb-space-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+        >
+          <div class="gap-space-md flex flex-col">
+            <span class="font-title-md text-title-md text-on-surface"
+              >London Airports</span
+            >
+            <div class="gap-space-sm flex flex-col">
+              <a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >Heathrow (LHR) Terminals 2–5</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >Gatwick (LGW) North &amp; South</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >London City Airport (LCY)</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >Stansted (STN) Passenger Hub</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="airports"
+                href="#"
+                >Luton (LTN) International</a
+              >
+            </div>
+          </div>
+          <div class="gap-space-md flex flex-col">
+            <span class="font-title-md text-title-md text-on-surface"
+              >Transit Services</span
+            >
+            <div class="gap-space-sm flex flex-col">
+              <a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="services"
+                href="#"
+                >Direct Airport Transfers</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="services"
+                href="#"
+                >Corporate Chauffeur Accounts</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="services"
+                href="#"
+                >Flight Delay Monitoring</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="services"
+                href="#"
+                >Meet &amp; Greet Arrivals</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="fleet"
+                href="#"
+                >Executive MPV &amp; Saloons</a
+              >
+            </div>
+          </div>
+          <div class="gap-space-md flex flex-col">
+            <span class="font-title-md text-title-md text-on-surface"
+              >Legal &amp; Company</span
+            >
+            <div class="gap-space-sm flex flex-col">
+              <a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="about"
+                href="#"
+                >About Cityline London</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="licensing"
+                href="#"
+                >TfL Regulatory Compliance</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="terms"
+                href="#"
+                >Terms of Transit</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="privacy"
+                href="#"
+                >Privacy &amp; Data Security</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="fares"
+                href="#"
+                >Fixed Fare Guarantee</a
+              >
+            </div>
+          </div>
+          <div class="gap-space-md flex flex-col">
+            <span class="font-title-md text-title-md text-on-surface"
+              >Help &amp; Support</span
+            >
+            <div class="gap-space-sm flex flex-col">
+              <a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="help"
+                href="#"
+                >Passenger FAQ</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="contact"
+                href="#"
+                >24/7 Operations Desk</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="luggage-policy"
+                href="#"
+                >Luggage Allowance Guide</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="booking"
+                href="#"
+                >Manage Existing Booking</a
+              ><a
+                class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+                data-path="cancellations"
+                href="#"
+                >Cancellation Policy</a
+              >
+            </div>
+          </div>
+        </div>
+        <div
+          class="pt-space-lg gap-space-lg flex flex-col items-start justify-between lg:flex-row lg:items-center"
+        >
+          <div class="gap-space-xs flex flex-col">
+            <span class="font-body-sm text-body-sm text-on-surface-variant"
+              >© 2025 Cityline Airport Transfers Ltd. Registered in England &amp; Wales
+              No. 09843211. Registered Office: 140 London Wall, London EC2Y 5DN.</span
+            >
+            <div class="gap-space-sm flex items-center">
+              <span
+                class="gap-space-xs px-space-sm bg-surface-container text-on-surface font-label-sm text-label-sm inline-flex items-center rounded py-0.5"
+                ><span class="bg-secondary h-1.5 w-1.5 rounded-full"></span>TfL PH
+                Operator Licence #008942/01</span
+              ><span class="font-body-sm text-body-sm text-on-surface-variant"
+                >Licensed by Transport for London</span
+              >
+            </div>
+          </div>
+          <div class="gap-space-sm flex flex-col items-start sm:flex-row sm:items-center">
+            <span
+              class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase"
+              >Accepted Cards &amp; Pay:</span
+            >
+            <div class="gap-space-xs flex items-center">
+              <span
+                class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_3px_rgba(15,26,20,0.04)]"
+                >Visa</span
+              ><span
+                class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_3px_rgba(15,26,20,0.04)]"
+                >Mastercard</span
+              ><span
+                class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_3px_rgba(15,26,20,0.04)]"
+                >Amex</span
+              ><span
+                class="px-space-sm bg-surface-container-lowest text-on-surface font-label-sm text-label-sm rounded py-1 shadow-[0_1px_3px_rgba(15,26,20,0.04)]"
+                >Apple Pay</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

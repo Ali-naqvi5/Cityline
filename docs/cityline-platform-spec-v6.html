@@ -1,0 +1,1148 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cityline Platform Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F4F6F8; --paper:#FFFFFF; --ink:#141C24; --muted:#56626E; --rule:#D8DEE4;
+  --sign:#1A1F25; --sign-ink:#FFC629; --accent:#0B5CAD; --accent-soft:#E3EEF9;
+  --mvp:#0E7A4F; --mvp-bg:#E1F3EA; --p2:#8A5A00; --p2-bg:#FBF0D9; --p3:#5B4CA8; --p3-bg:#ECE9F8;
+  --warn:#A2331B; --warn-bg:#FBE7E2; --code-bg:#EDF1F5;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F1419; --paper:#161D24; --ink:#E6EBF0; --muted:#98A4B0; --rule:#2A333D;
+    --sign:#07090C; --sign-ink:#FFC629; --accent:#6CB0F2; --accent-soft:#16283A;
+    --mvp:#5CD19B; --mvp-bg:#123024; --p2:#F0C063; --p2-bg:#33280F; --p3:#B3A8F0; --p3-bg:#231F3D;
+    --warn:#F4957F; --warn-bg:#3A1A13; --code-bg:#1D252E;
+  }
+}
+:root[data-theme="dark"]{
+    --ground:#0F1419; --paper:#161D24; --ink:#E6EBF0; --muted:#98A4B0; --rule:#2A333D;
+    --sign:#07090C; --sign-ink:#FFC629; --accent:#6CB0F2; --accent-soft:#16283A;
+    --mvp:#5CD19B; --mvp-bg:#123024; --p2:#F0C063; --p2-bg:#33280F; --p3:#B3A8F0; --p3-bg:#231F3D;
+    --warn:#F4957F; --warn-bg:#3A1A13; --code-bg:#1D252E;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding:0 16px}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sign{background:var(--sign);color:#fff;margin:0 -16px;padding:28px 16px 30px}
+.sign-inner{max-width:1180px;margin:0 auto;display:grid;gap:18px}
+.board{display:flex;flex-wrap:wrap;gap:10px 28px;font-family:var(--mono);font-size:12.5px;color:#AEB8C2;letter-spacing:.02em}
+.board b{color:var(--sign-ink);font-weight:600}
+.sign h1{font-family:var(--display);font-weight:700;font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.02;margin:0;color:var(--sign-ink);letter-spacing:.005em;text-wrap:balance}
+.sign p{margin:0;max-width:68ch;color:#D5DCE3}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;padding-block:36px 80px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13.5px}
+nav.toc p{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--muted);margin:0 0 8px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;border-left:2px solid var(--rule)}
+nav.toc a{display:block;padding:4px 0 4px 12px;color:var(--ink);text-decoration:none}
+nav.toc a:hover{color:var(--accent)}
+nav.toc span{font-family:var(--mono);color:var(--muted);font-size:11px;margin-right:6px}
+main{min-width:0}
+section{padding-block:8px 34px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+section:last-child{border-bottom:0}
+h2{font-family:var(--display);font-size:2rem;font-weight:700;line-height:1.1;margin:0 0 14px;text-wrap:balance}
+h2 .n{font-family:var(--mono);font-size:.9rem;font-weight:400;color:var(--muted);display:block;margin-bottom:4px;letter-spacing:.04em}
+h3{font-family:var(--display);font-size:1.35rem;font-weight:600;margin:28px 0 8px;letter-spacing:.01em}
+p,li{max-width:72ch}
+ul{padding-left:1.2em}
+li{margin:4px 0}
+.lede{font-size:1.08rem}
+code,.id{font-family:var(--mono);font-size:.84em}
+code{background:var(--code-bg);padding:1px 5px;border-radius:3px}
+.callout{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:16px 18px;margin:18px 0;max-width:80ch}
+.callout.warn{background:var(--warn-bg);border-color:transparent}
+.callout.warn strong:first-child{color:var(--warn)}
+.callout p{margin:.3em 0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts div{background:var(--paper);padding:12px 14px}
+.facts dt{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+.facts dd{margin:2px 0 0;font-weight:600}
+.tbl{overflow-x:auto;margin:14px 0 8px;border:1px solid var(--rule);border-radius:6px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--rule)}
+tr:last-child td{border-bottom:0}
+th{font-family:var(--display);font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;background:var(--ground)}
+td.id{white-space:nowrap;color:var(--muted)}
+.req td:nth-child(2){min-width:260px}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.mvp{color:var(--mvp);background:var(--mvp-bg)}
+.p2{color:var(--p2);background:var(--p2-bg)}
+.p3{color:var(--p3);background:var(--p3-bg)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--muted);margin:6px 0 4px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:16px 0}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:14px 16px}
+.card h4{margin:0 0 6px;font-family:var(--display);font-size:1.15rem;font-weight:600}
+.card p,.card ul{margin:.2em 0;font-size:14.5px}
+.card.pick{border:2px solid var(--accent)}
+.card .verdict{font-family:var(--mono);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.card.pick .verdict{color:var(--accent)}
+.card:not(.pick) .verdict{color:var(--muted)}
+pre.mermaid{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:16px;overflow-x:auto;margin:16px 0}
+.phase{display:grid;grid-template-columns:120px minmax(0,1fr);gap:18px;padding:14px 0;border-top:1px solid var(--rule)}
+.phase:first-of-type{border-top:0}
+.phase h4{margin:0;font-family:var(--display);font-size:1.25rem}
+.phase ul{margin:0}
+.src li{font-size:14px}
+@media (max-width:860px){
+  .wrap{grid-template-columns:1fr;gap:20px}
+  nav.toc{position:static}
+  nav.toc ol{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-left:0}
+  .phase{grid-template-columns:1fr;gap:6px}
+}
+.own{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.own.web{color:var(--accent);background:var(--accent-soft)}
+.own.ins{color:var(--p3);background:var(--p3-bg)}
+.own.sup{color:var(--p2);background:var(--p2-bg)}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin:16px 0}
+.split .card h4{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.changes{font-size:14.5px}
+pre.code{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:14px 0}
+.num{text-align:right;white-space:nowrap}
+.sub{font-size:14px;color:var(--muted)}
+.sw{display:inline-block;width:34px;height:18px;border-radius:4px;border:1px solid var(--rule);vertical-align:middle}
+</style>
+
+<header class="sign">
+  <div class="sign-inner">
+    <div class="board"><span>OPERATOR <b>Cityline Airport Transfers Ltd</b></span><span>TfL PHV LICENCE <b>11628</b></span><span>DOMAIN <b>citylineairporttransfers.com</b></span><span>STACK <b>Next.js 16 · self-hosted on IONOS VPS</b></span><span>DOC <b>v6.0 · 20 Sep 2026</b></span></div>
+    <h1>Website &amp; operations platform: requirements, design and development plan</h1>
+    <p>Everything needed to build Cityline's direct-booking website and operations admin: business rules, TfL compliance, sitemap and SEO system, design system, architecture on Next.js self-hosted on an IONOS VPS, database design, data safety, and a sprint-by-sprint development plan.</p>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <p>Contents</p>
+  <ol>
+    <li><a href="#summary"><span>01</span>Summary</a></li>
+    <li><a href="#model"><span>02</span>Business model</a></li>
+    <li><a href="#competitors"><span>03</span>Competitors</a></li>
+    <li><a href="#compliance"><span>04</span>TfL &amp; legal rules</a></li>
+    <li><a href="#seo"><span>05</span>Sitemap &amp; SEO</a></li>
+    <li><a href="#design"><span>06</span>Design sources</a></li>
+    <li><a href="#logic"><span>07</span>Business logic</a></li>
+    <li><a href="#functional"><span>08</span>Functional reqs</a></li>
+    <li><a href="#nfr"><span>09</span>Non-functional</a></li>
+    <li><a href="#architecture"><span>10</span>Architecture</a></li>
+    <li><a href="#setup"><span>11</span>Environment &amp; setup</a></li>
+    <li><a href="#infra"><span>12</span>Deploy &amp; costs</a></li>
+    <li><a href="#persistence"><span>13</span>Data safety</a></li>
+    <li><a href="#db"><span>14</span>Database design</a></li>
+    <li><a href="#plan"><span>15</span>Development plan</a></li>
+    <li><a href="#handbook"><span>16</span>Developer handbook</a></li>
+    <li><a href="#decisions"><span>17</span>Open decisions</a></li>
+    <li><a href="#changes"><span>18</span>Version history</a></li>
+    <li><a href="#sources"><span>19</span>Sources</a></li>
+  </ol>
+</nav>
+
+<main>
+<section id="summary">
+  <h2><span class="n">01</span>Summary</h2>
+  <p class="lede">Cityline Airport Transfers gets most of its work from partner platforms such as Trip.com, which take about 18% commission, and wants a strong <strong>commission-free direct channel</strong>. This document specifies one <strong>Next.js</strong> application, self-hosted on a single <strong>IONOS VPS</strong> with PostgreSQL, Caddy and a background worker in Docker. It has two parts: a <strong>public website</strong> with hundreds of SEO pages and a fixed-price booking engine, and an <strong>operations admin</strong> that records every job from every source, together with drivers, vehicles, costs and profit. Drivers get their jobs automatically on <strong>WhatsApp</strong>. The domain and existing IONOS plan are already set up (§11) and keep the domain, DNS, mailboxes and backup copies; the VPS runs everything else (§10). A staging site on the same server and a launch gate keep work away from customers until go-live (§12). The build order is website and booking first, <strong>admin panel last</strong> (§15). The development plan is in §15.</p>
+  <dl class="facts">
+    <div><dt>Licence holder</dt><dd>Cityline Airport Transfers Limited · TfL PHV Operator Licence 11628</dd></div>
+    <div><dt>Operating centre</dt><dd>Hillingdon House, Wren Ave, Uxbridge UB10 0FD (No Public Access)</dd></div>
+    <div><dt>Domain</dt><dd>citylineairporttransfers.com · wildcard SSL active</dd></div>
+    <div><dt>Hosting</dt><dd>IONOS VPS L+ (Ubuntu 24.04, UK) · PostgreSQL 17 · Docker + Caddy</dd></div>
+    <div><dt>Stack</dt><dd>Next.js 16 · TypeScript · Tailwind CSS 4 · Payload CMS 3 (admin, built last)</dd></div>
+    <div><dt>Design</dt><dd>From Cityline's Figma file / Google Stitch (§6)</dd></div>
+  </dl>
+  <div class="callout warn">
+    <p><strong>Scope rules</strong></p>
+    <ul>
+      <li><strong>One job register for all sources.</strong> Website bookings create jobs automatically. Supplier, phone and other jobs are created by staff. Every job records where it came from, and the same job can't be entered twice (§2).</li>
+      <li><strong>Staff update job progress by hand.</strong> No live location, no driver app, no GPS tracking, no automatic driver allocation, no automatic flight tracking.</li>
+      <li><strong>Assigning a driver sends a WhatsApp message automatically.</strong> Changes, reassignments and cancellations are sent automatically too.</li>
+      <li><strong>The admin keeps the finance records:</strong> each job's revenue, commission, driver pay and costs; company expenses; driver statements; money owed by suppliers; profit reports. Driver pay rules, whether pay appears in WhatsApp messages, and supplier commission rates are settings you can change at any time.</li>
+      <li><strong>Hosting:</strong> everything runs on one IONOS VPS (about £18/month on top of the existing plan). You own server maintenance in exchange (§12).</li>
+      <li><strong>Admin last:</strong> the website and booking flow are built first. §15 explains the record-keeping gap this creates and the two ways to cover it.</li>
+      <li><strong>Design, logos and photos</strong> come from Cityline's Figma file (or Google Stitch). No palette or typography is specified here (§6).</li>
+    </ul>
+  </div>
+</section>
+
+
+<section id="model">
+  <h2><span class="n">02</span>Business model &amp; job flow</h2>
+  <h3>Job sources</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Source</th><th>How the job is created</th><th>Customer payment</th><th>Deductions</th><th>Editable in admin?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="own web">WEBSITE</span></td><td>Created automatically when payment succeeds (one job per leg)</td><td>Stripe, paid to Cityline</td><td>Stripe fees</td><td>Operational fields only. Price and customer details change only through the booking's amendment flow.</td></tr>
+      <tr><td><span class="own sup">SUPPLIER</span> Trip.com and other partners</td><td>Staff create it from the partner dashboard, choose the supplier and enter the supplier's reference</td><td>The supplier pays Cityline later</td><td>Supplier commission (default % per supplier, can be changed per job)</td><td>Fully editable</td></tr>
+      <tr><td><span class="own ins">DIRECT</span> Phone, WhatsApp, email, partner hotels, account customers</td><td>Staff create it in the admin</td><td>Cash, card payment link, bank transfer or on account</td><td>Card fees if applicable</td><td>Fully editable</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>How conflicts between sources are prevented</h3>
+  <ul>
+    <li><strong>One <code>jobs</code> table and one reference format</strong> for every source (e.g. <code>J-004271</code>). Website jobs also carry the booking reference (<code>CL-7K4Q2P</code>).</li>
+    <li><strong>Source is required and can't be changed</strong> after creation: <code>website</code>, <code>supplier</code>, <code>phone</code>, <code>whatsapp</code>, <code>email</code>, <code>account</code> or <code>other</code>.</li>
+    <li><strong>The staff form can't create website jobs.</strong> Only the checkout process can, so a website booking can't be entered by hand as well.</li>
+    <li><strong>Website jobs are locked:</strong> the price, the customer's details and the route come from the booking. Staff change them through "Amend booking", which reprices, charges or refunds, and emails the customer. Driver, vehicle, status and internal notes can be edited freely.</li>
+    <li><strong>Supplier jobs are checked for duplicates:</strong> the database won't accept the same supplier reference twice for the same supplier.</li>
+    <li><strong>Possible-duplicate warning:</strong> if a new job matches an existing one on pickup time (±30 min), passenger surname or flight number, the admin warns before saving.</li>
+  </ul>
+
+  <h3>Job flow</h3>
+  <pre class="mermaid">
+flowchart TD
+  W[Website checkout paid] --> J1[Job created automatically<br/>source = website]
+  S[Supplier dashboard<br/>Trip.com etc.] --> F[Staff: New job form<br/>source = supplier + supplier ref]
+  P[Phone / WhatsApp / email] --> F2[Staff: New job form<br/>source = phone etc.]
+  F --> J2[Job created]
+  F2 --> J2
+  J1 --> Q[Unassigned jobs board]
+  J2 --> Q
+  Q --> A[Controller assigns driver + vehicle]
+  A --> WA[WhatsApp job message to driver<br/>sent automatically]
+  A --> PX[Driver details to passenger<br/>email/SMS · TfL requirement]
+  WA --> U[Staff update status by hand:<br/>driver confirmed → completed / no-show / cancelled]
+  U --> FIN[Finance: revenue, commission,<br/>driver pay, costs → profit]
+  </pre>
+</section>
+
+<section id="competitors">
+  <h2><span class="n">03</span>What the three competitors do</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Area</th><th>My London Transfer</th><th>Elite London Rides</th><th>Airport Move</th></tr></thead>
+    <tbody>
+      <tr><td>Positioning</td><td>Volume, value, broad coverage</td><td>Premium minicab / chauffeur, tours</td><td>Executive &amp; EV chauffeur, heavy SEO</td></tr>
+      <tr><td>Coverage</td><td>13 UK airports, 12 London stations, 5 cruise ports</td><td>London airports, Dover/Portsmouth/Southampton, Manchester, Birmingham, Cambridge</td><td>5 London airports (terminal-level), 4 cruise ports, 10+ stations, 64 areas</td></tr>
+      <tr><td>Fleet model</td><td>Saloon, MPV5, MPV8, Executive, 9–16-seat minibus</td><td>9 classes with passenger and bag counts</td><td>Specific models (E-Class, i5, EQS, Maybach, V-Class, Model X) in 4 tiers</td></tr>
+      <tr><td>Pricing shown</td><td>Quote only; promo codes</td><td>"From" prices on port routes (e.g. Heathrow–Dover from £167)</td><td>"From" prices per vehicle plus hourly and half-day rates</td></tr>
+      <tr><td>Booking</td><td>Instant confirmation; AI booking assistant</td><td>Online form + phone</td><td>Embedded Taxi Base Software form; card or cash</td></tr>
+      <tr><td>Airport ops</td><td>Flight tracking, name board, terminal meeting points, 45-min buffer</td><td>Flight tracking, free waiting</td><td>Flight tracking, meet &amp; greet standard</td></tr>
+      <tr><td>SEO footprint</td><td>Airport, terminal, station, port pages; blog</td><td>City, airport, port pages; tours</td><td>150+ pages: 38 routes, 64 areas, terminals, international guides, comparison pages</td></tr>
+      <tr><td>Tech (checked)</td><td>WordPress (confirmed via <code>/wp-json/</code>)</td><td>WordPress + WooCommerce (confirmed)</td><td>Probably not WordPress; third-party booking form</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub">My London Transfer's site title uses the word "Taxi", which TfL rules don't allow for private hire advertising. Keep it off every Cityline page.</p>
+  <h3>Where Cityline can do better</h3>
+  <ul>
+    <li>A price table for every vehicle class on every route page.</li>
+    <li>A fast, native booking flow instead of an embedded third-party form.</li>
+    <li>Policies in plain numbers, and the TfL licence shown on every page.</li>
+    <li>More pages than Airport Move, each with more real data (§5).</li>
+    <li>Reasons to book direct: free waiting time, return discounts, loyalty credit.</li>
+  </ul>
+  <h3>Close look: My London Transfer's home page</h3>
+  <p>From the full-page capture supplied, the page runs in this order: hero with booking widget → partner logos → seasonal offer → why ride with us → stats → vehicle and luggage guide → child seat guide → flying into London from abroad → 3-step how it works → compliance → airports with terminal accordions → families and tourists → press mention → services carousel → airport-to-seaport and airport-to-railway connections → "ride somewhere else" call to action → popular route cards → Google reviews → FAQ → blogs → payment methods → footer. Styling: yellow and cream, rounded buttons, lots of photography.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Their section</th><th>What it does</th><th>Cityline decision</th></tr></thead>
+    <tbody>
+      <tr><td>Hero + widget (pickup, drop-off, date/time, return, promo code)</td><td>Booking starts immediately</td><td><strong>Adopt and improve:</strong> add passengers and bags, show prices on the next screen with no sign-up</td></tr>
+      <tr><td>Partner strip (Booking.com, Tripadvisor, Trip.com, KAYAK)</td><td>Borrowed trust</td><td><strong>Adopt only with permission</strong> and only for real partners. Partner logos usually need written approval.</td></tr>
+      <tr><td>Seasonal offer (Fashion Week, 5% code, what's included)</td><td>Time-limited reason to book</td><td><strong>Adopt</strong> as an "Offer banner" block with start and end dates in the CMS</td></tr>
+      <tr><td>Why ride with us (upfront pricing, licensed drivers, flight monitoring, meet &amp; greet, 24/7, secure payments, flexible cancellation)</td><td>Answers objections</td><td><strong>Adopt</strong>, but with numbers (e.g. "60 min free waiting")</td></tr>
+      <tr><td>Stats (rides, drivers, on-time %)</td><td>Social proof</td><td><strong>Only with real, provable figures.</strong> Their "9% on-time arrivals" looks like a typo that damages trust.</td></tr>
+      <tr><td>Vehicle &amp; luggage fit guide, child seat guide</td><td>Helps families choose</td><td><strong>Adopt</strong> as dedicated help pages plus compact blocks on the home page</td></tr>
+      <tr><td>Flying into London from abroad (country cards)</td><td>Targets international search traffic</td><td><strong>Adopt</strong> as country guide pages (P2)</td></tr>
+      <tr><td>Airport tabs with terminal accordions</td><td>Covers many airports compactly</td><td><strong>Adopt</strong> as a hub block linking to terminal pages</td></tr>
+      <tr><td>Airport ↔ seaport / railway connections</td><td>Internal links to station and port pages</td><td><strong>Adopt</strong></td></tr>
+      <tr><td>Popular route cards</td><td>Quick booking and internal links</td><td><strong>Adopt</strong>, with live "from" prices</td></tr>
+      <tr><td>Google reviews widget (third party), FAQ, blogs</td><td>Trust and SEO</td><td><strong>Adopt</strong>, but render reviews on the server (third-party widgets hurt speed)</td></tr>
+      <tr><td>AI booking assistant, live chat bubble</td><td>Convenience</td><td>P3. <strong>WhatsApp button</strong> at launch.</td></tr>
+      <tr><td>"Taxi" wording throughout URLs and headings</td><td>SEO keywords</td><td><strong>Don't copy.</strong> TfL rules forbid it for private hire operators. Use "transfer", "private hire", "chauffeur".</td></tr>
+      <tr><td>Footer disclaimer ("booking and payment agent for licensed private hire drivers")</td><td>Their legal model</td><td>Not applicable. <strong>Cityline is the licensed operator</strong>, and the footer says so.</td></tr>
+    </tbody>
+  </table></div>
+
+</section>
+
+<section id="compliance">
+  <h2><span class="n">04</span>TfL &amp; legal rules</h2>
+  <div class="tbl"><table class="req">
+    <thead><tr><th>ID</th><th>Requirement</th><th>What it means for the build</th></tr></thead>
+    <tbody>
+      <tr><td class="id">CMP-01</td><td>No "taxi", "cab" or similar in names, URLs, email addresses or adverts, and no images of licensed taxis.</td><td>A CMS check blocks those words in titles, slugs and meta descriptions. The domain and email addresses must avoid them too.</td></tr>
+      <tr><td class="id">CMP-02</td><td>A fare must be agreed, or an accurate estimate given, before the journey, and recorded.</td><td>Website prices are locked at checkout. Staff-created jobs must include the agreed customer price before a driver can be assigned. A public Fares page is generated from the pricing tables.</td></tr>
+      <tr><td class="id">CMP-03</td><td>Booking record: date booked and date of journey, passenger, pickup time and place, destination, fare, driver, vehicle registration, sub-contractor, the person who took the booking, the person who dispatched it, and the driver's PHV licence number.</td><td>All of these are fields on <code>jobs</code>. "Taken by" and "dispatched by" are recorded automatically from the logged-in user (the system for website jobs). The driver's licence number and the vehicle registration are copied onto the job at assignment. An exportable booking register (CSV/PDF) covers every source.</td></tr>
+      <tr><td class="id">CMP-04</td><td>Before the journey, tell the passenger the vehicle registration, the driver's first name and PHV licence number (plus a photo where feasible).</td><td>Sent to the passenger by email/SMS when a driver is assigned. For supplier jobs without passenger contact details, record how the details were passed on (e.g. through the supplier's dashboard).</td></tr>
+      <tr><td class="id">CMP-05</td><td>Keep booking, complaints and lost-property records for 12 months.</td><td>Jobs are kept for at least 12 months (and 6 years for accounting). Complaints and lost property are logged in <code>enquiries</code>.</td></tr>
+      <tr><td class="id">CMP-06</td><td>Keep a register of booking and dispatch staff (full name, date of birth, DBS reference and date), kept for 12 months after they leave.</td><td>The <code>staff_register</code> module is linked to admin users. Anyone who can create or assign jobs must have a register entry.</td></tr>
+      <tr><td class="id">CMP-07</td><td>A person must be available to speak to passengers during operating hours.</td><td>Phone number on every page, email and WhatsApp message. Only claim 24/7 if phones are staffed 24/7.</td></tr>
+      <tr><td class="id">CMP-08</td><td>Licence condition: No Public Access.</td><td>Show the address as a registered/operating address only. No walk-in wording, and no "visit us" map pin on the contact page.</td></tr>
+      <tr><td class="id">CMP-09</td><td>Show company name, address, phone, operator licence number, TfL licensing, company number, VAT number.</td><td>A global footer, editable in site settings.</td></tr>
+      <tr><td class="id">CMP-10</td><td>Drivers and vehicles must hold valid PHV licences, MOT and hire-and-reward insurance.</td><td>Document expiry dates are recorded. A driver or vehicle with an expired document can't be assigned, and alerts go out 30 days before expiry.</td></tr>
+      <tr><td class="id">CMP-11</td><td>UK GDPR, PECR, Consumer Contracts Regulations, accessibility.</td><td>A privacy policy covering customers <em>and drivers</em>, with Stripe, Google, Meta (WhatsApp) and the email provider named as data processors. Cookie consent before analytics loads, T&amp;Cs accepted at checkout, WCAG 2.2 AA. Driver documents and bank details encrypted and restricted by role.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub">This isn't legal advice. Have your T&amp;Cs and privacy policy checked by a UK solicitor.</p>
+</section>
+
+<section id="seo">
+  <h2><span class="n">05</span>Sitemap &amp; SEO page system</h2>
+  <p>The structure below is the approved site map (the separate "Cityline Airport Transfers — site map" artifact, September 2026). About 45 URLs at full build, of which roughly half are templates that generate many pages from the pricing tables. Two rules drive it: <strong>the booking flow never leaves the domain</strong>, and <strong>a price is shown before any personal details are asked for</strong>.</p>
+
+  <h3>Structure</h3>
+<pre class="code">/                                    Home — quote widget above the fold
+├─ /quote                            Price-only quote; also the embeddable partner widget
+├─ /book/                            THE FUNNEL (one session, 4 screens)
+│  ├─ /book/                         1 · Route &amp; time (flight number for airport pickups)
+│  ├─ /book/vehicle                  2 · Choose vehicle (fare per class + capacities)
+│  ├─ /book/details                  3 · Passenger details &amp; extras (priced live)
+│  ├─ /book/payment                  4 · Payment (card; pay-on-account for business)
+│  └─ /book/confirmed/[ref]          Confirmation + magic link into Manage booking
+├─ /manage/                          Self-service, no password
+│  ├─ /manage/[ref]                  Booking detail, driver &amp; vehicle once allocated
+│  ├─ /manage/[ref]/amend
+│  └─ /manage/[ref]/cancel           Shows the actual refund before confirming
+├─ /airports/                        Hub
+│  ├─ /airports/heathrow             + /terminal-2 /terminal-3 /terminal-4 /terminal-5
+│  ├─ /airports/gatwick              + /north-terminal /south-terminal
+│  ├─ /airports/luton  /airports/stansted  /airports/london-city  /airports/southend
+│  └─ /airports/[airport]            Regional — only when the route can be priced and staffed
+├─ /transfers/                       Route index (searchable A-to-B grid)
+│  ├─ /transfers/[from]-to-[to]      TEMPLATE — live fare, journey time, quote box, own copy
+│  └─ /transfers/popular             Curated set, chosen from real booking data
+├─ /stations/[station]               TEMPLATE — St Pancras, King's Cross, Paddington, Victoria,
+│                                    Euston, Waterloo, Liverpool Street, London Bridge, Stratford
+├─ /seaports/[port]                  TEMPLATE — Dover, Southampton, Portsmouth, Harwich, Tilbury
+├─ /areas/                           Coverage map (one page, not nine near-identical ones)
+│  └─ /areas/[area]                  TEMPLATE — only where the content is genuinely local
+├─ /services/                        airport-transfers · corporate · executive-chauffeur
+│                                    minibus-hire · hourly-hire · events · tours
+│                                    student-transfers · accessible-travel
+├─ /fleet/                           Fleet + /fleet/[class]
+├─ /fares                            How pricing works, published
+├─ /luggage-guide   /child-seats
+├─ /info/                            meeting-points · flight-monitoring · cancellation
+│                                    payment · lost-property     (+ /faq)
+├─ /business/                        corporate-accounts · hotels · travel-trade
+├─ /drive-with-us                    Driver applications feed the admin driver list
+├─ /about  /contact  /reviews  /blog  (+ /blog/[slug])
+├─ /terms  /privacy  /cookies  /legal/licensing  /legal/complaints
+├─ /account/                         PHASE 2 — signin · bookings · addresses · invoices
+│                                    (never required by the booking flow)
+├─ /admin/                           Operations panel (noindex) — see §14 for build order
+└─ /404   /search   /sitemap.xml   /robots.txt</pre>
+
+  <h3>Build order</h3>
+  <div class="tbl"><table><thead><tr><th>Phase</th><th>Pages</th></tr></thead><tbody>
+    <tr><td><strong>Phase 1 — go live</strong></td><td>Home, <code>/quote</code>, the four booking steps, confirmation, manage-booking, the London airport hubs and terminals, services, fleet, fares, luggage guide, child seats, travel information, FAQ, about, contact, legal pages, system pages.</td></tr>
+    <tr><td><strong>Phase 2 — reach</strong></td><td>The route template at scale, area pages, stations, seaports, tours, blog, business and partner pages, driver recruitment, customer accounts.</td></tr>
+  </tbody></table></div>
+
+  <h3>Rules for the template pages</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th></tr></thead><tbody>
+    <tr><td class="id">SEO-01</td><td><strong>Quality bar before a generated page is indexed:</strong> a live fare for at least three vehicle classes; distance and journey time; at least 120 words written for that page plus 3 specific FAQs; at least 5 internal links. Pages that fail are rendered <code>noindex</code> and kept out of the sitemap, and the admin shows the score. Publishing route or area pages faster than the content can be written is the main SEO risk in this plan.</td></tr>
+    <tr><td class="id">SEO-02</td><td>Pages are pre-rendered and cached, and a page rebuilds itself when its prices or content change.</td></tr>
+    <tr><td class="id">SEO-03</td><td>Sitemap index split by page type with last-modified dates, submitted to Search Console. <code>robots.txt</code> disallows <code>/admin/</code>, <code>/manage/</code> and the booking steps, and allows everything else.</td></tr>
+    <tr><td class="id">SEO-04</td><td>Structured data: <code>LocalBusiness</code>, <code>Service</code>/<code>Offer</code>, <code>FAQPage</code>, <code>BreadcrumbList</code>, <code>Article</code>. Ratings only from genuine reviews.</td></tr>
+    <tr><td class="id">SEO-05</td><td>Editable title, meta description, share image, canonical and indexing settings per page; share images generated automatically.</td></tr>
+    <tr><td class="id">SEO-06</td><td>One official address: <code>https://citylineairporttransfers.com</code> (no www, recommended). www redirects permanently. Slug changes create a 301 automatically.</td></tr>
+    <tr><td class="id">SEO-07</td><td>One canonical Contact page and one Blog URL, linked identically from the header and footer.</td></tr>
+    <tr><td class="id">SEO-08</td><td>The quote widget appears on every landing page, pre-filled for that page, and on the 404 page.</td></tr>
+    <tr><td class="id">SEO-09</td><td>Google Business Profile as a service-area business, with the address hidden (No Public Access condition). Consistent name, address and phone everywhere.</td></tr>
+    <tr><td class="id">SEO-10</td><td>Search Console and GA4 funnel tracking (quote → vehicle → details → paid), after cookie consent. Because the funnel stays on one domain, drop-off is measurable at each step.</td></tr>
+    <tr><td class="id">SEO-11</td><td>No "taxi" or "cab" in slugs, titles, headings or alt text (CMP-01).</td></tr>
+  </tbody></table></div>
+  <p class="sub">Decisions this sitemap raises, still open: guest-only booking with magic links in v1 (recommended) or customer accounts too; whether supplier jobs appear anywhere customer-facing (recommended: admin only); and whether every route has a published fixed fare or quote-on-request above a distance, which decides whether route pages can be templated at all.</p>
+</section>
+
+
+<section id="design">
+  <h2><span class="n">06</span>Design sources</h2>
+  <p>There is no design system in this document. The visual design comes from Cityline's own files, and the build follows them:</p>
+  <ul>
+    <li><strong>Figma file</strong> (to be supplied). Claude reads it directly through the Figma MCP connection, or from Dev Mode exports, and builds React components from the frames. Brand colours, typography, spacing and component states all come from there.</li>
+    <li><strong>Google Stitch</strong> may be used to generate or refine screens; its output feeds the same component build.</li>
+    <li>What this document still fixes, because it isn't a styling matter: the pages that must exist (§5), what each page must contain and do (§8), the rules the booking flow must obey (§7), and accessibility and performance targets (§9).</li>
+  </ul>
+  <p><strong>For the design files to be buildable, they need to cover:</strong> the quote widget in its three uses (hero, inline on landing pages, compact sticky bar), the four booking steps with the running total, the confirmation page, manage-booking, the home page, one route page, one airport and terminal page, fleet and service pages, an information/policy page, contact, 404, plus the shared header, footer, cookie banner, form fields, buttons, alerts and empty states. Mobile (390px) and desktop (1440px) for each, and the error states listed in §7 (price changed, quote expired, payment failed, pickup too soon).</p>
+  <p class="sub">Two constraints the design must respect, whatever it looks like: no image or wording that implies a licensed London taxi (CMP-01), and the footer legal block from CMP-09. Accessibility target: WCAG 2.2 AA, so colour choices need enough contrast and every control needs a visible focus state.</p>
+</section>
+
+
+<section id="logic">
+  <h2><span class="n">07</span>Business logic</h2>
+  <h3>Catalogue (editable in the admin)</h3>
+  <ul>
+    <li><strong>Service types:</strong> airport, cruise port, station, point-to-point, hourly, tours, events, weddings, minibus/group.</li>
+    <li><strong>Vehicle classes:</strong> capacity, example models, photos, EV flag, order on the page.</li>
+    <li><strong>Places:</strong> airports → terminals, ports, stations, hotels, areas, zones (by postcode district or map area).</li>
+    <li><strong>Extras:</strong> child seats, extra stop, meet &amp; greet, extra luggage, pet, wheelchair accessible.</li>
+    <li><strong>Offers:</strong> promo codes, return discount, perks for booking direct, seasonal banners, tour packages.</li>
+    <li><strong>Suppliers:</strong> name, default commission %, payment terms, contact, dashboard URL.</li>
+  </ul>
+
+  <h3>Pricing engine (website quotes)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Base fare</td><td>A fixed route fare if one matches (place/zone ↔ place/zone, per class). Otherwise a distance tariff (flag fall + £/mile bands + £/min) with a minimum fare.</td></tr>
+      <tr><td>2 · Hourly</td><td>£/hour per class, with minimum hours and an included-miles allowance.</td></tr>
+      <tr><td>3 · Location charges</td><td>Airport pickup and drop-off fees, parking, congestion charge.</td></tr>
+      <tr><td>4 · Time modifiers</td><td>Night, bank holiday and peak-date surcharges.</td></tr>
+      <tr><td>5 · Extras</td><td>Sum of the selected extras.</td></tr>
+      <tr><td>6 · Discounts</td><td>Return discount, then a promo code.</td></tr>
+      <tr><td>7 · Rounding &amp; VAT</td><td>Round to £1. VAT shown only if you're registered.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The same engine suggests a price when staff create a phone or other direct job. Staff can override it, and the override is logged.</p>
+
+  <h3>Job lifecycle (all sources)</h3>
+  <pre class="mermaid">
+stateDiagram-v2
+  [*] --> Unassigned
+  Unassigned --> Assigned: driver + vehicle set (WhatsApp sent)
+  Assigned --> Assigned: reassigned (both drivers notified)
+  Assigned --> DriverConfirmed: staff mark driver acknowledged
+  DriverConfirmed --> Completed: staff mark done
+  Assigned --> Completed: staff mark done
+  DriverConfirmed --> NoShow
+  Unassigned --> Cancelled
+  Assigned --> Cancelled: driver notified
+  DriverConfirmed --> Cancelled: driver notified
+  Completed --> [*]
+  </pre>
+  <p>Website jobs are also linked to their booking, which tracks payment and amendments separately: <code>pending_payment → confirmed → cancelled / completed</code>. Cancelling a website booking cancels its jobs. Cancelling a website job in the admin requires going through the booking's cancel-and-refund flow.</p>
+
+  <h3>Job finance</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Field</th><th>Meaning</th><th>Source by channel</th></tr></thead>
+    <tbody>
+      <tr><td>Customer price</td><td>What the end customer paid or agreed to pay</td><td>Website: locked from checkout · Supplier: price shown on the supplier dashboard · Direct: entered by staff</td></tr>
+      <tr><td>Commission</td><td>What the supplier keeps</td><td>Supplier: customer price × supplier % (editable) · Others: 0</td></tr>
+      <tr><td>Payment fees</td><td>Card processing fees</td><td>Website: Stripe fee from the webhook · Payment link: Stripe fee · Cash: 0</td></tr>
+      <tr><td>Net revenue</td><td>Customer price − commission − payment fees</td><td>Calculated</td></tr>
+      <tr><td>Driver pay</td><td>What Cityline pays the driver for the job</td><td>Default from the driver's pay rule (fixed per job, % of net, or rate card), editable</td></tr>
+      <tr><td>Job costs</td><td>Parking, tolls, congestion charge, waiting pay, other</td><td>Added by staff, with optional receipt photo. Marked as paid by the company or by the driver (to be reimbursed).</td></tr>
+      <tr><td>Job profit</td><td>Net revenue − driver pay − job costs</td><td>Calculated and stored when the job is completed</td></tr>
+      <tr><td>Cash collected</td><td>Cash the driver took from the customer</td><td>Subtracted on the driver's statement</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub">Company profit = sum of job profit − company expenses (vehicle finance, insurance, fuel if company-paid, software, marketing, office, licensing) for the period.</p>
+</section>
+
+<section id="functional">
+  <h2><span class="n">08</span>Functional requirements</h2>
+  <div class="legend"><span><span class="pill mvp">MVP</span> launch</span><span><span class="pill p2">P2</span> 1–3 months after launch</span><span><span class="pill p3">P3</span> growth</span></div>
+
+  <h3>Public website</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th><th>Phase</th></tr></thead><tbody>
+    <tr><td class="id">WEB-01</td><td>Home page with the quote widget above the fold.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WEB-02</td><td>All MVP page types from §5, generated from data using page templates.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WEB-03</td><td>Help and policy pages: fares, cancellation, waiting, child seats, luggage, meeting points, FAQ, T&amp;Cs, privacy, cookies, complaints, lost property, accessibility.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WEB-04</td><td>Global trust bar: TfL licence 11628, phone, WhatsApp, review score, accepted payment methods.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WEB-05</td><td>Forms for contact, group quotes, complaints, lost property and driver applications, with spam protection (Turnstile).</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WEB-06</td><td>Display of genuine Google and Trustpilot reviews.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WEB-07</td><td>Brand assets (logo, images) supplied by Cityline and managed in the media library. Placeholders until then.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WEB-08</td><td>Hotel, event, tour and guide pages.</td><td><span class="pill p2">P2</span></td></tr>
+    <tr><td class="id">WEB-09</td><td>Currency display and translated key pages.</td><td><span class="pill p3">P3</span></td></tr>
+  </tbody></table></div>
+
+  <h3>Booking engine (website)</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th><th>Phase</th></tr></thead><tbody>
+    <tr><td class="id">BK-01</td><td>Journey → Vehicle (unsuitable classes disabled) → Extras → Passenger &amp; flight details → Review &amp; pay → confirmation page.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">BK-02</td><td>Google Places autocomplete, with airports, terminals, ports and stations suggested first.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">BK-03</td><td>Flight number and arrival time. Pickup time set relative to landing.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">BK-04</td><td>Return journey, via stops, separate lead passenger and booker, driver notes.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">BK-05</td><td>Minimum notice, blackout dates, and a daily cap on bookings (set in admin).</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">BK-06</td><td>Guest checkout, with an optional account.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">BK-07</td><td>"Manage booking" link to view, amend or cancel. It shows driver details once a driver is assigned.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">BK-08</td><td>The server recalculates the price at checkout, and quotes expire after 30 minutes.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">BK-09</td><td>When payment succeeds, one job is created per leg with <code>source = website</code>, and staff are alerted.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">BK-10</td><td>Abandoned-quote reminder email (with consent).</td><td><span class="pill p2">P2</span></td></tr>
+  </tbody></table></div>
+
+  <h3>Jobs (admin)</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th><th>Phase</th></tr></thead><tbody>
+    <tr><td class="id">JOB-01</td><td><strong>New job form</strong> for non-website sources. Fields: source (required), supplier and supplier reference (required when the source is a supplier), pickup date/time, pickup and drop-off addresses (with autocomplete), via stops, flight number, service type, vehicle class, passengers and bags, lead passenger name and phone, booker details, extras, customer price, payment method (supplier-paid, cash, card link, bank transfer, account), commission (defaults from the supplier), notes for the driver, internal notes.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-02</td><td><strong>Return trip</strong> shortcut: creates a second linked job with the pickup and drop-off swapped.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-03</td><td><strong>Duplicate prevention:</strong> supplier + supplier reference must be unique. Possible-duplicate warning on matching time, passenger or flight. Website jobs can't be created from this form.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-04</td><td><strong>Jobs board:</strong> a list plus day and week views, filters (date, source, supplier, status, driver, unassigned), colour by status, and a red flag for unassigned jobs within 24 hours.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-05</td><td><strong>Assign driver and vehicle:</strong> only drivers and vehicles with valid documents and the right class can be chosen. Warns if the driver has another job within 90 minutes. Records who assigned the job and when, and copies the driver's licence number and the vehicle registration onto the job.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-06</td><td><strong>Manual status updates:</strong> Unassigned → Assigned → Driver confirmed → Completed / No-show / Cancelled, each with a timestamp and the staff member's name.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-07</td><td><strong>Edit rules:</strong> supplier and direct jobs are fully editable. Website jobs lock the price, customer and route fields, and send staff to "Amend booking" instead.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-08</td><td><strong>Job history:</strong> a full change log on each job (field, old value, new value, who, when), plus WhatsApp message statuses.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-09</td><td><strong>Daily run-sheet:</strong> a printable or PDF list of tomorrow's jobs by driver.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-10</td><td><strong>Booking register export</strong> for TfL (CSV/PDF) covering every source, filterable by date.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-11</td><td><strong>Search</strong> by job reference, booking reference, supplier reference, passenger name, phone or flight number.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">JOB-12</td><td>Bulk import of supplier jobs from a CSV file (if the supplier dashboard can export one).</td><td><span class="pill p2">P2</span></td></tr>
+  </tbody></table></div>
+
+  <h3>WhatsApp driver messages</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th><th>Phase</th></tr></thead><tbody>
+    <tr><td class="id">WA-01</td><td>When a job is assigned, send the driver a WhatsApp message automatically, using an approved message template: job reference, date and pickup time, pickup address and terminal, flight number, drop-off, via stops, passenger name and phone, number of passengers and bags, vehicle class, extras (e.g. child seat), meet &amp; greet instructions, driver notes, amount of cash to collect (if any), and the office phone number. <strong>Driver pay is included or left out based on an admin setting</strong> (global default, can be changed per driver), so this can be decided while the system is running.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WA-02</td><td>Automatic messages when a job's time, address, flight or passenger details change, when the job is reassigned (a "job removed" message to the previous driver), and when it's cancelled.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WA-03</td><td>Delivery status shown on the job (sent, delivered, read, failed), updated from WhatsApp's delivery reports. If a message fails, staff are alerted immediately and can resend it.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WA-04</td><td>"Resend" and "Send reminder" buttons. An optional automatic reminder goes to the driver X hours before pickup (set in admin).</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WA-05</td><td>Driver consent to WhatsApp messages is recorded on the driver's profile. Messages go only to the driver's verified number.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">WA-06</td><td>Message templates can be edited in the admin; each change needs Meta's approval before it's used.</td><td><span class="pill p2">P2</span></td></tr>
+    <tr><td class="id">WA-07</td><td>Driver replies such as "OK" or "Accept" shown on the job, with an option to mark the driver as having confirmed.</td><td><span class="pill p2">P2</span></td></tr>
+  </tbody></table></div>
+
+  <h3>Drivers &amp; vehicles (records)</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th><th>Phase</th></tr></thead><tbody>
+    <tr><td class="id">DRV-01</td><td>Driver profile: name, photo, phone (WhatsApp), email, address, date of birth, employment type (self-employed or employee), start date, status (active, suspended, left), pay rule, WhatsApp consent, notes.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">DRV-02</td><td>Driver documents: PHV driver licence (number and expiry), DVLA licence, DBS certificate, right-to-work check, and others, each with a file upload, expiry date and verification (who checked it and when).</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">DRV-03</td><td>Driver job history, earnings, cash collected and rating/notes.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">DRV-04</td><td>Payout details (bank details stored encrypted, visible only to the owner role).</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">VEH-01</td><td>Vehicle profile: registration, make and model, colour, class, seats, ownership (company, driver-owned or hired), linked driver(s), status.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">VEH-02</td><td>Vehicle documents: PHV vehicle licence, MOT, hire-and-reward insurance, V5C, service records, each with a file and an expiry date.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">VEH-03</td><td>Vehicle job history, costs and profit per vehicle.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">DOC-01</td><td>An expiry dashboard and daily email alerts at 30, 14 and 7 days before any document expires. Expired documents block assignment.</td><td><span class="pill mvp">MVP</span></td></tr>
+  </tbody></table></div>
+
+  <h3>Finance &amp; reports</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th><th>Phase</th></tr></thead><tbody>
+    <tr><td class="id">FIN-00</td><td><strong>Settings you can change while the system is running (no code change or deployment):</strong> the driver pay model is set per driver and can be changed at any time: <em>fixed amount per job</em>, <em>percentage of net revenue</em>, or <em>rate card</em> (by route or zone and vehicle class, with a fallback). The chosen rule fills in each job's driver pay when the driver is assigned, and staff can still change it on the job. Suppliers and their default commission rates are added and edited in the admin; a rate change applies to new jobs only, so past jobs keep the rate they were recorded with.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">FIN-01</td><td>Job finance panel on each job (§7): customer price, commission, fees, driver pay, costs, profit.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">FIN-02</td><td>Company expenses: date, category, amount, VAT, supplier/payee, optional vehicle or driver, receipt upload.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">FIN-03</td><td>Driver statements for a date range: jobs, pay, reimbursable costs, minus cash collected, giving the balance. Mark as paid (date, method, reference). Statement exported as PDF.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">FIN-04</td><td>Money owed by suppliers: completed supplier jobs not yet paid, grouped by supplier. Record supplier payments against the jobs they cover.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">FIN-05</td><td>Dashboard: jobs today and this week, unassigned count, revenue, profit, direct vs supplier share, commission paid.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">FIN-06</td><td>Reports with date filters and CSV export: profit and loss by month; profit by source, supplier, driver, vehicle, vehicle class and route; commission paid to suppliers; driver pay owed; cash outstanding; cancellations and no-shows.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">FIN-07</td><td>Export to accounting software (Xero/QuickBooks CSV). Direct integration later.</td><td><span class="pill p2">P2</span></td></tr>
+    <tr><td class="id">FIN-08</td><td>Customer invoices for direct and account jobs (PDF, numbered).</td><td><span class="pill p2">P2</span></td></tr>
+  </tbody></table></div>
+
+  <h3>Passenger notifications</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th><th>Phase</th></tr></thead><tbody>
+    <tr><td class="id">NOT-01</td><td>Website customers get emails for confirmation (with calendar file), amendment, cancellation, receipt and refund.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">NOT-02</td><td>Driver details sent on assignment (email + SMS): the driver's first name, PHV licence number, vehicle make, colour and registration, and the driver's phone number or the office number (CMP-04). This can be switched on or off per job for supplier jobs.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">NOT-03</td><td>Staff alerts: new website booking, amendment or cancellation, failed WhatsApp message, unassigned job within 24 hours.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">NOT-04</td><td>Pickup reminder the day before, and a review request after completion.</td><td><span class="pill p2">P2</span></td></tr>
+  </tbody></table></div>
+
+  <h3>Payments &amp; accounts</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th><th>Phase</th></tr></thead><tbody>
+    <tr><td class="id">PAY-01</td><td>Stripe Payment Element (cards with 3-D Secure, Apple Pay, Google Pay). Webhooks decide payment status.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">PAY-02</td><td>Refunds, extra charges after the trip, and Stripe payment links for direct jobs, all from the admin.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">PAY-03</td><td>Cash option that can be switched on or off per service (website) and per job (admin).</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">ACC-01</td><td>Customer accounts: bookings, rebook, saved passengers and addresses, receipts.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">ACC-02</td><td>Business accounts with invoicing.</td><td><span class="pill p2">P2</span></td></tr>
+  </tbody></table></div>
+
+  <h3>Admin platform</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Requirement</th><th>Phase</th></tr></thead><tbody>
+    <tr><td class="id">ADM-01</td><td>Catalogue and pricing management. Changes go live without a deployment.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">ADM-02</td><td>Content management: pages built from blocks, SEO fields, redirects, menus, site settings, media library.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">ADM-03</td><td>Roles: <strong>Owner</strong> (everything, including finance and bank details), <strong>Controller</strong> (jobs, drivers, vehicles; no company finance), <strong>Accounts</strong> (finance, statements), <strong>Editor</strong> (content only). Two-factor authentication for everyone.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">ADM-04</td><td>Audit log for jobs, prices, finance and driver records.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">ADM-05</td><td>Enquiries inbox (complaints, lost property, quotes, driver applications).</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">ADM-06</td><td>Staff register (CMP-06) and SEO quality dashboard.</td><td><span class="pill mvp">MVP</span></td></tr>
+    <tr><td class="id">ADM-07</td><td>Admin screens usable on a phone (controllers often work from their phones).</td><td><span class="pill mvp">MVP</span></td></tr>
+  </tbody></table></div>
+
+  <h3>Out of scope</h3>
+  <p class="changes">Live location sharing · GPS tracking · a driver mobile app · automatic driver allocation · automatic flight tracking · third-party dispatch software · driver self-service portal. Some of these could be reconsidered after launch.</p>
+</section>
+
+<section id="nfr">
+  <h2><span class="n">09</span>Non-functional requirements</h2>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Area</th><th>Target</th></tr></thead><tbody>
+    <tr><td class="id">NFR-01</td><td>Performance</td><td>Core Web Vitals "good" on mobile. Cached pages start loading in under 250ms. Quotes in under 1.5s. Admin lists load in under 1.5s for 50,000 jobs.</td></tr>
+    <tr><td class="id">NFR-02</td><td>Availability</td><td>99.9% monthly target. Deployments replace only the app containers, so downtime is a few seconds; rollback is redeploying the previous image. Uptime monitor alerts within 5 minutes.</td></tr>
+    <tr><td class="id">NFR-03</td><td>Data safety</td><td>Deployments never delete data. Continuous WAL archiving means at most about 15 minutes of data could be lost in a disaster (§13).</td></tr>
+    <tr><td class="id">NFR-04</td><td>Security</td><td>HTTPS only, Stripe handles card data (PCI SAQ-A), secrets in <code>.env.production</code> on the server and never in git, database not exposed to the internet, SSH keys only, firewall and fail2ban, rate limits on quote/login/form routes, 2FA for admin, security headers and a content security policy. Driver documents kept in private storage outside the web root and opened only through signed, short-lived links. Bank details encrypted at the field level.</td></tr>
+    <tr><td class="id">NFR-05</td><td>Accessibility</td><td>WCAG 2.2 AA on the public site.</td></tr>
+    <tr><td class="id">NFR-06</td><td>Reliability of messaging</td><td>The WhatsApp message is sent the moment a driver is assigned. If it fails, the controller sees an error straight away, the message goes into the outbox, and cron retries it every minute. A failed message is never silent.</td></tr>
+    <tr><td class="id">NFR-07</td><td>Maintainability</td><td>TypeScript in strict mode, ESLint and Prettier. Vitest tests for pricing, job rules, finance calculations and webhooks; Playwright for the booking flow. Every deployment goes through CI and a preview build.</td></tr>
+    <tr><td class="id">NFR-09</td><td>Portability</td><td>Everything runs in Docker with settings in environment variables, so the app can move to a bigger VPS or another provider without code changes.</td></tr>
+    <tr><td class="id">NFR-08</td><td>Data conventions</td><td>Times stored in UTC and shown in Europe/London. Money stored as integer pence. Commission stored in basis points (1% = 100).</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="architecture">
+  <h2><span class="n">10</span>Architecture</h2>
+  <p>Everything runs on <strong>one IONOS VPS</strong>: the Next.js application, the PostgreSQL database, the reverse proxy and the backup job, all in Docker containers. The existing Web Hosting Ultimate plan keeps the domain, DNS and mailboxes.</p>
+
+  <h3>Server</h3>
+  <div class="tbl"><table><thead><tr><th>Item</th><th>Choice</th><th>Note</th></tr></thead><tbody>
+    <tr><td>Machine</td><td><strong>IONOS VPS L+</strong> — 6 vCPU, 8 GB RAM, 240 GB NVMe, UK data centre</td><td>£5/month for 3 months, then £18/month excl. VAT. M+ (4 GB) is the minimum; 8 GB leaves room for the database, the app and builds.</td></tr>
+    <tr><td>Operating system</td><td>Ubuntu 24.04 LTS</td><td>Supported to 2029</td></tr>
+    <tr><td>Runtime</td><td>Docker Engine + Docker Compose</td><td>Same containers locally and on the server</td></tr>
+    <tr><td>Web entry</td><td>Caddy 2</td><td>Automatic HTTPS, HTTP/3, compression, static-asset caching</td></tr>
+    <tr><td>Database</td><td>PostgreSQL 17 in a container, data in a named volume</td><td>Never exposed to the internet</td></tr>
+    <tr><td>Files</td><td><code>/srv/cityline/storage</code> volume: public media and a private area for driver documents and receipts</td><td>Private files served only through signed, short-lived links after a role check</td></tr>
+    <tr><td>Scheduling</td><td>System cron on the VPS calling the app's job runner <strong>every minute</strong></td><td>No 5-minute limit and no 60-second cap, unlike shared hosting</td></tr>
+    <tr><td>Domain &amp; DNS</td><td>Stay at IONOS; A/AAAA records point to the VPS IP</td><td>Certificates issued by Caddy; the IONOS wildcard certificate stays for anything on the webspace</td></tr>
+    <tr><td>Off-server backups</td><td>IONOS Cloud Backup or snapshots, plus encrypted dumps to HiDrive and to storage outside IONOS</td><td>§13</td></tr>
+  </tbody></table></div>
+
+  <h3>Stack</h3>
+  <div class="tbl"><table><thead><tr><th>Layer</th><th>Choice</th><th>Note</th></tr></thead><tbody>
+    <tr><td>Framework</td><td><strong>Next.js 16</strong> (App Router, TypeScript), running in standalone mode in a container</td><td>Server-rendered and cached pages; the booking API and webhooks are route handlers</td></tr>
+    <tr><td>Admin &amp; content</td><td><strong>Payload CMS 3</strong> inside the same Next.js app (Postgres adapter), plus custom admin views</td><td>Built <strong>last</strong> (§14). A persistent server suits Payload better than serverless hosting does.</td></tr>
+    <tr><td>Database access</td><td>Drizzle (via Payload) + SQL views for reports</td><td>Generated, reviewed, committed migrations</td></tr>
+    <tr><td>UI</td><td>Tailwind CSS 4 + shadcn/ui, built from the supplied Figma design (§6)</td><td>Server components by default; client components only where there's interaction</td></tr>
+    <tr><td>Forms &amp; validation</td><td>React Hook Form + Zod, shared client and server</td><td>Prices always recalculated on the server</td></tr>
+    <tr><td>Background work</td><td>An <code>outbox</code> table plus a worker container; cron every minute as the safety net</td><td>WhatsApp messages are still sent inside the request; retries happen in the worker</td></tr>
+    <tr><td>Payments</td><td>Stripe (Payment Element, SetupIntents, webhooks, payment links)</td><td>Dojo is the alternative if card terminals in cars are wanted later</td></tr>
+    <tr><td>Maps</td><td>Google Places Autocomplete (New) + Routes API, results cached</td><td>Browser key restricted by domain, server key by the VPS IP</td></tr>
+    <tr><td>WhatsApp</td><td>WhatsApp Business Platform (Cloud API), or Twilio</td><td>Approved utility templates; delivery webhooks update the job</td></tr>
+    <tr><td>Email / SMS</td><td>Resend or Postmark · Twilio SMS</td><td>SPF, DKIM, DMARC on the domain. Not sent from the VPS itself.</td></tr>
+    <tr><td>PDFs</td><td><code>@react-pdf/renderer</code></td><td>Run-sheets, statements, register exports, invoices</td></tr>
+    <tr><td>Auth</td><td>Payload auth for staff (TOTP 2FA); magic links for customers; accounts optional in phase 2</td><td>The booking flow never requires an account</td></tr>
+    <tr><td>Monitoring</td><td>Sentry, Uptime Kuma on the VPS, container log rotation</td><td></td></tr>
+    <tr><td>Testing</td><td>Vitest (unit), Playwright (booking flow), run in CI</td><td>Pricing, job rules and webhooks have full coverage</td></tr>
+    <tr><td>CI/CD</td><td>GitHub Actions → build image → push to GitHub Container Registry → deploy over SSH</td><td>§12</td></tr>
+  </tbody></table></div>
+
+  <h3>System diagram</h3>
+  <pre class="mermaid">
+flowchart LR
+  subgraph People
+    C[Customers]
+    ST[Owner / controllers / accounts]
+    DR[Drivers · WhatsApp]
+  end
+  subgraph VPS["IONOS VPS L+ · Ubuntu 24.04 · UK"]
+    CAD[Caddy · HTTPS]
+    APP[Next.js 16 + Payload 3<br/>site · booking · admin]
+    WRK[Worker: outbox retries,<br/>reminders, alerts, exports]
+    PG[(PostgreSQL 17<br/>Docker volume)]
+    FS[(Storage volume:<br/>media + private documents)]
+    CRON[cron · every minute]
+    UK[Uptime Kuma]
+  end
+  OFF[(Off-server backups:<br/>IONOS snapshot · HiDrive · B2)]
+  IONOSDNS[IONOS: domain, DNS, mailboxes]
+  subgraph External
+    STR[Stripe]
+    GM[Google Maps]
+    WAC[WhatsApp Cloud API]
+    EM[Email provider]
+    SMS[SMS provider]
+    SEN[Sentry]
+  end
+  SUP[Supplier dashboards<br/>Trip.com etc.]
+  C & ST --> CAD --> APP
+  APP --> PG
+  APP --> FS
+  CRON --> WRK --> PG
+  WRK --> OFF
+  APP --> STR
+  STR -- webhooks --> APP
+  APP --> GM
+  APP -- "job message" --> WAC --> DR
+  WAC -- "delivery status" --> APP
+  APP --> EM
+  APP --> SMS
+  APP --> SEN
+  IONOSDNS -- "A record" --> CAD
+  SUP -. "staff read and enter jobs" .-> ST
+  </pre>
+
+  <h3>Code structure</h3>
+<pre class="code">cityline-web/
+├─ src/
+│  ├─ app/
+│  │  ├─ (site)/                 public pages and templates (§5)
+│  │  ├─ (booking)/book/         4-step funnel + /quote + /book/confirmed/[ref]
+│  │  ├─ (manage)/manage/        magic-link self-service
+│  │  ├─ (account)/              phase 2
+│  │  ├─ (payload)/admin/        admin (built last)
+│  │  └─ api/                    quotes, bookings, stripe + whatsapp webhooks, cron
+│  ├─ collections/               jobs, drivers, vehicles, suppliers, places, pages …
+│  ├─ admin-views/               jobs board, dispatch, run-sheet, statements, reports
+│  ├─ components/                ui/ (from Figma) + site/ (page blocks)
+│  ├─ domain/{pricing,booking,jobs,finance,messaging,compliance,seo}/
+│  ├─ worker/                    outbox handlers, scheduled tasks
+│  └─ migrations/
+├─ docker/ (Dockerfile, Caddyfile)
+├─ compose.yaml
+└─ .github/workflows/deploy.yml</pre>
+</section>
+
+<section id="setup">
+  <h2><span class="n">11</span>Environment &amp; setup status</h2>
+  <h3>In place</h3>
+  <div class="tbl"><table><thead><tr><th>Item</th><th>State</th><th>Role now</th></tr></thead><tbody>
+    <tr><td>Domain</td><td><code>citylineairporttransfers.com</code>, renews 15/09/2027, DNS managed at IONOS</td><td>✅ A/AAAA records will point to the VPS</td></tr>
+    <tr><td>SSL (IONOS wildcard)</td><td>Valid to 17/03/2027, auto-renewed</td><td>Stays for anything on the webspace; the VPS gets its own certificates from Caddy</td></tr>
+    <tr><td>Web Hosting Ultimate</td><td>Active, £24/month after the intro period</td><td>Domain, DNS, 5 mailboxes, HiDrive backup copies, coming-soon page</td></tr>
+    <tr><td>SSH user <code>su1160547</code> · webspace</td><td>Working, home <code>/home/www</code></td><td>Used for the coming-soon page and backup copies only</td></tr>
+    <tr><td>Test database <code>dbs16137152</code> (MariaDB)</td><td>Created during testing</td><td>Not needed — the VPS runs PostgreSQL. Can be deleted.</td></tr>
+    <tr><td>Coming-soon page</td><td>Prepared (<code>noindex</code>)</td><td>Serves until the launch gate on the VPS takes over</td></tr>
+    <tr><td><strong>VPS</strong></td><td>⏳ Not purchased yet</td><td><strong>Sprint 0 task:</strong> order VPS L+, Ubuntu 24.04, UK data centre, no Plesk</td></tr>
+  </tbody></table></div>
+
+  <h3>Checks already done on the webspace (kept for the record)</h3>
+  <p class="sub">These informed the earlier PHP design. With the VPS they matter only for the domain, mailboxes and backup copies.</p>
+  <div class="tbl"><table><tbody>
+    <tr><td>SSH login</td><td>✅ <code>access-5021434057.webspace-host.com</code></td></tr>
+    <tr><td>Node.js on the webspace</td><td>v18.20.4, command line only, out of support — <strong>this is why the app needs the VPS</strong></td></tr>
+    <tr><td>mysqldump / git / PHP 8.4</td><td>Present (not used by the new stack)</td></tr>
+    <tr><td>Webspace cron</td><td>5-minute minimum, 60-second cap — the VPS has neither limit</td></tr>
+  </tbody></table></div>
+
+  <h3>Sprint 0 checklist</h3>
+  <ul>
+    <li>Order the VPS; harden it (SSH keys only, firewall, fail2ban, automatic updates); install Docker.</li>
+    <li>Point DNS at the VPS; confirm Caddy issues certificates for the domain and <code>staging.</code>.</li>
+    <li>Create the GitHub repository and the deploy key; get the first container deployed behind the launch gate.</li>
+    <li>Enable IONOS Cloud Backup/snapshots; set up dumps to HiDrive and to an off-account bucket; run a restore test.</li>
+    <li>Open the accounts with long lead times: Stripe (company verification), Meta Business + a <strong>new phone number</strong> for WhatsApp, Google Cloud (Places, Routes), email provider domain verification, Sentry.</li>
+    <li>Ask Cityline for the Figma file and brand assets, and for the launch price tables.</li>
+  </ul>
+</section>
+
+
+<section id="infra">
+  <h2><span class="n">12</span>Deployment, environments &amp; costs</h2>
+  <h3>Environments</h3>
+  <div class="tbl"><table><thead><tr><th>Environment</th><th>Where</th><th>Data</th></tr></thead><tbody>
+    <tr><td><strong>Local</strong></td><td>Docker Compose on the developer's machine</td><td>Local Postgres with seeded example data</td></tr>
+    <tr><td><strong>Staging</strong> (recommended, cheap)</td><td>A second Compose project on the same VPS at <code>staging.citylineairporttransfers.com</code>, password-protected and <code>noindex</code></td><td>Its own database; refreshed from a production dump when needed</td></tr>
+    <tr><td><strong>Production</strong></td><td><code>citylineairporttransfers.com</code> on the VPS</td><td>Production database</td></tr>
+  </tbody></table></div>
+  <p class="sub">The 8 GB VPS can run both. If resources get tight, staging can be switched off between releases.</p>
+
+  <h3>Safeguards</h3>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Safeguard</th></tr></thead><tbody>
+    <tr><td class="id">PRD-01</td><td>Every change is built and tested locally, then on staging, then merged to <code>main</code>, which deploys to production.</td></tr>
+    <tr><td class="id">PRD-02</td><td><strong>Launch gate:</strong> until go-live the public sees the "coming soon" page (<code>noindex</code>); staff reach the admin normally and owners preview with a secret link.</td></tr>
+    <tr><td class="id">PRD-03</td><td>Feature flags hide unfinished features in production.</td></tr>
+    <tr><td class="id">PRD-04</td><td>Stripe test keys, a WhatsApp test number and email limited to staff addresses until launch. After going live, one real £1 booking and refund.</td></tr>
+    <tr><td class="id">PRD-05</td><td>A database dump runs before every deployment; migrations run with the app in maintenance mode; rollback is redeploying the previous image tag.</td></tr>
+    <tr><td class="id">PRD-06</td><td>Deploy only when CI passes (types, lint, unit tests, Playwright booking test), and outside UK peak booking hours.</td></tr>
+    <tr><td class="id">PRD-07</td><td>Test records carry an <code>is_test</code> flag and are excluded from reports and TfL exports.</td></tr>
+    <tr><td class="id">PRD-08</td><td>Server hardening on day one: SSH keys only, root and password login disabled, UFW plus the IONOS firewall allowing only 22/80/443, fail2ban, automatic security updates, Postgres not published to the internet.</td></tr>
+  </tbody></table></div>
+
+  <h3>Containers (compose.yaml, simplified)</h3>
+<pre class="code">services:
+  caddy:
+    image: caddy:2
+    ports: ["80:80", "443:443"]
+    volumes: [caddy_data:/data, ./docker/Caddyfile:/etc/caddy/Caddyfile]
+  app:
+    image: ghcr.io/cityline/web:${APP_TAG}      # Next.js standalone + Payload
+    env_file: .env.production
+    volumes: [storage:/app/storage]
+    depends_on: { db: { condition: service_healthy } }
+  worker:
+    image: ghcr.io/cityline/web:${APP_TAG}      # same image, runs the outbox worker
+    command: ["node", "dist/worker.js"]
+    env_file: .env.production
+    depends_on: [db]
+  db:
+    image: postgres:17
+    volumes: [pg_data:/var/lib/postgresql/data]  # data lives here, not in the app
+    healthcheck: { test: ["CMD", "pg_isready", "-U", "cityline"] }
+    # no "ports:" → never exposed to the internet
+  backup:
+    image: ghcr.io/cityline/pg-backup            # nightly dump + WAL archiving off-server
+    depends_on: [db]
+volumes: { pg_data: , storage: , caddy_data: }</pre>
+
+  <h3>Deployment pipeline</h3>
+  <pre class="mermaid">
+flowchart LR
+  L[Local build + tests] --> P[Push branch]
+  P --> CI[CI: typecheck, lint,<br/>Vitest, Playwright]
+  CI --> IMG[Build image · tag = git SHA]
+  IMG --> GH[Push to GHCR]
+  GH --> STG[Deploy to staging on the VPS]
+  STG --> OK[Check on staging]
+  OK --> BK[SSH: pg_dump before migrating]
+  BK --> MG[Migrations + maintenance mode]
+  MG --> UP[docker compose up -d app worker<br/>only the app containers are replaced]
+  UP --> HC[Health check /api/health]
+  HC -- fail --> RB[Redeploy previous tag]
+  </pre>
+  <ul>
+    <li>Only the <code>app</code> and <code>worker</code> containers are replaced. The database volume and the storage volume are never touched.</li>
+    <li>Cron on the VPS: <code>* * * * *</code> calling the job runner, plus the nightly backup and weekly off-site copy.</li>
+    <li>Content, price, job and driver changes are made in the admin (once it exists) and need no deployment.</li>
+  </ul>
+
+  <h3>Running costs (excluding VAT)</h3>
+  <div class="tbl"><table><thead><tr><th>Item</th><th>Cost</th><th>Note</th></tr></thead><tbody>
+    <tr><td>IONOS VPS L+</td><td>£5/month for 3 months, then £18/month</td><td>Setup fee waived in the current offer</td></tr>
+    <tr><td>IONOS Web Hosting Ultimate</td><td>£24/month (already committed)</td><td>Now used for domain, DNS, mailboxes, HiDrive backup copies and the coming-soon page</td></tr>
+    <tr><td>Off-account backup storage</td><td>A few £ per month</td><td>Backblaze B2 or similar</td></tr>
+    <tr><td>Email, SMS, WhatsApp messages, Google Maps</td><td>Pay per use</td><td>Set budget alerts</td></tr>
+    <tr><td>Sentry, Uptime Kuma</td><td>Free tiers</td><td>Uptime Kuma runs on the VPS</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>about £18–£25/month on top of the existing plan</strong></td><td>Everything stays with IONOS, in exchange for you owning server maintenance</td></tr>
+  </tbody></table></div>
+  <p class="sub">What owning the server means in practice: security updates, firewall, certificate renewals (Caddy handles these), backups, uptime, and responding when something breaks at 3am. Budget a few hours a month.</p>
+</section>
+
+
+<section id="persistence">
+  <h2><span class="n">13</span>Data safety &amp; backups</h2>
+  <p>Data is lost on a deployment when it lives inside something that gets rebuilt. Here the database and the uploaded files sit in Docker volumes that deployments never replace; only the application containers change.</p>
+  <div class="tbl"><table class="req"><thead><tr><th>ID</th><th>Rule</th></tr></thead><tbody>
+    <tr><td class="id">DATA-01</td><td>Postgres data lives only in the named volume <code>pg_data</code>. The app containers hold no data.</td></tr>
+    <tr><td class="id">DATA-02</td><td>All uploads (media, driver and vehicle documents, receipts, generated PDFs) live in the <code>storage</code> volume, outside the app image.</td></tr>
+    <tr><td class="id">DATA-03</td><td>Schema changes happen only through committed, reviewed migrations. Reset and drop commands are blocked outside local development.</td></tr>
+    <tr><td class="id">DATA-04</td><td>Migrations only add things. Removing or renaming a column takes two deployments: add and copy first, drop later.</td></tr>
+    <tr><td class="id">DATA-05</td><td><strong>Never run <code>docker compose down -v</code> or <code>docker volume prune</code> on the server.</strong> A server runbook says so, and only named users have shell access.</td></tr>
+    <tr><td class="id">DATA-06</td><td>Continuous WAL archiving (WAL-G or pgBackRest) off the server, so the database can be restored to any point within the last 15 minutes.</td></tr>
+    <tr><td class="id">DATA-07</td><td>A nightly encrypted <code>pg_dump</code>, kept 14 daily, 8 weekly and 12 monthly, copied to IONOS HiDrive and to storage outside the IONOS account.</td></tr>
+    <tr><td class="id">DATA-08</td><td>The <code>storage</code> volume is synced off-server nightly. IONOS Cloud Backup or snapshots of the whole VPS run daily and before OS upgrades.</td></tr>
+    <tr><td class="id">DATA-09</td><td>A restore is tested monthly into staging, with the result recorded. A backup that has never been restored doesn't count.</td></tr>
+    <tr><td class="id">DATA-10</td><td>Backups are held with a different provider from the VPS, so losing the IONOS account doesn't lose the data.</td></tr>
+    <tr><td class="id">DATA-11</td><td>Jobs and finance records are never permanently deleted. They're archived, and kept at least 12 months (TfL) and 6 years (accounting).</td></tr>
+    <tr><td class="id">DATA-12</td><td>Stripe and WhatsApp hold their own records of payments and messages, which can be used to rebuild if needed.</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="db">
+  <h2><span class="n">14</span>Database design</h2>
+  <p>PostgreSQL 17 on the VPS. Tables are Payload collections unless noted; Payload adds <code>id</code>, <code>created_at</code> and <code>updated_at</code>. Money is stored as integer pence and percentages as basis points. Times are <code>timestamptz</code> in UTC, displayed in Europe/London. Lists and structured data use <code>JSONB</code>. Case-insensitive text (emails, promo codes) uses <code>citext</code> or a lower() unique index. Free-text search uses a GIN trigram index. Nothing that feeds finance or the TfL register is ever permanently deleted; archived records get an <code>archived_at</code> date.</p>
+
+  <h3>Entity relationships</h3>
+  <pre class="mermaid">
+erDiagram
+  CUSTOMERS ||--o{ BOOKINGS : makes
+  BOOKINGS ||--|{ JOBS : "website legs"
+  SUPPLIERS ||--o{ JOBS : "supplier source"
+  JOBS ||--o| JOBS : "return of"
+  JOBS ||--o{ JOB_STOPS : via
+  JOBS ||--o{ JOB_EXTRAS : adds
+  JOBS ||--o{ JOB_COSTS : incurs
+  JOBS ||--o{ JOB_EVENTS : history
+  JOBS ||--o{ MESSAGES : notifies
+  DRIVERS ||--o{ JOBS : drives
+  VEHICLES ||--o{ JOBS : used
+  VEHICLE_CLASSES ||--o{ JOBS : class
+  DRIVERS ||--o{ DRIVER_DOCUMENTS : holds
+  VEHICLES ||--o{ VEHICLE_DOCUMENTS : holds
+  DRIVERS }o--o{ VEHICLES : "assigned to"
+  DRIVERS ||--o{ DRIVER_PAYOUTS : paid
+  DRIVER_PAYOUTS ||--|{ PAYOUT_ITEMS : covers
+  JOBS ||--o| PAYOUT_ITEMS : "settled in"
+  SUPPLIERS ||--o{ SUPPLIER_PAYMENTS : pays
+  SUPPLIER_PAYMENTS ||--|{ SUPPLIER_PAYMENT_ITEMS : covers
+  JOBS ||--o| SUPPLIER_PAYMENT_ITEMS : "settled in"
+  BOOKINGS ||--o{ PAYMENTS : paid
+  PAYMENTS ||--o{ REFUNDS : refunded
+  EXPENSES }o--o| VEHICLES : "for"
+  PLACES ||--o{ TERMINALS : has
+  ROUTES ||--o{ ROUTE_FARES : priced
+  VEHICLE_CLASSES ||--o{ ROUTE_FARES : priced
+  USERS ||--o| STAFF_REGISTER : "TfL register"
+  </pre>
+
+  <h3>Jobs &amp; bookings</h3>
+  <div class="tbl"><table><thead><tr><th>Table</th><th>Columns</th><th>Constraints / indexes</th></tr></thead><tbody>
+    <tr><td><code>jobs</code></td><td>
+      <b>Identity:</b> reference (J-000001), source (website | supplier | phone | whatsapp | email | account | other), booking_id → bookings, leg (outbound | return), supplier_id → suppliers, supplier_ref, return_of_job_id → jobs<br/>
+      <b>Journey:</b> service_type_id, pickup_at, pickup_address, pickup_place_id, pickup_terminal_id, pickup_lat/lng, dropoff_address, dropoff_place_id, dropoff_terminal_id, dropoff_lat/lng, flight_number, flight_arrival_at, distance_m, duration_s<br/>
+      <b>Passengers:</b> vehicle_class_id, passengers, large_bags, small_bags, lead_name, lead_phone, lead_email, booker_name, booker_phone, booker_email, meet_and_greet bool, name_board_text<br/>
+      <b>Dispatch (TfL):</b> status (unassigned | assigned | driver_confirmed | completed | no_show | cancelled), driver_id, vehicle_id, driver_phv_no (copied at assignment), vehicle_reg (copied), taken_by_user_id (null = website), taken_at, dispatched_by_user_id, dispatched_at, subcontractor_name, completed_at, cancelled_at, cancel_reason<br/>
+      <b>Finance:</b> customer_price_pence, driver_pay_rule_snapshot (json), payment_method (web_prepaid | supplier | cash | card_link | bank | account), commission_bp, commission_pence, payment_fee_pence, driver_pay_pence, cash_to_collect_pence, cash_collected_pence, costs_total_pence, profit_pence, price_overridden_by, locked bool<br/>
+      <b>Notes:</b> driver_notes, internal_notes, notify_passenger bool, archived_at
+    </td><td>unique(reference)<br/>partial unique index on (supplier_id, supplier_ref) where supplier_ref is not null<br/>partial unique index on (booking_id, leg) where booking_id is not null<br/>check: source = 'website' ⇔ booking_id is set<br/>check: source = 'supplier' ⇒ supplier_id and supplier_ref are set<br/>index(pickup_at)<br/>index(status, pickup_at)<br/>index(driver_id, pickup_at)<br/>index(source, pickup_at)<br/>GIN trigram index on lead_name, lead_phone, flight_number, supplier_ref</td></tr>
+    <tr><td><code>job_stops</code></td><td>job_id, position, address, lat, lng</td><td>unique(job_id, position)</td></tr>
+    <tr><td><code>job_extras</code></td><td>job_id, extra_id, qty, unit_price_pence</td><td>unique(job_id, extra_id)</td></tr>
+    <tr><td><code>job_costs</code></td><td>job_id, type (parking | toll | congestion | waiting_pay | fuel | other), amount_pence, paid_by (company | driver), reimbursable bool, receipt → private_media, note, created_by</td><td>index(job_id)</td></tr>
+    <tr><td><code>job_events</code></td><td>job_id, type (created | updated | assigned | unassigned | status_changed | message_sent …), field, old_value, new_value, actor_type (user | system | customer), actor_id, created_at</td><td>index(job_id, created_at). Rows can only be added, never edited.</td></tr>
+    <tr><td><code>messages</code></td><td>job_id, driver_id, channel (whatsapp | sms | email), recipient, purpose (job_assigned | job_updated | job_removed | job_cancelled | reminder | passenger_driver_details), template_name, payload (json), provider_message_id, status (queued | sent | delivered | read | failed), error, attempts, sent_at, delivered_at, read_at</td><td>unique(provider_message_id); index(job_id); index(status)</td></tr>
+    <tr><td><code>bookings</code> (website orders)</td><td>reference (CL-XXXXXX), customer_id, status (pending_payment | confirmed | cancelled | completed | expired), booker details, subtotal_pence, discount_pence, total_pence, price_snapshot (json), promotion_id, terms_version, manage_token_hash, cancelled_at, cancel_reason</td><td>unique(reference); index(status, created_at)</td></tr>
+    <tr><td><code>quotes</code></td><td>token, request (json), results (json), expires_at</td><td>unique(token); index(expires_at)</td></tr>
+    <tr><td><code>payments</code></td><td>booking_id, job_id (for payment links), stripe_payment_intent_id, amount_pence, fee_pence, status, kind (initial | amendment | post_trip | payment_link), raw (json)</td><td>unique(stripe_payment_intent_id)</td></tr>
+    <tr><td><code>refunds</code></td><td>payment_id, stripe_refund_id, amount_pence, reason, created_by</td><td>unique(stripe_refund_id)</td></tr>
+    <tr><td><code>webhook_events</code></td><td>provider (stripe | whatsapp), event_id, type, processed_at, payload (json)</td><td>unique(provider, event_id)</td></tr>
+    <tr><td><code>customers</code></td><td>email, name, phone, password_hash, marketing_consent(+at), stripe_customer_id</td><td>unique(email) using citext</td></tr>
+    <tr><td><code>saved_addresses</code></td><td>customer_id, label, address, lat, lng</td><td>index(customer_id)</td></tr>
+  </tbody></table></div>
+
+  <h3>Drivers, vehicles &amp; compliance</h3>
+  <div class="tbl"><table><thead><tr><th>Table</th><th>Columns</th><th>Constraints / indexes</th></tr></thead><tbody>
+    <tr><td><code>drivers</code></td><td>first_name, last_name, photo → private_media, phone_whatsapp (E.164), phone_verified_at, whatsapp_consent_at, email, address, date_of_birth, employment_type, start_date, end_date, status (active | suspended | left), pay_rule (fixed | percent | rate_card), pay_value, rate_card_id → driver_rate_cards, show_pay_in_whatsapp (null = use global default), bank_details_encrypted, notes</td><td>unique(phone_whatsapp); index(status)</td></tr>
+    <tr><td><code>driver_documents</code></td><td>driver_id, type (phv_licence | dvla_licence | dbs | right_to_work | other), number, issued_at, expires_at, file → private_media, verified_by, verified_at</td><td>index(expires_at); index(driver_id, type)</td></tr>
+    <tr><td><code>vehicles</code></td><td>registration, make, model, colour, vehicle_class_id, seats, ownership (company | driver | hired), status, notes</td><td>unique(registration)</td></tr>
+    <tr><td><code>vehicle_documents</code></td><td>vehicle_id, type (phv_vehicle_licence | mot | insurance | v5c | service), number, expires_at, file, verified_by</td><td>index(expires_at)</td></tr>
+    <tr><td><code>driver_vehicles</code></td><td>driver_id, vehicle_id, is_default</td><td>unique(driver_id, vehicle_id)</td></tr>
+    <tr><td><code>staff_register</code></td><td>user_id, full_name, date_of_birth, dbs_reference, dbs_date, role, started_at, ended_at</td><td>unique(user_id)</td></tr>
+    <tr><td><code>enquiries</code></td><td>kind (contact | group_quote | complaint | lost_property | driver_application), name, email, phone, job_id, message, data (json), attachments, status, assigned_to, retention_until</td><td>index(kind, status)</td></tr>
+  </tbody></table></div>
+
+  <h3>Finance</h3>
+  <div class="tbl"><table><thead><tr><th>Table</th><th>Columns</th><th>Constraints / indexes</th></tr></thead><tbody>
+    <tr><td><code>suppliers</code></td><td>name, slug, default_commission_bp, payment_terms_days, contact_name, email, dashboard_url, active</td><td>unique(slug)</td></tr>
+    <tr><td><code>supplier_payments</code></td><td>supplier_id, received_at, amount_pence, reference, method, note</td><td>index(supplier_id, received_at)</td></tr>
+    <tr><td><code>supplier_payment_items</code></td><td>supplier_payment_id, job_id, amount_pence</td><td>unique(job_id)</td></tr>
+    <tr><td><code>driver_payouts</code></td><td>driver_id, period_start, period_end, jobs_total_pence, reimbursements_pence, cash_collected_pence, adjustments_pence, balance_pence, status (draft | approved | paid), paid_at, method, reference, pdf → private_media</td><td>index(driver_id, period_end)</td></tr>
+    <tr><td><code>payout_items</code></td><td>payout_id, job_id, driver_pay_pence, reimbursable_pence, cash_collected_pence</td><td>unique(job_id), so a job is paid out once only</td></tr>
+    <tr><td><code>expenses</code></td><td>date, category (vehicle_finance | insurance | fuel | maintenance | licensing | software | marketing | office | other), amount_pence, vat_pence, payee, vehicle_id, driver_id, receipt → private_media, note, created_by</td><td>index(date, category)</td></tr>
+    <tr><td><code>driver_rate_cards</code></td><td>name, default_pence, active</td><td>unique(name)</td></tr>
+    <tr><td><code>driver_rate_card_lines</code></td><td>rate_card_id, route_id or origin_zone_id + destination_zone_id, vehicle_class_id, pay_pence</td><td>unique(rate_card_id, route_id, origin_zone_id, destination_zone_id, vehicle_class_id)</td></tr>
+  </tbody></table></div>
+  <p class="sub">Reports (profit and loss, profit by source/supplier/driver/vehicle/route, commission, balances) are built from SQL queries and views over <code>jobs</code>, <code>job_costs</code>, <code>expenses</code> and the payment tables. Nothing is double-stored, except <code>profit_pence</code>, which is saved when a job is completed and recalculated whenever its finance fields change.</p>
+
+  <h3>Catalogue, pricing, content &amp; system</h3>
+  <div class="tbl"><table><thead><tr><th>Table</th><th>Columns</th><th>Constraints / indexes</th></tr></thead><tbody>
+    <tr><td><code>service_types</code></td><td>slug, name, requires_flight, min_notice_minutes, cancellation_policy (json), cash_allowed, active</td><td>unique(slug)</td></tr>
+    <tr><td><code>vehicle_classes</code></td><td>slug, name, max_pax, max_large_bags, max_small_bags, example_models, is_ev, hourly_rate_pence, min_hours, images, sort</td><td>unique(slug)</td></tr>
+    <tr><td><code>places</code> / <code>terminals</code></td><td>kind, slug, name, parent_id, address, postcode, lat, lng, iata_code, fees, meeting_info, meeting_photos, airlines (JSONB)</td><td>unique(kind, slug)</td></tr>
+    <tr><td><code>zones</code> / <code>zone_postcodes</code></td><td>slug, name, polygon (JSONB, GeoJSON format), priority · zone_id, postcode_district</td><td>unique(postcode_district, zone_id)</td></tr>
+    <tr><td><code>routes</code> / <code>route_fares</code></td><td>slug, origin/destination (place or zone), distance_m, duration_s, bidirectional, intro, is_published · route_id, vehicle_class_id, price_pence, valid_from, valid_to</td><td>unique(slug); unique(route_id, vehicle_class_id, valid_from)</td></tr>
+    <tr><td><code>tariffs</code> / <code>tariff_bands</code></td><td>vehicle_class_id, flag_fall, per_minute, minimum_fare, validity · tariff_id, from_miles, to_miles, per_mile</td><td></td></tr>
+    <tr><td><code>surcharges</code>, <code>extras</code>, <code>promotions</code>, <code>promotion_redemptions</code></td><td>as in pricing rules (§7)</td><td>unique(lower(code)) on promotions</td></tr>
+    <tr><td><code>route_cache</code></td><td>origin_hash, destination_hash, distance_m, duration_s, fetched_at</td><td>unique(origin_hash, destination_hash)</td></tr>
+    <tr><td><code>pages</code>, <code>seo_pages</code>, <code>posts</code>, <code>faqs</code>, <code>reviews</code>, <code>redirects</code></td><td>content and SEO records (§5)</td><td>unique(path) / unique(from_path)</td></tr>
+    <tr><td><code>media</code> / <code>private_media</code></td><td>file metadata, alt text, disk (public | private), path, sizes. Private files are served only through signed, short-lived links after a permission check.</td><td></td></tr>
+    <tr><td><code>users</code></td><td>email, name, role (owner | controller | accounts | editor), totp_secret, last_login_at, active</td><td>unique(email)</td></tr>
+    <tr><td><code>audit_log</code></td><td>user_id, collection, doc_id, action, diff (json), ip</td><td>index(collection, doc_id)</td></tr>
+    <tr><td>Globals</td><td>site_settings, header, footer, booking_rules, messaging_settings (templates, reminder hours, show_driver_pay_default), finance_settings (VAT, default driver pay rule)</td><td></td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="plan">
+  <h2><span class="n">15</span>Development plan</h2>
+  <p>Order follows Cityline's decision: <strong>the website and booking flow first, the admin panel last</strong>. Sprints are one week for one developer working with Claude; the durations are estimates, and content (prices, copy, photos) plus third-party approvals are the usual causes of delay.</p>
+
+  <div class="callout warn">
+    <p><strong>The cost of leaving the admin until last</strong></p>
+    <p>From the day the website takes its first booking until the admin exists, there is no screen for assigning a driver, recording who dispatched a job, or keeping supplier jobs in one place. TfL requires a booking record that includes the driver's licence number, the vehicle registration and who dispatched the job (CMP-03). Two ways to cover the gap:</p>
+    <ul>
+      <li><strong>Keep the launch gate on</strong> until the admin's first slice (S8) is done, so the website isn't taking public bookings yet. Cleanest.</li>
+      <li><strong>Or launch earlier</strong> and run dispatch by hand (WhatsApp plus a spreadsheet), with the website emailing every booking to staff and providing a CSV export of its own booking records. Legal, but the dispatch half of the record lives outside the system, and someone must keep it complete.</li>
+    </ul>
+    <p>A small mitigation is built in S7: a read-only job list and CSV export, so bookings are at least visible and exportable before the full admin arrives.</p>
+  </div>
+
+  <div class="tbl"><table>
+    <thead><tr><th>Sprint</th><th>Scope</th><th>Done when</th></tr></thead>
+    <tbody>
+      <tr><td><strong>S0 · Week 1</strong><br/>Server &amp; foundations</td><td>VPS ordered and hardened; Docker, Caddy, Postgres, storage volume; DNS moved; Next.js 16 project with TypeScript, Tailwind, testing and CI; deploy pipeline to staging and production; launch gate; cron and worker; backups plus a restore test; Sentry and uptime monitoring. External accounts opened in parallel.</td><td>Pushing to <code>main</code> deploys to production behind the gate; staging works; a restore has succeeded; a cron run is logged.</td></tr>
+      <tr><td><strong>S1 · Week 2</strong><br/>Design to components</td><td>Read the Figma file (or Stitch output); build the component library, layouts, header, footer, cookie banner, form fields, alerts and empty states; responsive at 390px and 1440px; accessibility baseline.</td><td>A component showcase page matches the design at both widths; Lighthouse accessibility ≥ 95. <strong>Blocked until the Figma file arrives</strong> — if it's late, build with neutral styling and restyle later.</td></tr>
+      <tr><td><strong>S2 · Week 3</strong><br/>Places &amp; pricing</td><td>Places, terminals, zones, postcodes; routes, fares, tariffs, surcharges, extras, promotions; Google Routes caching; pricing engine with full tests; a seed importer for the launch price tables.</td><td>30 test journeys (fixed routes, distance tariff, night surcharge, extras, return, promo code) all return the expected fare.</td></tr>
+      <tr><td><strong>S3 · Week 4</strong><br/>Quote &amp; steps 1–2</td><td><code>/quote</code>, the hero/inline/compact quote widget, Google Places autocomplete with airports first, step 1 (route, time, flight number, return leg), step 2 (vehicle choice with capacities and disabled classes), session handling, quote expiry.</td><td>Postcode in, fares out in under 5 seconds, with no personal details requested.</td></tr>
+      <tr><td><strong>S4 · Week 5</strong><br/>Steps 3–4 &amp; payment</td><td>Step 3 (passenger details, extras priced live), step 4 (Stripe Payment Element, SetupIntent for later charges), webhooks, booking records created, confirmation page with reference and magic link, customer emails, staff alert email/WhatsApp.</td><td>A test booking with a return leg is recorded, emails arrive, and a duplicated webhook changes nothing.</td></tr>
+      <tr><td><strong>S5 · Week 6</strong><br/>Manage booking</td><td><code>/manage/</code> lookup and magic link, booking detail, amend (reprice, charge or refund the difference), cancel with the true refund shown first, VAT receipt, edge states (price changed, quote expired, payment failed, pickup too soon).</td><td>Amending a booking updates the price correctly and emails the customer; cancelling refunds the right amount.</td></tr>
+      <tr><td><strong>S6 · Week 7</strong><br/>Phase-1 pages &amp; SEO</td><td>Home, airport hubs and terminals, services, fleet and vehicle classes, fares, luggage guide, child seats, travel information, FAQ, about, contact, reviews, legal pages, 404 with the quote box; sitemap, robots, structured data, redirects, page cache invalidation, GA4 and consent, Search Console.</td><td>All phase-1 pages live behind the gate; mobile LCP under 2.5s on home and a route page; sitemap valid.</td></tr>
+      <tr><td><strong>S7 · Week 8</strong><br/>Launch prep · <em>Milestone A</em></td><td>Accessibility audit, performance pass, security review, rate limits, legal pages reviewed, Stripe live keys, real £1 booking and refund, <strong>interim job list</strong> (read-only, with CSV export for TfL records) and booking alerts to staff, then the launch gate comes off.</td><td>The public site takes real bookings; every booking reaches staff within a minute; records are exportable.</td></tr>
+      <tr><td><strong>S8 · Week 9</strong><br/>Admin 1: jobs</td><td>Payload admin with roles and 2FA; drivers, vehicles and documents with expiry blocking; suppliers; jobs board (list, day, week); manual job entry for supplier and phone jobs with duplicate rules; assignment recording driver licence number and vehicle registration; manual statuses; job history.</td><td>A supplier job can't be entered twice; an expired driver can't be assigned; the TfL register export contains every required field.</td></tr>
+      <tr><td><strong>S9 · Week 10</strong><br/>Admin 2: dispatch</td><td>WhatsApp templates and automatic sending on assignment, change, reassignment and cancellation; delivery status and retries; passenger driver-details message (CMP-04); run-sheet PDF; staff alerts; unassigned-job alarms.</td><td>Assigning a job messages the driver within seconds and shows delivered/read; a forced failure alerts staff.</td></tr>
+      <tr><td><strong>S10 · Week 11</strong><br/>Admin 3: finance · <em>Milestone B</em></td><td>Job finance (price, commission, fees, driver pay, costs, profit); expenses; driver pay rules and rate cards; driver statements; supplier payments and balances; dashboard; reports with CSV export; content editing for the CMS pages.</td><td>Profit per job matches a hand calculation on 10 jobs; a driver statement nets off cash collected. <strong>Operations run entirely in the system.</strong></td></tr>
+      <tr><td><strong>S11+ · Week 12 onward</strong><br/>Phase 2</td><td>Route template at scale, area pages, stations, seaports, tours, blog, business and partner pages, driver recruitment, customer accounts, reminders and review requests, accounting export.</td><td>Route and area pages are published only as fast as real content is written for them.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Definition of done (every task)</h3>
+  <ul>
+    <li>Works locally, then on staging. Tests written or updated and passing in CI.</li>
+    <li>Migrations only add things and have been reviewed. No destructive commands.</li>
+    <li>Money in integer pence, times in UTC. No "taxi" or "cab" wording anywhere.</li>
+    <li>Matches the Figma design at 390px and 1440px; keyboard-usable; no console errors.</li>
+    <li>Deployed through CI with a database dump taken first, and checked on production afterwards.</li>
+  </ul>
+</section>
+
+
+<section id="handbook">
+  <h2><span class="n">16</span>Developer handbook (for Claude)</h2>
+  <p>Put this in the repository as <code>CLAUDE.md</code> so every development session starts with the same context.</p>
+<pre class="code"># Cityline — project rules
+
+## What this is
+Next.js app for Cityline Airport Transfers Ltd (TfL PHV operator 11628):
+public SEO website + booking funnel (/book) + magic-link manage-booking,
+and later an operations admin (jobs from all sources, drivers, finance, WhatsApp).
+Spec: "Cityline Platform Spec" artifact (v6.0). Site map: the site-map artifact.
+
+## Stack
+Next.js 16 (App Router, TypeScript, standalone build) · Payload CMS 3 (admin, added last)
+PostgreSQL 17 · Tailwind 4 + shadcn/ui · Stripe · Google Places/Routes
+WhatsApp Cloud API · Resend/Postmark · Twilio · Sentry
+Self-hosted on ONE IONOS VPS (Ubuntu 24.04) with Docker Compose behind Caddy.
+Cron on the VPS runs the worker every minute (outbox retries, reminders, backups).
+
+## Commands
+pnpm dev · pnpm build · pnpm test · pnpm e2e
+docker compose up -d · pnpm payload migrate:create · pnpm payload migrate
+Deploy: push to main → CI builds the image → SSH deploy (never edit files on the server)
+
+## Styling
+Comes from Cityline's Figma file (read via the Figma MCP / Dev Mode exports) or Google
+Stitch output. Do NOT invent a palette or typography; ask for the file if it is missing.
+Tokens live in one theme file; components must not hard-code colours.
+
+## Non-negotiable rules
+- NEVER use "taxi", "cab", "minicab" in copy, slugs, titles, alt text, emails.
+- Money = integer pence; percentages = basis points; timestamps timestamptz UTC,
+  displayed Europe/London.
+- The booking funnel stays on this domain, never requires an account, and shows a price
+  before asking for name/phone/email.
+- Prices are ALWAYS recalculated server-side; never trust a price from the client.
+- jobs.source is required and immutable; website jobs only come from checkout;
+  partial unique index on (supplier_id, supplier_ref); website jobs lock
+  price/customer/route — changes go through the amend flow.
+- Assign driver => WhatsApp template sent immediately; on failure write to `outbox`
+  for retry and alert staff. Never silent.
+- Copy driver PHV number + vehicle reg onto the job at assignment (TfL record).
+- Drivers/vehicles with expired documents cannot be assigned.
+- Stripe webhooks: verify signature, store event ids for idempotency, treat as the
+  source of truth for payment status.
+- Migrations only add. No destructive commands outside local dev.
+  NEVER `docker compose down -v` or `docker volume prune` on the server.
+- Private files (driver docs, receipts) only via signed short-lived URLs after a role check.
+- Respect the launch gate and feature flags; Stripe/WhatsApp stay in test mode until
+  launch; test records carry is_test.
+- WCAG 2.2 AA; verify at 390px and 1440px; no layout shift; next/image everywhere.
+
+## Structure
+src/app/(site) · (booking)/book · (manage) · (account) · (payload)/admin · api
+src/collections · src/admin-views · src/components/{ui,site} · src/domain/* · src/worker</pre>
+
+  <h3>Environment variables</h3>
+  <div class="tbl"><table><thead><tr><th>Group</th><th>Keys</th><th>Source</th></tr></thead><tbody>
+    <tr><td>App</td><td><code>NEXT_PUBLIC_SITE_URL PAYLOAD_SECRET LAUNCH_GATE PREVIEW_TOKEN CRON_SECRET APP_TAG</code></td><td>Generated; stored in <code>.env.production</code> on the VPS (not in git)</td></tr>
+    <tr><td>Database</td><td><code>DATABASE_URL</code> (container network) · <code>POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB</code></td><td>Set when the database container is created</td></tr>
+    <tr><td>Storage</td><td><code>STORAGE_PATH</code> (public and private sub-paths)</td><td>Docker volume on the VPS</td></tr>
+    <tr><td>Stripe</td><td><code>STRIPE_SECRET_KEY NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY STRIPE_WEBHOOK_SECRET</code></td><td>Stripe (test keys first)</td></tr>
+    <tr><td>Google</td><td><code>NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY GOOGLE_MAPS_SERVER_KEY</code></td><td>Google Cloud, restricted by domain and by the VPS IP</td></tr>
+    <tr><td>WhatsApp</td><td><code>WHATSAPP_TOKEN WHATSAPP_PHONE_NUMBER_ID WHATSAPP_BUSINESS_ACCOUNT_ID WHATSAPP_APP_SECRET WHATSAPP_VERIFY_TOKEN</code></td><td>Meta Business / WhatsApp Manager</td></tr>
+    <tr><td>Email / SMS</td><td><code>RESEND_API_KEY MAIL_FROM TWILIO_SID TWILIO_TOKEN TWILIO_FROM</code></td><td>Email and SMS providers</td></tr>
+    <tr><td>Security</td><td><code>NEXT_PUBLIC_TURNSTILE_SITE_KEY TURNSTILE_SECRET</code></td><td>Cloudflare Turnstile</td></tr>
+    <tr><td>Monitoring</td><td><code>SENTRY_DSN NEXT_PUBLIC_GA4_ID</code></td><td>Sentry · Google Analytics</td></tr>
+    <tr><td>Backups</td><td><code>BACKUP_ARCHIVE_PASSWORD HIDRIVE_WEBDAV_URL HIDRIVE_USER HIDRIVE_PASSWORD B2_KEY_ID B2_APP_KEY B2_BUCKET</code></td><td>IONOS HiDrive · Backblaze B2</td></tr>
+  </tbody></table></div>
+
+  <h3>Inputs Cityline must provide</h3>
+  <div class="tbl"><table><thead><tr><th>Needed by</th><th>Item</th></tr></thead><tbody>
+    <tr><td>S0</td><td>IONOS VPS purchase · GitHub organisation · Stripe (company verified) · Google Cloud billing · Meta Business + a <strong>new phone number</strong> for WhatsApp · email provider · Twilio · Sentry · off-account backup storage</td></tr>
+    <tr><td>S1</td><td><strong>Figma file</strong> (or Stitch output) covering the screens listed in §6 · logo (SVG) · car, driver and meeting-point photos</td></tr>
+    <tr><td>S2</td><td><strong>Price tables:</strong> fixed fares per class for the launch routes, per-mile tariff, surcharges, extras prices · policies (free waiting, cancellation windows, minimum notice)</td></tr>
+    <tr><td>S4–S6</td><td>Public phone number and email · company number · VAT number (if registered) · genuine review links · page copy for the phase-1 pages · meeting point text per terminal</td></tr>
+    <tr><td>S7</td><td>Solicitor-reviewed T&amp;Cs and privacy policy · Google Business Profile access · decision on whether to launch before the admin exists</td></tr>
+    <tr><td>S8–S10</td><td>Driver and vehicle records with documents · supplier list and commission rates · staff list and roles · WhatsApp message wording · expense categories · driver pay rules</td></tr>
+  </tbody></table></div>
+</section>
+
+
+<section id="decisions">
+  <h2><span class="n">17</span>Open decisions</h2>
+  <ul>
+    <li><strong>Launch before the admin exists?</strong> Either hold the launch gate until Sprint 8, or launch at Sprint 7 and run dispatch by hand for a few weeks (§15).</li>
+    <li><strong>Customer accounts in v1?</strong> Recommended: guest booking plus magic-link manage-booking only, with accounts in phase 2. Fewer things to build and it converts better, and no URLs change later.</li>
+    <li><strong>Published fixed fares for every route, or quote-on-request beyond a distance?</strong> This decides whether route pages can be templated at all.</li>
+    <li><strong>Are supplier (Trip.com/OTA) jobs visible anywhere customer-facing?</strong> Recommended: admin only.</li>
+    <li><strong>Main address:</strong> without www (recommended) or with.</li>
+    <li><strong>Payment policy:</strong> pay in full at booking, or save the card and charge nearer the time? Allow cash to the driver?</li>
+    <li><strong>Policies:</strong> free waiting minutes, cancellation windows and refund percentages, child-seat prices, surcharges, minimum notice.</li>
+    <li><strong>Service hours:</strong> only claim 24/7 if phones are staffed 24/7.</li>
+    <li><strong>VAT status</strong>, which decides how prices are displayed.</li>
+    <li><strong>Staging on the same VPS?</strong> Recommended yes — it costs nothing extra and the 8 GB machine can run it.</li>
+  </ul>
+  <p class="sub">Settings that can be changed at any time in the admin, so they don't block the build: driver pay model, whether pay appears in WhatsApp messages, supplier list and commission rates, promotions, and page content.</p>
+</section>
+
+
+<section id="changes">
+  <h2><span class="n">18</span>Version history</h2>
+  <ul class="changes">
+    <li><strong>v6.0 (20 Sep 2026):</strong> hosting is now entirely IONOS — one <strong>VPS L+</strong> running Next.js, PostgreSQL, Caddy and the worker in Docker, with the existing Web Hosting plan kept for domain, DNS, mailboxes and backup copies (Vercel and Neon dropped). Sitemap replaced with the approved site-map artifact (booking funnel at <code>/book</code>, magic-link <code>/manage</code>, template-driven route, station, seaport and area pages; phase 1 / phase 2 split). Design system removed: styling now comes from Cityline's Figma file or Google Stitch, which Claude reads directly (§6). Development plan reordered — <strong>website and booking first, admin panel last</strong> — with the TfL record-keeping gap that creates written up, plus an interim job list and export in Sprint 7. Deployment, data safety, handbook, environment variables and costs rewritten for the VPS.</li>
+    <li><strong>v5.1:</strong> stack changed to Next.js + Payload + Postgres, hosted on Vercel with a Neon database (superseded by v6.0).</li>
+    <li><strong>v5.0:</strong> design system, full sitemap, IONOS setup and server test results, no-staging safeguards, 11-sprint plan, developer handbook.</li>
+    <li><strong>v4.0:</strong> stay on IONOS Web Hosting Ultimate; Laravel 13 + Filament 5 + MariaDB.</li>
+    <li><strong>v3.0–3.1:</strong> INSOFTDEV removed; in-house operations admin, one job register for all sources, WhatsApp dispatch, drivers, vehicles and finance.</li>
+    <li><strong>v2.0:</strong> supplier-led business model, SEO page system, database design, data-safety rules.</li>
+    <li><strong>v1.0–1.1:</strong> first requirements, competitor research, TfL rules.</li>
+  </ul>
+</section>
+
+
+<section id="sources">
+  <h2><span class="n">19</span>Sources</h2>
+  <ul class="src">
+    <li><a href="https://mylondontransfer.com/">My London Transfer</a> · <a href="https://elitelondonrides.co.uk/">Elite London Rides</a> · <a href="https://www.airportmove.co.uk/">Airport Move</a></li>
+    <li><a href="https://content.tfl.gov.uk/private-hire-operator-handbook.pdf">TfL Private Hire Operator's Handbook</a> · <a href="https://content.tfl.gov.uk/phv-operator-register-and-booking-records-guidance.pdf">TfL booking records guidance</a> · <a href="https://content.tfl.gov.uk/05-24-tph-notice-changes-to-licensing-requirements-from-1-july-2024.pdf">TfL Notice 05/24</a></li>
+    <li><a href="https://developers.facebook.com/docs/whatsapp/pricing/">WhatsApp Business Platform pricing</a></li>
+    <li><a href="https://www.ionos.co.uk/hosting/web-hosting">IONOS Web Hosting</a> · <a href="https://www.ionos.co.uk/servers/vps">IONOS VPS</a> · <a href="https://docs.ionos.space/docs/faq/">IONOS: no server-side Node.js</a></li>
+    <li><a href="https://payloadcms.com/posts/releases/new-in-payload-dashboards-developer-control-and-nextjs-16">Payload + Next.js 16</a> · <a href="https://www.buildwithmatija.com/blog/deploy-payload-cms-nextjs-16-self-hosted">Self-hosting Payload with Next.js 16</a></li>
+    <li>Cityline artifacts: the approved <em>site map</em> (Sep 2026) and the Figma design file (to be supplied)</li>
+    <li><a href="https://developers.google.com/search/docs/essentials/spam-policies">Google Search spam policies</a></li>
+    <li>Supplied by Cityline: full-page capture of mylondontransfer.com (17 Sep 2026), the competitor's sitemap, the Claude Design wireframes ("design.pdf"), IONOS control-panel screenshots and SSH check output</li>
+    <li><a href="https://www.ionos.com/help/hosting/cron-jobs/cron-job-manager/">IONOS Cron Job Manager</a> · <a href="https://www.ionos.com/help/hosting/cron-jobs/tips-for-creating-cron-jobs/">IONOS cron tips</a></li>
+  </ul>
+</section>
+
+</main>
+</div>
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+
+</body></html>

@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="web_standard" name="shell-type" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-background":"#121e18","primary-fixed-dim":"#84d89b","inverse-on-surface":"#e6f4e9","secondary-fixed-dim":"#69dd92","outline-variant":"#bfc9bd","surface-bright":"#effdf2","on-secondary-fixed":"#00210e","surface":"#effdf2","on-secondary-container":"#00723d","error":"#ba1a1a","surface-container-lowest":"#ffffff","on-secondary-fixed-variant":"#00522a","surface-container-high":"#ddece1","on-primary":"#ffffff","on-surface-variant":"#3f4940","tertiary-fixed":"#99f899","primary-container":"#0e6b39","surface-container-low":"#e9f7ec","tertiary-container":"#006c20","on-primary-fixed":"#00210d","primary-fixed":"#a0f5b5","error-container":"#ffdad6","on-tertiary-fixed-variant":"#005316","surface-container-highest":"#d8e6db","inverse-surface":"#27332c","secondary-container":"#83f7a9","on-secondary":"#ffffff","inverse-primary":"#84d89b","on-surface":"#121e18","secondary-fixed":"#85faac","on-tertiary-container":"#8deb8d","surface-tint":"#116c3a","secondary":"#006d3a","background":"#effdf2","primary":"#005128","on-error-container":"#93000a","surface-variant":"#d8e6db","on-tertiary-fixed":"#002105","on-tertiary":"#ffffff","tertiary-fixed-dim":"#7edb7f","surface-dim":"#cfded3","on-error":"#ffffff","outline":"#6f7a6f","surface-container":"#e3f1e7","on-primary-fixed-variant":"#005229","on-primary-container":"#94e9aa","tertiary":"#005116"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-sm":"0.5rem","space-xs":"0.25rem","space-xl":"2rem","gutter-sm":"1rem","gutter":"1.5rem","margin-desktop":"7.5rem","margin":"2rem","space-md":"1rem","space-lg":"1.5rem"},"fontFamily":{"body-md":["Inter"],"label-sm":["Inter"],"title-md":["Inter"],"headline-md":["Inter"],"body-sm":["Inter"],"headline-lg-mobile":["Inter"],"fare-tabular":["Inter"],"headline-sm":["Inter"],"display-lg-mobile":["Inter"],"headline-lg":["Inter"],"display-lg":["Inter"],"body-lg":["Inter"],"label-md":["Inter"]},"fontSize":{"body-md":["15px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"400"}],"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"600"}],"title-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"400"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"fare-tabular":["22px",{"lineHeight":"28px","letterSpacing":"0em","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"600"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.025em","fontWeight":"600"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"0em","fontWeight":"400"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"500"}]}}}
+    </script>
+  </head>
+  <body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+    <header
+      class="bg-surface-container-lowest/90 fixed top-0 z-50 w-full shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl"
+    >
+      <div
+        class="px-gutter gap-space-lg mx-auto flex h-20 max-w-[1200px] items-center justify-between"
+      >
+        <div class="gap-space-md flex items-center">
+          <div class="gap-space-sm flex items-center">
+            <div
+              class="bg-primary-container text-on-primary flex h-9 w-9 items-center justify-center rounded-lg"
+            >
+              <span class="material-symbols-outlined text-[20px]">local_taxi</span>
+            </div>
+            <div class="flex flex-col">
+              <span
+                class="font-title-md text-title-md text-on-surface leading-none tracking-tight"
+                >CITYLINE</span
+              ><span
+                class="font-label-sm text-label-sm text-secondary leading-none tracking-wider uppercase"
+                >Transfers London</span
+              >
+            </div>
+          </div>
+          <nav
+            class="gap-space-lg ml-space-lg hidden items-center xl:flex"
+            data-active-classes="text-primary font-bold"
+          >
+            <a
+              class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors"
+              data-path="airports"
+              href="#"
+              >Airports</a
+            ><a
+              class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors"
+              data-path="services"
+              href="#"
+              >Services</a
+            ><a
+              class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors"
+              data-path="fleet"
+              href="#"
+              >Fleet</a
+            ><a
+              class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors"
+              data-path="fares"
+              href="#"
+              >Fares</a
+            ><a
+              aria-current="page"
+              class="text-primary font-bold transition-colors"
+              data-path="blog"
+              href="#"
+              >Blog</a
+            ><a
+              class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors"
+              data-path="help"
+              href="#"
+              >Help</a
+            ><a
+              class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors"
+              data-path="contact"
+              href="#"
+              >Contact</a
+            >
+          </nav>
+        </div>
+        <div class="gap-space-md flex items-center">
+          <div class="hidden flex-col text-right lg:flex">
+            <span class="font-label-sm text-label-sm text-on-surface-variant"
+              >24/7 UK Dispatch</span
+            ><a
+              class="font-label-md text-label-md text-on-surface hover:text-primary font-semibold transition-colors"
+              href="tel:+442079460812"
+              >+44 (0)20 7946 0812</a
+            >
+          </div>
+          <a
+            class="px-gutter py-space-sm bg-primary-container text-on-primary hover:bg-secondary font-label-md text-label-md inline-flex items-center justify-center rounded-lg shadow-[0_1px_3px_rgba(15,26,20,0.04)] transition-colors"
+            data-path="book-now"
+            href="#"
+            >Book now</a
+          ><img
+            alt="Profile"
+            class="h-8 w-8 rounded-full object-cover"
+            src="https://lh3.googleusercontent.com/aida/AEtjO1Wo22GfjdFIHzeGon_3-qDYCbJ8zfGVPUbhyXvOo9JbmvAcXmgXfQMwgnJ4Wxogy2UM4FIGHiDezMQXtAw2SfVt6DhwgY3Qq1zNQg3KKOybc60shelsIWUoRYgyQGV65-lKSkkEImO86wU5QYICG2Y39soqob3WsMYuAO9ZSORsTwxoihDjWNbC7ItIMwMdRgAps-bkrW8eEj975ndX4P_k7BVhauMa7relA-Js419ty9Xa_joxr74MANuCv9-WhURwraMjiffCDg"
+          />
+        </div>
+      </div>
+    </header>
+    <main class="bg-surface w-full pt-20">
+      <div class="flex w-full flex-col">
+        <!-- Content Wrapper -->
+        <div
+          class="px-gutter py-space-xl lg:py-margin gap-space-xl mx-auto flex w-full max-w-[1200px] flex-col"
+        >
+          <!-- Editorial Header Block -->
+          <header class="gap-space-sm flex max-w-3xl flex-col">
+            <div
+              class="gap-space-xs text-primary font-label-sm inline-flex items-center tracking-wider uppercase"
+            >
+              <span class="bg-secondary-container h-2 w-2 rounded-full"></span>
+              <span>Cityline Intelligence &amp; Dispatch Briefs</span>
+            </div>
+            <h1
+              class="font-display-lg text-display-lg-mobile lg:text-display-lg text-on-surface leading-tight tracking-tight"
+            >
+              Airport Transfer Insights &amp; London Travel Guides
+            </h1>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+              Expert timing advice, terminal navigation, luggage regulations, and private
+              hire standards from London's trusted airport transfer specialists.
+            </p>
+          </header>
+          <!-- Featured Post Hero Card (Wide Split) -->
+          <article
+            class="bg-surface-container-lowest group w-full overflow-hidden rounded-xl shadow-[0_1px_4px_rgba(15,26,20,0.06)] transition-all duration-300 hover:shadow-[0_12px_32px_rgba(14,107,57,0.08)]"
+          >
+            <div class="grid min-h-[380px] grid-cols-1 lg:grid-cols-12">
+              <!-- Left Image Container -->
+              <div class="bg-surface-container relative overflow-hidden lg:col-span-7">
+                <img
+                  alt="London street scene with sleek executive car in motion blur"
+                  class="h-full min-h-[260px] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 lg:min-h-full"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKR1nkoZl7riTK3M53CjZS6vAQoAep_ocg7QU0eKHLs8nhaALPu3OChMn4jN5yAasfEk_0NEmCjff3w7K24ZZ8tdlyPiIK9_QII4rouzE1kcz-yTOQ4LGuxeIYikQLGbdDxYIHwycl6yd2vbdRVQ4LI0niMzHF4gqOiYEHd9mrPZqzoLecfZXBH1gM90XSJj_6ntHsaC8rAnHEQm2Iz6Nbe_XWtRG1msBkjIe3Ibb4FGuueNAqAI8U"
+                />
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent lg:hidden"
+                ></div>
+                <span
+                  class="top-space-md left-space-md bg-surface-container-lowest/90 font-label-sm text-primary absolute flex items-center gap-1 rounded-full px-3 py-1 shadow-sm backdrop-blur-md"
+                >
+                  <span class="material-symbols-outlined text-[16px]">verified</span>
+                  <span>Featured Analysis</span>
+                </span>
+              </div>
+              <!-- Right Card Body -->
+              <div
+                class="p-space-lg lg:p-space-xl bg-surface-container-lowest flex flex-col justify-between lg:col-span-5"
+              >
+                <div class="gap-space-md flex flex-col">
+                  <div>
+                    <span
+                      class="text-primary font-label-sm inline-flex items-center rounded-full bg-[#90EE90]/40 px-3 py-1 font-semibold tracking-wide"
+                    >
+                      London Airports &amp; Navigation
+                    </span>
+                  </div>
+                  <a class="group/title block" href="#">
+                    <h2
+                      class="font-headline-md text-headline-md text-on-surface group-hover/title:text-primary leading-snug transition-colors"
+                    >
+                      Navigating London Terminal Congestion: The 2025 Chauffeur Timing
+                      Guide
+                    </h2>
+                  </a>
+                  <p
+                    class="font-body-md text-body-md text-on-surface-variant leading-relaxed"
+                  >
+                    Why the standard two-hour flight arrival rule often falls short during
+                    M25 widening works and terminal forecourt redevelopment. How ADS-B
+                    radar tracking protects your itinerary against unexpected delays.
+                  </p>
+                </div>
+                <div
+                  class="pt-space-md mt-space-md bg-surface-container-low/40 -mx-space-lg -mb-space-lg lg:-mx-space-xl lg:-mb-space-xl p-space-md lg:px-space-xl flex items-center justify-between"
+                >
+                  <div
+                    class="text-on-surface-variant font-label-sm flex flex-wrap items-center gap-2"
+                  >
+                    <span class="text-on-surface font-semibold"
+                      >Published 18 Feb 2025</span
+                    >
+                    <span>•</span>
+                    <span>6 min read</span>
+                    <span>•</span>
+                    <span>By Cityline Operations</span>
+                  </div>
+                  <a
+                    class="text-primary inline-flex items-center transition-transform group-hover:translate-x-1"
+                    href="#"
+                  >
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+          <!-- Category Filter Chips Row -->
+          <section class="gap-space-sm pt-space-sm flex flex-col">
+            <div
+              class="pb-space-xs flex scrollbar-none items-center justify-between overflow-x-auto"
+            >
+              <div class="flex min-w-max items-center gap-2.5">
+                <button
+                  class="text-on-primary font-label-md h-9 cursor-pointer rounded-full bg-[#0E6B39] px-4 font-semibold shadow-[0_1px_3px_rgba(14,107,57,0.18)] transition-all"
+                  type="button"
+                >
+                  All Articles
+                </button>
+                <button
+                  class="bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-label-md h-9 cursor-pointer rounded-full px-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors"
+                  type="button"
+                >
+                  Terminal Guides
+                </button>
+                <button
+                  class="bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-label-md h-9 cursor-pointer rounded-full px-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors"
+                  type="button"
+                >
+                  Luggage &amp; Vehicles
+                </button>
+                <button
+                  class="bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-label-md h-9 cursor-pointer rounded-full px-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors"
+                  type="button"
+                >
+                  Travel Logistics &amp; Timing
+                </button>
+                <button
+                  class="bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-label-md h-9 cursor-pointer rounded-full px-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors"
+                  type="button"
+                >
+                  Family &amp; Group Travel
+                </button>
+                <button
+                  class="bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-label-md h-9 cursor-pointer rounded-full px-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors"
+                  type="button"
+                >
+                  Corporate Ground Transport
+                </button>
+              </div>
+            </div>
+          </section>
+          <!-- Three-Column Articles Grid -->
+          <section class="gap-gutter grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Card 1 -->
+            <article
+              class="bg-surface-container-lowest group flex flex-col justify-between overflow-hidden rounded-xl shadow-[0_1px_4px_rgba(15,26,20,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(14,107,57,0.07)]"
+            >
+              <div class="flex flex-col">
+                <div
+                  class="bg-surface-container relative aspect-[4/3] w-full overflow-hidden"
+                >
+                  <img
+                    alt="Airport Queues &amp; Terminal Navigation"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1UbTBpak6q2nAAiZG74LusOLrFpEPZiYpvjLQy1QDC7-eei0SmjOULZ72UKnzw6Ti3fXA6_kQ0r1hdBzKMOmQlyJHQNzLP73yDjT9IBz-23FDDl-MdKPqxwJl-Z6COhwH9vo6I6gMJKaGWXQOi1z566g1VloiXHeCh92ndV_JKEiZk8oa9yrBhnM3lxPtnJMAvFXq3WVljIziobQRkdjG4MXTKp_Zqmk6AOKgVzWx6SjsfBRy99L7aEsg"
+                  />
+                  <div class="top-space-sm left-space-sm absolute">
+                    <span
+                      class="text-primary font-label-sm inline-flex items-center rounded-full bg-[#90EE90]/90 px-2.5 py-0.5 font-semibold backdrop-blur-sm"
+                    >
+                      Terminal Guides
+                    </span>
+                  </div>
+                </div>
+                <div class="p-space-lg gap-space-xs flex flex-col">
+                  <a class="group/link" href="#">
+                    <h3
+                      class="font-title-md text-headline-sm text-on-surface group-hover/link:text-primary leading-snug transition-colors"
+                    >
+                      Heathrow vs Gatwick Security: Queue Predictability in 2025
+                    </h3>
+                  </a>
+                  <p
+                    class="font-body-md text-body-sm text-on-surface-variant mt-1 line-clamp-3"
+                  >
+                    Detailed terminal concourse layouts and why direct chauffeur forecourt
+                    handoffs save an estimated 35 minutes over rail connections.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="px-space-lg pb-space-lg pt-space-xs font-label-sm text-on-surface-variant flex items-center justify-between"
+              >
+                <span class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-primary text-[16px]"
+                    >schedule</span
+                  >
+                  <span>14 Feb 2025 · 5 min read</span>
+                </span>
+                <span
+                  class="material-symbols-outlined text-primary text-[18px] transition-transform group-hover:translate-x-0.5"
+                  >arrow_forward</span
+                >
+              </div>
+            </article>
+            <!-- Card 2 -->
+            <article
+              class="bg-surface-container-lowest group flex flex-col justify-between overflow-hidden rounded-xl shadow-[0_1px_4px_rgba(15,26,20,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(14,107,57,0.07)]"
+            >
+              <div class="flex flex-col">
+                <div
+                  class="bg-surface-container relative aspect-[4/3] w-full overflow-hidden"
+                >
+                  <img
+                    alt="Travel Timing &amp; M25 Traffic Windows"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1Uq8wk7Nhbz8tXFaJ9wqtmh8DqmI5m5Sk4dxtNtJHLgsKgTnncxvJkl3nAPRnoaBJLQmwTIh9Wobwj4EJYBXWNT85IWYxNeSmreEkg9FZz-odUtE5iGRfyaD69X2WW-WeM1EWDfcpeSb-yjoCnHpiJRtIKqeiPevZ7Srqw3Ipdh44Jn3UOqRq-wP67bIY22o2NbqTfe224ehbjvR1G3JnUw4Unz5nc_aCURfSmUwe2EB1eTMLWn65rLjQ"
+                  />
+                  <div class="top-space-sm left-space-sm absolute">
+                    <span
+                      class="text-primary font-label-sm inline-flex items-center rounded-full bg-[#90EE90]/90 px-2.5 py-0.5 font-semibold backdrop-blur-sm"
+                    >
+                      Travel Logistics
+                    </span>
+                  </div>
+                </div>
+                <div class="p-space-lg gap-space-xs flex flex-col">
+                  <a class="group/link" href="#">
+                    <h3
+                      class="font-title-md text-headline-sm text-on-surface group-hover/link:text-primary leading-snug transition-colors"
+                    >
+                      Calculating Your Transfer Buffer: The M25 Orbital Timing Matrix
+                    </h3>
+                  </a>
+                  <p
+                    class="font-body-md text-body-sm text-on-surface-variant mt-1 line-clamp-3"
+                  >
+                    Analysis of rush-hour bottleneck corridors across Junctions 12 to 15,
+                    and how to calibrate your pickup time for red-eye departures.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="px-space-lg pb-space-lg pt-space-xs font-label-sm text-on-surface-variant flex items-center justify-between"
+              >
+                <span class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-primary text-[16px]"
+                    >schedule</span
+                  >
+                  <span>09 Feb 2025 · 7 min read</span>
+                </span>
+                <span
+                  class="material-symbols-outlined text-primary text-[18px] transition-transform group-hover:translate-x-0.5"
+                  >arrow_forward</span
+                >
+              </div>
+            </article>
+            <!-- Card 3 -->
+            <article
+              class="bg-surface-container-lowest group flex flex-col justify-between overflow-hidden rounded-xl shadow-[0_1px_4px_rgba(15,26,20,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(14,107,57,0.07)]"
+            >
+              <div class="flex flex-col">
+                <div
+                  class="bg-surface-container relative aspect-[4/3] w-full overflow-hidden"
+                >
+                  <img
+                    alt="Luggage Rules &amp; Boot Dimensions"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1W1n1YZFZFZ1M0YkCQ-IQATKIxL-42yl0jluFMAugcDGotU3SWtq2dQlMirLbFtn5vL---1Y7arWlskdj6L6bQgLmLPDUMgTtDS0qYhBIsm5K4fHaEOHIH2vRAvkqas3ICSlRr9VGmXlmQTQwXWXbpED4_WJfz3aI-obTy-wJZXXTVd0tJkio2eW8rkIUqoEt3PmoO3o0ue3t1NXwH4u2Mct3NmceBfSFZgFbDh-w7_mjDasfMO6zg3UsQ"
+                  />
+                  <div class="top-space-sm left-space-sm absolute">
+                    <span
+                      class="text-primary font-label-sm inline-flex items-center rounded-full bg-[#90EE90]/90 px-2.5 py-0.5 font-semibold backdrop-blur-sm"
+                    >
+                      Luggage &amp; Vehicles
+                    </span>
+                  </div>
+                </div>
+                <div class="p-space-lg gap-space-xs flex flex-col">
+                  <a class="group/link" href="#">
+                    <h3
+                      class="font-title-md text-headline-sm text-on-surface group-hover/link:text-primary leading-snug transition-colors"
+                    >
+                      Boot Space Realities: Which Vehicle Actually Fits Your Luggage?
+                    </h3>
+                  </a>
+                  <p
+                    class="font-body-md text-body-sm text-on-surface-variant mt-1 line-clamp-3"
+                  >
+                    Why airline checked bag sizes (up to 75cm) quickly overwhelm standard
+                    saloons, and when upgrading to an Estate or MPV is mandatory.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="px-space-lg pb-space-lg pt-space-xs font-label-sm text-on-surface-variant flex items-center justify-between"
+              >
+                <span class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-primary text-[16px]"
+                    >schedule</span
+                  >
+                  <span>02 Feb 2025 · 4 min read</span>
+                </span>
+                <span
+                  class="material-symbols-outlined text-primary text-[18px] transition-transform group-hover:translate-x-0.5"
+                  >arrow_forward</span
+                >
+              </div>
+            </article>
+            <!-- Card 4 -->
+            <article
+              class="bg-surface-container-lowest group flex flex-col justify-between overflow-hidden rounded-xl shadow-[0_1px_4px_rgba(15,26,20,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(14,107,57,0.07)]"
+            >
+              <div class="flex flex-col">
+                <div
+                  class="bg-surface-container relative aspect-[4/3] w-full overflow-hidden"
+                >
+                  <img
+                    alt="Travelling with Children &amp; Safety Seats"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1VxFqwGpHryazW6dDo9LgQeTFUYOn6sS8kLg17ojFNHpmlO6BdU05ce2fiQL4EccDs8JqwSnc40uQoAYspq5_uMeYhZsGbPeo3w9Paan0nJqnkmDn1Hk442t68wd_BX7T42qgzQSG5hWV85pY9op2X9HJtvsqQUhBV5GAb25_yBW054FSBvDqQnkCAyVrFkJrelB9h8CZs7Uo748tEfOIXS94rRout_Es-7fx9JenrtekS-uGHrrpChWQ"
+                  />
+                  <div class="top-space-sm left-space-sm absolute">
+                    <span
+                      class="text-primary font-label-sm inline-flex items-center rounded-full bg-[#90EE90]/90 px-2.5 py-0.5 font-semibold backdrop-blur-sm"
+                    >
+                      Family Travel
+                    </span>
+                  </div>
+                </div>
+                <div class="p-space-lg gap-space-xs flex flex-col">
+                  <a class="group/link" href="#">
+                    <h3
+                      class="font-title-md text-headline-sm text-on-surface group-hover/link:text-primary leading-snug transition-colors"
+                    >
+                      TfL Private Hire Regulations: Child Car Seat Laws Explained
+                    </h3>
+                  </a>
+                  <p
+                    class="font-body-md text-body-sm text-on-surface-variant mt-1 line-clamp-3"
+                  >
+                    Clarifying UK private hire exemptions versus best-practice
+                    pre-installed ISOFIX child booster seats for long motorway journeys.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="px-space-lg pb-space-lg pt-space-xs font-label-sm text-on-surface-variant flex items-center justify-between"
+              >
+                <span class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-primary text-[16px]"
+                    >schedule</span
+                  >
+                  <span>28 Jan 2025 · 5 min read</span>
+                </span>
+                <span
+                  class="material-symbols-outlined text-primary text-[18px] transition-transform group-hover:translate-x-0.5"
+                  >arrow_forward</span
+                >
+              </div>
+            </article>
+            <!-- Card 5 -->
+            <article
+              class="bg-surface-container-lowest group flex flex-col justify-between overflow-hidden rounded-xl shadow-[0_1px_4px_rgba(15,26,20,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(14,107,57,0.07)]"
+            >
+              <div class="flex flex-col">
+                <div
+                  class="bg-surface-container relative aspect-[4/3] w-full overflow-hidden"
+                >
+                  <img
+                    alt="Cruise Port Departures"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1X2bUsZLaMQvnF2dEbUiMkgPjgsZJGpELRjHudrhNGyWgYQz9G2r5xI4FBdOWJcorG8OSlovBhFjFTeHuXz5xxhMUtPy2vpD2Lim9ku_RsrHUaHTeCn2OFEdJRa1riSbAUWdZ_NJXdFQKVwLusZsb47v6aTOkIt-rT0DVRHkVvE325EenoKpIXa3JTjiuCFXE3mpCPL9LkvQ_QSv53fU6dSP29JTWoazcIKeWlRmn6T2vNBJ0a7Mu69_Xo"
+                  />
+                  <div class="top-space-sm left-space-sm absolute">
+                    <span
+                      class="text-primary font-label-sm inline-flex items-center rounded-full bg-[#90EE90]/90 px-2.5 py-0.5 font-semibold backdrop-blur-sm"
+                    >
+                      Seaports &amp; Cruising
+                    </span>
+                  </div>
+                </div>
+                <div class="p-space-lg gap-space-xs flex flex-col">
+                  <a class="group/link" href="#">
+                    <h3
+                      class="font-title-md text-headline-sm text-on-surface group-hover/link:text-primary leading-snug transition-colors"
+                    >
+                      London to Southampton &amp; Dover: Coordinating Seaport Connections
+                    </h3>
+                  </a>
+                  <p
+                    class="font-body-md text-body-sm text-on-surface-variant mt-1 line-clamp-3"
+                  >
+                    Disembarkation concourse barriers, luggage handling guidelines, and
+                    avoiding train strikes when catching transatlantic sailings.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="px-space-lg pb-space-lg pt-space-xs font-label-sm text-on-surface-variant flex items-center justify-between"
+              >
+                <span class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-primary text-[16px]"
+                    >schedule</span
+                  >
+                  <span>22 Jan 2025 · 6 min read</span>
+                </span>
+                <span
+                  class="material-symbols-outlined text-primary text-[18px] transition-transform group-hover:translate-x-0.5"
+                  >arrow_forward</span
+                >
+              </div>
+            </article>
+            <!-- Card 6 -->
+            <article
+              class="bg-surface-container-lowest group flex flex-col justify-between overflow-hidden rounded-xl shadow-[0_1px_4px_rgba(15,26,20,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(14,107,57,0.07)]"
+            >
+              <div class="flex flex-col">
+                <div
+                  class="bg-surface-container relative aspect-[4/3] w-full overflow-hidden"
+                >
+                  <img
+                    alt="Major London Events &amp; Stadium Logistics"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1W3xS8_AUmUILsWWA-2qJokpA_-kAPr1I-QYTMmXyah81LOoyy3SAGD_d4uCNa6Mupb5e27pybH-EI-GnQAPNNWP00KIHwc_6CzbsAZVz7Nxm8UbeplSFSIxIpRv4CHDFlNj7M-NqlazEMuYZEf0jWbqsJFToahR-WchVMNEJ2JJc7hpTSk9GhqexMHDylPS7Hbt2lyYbH_a7IckvTxgbtTzF-OsVhBym_3J2HenDuyM7i9JMi0QqLwBxQ"
+                  />
+                  <div class="top-space-sm left-space-sm absolute">
+                    <span
+                      class="text-primary font-label-sm inline-flex items-center rounded-full bg-[#90EE90]/90 px-2.5 py-0.5 font-semibold backdrop-blur-sm"
+                    >
+                      Event Logistics
+                    </span>
+                  </div>
+                </div>
+                <div class="p-space-lg gap-space-xs flex flex-col">
+                  <a class="group/link" href="#">
+                    <h3
+                      class="font-title-md text-headline-sm text-on-surface group-hover/link:text-primary leading-snug transition-colors"
+                    >
+                      Wembley, O2 &amp; Ascot: Private Hire Drop-Off Logistics
+                    </h3>
+                  </a>
+                  <p
+                    class="font-body-md text-body-sm text-on-surface-variant mt-1 line-clamp-3"
+                  >
+                    Forecourt restrictions, road closures, and dedicated chauffeur waiting
+                    bays during major summer sporting and concert events.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="px-space-lg pb-space-lg pt-space-xs font-label-sm text-on-surface-variant flex items-center justify-between"
+              >
+                <span class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-primary text-[16px]"
+                    >schedule</span
+                  >
+                  <span>15 Jan 2025 · 4 min read</span>
+                </span>
+                <span
+                  class="material-symbols-outlined text-primary text-[18px] transition-transform group-hover:translate-x-0.5"
+                  >arrow_forward</span
+                >
+              </div>
+            </article>
+          </section>
+          <!-- Pagination Row -->
+          <nav
+            aria-label="Blog pages"
+            class="gap-space-xs py-space-md flex items-center justify-center"
+          >
+            <button
+              aria-current="page"
+              class="text-on-primary font-label-md flex h-10 w-10 items-center justify-center rounded-full bg-[#0E6B39] font-semibold shadow-sm"
+            >
+              1
+            </button>
+            <button
+              class="bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md flex h-10 w-10 items-center justify-center rounded-full font-semibold transition-colors"
+            >
+              2
+            </button>
+            <button
+              class="bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md flex h-10 w-10 items-center justify-center rounded-full font-semibold transition-colors"
+            >
+              3
+            </button>
+            <button
+              class="bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md flex h-10 items-center gap-1 rounded-full px-4 font-semibold transition-colors"
+            >
+              <span>Next</span>
+              <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </button>
+          </nav>
+          <!-- Newsletter Strip Band -->
+          <section
+            class="bg-surface-container-low p-space-lg lg:p-space-xl relative w-full overflow-hidden rounded-xl shadow-[0_1px_3px_rgba(15,26,20,0.03)]"
+          >
+            <!-- Ambient decorative gradient shape -->
+            <div
+              class="bg-primary-fixed/20 pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full blur-3xl"
+            ></div>
+            <div
+              class="gap-space-lg relative z-10 flex flex-col items-center justify-between lg:flex-row"
+            >
+              <div class="flex max-w-xl flex-col gap-1 text-center lg:text-left">
+                <div
+                  class="text-primary font-label-sm flex items-center justify-center gap-2 font-semibold tracking-wider uppercase lg:justify-start"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >mark_email_read</span
+                  >
+                  <span>Operations Dispatch Weekly</span>
+                </div>
+                <h2
+                  class="font-headline-md text-headline-sm lg:text-headline-md text-on-surface"
+                >
+                  Stay updated on London transit regulations
+                </h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Receive monthly summaries on Heathrow express drop-off rules, M25
+                  construction corridors, and UK private hire legislative changes.
+                </p>
+              </div>
+              <form
+                class="gap-space-sm flex w-full max-w-md flex-col items-center sm:flex-row lg:w-auto"
+                onsubmit="event.preventDefault()"
+              >
+                <div class="relative w-full sm:w-80">
+                  <span
+                    class="material-symbols-outlined text-on-surface-variant absolute top-1/2 left-3.5 -translate-y-1/2 text-[20px]"
+                    >mail</span
+                  >
+                  <input
+                    class="bg-surface-container-lowest text-on-surface placeholder:text-on-surface-variant/60 font-body-sm focus:ring-primary h-12 w-full rounded-xl pr-4 pl-11 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all outline-none focus:ring-2"
+                    placeholder="name@company.co.uk"
+                    required=""
+                    type="email"
+                  />
+                </div>
+                <button
+                  class="text-on-primary font-label-md hover:bg-secondary h-12 w-full shrink-0 cursor-pointer rounded-xl bg-[#0E6B39] px-6 font-semibold shadow-sm transition-colors sm:w-auto"
+                  type="submit"
+                >
+                  Subscribe
+                </button>
+              </form>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer
+      class="bg-surface-container-lowest w-full shadow-[0_-1px_8px_rgba(0,0,0,0.02)]"
+    >
+      <div class="px-gutter py-space-xl mx-auto max-w-[1200px]">
+        <div
+          class="gap-gutter mb-space-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+        >
+          <div>
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-md">
+              London Airports
+            </h4>
+            <ul class="space-y-space-sm">
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Heathrow Airport (LHR)
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Gatwick Airport (LGW)
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                London City Airport (LCY)
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Stansted Airport (STN)
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Luton Airport (LTN)
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Farnborough &amp; Private FBOs
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-md">
+              Transit Services
+            </h4>
+            <ul class="space-y-space-sm">
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Direct Terminal Transfers
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Executive Business Travel
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Flight Delay Monitoring
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Meet &amp; Greet Arrivals
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Corporate Account Portals
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Group Multi-Vehicle Charters
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-md">
+              Help &amp; Support
+            </h4>
+            <ul class="space-y-space-sm">
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Booking Management
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Luggage &amp; Vehicle Guide
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Terminal Meeting Points
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Child Seats &amp; Accessibility
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Passenger FAQs
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Dispatch Operations Support
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-title-md text-title-md text-on-surface mb-space-md">
+              Legal &amp; Company
+            </h4>
+            <ul class="space-y-space-sm mb-space-md">
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                About Cityline
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Terms &amp; Cancellation Policy
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Privacy Policy
+              </li>
+              <li
+                class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors"
+              >
+                Cookie Preferences
+              </li>
+            </ul>
+            <div class="p-space-sm bg-surface-container rounded-lg">
+              <p class="font-label-sm text-label-sm text-on-surface font-semibold">
+                Transport for London
+              </p>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Licensed Private Hire Operator
+              </p>
+              <p class="font-label-sm text-label-sm text-secondary mt-space-xs font-mono">
+                Licence #008942/01
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="pt-space-md gap-space-sm flex flex-col items-center justify-between md:flex-row"
+        >
+          <p class="font-body-sm text-body-sm text-on-surface-variant">
+            © 2025 Cityline Airport Transfers Ltd. All rights reserved. London, United
+            Kingdom.
+          </p>
+          <div class="gap-space-lg flex items-center">
+            <span class="font-body-sm text-body-sm text-on-surface-variant"
+              >Fixed Transparent Rates</span
+            ><span class="font-body-sm text-body-sm text-on-surface-variant">•</span
+            ><span class="font-body-sm text-body-sm text-on-surface-variant"
+              >Complimentary 60-min Airport Wait</span
+            ><span class="font-body-sm text-body-sm text-on-surface-variant">•</span
+            ><span class="font-body-sm text-body-sm text-on-surface-variant"
+              >24/7 Monitored Dispatch</span
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
