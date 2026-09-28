@@ -19,9 +19,9 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 | `pnpm typecheck`        | passing                               |
 | `pnpm lint`             | passing                               |
 | `pnpm format:check`     | passing                               |
-| `pnpm check:compliance` | passing — 141 files, wording + claims |
-| `pnpm check:migrations` | passing — 1 migration, additive only  |
-| `pnpm test`             | passing — 262 tests across 19 files   |
+| `pnpm check:compliance` | passing — 150 files, wording + claims |
+| `pnpm check:migrations` | passing — 2 migrations, additive only |
+| `pnpm test`             | passing — 275 tests across 20 files   |
 | `pnpm build`            | passing                               |
 | `pnpm e2e`              | off until S3 (browsers not installed) |
 
@@ -38,7 +38,7 @@ deploys to production — there is no staging (see below).
 | S1     | Design → component library      | **Done** from the Stitch exports                                                 |
 | S2     | Places, zones, pricing engine   | **Not started** — blocked on the launch price tables                             |
 | S3     | Quote, steps 1–2                | Steps 1–2 built on placeholder fares; `/quote` and Places autocomplete not built |
-| S4     | Steps 3–4, Stripe, confirmation | Steps 3–4, confirmation and booking creation built; **Stripe not wired**         |
+| S4     | Steps 3–4, Stripe, confirmation | **Done in test mode.** Card payments through Stripe; live keys still to come     |
 | S5+    | Manage booking, pages, admin    | Help, policy and legal pages built; manage booking and admin not started         |
 
 The build ran ahead of S2, so **every fare on the site is a placeholder**. The
@@ -77,12 +77,14 @@ funnel has four working screens standing on invented numbers.
 /book                step 1 · journey
 /book/vehicle        step 2 · vehicle choice
 /book/details        step 3 · passenger details and extras → quotes row
-/book/payment        step 4 · review and pay, from the quote (no Stripe yet)
+/book/payment        step 4 · review and pay — Stripe Payment Element
+/book/return         Stripe's return URL; fulfils, then redirects to the booking
 /book/confirmed/[ref]           confirmation; needs ?t=<manage token>
 /book/confirmed/[ref]/calendar  .ics download (NOT-01), same guard
 /coming-soon         launch gate target
 /api/health          deploy health check
 /api/cron            worker tick, called by VPS cron
+/api/webhooks/stripe Stripe events, signature-checked; creates bookings
 /robots.txt
 /sitemap.xml         built from the same constants as the pages; empty while gated
 404                  not-found.tsx, a real 404 status
@@ -190,14 +192,47 @@ the price live in the row. Personal data never travels in a URL — see
 deviation 17. The site sets no cookies for customers at all now, and the
 privacy and cookie policies say so.
 
+**Card payments go through Stripe (PAY-01), in test mode.** The route the
+Stripe planner and best-practices skill recommend for an embedded form: the
+Payment Element backed by a **Checkout Session** (`ui_mode: "elements"`),
+fulfilled from a signature-checked webhook.
+
+- Step 4 creates one Checkout Session per quote, from the stored quote only
+  (`domain/payments/checkout-session.ts`), with an idempotency key and a
+  deterministic expiry so a reload or a second tab gets the _same_ session. The
+  session id is kept on `quotes.stripe_checkout_session_id`.
+- No `payment_method_types`: which methods show (cards, Apple Pay, Google Pay,
+  Link…) is Dashboard configuration.
+- Stripe sends the customer to `/book/return`, which runs the same fulfilment as
+  the webhook (`/api/webhooks/stripe`) — Stripe recommends both, because
+  webhooks can lag. Both call `fulfilCheckoutSession`, which re-reads the
+  session from Stripe with the secret key and fulfils only when
+  `payment_status` is not `unpaid`.
+- Pressing Back after paying lands on the booking, never on a "pay again"
+  screen (`loadQuote` has a `booked` state for this).
+- Verified end to end in Chrome against Stripe's sandbox, with `stripe listen`
+  forwarding real events: a £136 return booking produced one booking, two jobs,
+  one payment and a processed webhook, with the webhook and return page racing;
+  a declined test card showed Stripe's reason and booked nothing.
+
 **A booking is born in exactly one place: `confirmBooking`**
-(`src/domain/booking/confirm.ts`). It turns a quote into a customer, a booking
-and one job per leg, in one transaction, and marks the quote converted. It is
-not a server action and nothing a browser can reach calls it — **the Stripe
-webhook will be its only caller** (S4). A second call with the same quote
-returns `already_confirmed` instead of booking twice, because Stripe retries
-webhooks. Verified against the local database: a return booking gives
-`J-000001` and `J-000002`, the return leg reversed, the fare split to the penny.
+(`src/domain/booking/confirm.ts`), reached only through
+`fulfilCheckoutSession`. It writes the payment row first inside the
+transaction; the unique index on `stripe_payment_intent_id` is what makes the
+webhook and the return page safe to run at the same instant — the loser rolls
+back and its retry finds the booking. It no longer rejects an expired quote:
+BK-08's limit is enforced before a session is created, and by the time this runs
+the customer has paid.
+
+**Job references come from a Postgres sequence** (`job_reference_seq`, second
+migration). The old read-highest-then-retry could never have worked: a unique
+violation aborts the Postgres transaction, so the retry failed too.
+
+**Booking links are derived, not random.** `manageTokenFor(reference)` is an
+HMAC under a key derived from `PAYLOAD_SECRET`, and the booking stores its hash.
+Whichever of the webhook or the return page creates the booking, both can
+produce the same link — the confirmation email will need that. Rotating
+`PAYLOAD_SECRET` withdraws every link.
 
 **The confirmation page needs the magic-link token, not just the reference.**
 `CL-7K4Q2P` is read down the phone and printed on receipts, so it is not a
@@ -323,9 +358,25 @@ booking can be charged for seats nobody sits in. The child-seats page says
 "warns", accurately. Worth closing in `saveDetails` with the rest of step 3's
 server validation.
 
-**Job references are read-then-write.** `confirmBooking` takes the highest
-`J-` reference and adds one, retrying on a unique-index collision. Fine at
-website volume; move it to a Postgres sequence in S8 when staff create jobs too.
+**No Content-Security-Policy yet.** Planned for the S7 security pass. Stripe's
+required directives are now recorded beside the headers in `next.config.ts`.
+The `Permissions-Policy` already names Stripe's origins for `payment` —
+without that, Apple Pay and Google Pay never appear in Stripe's iframe.
+
+**Testing payments locally** needs Docker (Postgres), a production build
+(`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is baked in at build time) and
+`stripe listen --forward-to localhost:3000/api/webhooks/stripe`, whose printed
+`whsec_…` goes in `.env.local`. Test card `4242 4242 4242 4242`. Do not use
+`next dev` against the shared local database: in development Payload pushes its
+schema, which would drop the hand-written constraints and the job sequence.
+
+**Playwright clicks mid-scroll miss.** The site scrolls smoothly, so a click
+issued while Playwright scrolls a button into view lands where the button was.
+Scroll first, wait, then click. Not a customer-facing problem.
+
+**Stripe.js sees the step 4 URL**, including the `?q=` quote token, as part of
+Stripe's fraud signals. Stripe is the payment processor, so this is expected,
+but the token is a bearer credential for that quote.
 
 **The reviews page was built without the design's copy.** The design's text
 invents testimonials and says "in standard app taxis"; neither can ship. The
@@ -339,18 +390,19 @@ flash once and stop. Its intended use has not been confirmed.
 
 ## Waiting on Cityline
 
-| Needed for | Item                                                                                                       |
-| ---------- | ---------------------------------------------------------------------------------------------------------- |
-| S2         | **Launch price tables** — fixed fares per class, per-mile tariff, surcharges, extras. The main blocker     |
-| S3         | Google Maps keys (Places autocomplete, BK-02)                                                              |
-| S4         | Stripe keys — account verification has a long lead time                                                    |
-| S4–S6      | Real phone number, company number, VAT status (decides how prices display)                                 |
-| S6         | Page copy for the phase-1 pages, meeting point text per terminal                                           |
-| S7         | Solicitor-reviewed T&Cs, privacy, cookie and complaints policies                                           |
-| S6         | Google Business Profile and Trustpilot URLs (`company.reviewProfiles`) — `/reviews` is empty until then    |
-| S6         | Whether to show the operator licence number: hidden on request, but CMP-09 expects it (`/legal/licensing`) |
-| S0 (VPS)   | IONOS VPS purchase — see `runbook-vps.md`                                                                  |
-| S9         | Meta Business + a new phone number for WhatsApp — long lead time                                           |
+| Needed for | Item                                                                                                        |
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
+| S2         | **Launch price tables** — fixed fares per class, per-mile tariff, surcharges, extras. The main blocker      |
+| S3         | Google Maps keys (Places autocomplete, BK-02)                                                               |
+| Launch     | Stripe live activation, restricted live key, live webhook endpoint, Apple Pay domain — `runbook-vps.md` §10 |
+| Launch     | Fix the website on the Stripe profile: it reads `citylineariporttransfers.com`                              |
+| S4–S6      | Real phone number, company number, VAT status (decides how prices display)                                  |
+| S6         | Page copy for the phase-1 pages, meeting point text per terminal                                            |
+| S7         | Solicitor-reviewed T&Cs, privacy, cookie and complaints policies                                            |
+| S6         | Google Business Profile and Trustpilot URLs (`company.reviewProfiles`) — `/reviews` is empty until then     |
+| S6         | Whether to show the operator licence number: hidden on request, but CMP-09 expects it (`/legal/licensing`)  |
+| S0 (VPS)   | IONOS VPS purchase — see `runbook-vps.md`                                                                   |
+| S9         | Meta Business + a new phone number for WhatsApp — long lead time                                            |
 
 Placeholders currently in the build are listed in `design-deviations.md` §11.
 
@@ -363,6 +415,8 @@ Placeholders currently in the build are listed in `design-deviations.md` §11.
 2. **The home page's seven dead links**: either build the route template
    (phase 2 in §5, and bound by SEO-01) or point that block at pages that
    exist until then.
-3. **Stripe (PAY-01)**, once the keys arrive: the webhook calls
-   `confirmBooking` and nothing else creates bookings.
-4. S2 proper, once the price tables land.
+3. **Refunds** — cancellation (full) and cheaper amendments (partial), through
+   the Refunds API against the booking's payment. Needs manage booking first.
+4. **The confirmation email (NOT-01)** — `fulfilCheckoutSession` is where it
+   hangs off, and `manageTokenFor` gives the link.
+5. S2 proper, once the price tables land.

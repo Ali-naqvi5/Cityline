@@ -12,9 +12,12 @@
  * customer's reference being typed into a job search.
  *
  * Sequential rather than random, also deliberately: these are counted, sorted
- * and read aloud in order by staff, and a gap in the sequence is a useful
- * signal. Nothing secret depends on a job reference — the magic link guards
- * customer data — so predictability costs nothing here.
+ * and read aloud in order by staff. Nothing secret depends on a job reference —
+ * the magic link guards customer data — so predictability costs nothing here.
+ *
+ * The numbers come from the Postgres sequence `job_reference_seq`, which never
+ * hands out the same one twice, even to two checkouts at the same instant. A
+ * booking that rolls back leaves a gap; a gap is harmless, a duplicate is not.
  */
 
 const PREFIX = "J-";
@@ -43,26 +46,4 @@ export function jobSequenceOf(reference: string): number | null {
 
   const sequence = Number(reference.slice(PREFIX.length));
   return Number.isInteger(sequence) && sequence > 0 ? sequence : null;
-}
-
-/**
- * The next reference after a batch of existing ones.
- *
- * Takes the references rather than reading the database, so the ordering rule
- * is testable. It compares **numerically**, which is the point: sorting
- * `J-000999` and `J-0001000` as text puts the thousandth job before the
- * nine-hundredth, and the sequence would then start handing out duplicates.
- *
- * Unrecognised references are ignored rather than throwing. A hand-entered or
- * legacy reference in the column must not be able to stop checkout.
- */
-export function nextJobReference(existing: readonly string[]): string {
-  let highest = 0;
-
-  for (const reference of existing) {
-    const sequence = jobSequenceOf(reference);
-    if (sequence !== null && sequence > highest) highest = sequence;
-  }
-
-  return formatJobReference(highest + 1);
 }

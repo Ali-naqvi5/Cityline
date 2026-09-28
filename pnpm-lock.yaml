@@ -175,6 +175,12 @@ importers:
       '@payloadcms/richtext-lexical':
         specifier: ^3.90.2
         version: 3.90.2(@faceless-ui/modal@3.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@faceless-ui/scroll-info@2.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@payloadcms/next@3.90.2(@types/react@19.3.0)(graphql@16.14.2)(monaco-editor@0.57.0)(next@16.3.5(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.63.0)(@types/node@22.20.4)(babel-plugin-macros@3.1.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4))(payload@3.90.2(graphql@16.14.2)(supports-color@7.2.0)(typescript@5.9.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)(typescript@5.9.3))(@types/react@19.3.0)(monaco-editor@0.57.0)(next@16.3.5(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.63.0)(@types/node@22.20.4)(babel-plugin-macros@3.1.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4))(payload@3.90.2(graphql@16.14.2)(supports-color@7.2.0)(typescript@5.9.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)(typescript@5.9.3)(yjs@13.6.33)
+      '@stripe/react-stripe-js':
+        specifier: ^6.12.0
+        version: 6.12.0(@stripe/stripe-js@9.17.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@stripe/stripe-js':
+        specifier: ^9.17.0
+        version: 9.17.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -220,6 +226,9 @@ importers:
       sharp:
         specifier: ^0.35.4
         version: 0.35.4(@types/node@22.20.4)
+      stripe:
+        specifier: 22.6.0
+        version: 22.6.0(@types/node@22.20.4)
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
@@ -2428,6 +2437,17 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@stripe/react-stripe-js@6.12.0':
+    resolution: {integrity: sha512-5RVfx92MTb66+ELuQTreUqX2oFvma5wybZ7MaifoNo0QgrjbJiLZcysGw5kIHU7p1TCd1Lx5JnasoqteSwlUsg==}
+    peerDependencies:
+      '@stripe/stripe-js': '>=9.16.0 <10.0.0'
+      react: '>=16.8.0 <20.0.0'
+      react-dom: '>=16.8.0 <20.0.0'
+
+  '@stripe/stripe-js@9.17.0':
+    resolution: {integrity: sha512-uidL4OJum5kivsOAQnVfQmYLJ2zdgirtmT0zWgskASZ4TPXxpXQ0MNrzW4NsXB90uEqmPHpSEtciLFbF1QQvNA==}
+    engines: {node: '>=12.16'}
 
   '@swc/helpers@0.5.23':
     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
@@ -5667,6 +5687,15 @@ packages:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
 
+  stripe@22.6.0:
+    resolution: {integrity: sha512-Ezk+WYEEwX2DLxFrKfb6coznlCMZvCaCYMNPXNHFSZkBIEzF5Hgm7RLb38q/0h9Ol5jsUJGJRorvhzAvckgfhw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   strtok3@10.3.5:
     resolution: {integrity: sha512-ki4hZQfh5rX0QDLLkOCj+h+CVNkqmp/CMf8v8kZpkNVK6jGQooMytqzLZYUVYIZcFZ6yDB70EfD8POcFXiF5oA==}
     engines: {node: '>=18'}
@@ -8313,6 +8342,15 @@ snapshots:
   '@sindresorhus/merge-streams@4.0.0': {}
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@stripe/react-stripe-js@6.12.0(@stripe/stripe-js@9.17.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@stripe/stripe-js': 9.17.0
+      prop-types: 15.8.1
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+
+  '@stripe/stripe-js@9.17.0': {}
 
   '@swc/helpers@0.5.23':
     dependencies:
@@ -11902,6 +11940,10 @@ snapshots:
   strip-json-comments@3.1.1: {}
 
   strip-json-comments@5.0.3: {}
+
+  stripe@22.6.0(@types/node@22.20.4):
+    optionalDependencies:
+      '@types/node': 22.20.4
 
   strtok3@10.3.5:
     dependencies:

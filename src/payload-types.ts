@@ -202,6 +202,10 @@ export interface Quote {
    */
   customer?: (number | null) | Customer;
   /**
+   * The Stripe Checkout Session paying for this quote (PAY-01). One per quote, ever: reusing it is what stops a reloaded payment page opening a second session that could be paid twice.
+   */
+  stripeCheckoutSessionId?: string | null;
+  /**
    * PRD-07: excluded from reports and TfL exports.
    */
   isTest?: boolean | null;
@@ -627,6 +631,7 @@ export interface QuotesSelect<T extends boolean = true> {
   results?: T;
   totalPence?: T;
   customer?: T;
+  stripeCheckoutSessionId?: T;
   isTest?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -5,6 +5,15 @@ import type { NextConfig } from "next";
  * Security headers (NFR-04). A full Content-Security-Policy with a per-request
  * nonce is added in the S7 security pass, once Stripe / Google Maps / GA4 origins
  * are all known — it is deliberately not guessed here.
+ *
+ * Stripe's origins are now known. From Stripe's integration security guide,
+ * the CSP must allow, for Stripe.js and the Payment Element:
+ *   script-src   https://js.stripe.com https://*.js.stripe.com
+ *   frame-src    https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com
+ *   connect-src  https://api.stripe.com
+ * and for Link (shown by the Payment Element when enabled):
+ *   frame-src / connect-src  https://link.com https://*.link.com
+ *   img-src                  https://*.link.com
  */
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -12,7 +21,15 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(self), payment=(self)",
+    /*
+     * `payment` must name Stripe's origins as well as our own. The Payment
+     * Element runs in Stripe's iframe, and a cross-origin iframe can only use
+     * the Payment Request API — which Apple Pay and Google Pay go through — if
+     * the top-level page's policy allows that origin. `payment=(self)` alone
+     * silently hides both wallets.
+     */
+    value:
+      'camera=(), microphone=(), geolocation=(self), payment=(self "https://js.stripe.com" "https://*.js.stripe.com")',
   },
   {
     key: "Strict-Transport-Security",

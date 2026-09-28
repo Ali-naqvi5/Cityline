@@ -103,6 +103,17 @@ export const Quotes: CollectionConfig = {
       admin: { description: "Set once step 3 collects the passenger details." },
     },
     {
+      name: "stripeCheckoutSessionId",
+      type: "text",
+      unique: true,
+      index: true,
+      admin: {
+        readOnly: true,
+        description:
+          "The Stripe Checkout Session paying for this quote (PAY-01). One per quote, ever: reusing it is what stops a reloaded payment page opening a second session that could be paid twice.",
+      },
+    },
+    {
       name: "isTest",
       type: "checkbox",
       defaultValue: false,

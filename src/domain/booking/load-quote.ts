@@ -14,14 +14,18 @@ import {
 /**
  * Loads a quote by its token, for step 4 and (later) the confirmation page.
  *
- * Three outcomes rather than a nullable row, because the caller has to do
+ * Four outcomes rather than a nullable row, because the caller has to do
  * something different for each and a `null` would flatten them into one:
  *
  *   `missing`  — no token, nothing matches, or the row failed validation.
  *                Start again.
- *   `expired`  — past `expiresAt`, or already converted to a booking. §7 wants
- *                a real screen for this, not a redirect, and the journey comes
- *                back so re-quoting is one click.
+ *   `booked`   — already paid for and turned into a booking. The customer
+ *                pressed Back after paying, or reopened the tab: show them the
+ *                booking. Offering "get a new price" here, as this once did,
+ *                invites them to pay a second time.
+ *   `expired`  — past `expiresAt`. §7 wants a real screen for this, not a
+ *                redirect, and the journey comes back so re-quoting is one
+ *                click.
  *   `ok`       — a live quote, validated.
  *
  * Everything read from the row is parsed before use. A `quotes.request`
@@ -30,10 +34,14 @@ import {
  */
 export type LoadedQuote =
   | { state: "missing" }
+  | { state: "booked"; reference: string }
   | { state: "expired"; journey: FunnelParams }
   | {
       state: "ok";
+      id: number;
       token: string;
+      /** Set once step 4 has opened a Checkout Session for this quote. */
+      stripeCheckoutSessionId: string | null;
       journey: FunnelParams;
       details: PassengerDetails;
       extras: Record<string, number>;
@@ -64,6 +72,18 @@ export async function loadQuote(token: string): Promise<LoadedQuote> {
     return { state: "missing" };
   }
 
+  if (row.status === "converted") {
+    const booked = await payload.find({
+      collection: "bookings",
+      where: { quote: { equals: row.id } },
+      limit: 1,
+      overrideAccess: true,
+    });
+
+    const booking = booked.docs[0];
+    if (booking) return { state: "booked", reference: booking.reference };
+  }
+
   if (row.status !== "open" || isExpired(row.expiresAt)) {
     return { state: "expired", journey: request.data.journey };
   }
@@ -73,7 +93,9 @@ export async function loadQuote(token: string): Promise<LoadedQuote> {
 
   return {
     state: "ok",
+    id: row.id,
     token,
+    stripeCheckoutSessionId: row.stripeCheckoutSessionId ?? null,
     journey: request.data.journey,
     details: request.data.details,
     extras: request.data.extras,

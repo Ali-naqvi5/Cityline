@@ -153,7 +153,43 @@ before the site takes real bookings in S7.
 - **Sentry** DSN in `.env.production`.
 - Container logs are capped at 10 MB × 5 files in `compose.yaml`.
 
-## 10. Accounts to open now — they have the longest lead times (§11)
+## 10. Stripe in production (PAY-01)
+
+The integration is built and tested against Stripe's sandbox. To take real
+payments:
+
+1. **Activate the live account** in the Dashboard (business verification). Use
+   `https://citylineairporttransfers.com` as the website — the sandbox's
+   profile had it misspelt. Stripe may review the site during verification, so
+   the terms, cancellation and contact pages need to be reachable by then.
+2. **Create a restricted key** (`rk_live_…`) and use it as
+   `STRIPE_SECRET_KEY`, keeping the full secret key off the server. Today the
+   code only creates and reads Checkout Sessions, so start from _Checkout
+   Sessions: write_; refunds will need _Refunds: write_ once they are built. Try
+   the same permissions on a sandbox restricted key first — a `403` from Stripe
+   names the permission that is missing. Put `pk_live_…` in
+   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — it is baked in at build time, so it
+   must be present when the image is built.
+3. **Add the webhook endpoint** — Dashboard → Developers → Webhooks → Add
+   endpoint: `https://citylineairporttransfers.com/api/webhooks/stripe`, events
+   `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+   `checkout.session.async_payment_failed`. Copy its signing secret (`whsec_…`)
+   into `STRIPE_WEBHOOK_SECRET`. The launch gate already lets `/api/webhooks`
+   through.
+4. **Register the domain for Apple Pay and Google Pay** — Dashboard → Settings →
+   Payment method domains → add `citylineairporttransfers.com`. Without it the
+   wallets do not appear in the payment form. Register it separately in live
+   mode and in each sandbox.
+5. **Check payment methods** — Settings → Payment methods. The form shows
+   whatever is enabled there; nothing in the code lists them.
+6. Make one real payment with your own card, confirm the booking appears, then
+   refund it from the Dashboard.
+
+Every booking link is derived from `PAYLOAD_SECRET`, so rotating that secret
+withdraws every customer's manage-booking link at once. Do it only on a
+suspected compromise.
+
+## 11. Accounts to open now — they have the longest lead times (§11)
 
 - **Stripe** — company verification takes days.
 - **Meta Business + WhatsApp Cloud API** — needs a **new phone number** that has

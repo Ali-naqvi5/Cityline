@@ -90,6 +90,9 @@ Until the Figma file arrives, build with neutral styling and restyle in S1.
 - Drivers/vehicles with expired documents cannot be assigned (CMP-10).
 - Stripe webhooks: verify signature, store event ids for idempotency, treat as the
   source of truth for payment status.
+- A booking is created only by `fulfilCheckoutSession` (webhook and `/book/return`
+  both call it), which re-reads the Checkout Session from Stripe with the secret
+  key. Never book from anything the browser reports.
 - Migrations **only add**. No destructive commands outside local dev.
   `pnpm check:migrations` fails the build on DROP/TRUNCATE/RENAME in an `up`
   path. Removing a column takes two deployments: add and copy, then drop later.

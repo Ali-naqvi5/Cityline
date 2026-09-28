@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, hkdfSync, timingSafeEqual } from "node:crypto";
 
 /**
  * The magic link into "Manage booking" (BK-07).
@@ -7,29 +7,48 @@ import { createHash, timingSafeEqual } from "node:crypto";
  * only thing standing between a stranger and a customer's name, phone number
  * and home address. It is a bearer credential, so it is treated like one:
  *
- *   Only the **hash** is stored. `bookings.manageTokenHash` is a SHA-256; the
- *   token itself exists in the confirmation email and nowhere else. A leaked
- *   database dump therefore hands over no booking links.
- *
  *   The **reference is not enough on its own.** `CL-7K4Q2P` gets read down the
  *   phone, quoted in support chats and printed on receipts — it is an
  *   identifier, not a secret. Every screen that shows personal data checks this
  *   token as well.
  *
- * SHA-256 with no salt or stretching is right here and would be wrong for a
- * password: the input is already 32 bytes of CSPRNG output, so there is no
- * low-entropy guess for an attacker to grind through. Stretching would only
- * slow down the legitimate lookup.
+ *   The token is **derived, not stored**: an HMAC of the reference under a key
+ *   only the server holds. That matters because a booking is created by
+ *   whichever arrives first — Stripe's webhook or the customer's browser
+ *   returning from payment — and both then need the same link: the webhook for
+ *   the confirmation email, the browser for the confirmation screen. A random
+ *   token would exist only in whichever path created it, and the other would
+ *   have nothing to show.
+ *
+ *   A **hash** of the token is still kept on the booking and is what gets
+ *   checked. So a leaked database hands over no links (the key is not in it),
+ *   and one booking's link can be withdrawn by changing its stored hash.
+ *
+ * The key is derived from `PAYLOAD_SECRET` with HKDF under its own label, so it
+ * is separate from every other use of that secret while needing no new
+ * configuration on the server. Rotating `PAYLOAD_SECRET` withdraws every link at
+ * once, which is what a compromise calls for anyway.
  */
 
-const TOKEN_BYTES = 32;
+const KEY_LABEL = "cityline manage-link v1";
 
-/** A new manage token. Never logged, never stored — only its hash is kept. */
-export function createManageToken(): string {
-  const bytes = new Uint8Array(TOKEN_BYTES);
-  crypto.getRandomValues(bytes);
+function linkKey(secret: string): Buffer {
+  return Buffer.from(hkdfSync("sha256", secret, "", KEY_LABEL, 32));
+}
 
-  return Buffer.from(bytes).toString("base64url");
+/**
+ * The manage token for a booking. Deterministic: the same reference always
+ * gives the same token, from any process that holds the secret.
+ */
+export function manageTokenFor(
+  reference: string,
+  secret: string | undefined = process.env.PAYLOAD_SECRET,
+): string {
+  if (!secret) throw new Error("PAYLOAD_SECRET is not set; cannot issue booking links.");
+
+  return createHmac("sha256", linkKey(secret))
+    .update(reference, "utf8")
+    .digest("base64url");
 }
 
 export function hashManageToken(token: string): string {

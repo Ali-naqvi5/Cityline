@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  formatJobReference,
-  JOB_REFERENCE_PATTERN,
-  jobSequenceOf,
-  nextJobReference,
-} from "./reference";
+import { formatJobReference, JOB_REFERENCE_PATTERN, jobSequenceOf } from "./reference";
 
 describe("formatJobReference", () => {
   it("pads to six digits", () => {
@@ -45,31 +40,5 @@ describe("jobSequenceOf", () => {
     for (const input of ["", "J-", "004271", "CL-7K4Q2P", "J-12345", "J-ABCDEF"]) {
       expect(jobSequenceOf(input), input).toBeNull();
     }
-  });
-});
-
-describe("nextJobReference", () => {
-  it("starts at one when there are no jobs yet", () => {
-    expect(nextJobReference([])).toBe("J-000001");
-  });
-
-  it("continues from the highest", () => {
-    expect(nextJobReference(["J-000001", "J-000002"])).toBe("J-000003");
-  });
-
-  it("compares numerically, not as text", () => {
-    // Sorted as strings, "J-0001000" < "J-000999", and the sequence would hand
-    // out J-001000 twice.
-    expect(nextJobReference(["J-000999", "J-1000000"])).toBe("J-1000001");
-    expect(nextJobReference(["J-1000000", "J-000999"])).toBe("J-1000001");
-  });
-
-  it("ignores references it does not recognise", () => {
-    // A legacy or hand-entered value in the column must not stop checkout.
-    expect(nextJobReference(["LEGACY-7", "J-000004", ""])).toBe("J-000005");
-  });
-
-  it("falls back to the first reference when nothing is recognisable", () => {
-    expect(nextJobReference(["LEGACY-7", "nonsense"])).toBe("J-000001");
   });
 });
