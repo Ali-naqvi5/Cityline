@@ -33,6 +33,13 @@ pnpm e2e            # playwright test — switches on in S3 (browsers not instal
 pnpm db:up          # local Postgres only (compose.local.yaml)
 pnpm db:down        # stop local Postgres (keeps the volume)
 pnpm worker         # run the outbox worker once, locally
+pnpm check:migrations   # DATA-04 guard: migrations must only add
+
+# Payload (admin + schema). The DB must be up: pnpm db:up
+pnpm exec payload migrate:create <name>   # generate, then READ it before running
+pnpm exec payload migrate                 # apply pending migrations locally
+pnpm exec payload generate:types          # refresh src/payload-types.ts
+pnpm exec payload generate:importmap      # after adding a custom admin component
 ```
 
 Deploy: push to `main` → CI builds the image → SSH deploy. **Never edit files on the server.**
@@ -84,6 +91,10 @@ Until the Figma file arrives, build with neutral styling and restyle in S1.
 - Stripe webhooks: verify signature, store event ids for idempotency, treat as the
   source of truth for payment status.
 - Migrations **only add**. No destructive commands outside local dev.
+  `pnpm check:migrations` fails the build on DROP/TRUNCATE/RENAME in an `up`
+  path. Removing a column takes two deployments: add and copy, then drop later.
+  Never run `migrate:down` on the server — a rollback is redeploying the
+  previous image, not undoing the schema.
   **NEVER** `docker compose down -v` or `docker volume prune` on the server (DATA-05).
 - Private files (driver docs, receipts) only via signed short-lived URLs after a role check.
 - Respect the launch gate and feature flags; Stripe/WhatsApp stay in test mode until

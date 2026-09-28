@@ -3,12 +3,12 @@ import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 
 /**
- * Bundles the worker entry into dist/worker.js, which is what the `worker`
- * container runs (§12). Bundling (rather than shipping TypeScript) keeps the
- * worker independent of the Next build output.
+ * Bundles the migration runner into dist/migrate.js, which `deploy.sh` runs
+ * before the new containers start. Same reasoning as the worker build: the
+ * production image has no `src/` and no TypeScript toolchain.
  */
 await build({
-  entryPoints: ["src/worker/run.ts"],
+  entryPoints: ["src/migrate.ts"],
   bundle: true,
   platform: "node",
   target: "node22",
@@ -17,7 +17,7 @@ await build({
   // bundle written to a .js file under that setting is parsed as ESM and
   // fails on `require`.
   format: "esm",
-  outfile: "dist/worker.js",
+  outfile: "dist/migrate.js",
   sourcemap: true,
   /*
    * Some transitive CommonJS dependencies (ws, and others under Payload) call
@@ -31,8 +31,12 @@ await build({
       "const require = __createRequire(import.meta.url);",
     ].join("\n"),
   },
-  // `pg` loads optional native bindings at runtime; keep it external.
   external: ["pg-native"],
-  alias: { "@": fileURLToPath(new URL("../src", import.meta.url)) },
+  alias: {
+    "@": fileURLToPath(new URL("../src", import.meta.url)),
+    "@payload-config": fileURLToPath(
+      new URL("../src/payload.config.ts", import.meta.url),
+    ),
+  },
   logLevel: "info",
 });

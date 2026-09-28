@@ -120,10 +120,22 @@ Also missing: `not-found.tsx`, `sitemap.ts`, `/quote`.
 (`/blog`, `/reviews`, `/drive-with-us`), two legal pages, and the six
 `/transfers/*` route pages the home page links to.
 
-### No database at all
+### The database exists now
 
-`src/lib/db.ts` only pings for reachability. No Payload, no migrations, no
-tables, no `quotes`, `bookings` or `jobs`. Everything in §14 is still to come.
+Payload CMS 3 with the Postgres adapter, inside this Next.js app. **18 tables**,
+created by one reviewed migration (`src/migrations/`), verified from an empty
+schema using the bundled runner the VPS will use.
+
+Booking side only: `customers`, `quotes`, `bookings`, `jobs` (+ `jobs_via_stops`,
+`jobs_extras`), `job_events`, `payments`, `refunds`, `webhook_events`, `users`.
+
+**Not in the database yet, deliberately:** the catalogue — vehicle classes,
+extras, places, routes, tariffs. Those stay as typed constants until S2 brings
+real prices. Moving them now would turn the airport, fleet and fares pages from
+static HTML into queries, and SEO-02 wants that done with revalidation rather
+than as a side-effect.
+
+Still to come from §14: drivers, vehicles, suppliers, finance (S8–S10).
 
 ---
 

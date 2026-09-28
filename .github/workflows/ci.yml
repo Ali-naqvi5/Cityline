@@ -44,6 +44,9 @@ jobs:
       - name: TfL wording check (CMP-01)
         run: pnpm check:compliance
 
+      - name: Migrations only add (DATA-04)
+        run: pnpm check:migrations
+
       - name: Unit tests (pricing, money, compliance)
         run: pnpm test
 

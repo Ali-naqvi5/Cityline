@@ -31,7 +31,7 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_GA4_ID=$NEXT_PUBLIC_GA4_ID \
     NEXT_TELEMETRY_DISABLED=1
 
-RUN pnpm build && pnpm build:worker
+RUN pnpm build && pnpm build:worker && pnpm build:migrate
 
 # --- runtime ----------------------------------------------------------------
 FROM base AS runner

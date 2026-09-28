@@ -1,3 +1,4 @@
+import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 /**
@@ -45,4 +46,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+/**
+ * `withPayload` mounts the admin and Payload's REST/GraphQL routes inside this
+ * app (§10: Payload runs in the same Next.js process, not as a separate
+ * service). It does not touch the public pages — nothing under `(site)`
+ * imports Payload, so the marketing bundle is unaffected.
+ */
+export default withPayload(nextConfig, { devBundleServerPackages: false });
