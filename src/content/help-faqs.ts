@@ -1,7 +1,16 @@
 import { noticePhrase } from "@/domain/booking/booking-window";
+import { formatPence } from "@/domain/money";
 import type { PlaceFaq } from "@/domain/places/types";
+import { EXTRAS } from "@/domain/pricing/extras";
 import { company } from "@/lib/company";
 import { policies } from "@/lib/policies";
+
+/**
+ * The bookable extra waiting time, so its price is read from the catalogue.
+ * Missing it fails the build rather than printing a wrong price.
+ */
+const EXTRA_WAITING = EXTRAS.find((extra) => extra.slug === "extra-waiting");
+if (!EXTRA_WAITING) throw new Error("The extra-waiting extra is missing from EXTRAS.");
 
 /**
  * The help pages' FAQs, in one place (WEB-03).
@@ -174,6 +183,48 @@ export const HELP_FAQS = {
       question: "I lost something at the airport, not in the car.",
       answer:
         "Items left in a terminal are handled by the airport's own lost property office, not by us. Your airline can also help with anything left on board the aircraft.",
+    },
+  ],
+
+  waiting: [
+    {
+      question: "When does my free waiting time start at the airport?",
+      answer: `When your flight actually lands, not at the time you booked. Our team checks your flight's arrival time before sending your driver, so a delayed flight does not use up your ${policies.airportFreeWaitingMinutes} minutes.`,
+    },
+    {
+      question: "What if I will need longer than the free waiting time?",
+      answer: `Add extra waiting time when you book, in 30-minute blocks at ${formatPence(EXTRA_WAITING.pricePence)} each. If you find out on the day, call us — we would much rather hold the car than have you come out to find it gone.`,
+    },
+    {
+      question: "How long will my driver wait at a station, hotel or my home?",
+      answer: `${policies.standardFreeWaitingMinutes} minutes from the booked pickup time. Please be ready at the door; if you are running late, call us and let us know.`,
+    },
+    {
+      question: "What happens if I do not turn up?",
+      answer:
+        "Your driver waits for the free waiting time and we try to reach you on the number you gave us. If we still cannot find you, the booking may be treated as a no-show and charged in full — so keep your phone on and with you.",
+    },
+  ],
+
+  accessibility: [
+    {
+      question: "Do you charge extra for a wheelchair or mobility aid?",
+      answer:
+        "No. A folding wheelchair, walking frame or other mobility aid travels free, and so does any help your driver gives you. Tell us what you are bringing so we send a car it fits in.",
+    },
+    {
+      question: "Can I travel with my assistance dog?",
+      answer:
+        "Yes, always, and at no extra charge. Assistance dogs travel with their owner in every vehicle we send.",
+    },
+    {
+      question: "Do you have wheelchair accessible vehicles?",
+      answer: `Our standard fleet does not include vehicles with a ramp or lift. If you need to travel seated in your wheelchair, call us on ${company.phone} before booking and we will tell you what we can arrange for your date and time.`,
+    },
+    {
+      question: "Can my driver help me to and from the car?",
+      answer:
+        "Yes. Tell us in the notes when you book what would help — a hand with luggage, help to the door, or a little more time — and your driver will know before they arrive.",
     },
   ],
 } as const satisfies Record<string, readonly PlaceFaq[]>;

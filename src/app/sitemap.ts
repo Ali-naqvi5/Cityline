@@ -87,6 +87,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // booking.
     entry("/faq", 0.6),
     entry("/info/meeting-points", 0.6),
+    entry("/info/waiting-time", 0.5),
+    entry("/info/accessibility", 0.5),
     entry("/luggage-guide", 0.5),
     entry("/child-seats", 0.5),
     entry("/info/cancellation", 0.5),

@@ -44,6 +44,8 @@ describe("sitemap", () => {
     for (const path of [
       "/faq",
       "/info/meeting-points",
+      "/info/waiting-time",
+      "/info/accessibility",
       "/luggage-guide",
       "/child-seats",
       "/info/cancellation",

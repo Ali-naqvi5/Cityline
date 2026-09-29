@@ -31,6 +31,12 @@ const GROUPS = [
     more: HELP_LINKS.meetingPoints,
   },
   {
+    id: "waiting-time",
+    heading: "Waiting time",
+    faqs: HELP_FAQS.waiting,
+    more: HELP_LINKS.waiting,
+  },
+  {
     id: "luggage",
     heading: "Luggage",
     faqs: HELP_FAQS.luggage,
@@ -53,6 +59,12 @@ const GROUPS = [
     heading: "Changes and cancellations",
     faqs: HELP_FAQS.cancellation,
     more: HELP_LINKS.cancellation,
+  },
+  {
+    id: "accessibility",
+    heading: "Accessibility and assistance",
+    faqs: HELP_FAQS.accessibility,
+    more: HELP_LINKS.accessibility,
   },
   {
     id: "lost-property",

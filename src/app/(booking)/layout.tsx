@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { SiteHeader } from "@/components/site/site-header";
+import { TrustBar } from "@/components/site/trust-bar";
 import { Container } from "@/components/ui/container";
 import { company, telHref } from "@/lib/company";
 import { legalNav } from "@/lib/navigation";
@@ -18,7 +19,11 @@ export default function BookingLayout({ children }: LayoutProps<"/">) {
     <>
       <SiteHeader />
 
-      <div className="flex-1 pt-24">{children}</div>
+      <div className="flex-1 pt-24">
+        {/* WEB-04: under the fixed header, in the page flow, on every page. */}
+        <TrustBar />
+        {children}
+      </div>
 
       <footer className="border-outline-variant bg-surface-container-low border-t">
         <Container>

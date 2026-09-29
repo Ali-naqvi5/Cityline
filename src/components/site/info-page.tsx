@@ -151,6 +151,8 @@ export const HELP_LINKS = {
   cancellation: { href: "/info/cancellation", label: "Cancellations and refunds" },
   payment: { href: "/info/payment", label: "Paying for your journey" },
   lostProperty: { href: "/info/lost-property", label: "Lost property" },
+  waiting: { href: "/info/waiting-time", label: "Waiting time" },
+  accessibility: { href: "/info/accessibility", label: "Accessibility and assistance" },
   faq: { href: "/faq", label: "Frequently asked questions" },
   fleet: { href: "/fleet", label: "Our fleet" },
   fares: { href: "/fares", label: "Fares" },

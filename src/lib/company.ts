@@ -48,6 +48,14 @@ export const company = {
   whatsapp: null as string | null,
   email: "bookings@citylineairporttransfers.com",
 
+  /**
+   * What the trust bar says customers can pay with (WEB-04). Must match the
+   * payment methods switched on in the Stripe Dashboard: Apple Pay and Google
+   * Pay only appear once the domain is registered with Stripe
+   * (runbook-vps.md §10) — check both before launch.
+   */
+  paymentMethods: "Card, Apple Pay and Google Pay",
+
   /** Confirmed by Cityline: the phones are staffed around the clock (CMP-07). */
   serviceHours: "24/7 dispatch",
 

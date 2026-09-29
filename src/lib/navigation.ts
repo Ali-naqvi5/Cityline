@@ -77,11 +77,13 @@ export const primaryNav: readonly NavItem[] = [
 /** Travel information and policies (WEB-03). */
 export const helpNav: readonly NavItem[] = [
   { label: "Meeting points", href: "/info/meeting-points" },
+  { label: "Waiting time", href: "/info/waiting-time" },
   { label: "Luggage guide", href: "/luggage-guide" },
   { label: "Child seats", href: "/child-seats" },
   { label: "Cancellations", href: "/info/cancellation" },
   { label: "Payment", href: "/info/payment" },
   { label: "Lost property", href: "/info/lost-property" },
+  { label: "Accessibility", href: "/info/accessibility" },
   { label: "Frequently asked questions", href: "/faq" },
 ] as const;
 
