@@ -25,7 +25,7 @@ Cron on the VPS runs the worker every minute (outbox retries, reminders, backups
 ```
 pnpm dev            # next dev
 pnpm build          # next build (standalone)
-pnpm typecheck      # tsc --noEmit
+pnpm typecheck      # next typegen && tsc --noEmit (route types first: CI has no .next)
 pnpm lint           # eslint
 pnpm format         # prettier --write
 pnpm test           # vitest run (pricing, money, compliance, launch gate)
@@ -62,10 +62,13 @@ Deploy: push to `main` → CI builds the image → SSH deploy. **Never edit file
 ## Known trap: native bindings after a dependency change
 
 Vitest bundles with rolldown, which needs a platform-specific native binding
-shipped as an optional dependency. After `pnpm add`/`pnpm remove` re-resolves
-the tree, pnpm can drop it and vitest fails with
-"Cannot find native binding". A plain `pnpm install` will not fix it — it
-reports "Already up to date".
+shipped as an optional dependency. The binding requires Node
+`^20.19.0 || >=22.12.0`, and pnpm silently skips an optional dependency whose
+`engines` do not match — so on **Node 22.11** (this PC as of 29 Sep 2026) every
+fresh install leaves it out and vitest fails with "Cannot find native binding".
+CI uses the latest Node 22 and is unaffected. A plain `pnpm install` will not
+fix it — it reports "Already up to date". Upgrading local Node to the current
+22.x removes the problem; until then:
 
     pnpm install --force
 
