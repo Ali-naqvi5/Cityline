@@ -1,6 +1,7 @@
 import "server-only";
 
 import { confirmBooking } from "@/domain/booking/confirm";
+import { sendNewBookingNotifications } from "@/domain/notifications/send-booking-notifications";
 import { payloadClient } from "@/lib/payload";
 import { stripe } from "@/lib/stripe";
 
@@ -95,6 +96,9 @@ export async function fulfilCheckoutSession(sessionId: string): Promise<FulfilRe
       const result = await confirmBooking(quoteId, payment);
 
       if (result.state === "confirmed" || result.state === "already_confirmed") {
+        // Both callers get here for the same payment; the emails' idempotency
+        // keys make the second call a no-op at Nuntly. Never throws.
+        await sendNewBookingNotifications(result.reference);
         return { state: "confirmed", reference: result.reference };
       }
       if (result.state === "amount_mismatch") return { state: "amount_mismatch" };

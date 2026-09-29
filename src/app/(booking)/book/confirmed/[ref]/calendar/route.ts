@@ -1,7 +1,7 @@
 import {
   buildCalendar,
+  calendarEventsForJobs,
   calendarFilename,
-  type CalendarEvent,
 } from "@/domain/booking/calendar";
 import { loadBooking } from "@/domain/booking/load-booking";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
@@ -36,19 +36,12 @@ export async function GET(
   const origin = siteUrl();
   const manageUrl = `${origin}/manage/${booking.reference}?t=${encodeURIComponent(manageToken)}`;
 
-  const events: CalendarEvent[] = jobs.map((job) => ({
-    reference: booking.reference,
-    leg: job.leg === "return" ? "return" : "outbound",
-    pickupAt: new Date(job.pickupAt),
-    pickup: job.pickupAddress,
-    dropoff: job.dropoffAddress ?? "",
-    hours: job.hours ?? undefined,
-    passengers: job.passengers,
-    vehicleName:
-      VEHICLE_CLASSES.find((item) => item.slug === job.vehicleClassSlug)?.name ??
-      job.vehicleClassSlug,
+  const events = calendarEventsForJobs(
+    booking.reference,
+    jobs,
     manageUrl,
-  }));
+    (slug) => VEHICLE_CLASSES.find((item) => item.slug === slug)?.name ?? slug,
+  );
 
   return new Response(buildCalendar(events, new Date()), {
     headers: {

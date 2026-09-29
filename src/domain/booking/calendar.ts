@@ -176,3 +176,38 @@ export function buildCalendar(events: readonly CalendarEvent[], now: Date): stri
 export function calendarFilename(reference: string): string {
   return `cityline-${reference}.ics`;
 }
+
+/** The fields of a job the calendar needs — a subset of the `jobs` row. */
+export interface CalendarJob {
+  leg?: "outbound" | "return" | null;
+  pickupAt: string;
+  pickupAddress: string;
+  dropoffAddress?: string | null;
+  hours?: number | null;
+  passengers: number;
+  vehicleClassSlug: string;
+}
+
+/**
+ * One calendar event per job. Shared by the download on the confirmation page
+ * and the file attached to the confirmation email, so the two cannot disagree
+ * about a pickup time.
+ */
+export function calendarEventsForJobs(
+  reference: string,
+  jobs: readonly CalendarJob[],
+  manageUrl: string,
+  vehicleName: (slug: string) => string,
+): CalendarEvent[] {
+  return jobs.map((job) => ({
+    reference,
+    leg: job.leg === "return" ? "return" : "outbound",
+    pickupAt: new Date(job.pickupAt),
+    pickup: job.pickupAddress,
+    dropoff: job.dropoffAddress ?? "",
+    hours: job.hours ?? undefined,
+    passengers: job.passengers,
+    vehicleName: vehicleName(job.vehicleClassSlug),
+    manageUrl,
+  }));
+}

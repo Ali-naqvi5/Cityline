@@ -28,8 +28,18 @@ const serverSchema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
   WHATSAPP_APP_SECRET: z.string().optional(),
   WHATSAPP_VERIFY_TOKEN: z.string().optional(),
-  RESEND_API_KEY: z.string().optional(),
+  /** Nuntly (NOT-01, NOT-03). A send-only key is enough. */
+  NUNTLY_API_KEY: z.string().optional(),
+  /** Sender, e.g. `Cityline Airport Transfers <bookings@…>`; its domain must be verified in Nuntly. */
   MAIL_FROM: z.string().optional(),
+  /** Where new-booking alerts go (NOT-03). */
+  OFFICE_ALERT_EMAIL: z.string().email().optional(),
+  /**
+   * `live` sends customer emails to customers. Anything else — including unset,
+   * the default — redirects them to OFFICE_ALERT_EMAIL (PRD-04: email limited
+   * to staff until launch).
+   */
+  CUSTOMER_EMAILS: z.enum(["live", "staff-only"]).default("staff-only"),
   TWILIO_SID: z.string().optional(),
   TWILIO_TOKEN: z.string().optional(),
   TWILIO_FROM: z.string().optional(),
