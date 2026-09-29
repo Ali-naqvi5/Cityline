@@ -14,9 +14,6 @@ import { NavDropdown } from "./nav-dropdown";
  *
  * The operator licence number is deliberately not shown — see
  * `company.showOperatorLicence`.
- *
- * The phone number is still a placeholder from Ofcom's drama-reserved range
- * (`company.phoneIsPlaceholder`) until Cityline supplies the real booking line.
  */
 export function SiteHeader() {
   const nav = [...primaryNav];

@@ -162,11 +162,10 @@ rather than a port. It follows the design's type and colour tokens.
 
 These are marked in code and must be replaced before launch:
 
-| What                       | Where                                                          | Note                                                                                                                                     |
-| -------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Phone number               | `src/lib/company.ts`                                           | `+44 20 7946 0812` — from Ofcom's drama-reserved range, so it can never connect to a real person. The designs used this on all 26 pages. |
-| Fares                      | `src/domain/pricing/vehicle-classes.ts`, `src/content/home.ts` | The design's illustrative figures. Real price tables arrive in S2.                                                                       |
-| Company number, VAT number | `src/lib/company.ts`                                           | Not yet supplied. VAT status also decides how prices display (§17).                                                                      |
+| What                       | Where                                                          | Note                                                                |
+| -------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Fares                      | `src/domain/pricing/vehicle-classes.ts`, `src/content/home.ts` | The design's illustrative figures. Real price tables arrive in S2.  |
+| Company number, VAT number | `src/lib/company.ts`                                           | Not yet supplied. VAT status also decides how prices display (§17). |
 
 The designs are also inconsistent with themselves on fares: the fleet page shows
 a saloon from £48 carrying 4 passengers, while booking step 2 shows a saloon at

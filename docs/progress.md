@@ -465,7 +465,7 @@ flash once and stop. Its intended use has not been confirmed.
 | S3         | Google Maps keys (Places autocomplete, BK-02)                                                               |
 | Launch     | Stripe live activation, restricted live key, live webhook endpoint, Apple Pay domain — `runbook-vps.md` §10 |
 | Launch     | Fix the website on the Stripe profile: it reads `citylineariporttransfers.com`                              |
-| S4–S6      | Real phone number, company number, VAT status (decides how prices display)                                  |
+| S4–S6      | Company number, VAT status (decides how prices display)                                                     |
 | S6         | Page copy for the phase-1 pages, meeting point text per terminal                                            |
 | Launch     | Verify `citylineairporttransfers.com` in Nuntly, or name another verified sending address                   |
 | Launch     | The late-cancellation refund percentage (`policies.lateCancellationRefundPercent`)                          |

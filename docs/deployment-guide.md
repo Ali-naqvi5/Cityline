@@ -104,8 +104,8 @@ through the gate. **The first deployment is with the gate on.** Going live
 | Nuntly API key              | Already exists. The domain must be verified in Nuntly before email works (section 10) |
 | A password manager          | Several new secrets are created below; each must be stored somewhere safe             |
 
-Not needed for this deployment (they are launch-day items): the real phone
-number, Stripe live keys, turning off the gate.
+Not needed for this deployment (they are launch-day items): Stripe live keys,
+turning off the gate.
 
 **Is anything live on the domain today?** Changing DNS (section 5) moves the
 website to the VPS. If an old site is hosted on IONOS webspace at this domain,
@@ -662,8 +662,8 @@ rely on the backups alone.
 
 When the owner decides to go live:
 
-1. Real phone number in the code (the site shows a placeholder from a range
-   that cannot connect) — development session.
+1. The real phone number — in the code since 30 Sep 2026 (`+44 7926 608888`);
+   check it shows in the header once deployed.
 2. Stripe **live**: activate the account, create a restricted live key
    (`rk_live_…`) as `STRIPE_SECRET_KEY`, set the repository variable
    `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to `pk_live_…` **and redeploy** (it is

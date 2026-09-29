@@ -37,13 +37,10 @@ export const company = {
   },
 
   /**
-   * PLACEHOLDER. Deliberately from Ofcom's 020 7946 0xxx range, which is
-   * reserved for drama and can never connect to a real person or business —
-   * so if it survives to launch it cannot misdirect a customer.
-   * TODO(Cityline): replace with the real booking line before go-live.
+   * The booking line (Cityline, 30 Sep 2026). Every page, `tel:` link and
+   * structured-data block reads it from here.
    */
-  phone: "+44 20 7946 0812",
-  phoneIsPlaceholder: true,
+  phone: "+44 7926 608888",
 
   whatsapp: null as string | null,
   email: "bookings@citylineairporttransfers.com",
