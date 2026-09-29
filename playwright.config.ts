@@ -4,11 +4,13 @@ import { defineConfig, devices } from "@playwright/test";
  * The booking funnel is the thing that must never break (NFR-07, PRD-06), so
  * e2e runs at both reference widths: 390px mobile and 1440px desktop (§6).
  *
- * NOT RUNNING YET. Browsers are not installed and the CI job is switched off
- * until the funnel exists in S3/S4 — there is nothing a real browser can tell
- * us about the current pages that a Vitest test cannot (see src/proxy.test.ts).
- * To turn it on:  pnpm exec playwright install --with-deps chromium
- *                 then re-enable the `e2e` job in .github/workflows/ci.yml
+ * Needs Postgres, migrated: locally `pnpm db:up && pnpm migrate`; in CI the
+ * `e2e` job starts a Postgres service. Then `pnpm e2e`. Chrome for Playwright:
+ * `pnpm exec playwright install chromium`.
+ *
+ * The server runs with Stripe and email switched off — empty values, which
+ * Next does not replace from `.env.local` — so a test run never creates a
+ * Checkout Session or sends a message, and behaves the same on every machine.
  */
 const PORT = Number(process.env.E2E_PORT ?? 3100);
 const baseURL = `http://127.0.0.1:${PORT}`;
@@ -37,14 +39,21 @@ export default defineConfig({
     // database, which Playwright would never accept as "up".
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 300_000,
+    timeout: 600_000,
     env: {
       LAUNCH_GATE: "on",
       PREVIEW_TOKEN: "e2e-preview-token",
       CRON_SECRET: "e2e-cron-secret",
       PAYLOAD_SECRET: "e2e-secret-e2e-secret-e2e-secret-abc",
       NEXT_PUBLIC_SITE_URL: baseURL,
-      DATABASE_URL: "postgres://cityline:cityline@127.0.0.1:59999/cityline",
+      // compose.local.yaml locally, the Postgres service in CI.
+      DATABASE_URL:
+        process.env.E2E_DATABASE_URL ??
+        "postgres://cityline:cityline@127.0.0.1:5432/cityline",
+      STRIPE_SECRET_KEY: "",
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "",
+      STRIPE_WEBHOOK_SECRET: "",
+      NUNTLY_API_KEY: "",
     },
   },
 });

@@ -50,25 +50,60 @@ jobs:
       - name: Unit tests (pricing, money, compliance)
         run: pnpm test
 
-  # The Playwright job turns on in S3, with the booking funnel (NFR-07, PRD-06).
-  # Until then the launch gate is covered by Vitest in src/proxy.test.ts, and
-  # downloading a browser on every CI run would buy nothing.
-  #
-  # e2e:
-  #   name: Booking flow (Playwright)
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: pnpm/action-setup@v4
-  #       with: { version: 12 }
-  #     - uses: actions/setup-node@v4
-  #       with: { node-version: 22, cache: pnpm }
-  #     - run: pnpm install --frozen-lockfile
-  #     - run: pnpm exec playwright install --with-deps chromium
-  #     - run: pnpm e2e
-  #     - uses: actions/upload-artifact@v4
-  #       if: ${{ !cancelled() }}
-  #       with:
-  #         name: playwright-report
-  #         path: playwright-report/
-  #         retention-days: 7
+  # The booking funnel in a real browser, at 390px and 1440px (NFR-07, PRD-06).
+  # It stops at the card form: see e2e/booking.spec.ts for why payment itself
+  # is not driven from CI.
+  e2e:
+    name: Booking flow (Playwright)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: cityline
+          POSTGRES_PASSWORD: cityline
+          POSTGRES_DB: cityline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cityline"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Throwaway values for a throwaway database; the same ones the
+      # Playwright web server uses (playwright.config.ts).
+      DATABASE_URL: postgres://cityline:cityline@127.0.0.1:5432/cityline
+      E2E_DATABASE_URL: postgres://cityline:cityline@127.0.0.1:5432/cityline
+      PAYLOAD_SECRET: e2e-secret-e2e-secret-e2e-secret-abc
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3100
+      PREVIEW_TOKEN: e2e-preview-token
+      CRON_SECRET: e2e-cron-secret
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - name: Migrate the database
+        run: pnpm migrate
+
+      - name: Booking flow and launch gate
+        run: pnpm e2e
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

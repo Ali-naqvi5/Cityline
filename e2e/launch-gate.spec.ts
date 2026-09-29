@@ -29,7 +29,7 @@ test.describe("launch gate", () => {
 
     expect(page.url()).not.toContain("preview=");
     await expect(
-      page.getByRole("heading", { name: "Cityline Airport Transfers" }),
+      page.getByRole("heading", { level: 1, name: /london airport transfers/i }),
     ).toBeVisible();
   });
 

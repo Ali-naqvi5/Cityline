@@ -29,7 +29,7 @@ pnpm typecheck      # tsc --noEmit
 pnpm lint           # eslint
 pnpm format         # prettier --write
 pnpm test           # vitest run (pricing, money, compliance, launch gate)
-pnpm e2e            # playwright test — switches on in S3 (browsers not installed yet)
+pnpm e2e            # playwright: booking funnel + launch gate; needs pnpm db:up && pnpm migrate
 pnpm db:up          # local Postgres only (compose.local.yaml)
 pnpm db:down        # stop local Postgres (keeps the volume)
 pnpm worker         # run the outbox worker once, locally
