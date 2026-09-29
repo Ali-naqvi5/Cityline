@@ -20,6 +20,13 @@ export const policies = {
   freeCancellationHours: 24,
   /** Refund within that window, in percent. */
   freeCancellationRefundPercent: 100,
+  /**
+   * Refund for a cancellation inside the free window, in percent. Cityline
+   * confirmed it is partial (29 Sep 2026) but not yet by how much.
+   * TODO(Cityline): the percentage. Until it is set, the site says the team
+   * will confirm the amount rather than guessing one.
+   */
+  lateCancellationRefundPercent: null as number | null,
 
   /** No surcharge for paying by card (PAY-01). */
   cardFeesCharged: false,

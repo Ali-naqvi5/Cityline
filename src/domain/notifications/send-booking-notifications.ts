@@ -9,14 +9,21 @@ import { manageTokenFor } from "@/domain/booking/manage-token";
 import { EXTRAS } from "@/domain/pricing/extras";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { company, siteUrl } from "@/lib/company";
-import { sendEmail, type SendResult } from "@/lib/email";
+import { sendEmail, type OutgoingEmail, type SendResult } from "@/lib/email";
 import { payloadClient } from "@/lib/payload";
 import type { Customer } from "@/payload-types";
 
 import {
+  bookingCancelledEmail,
+  bookingChangedEmail,
   confirmationEmail,
+  manageLinkEmail,
+  officeBookingCancelledEmail,
+  officeBookingChangedEmail,
   officeNewBookingEmail,
+  type BookingChange,
   type BookingEmailData,
+  type RefundStatement,
 } from "./booking-emails";
 
 /**
@@ -75,6 +82,108 @@ export async function sendNewBookingNotifications(reference: string): Promise<vo
     log(reference, "office alert", toOffice);
   } catch (error) {
     console.error(`[notifications] ${reference}: sending failed`, error);
+  }
+}
+
+/**
+ * A customer changed their booking online: confirm it to them, and tell the
+ * office, which may need to tell an assigned driver. `changeId` makes the pair
+ * idempotent per change rather than per booking — a second change is new news.
+ */
+export async function sendBookingChangedNotifications(
+  reference: string,
+  changes: readonly BookingChange[],
+  changeId: string,
+): Promise<void> {
+  await sendPair(reference, "change", (data) => [
+    {
+      to: data.email.customerEmail,
+      ...bookingChangedEmail(data.email, changes),
+      idempotencyKey: `booking-changed:${reference}:${changeId}`,
+      audience: "customer",
+      replyTo: company.email,
+    },
+    data.officeAddress
+      ? {
+          to: data.officeAddress,
+          ...officeBookingChangedEmail(data.email, changes),
+          idempotencyKey: `office-booking-changed:${reference}:${changeId}`,
+          audience: "staff",
+          replyTo: data.email.customerEmail,
+        }
+      : null,
+  ]);
+}
+
+/** A customer cancelled online: confirm it, and give the office the refund to make. */
+export async function sendBookingCancelledNotifications(
+  reference: string,
+  refund: RefundStatement,
+): Promise<void> {
+  await sendPair(reference, "cancellation", (data) => [
+    {
+      to: data.email.customerEmail,
+      ...bookingCancelledEmail(data.email, refund),
+      idempotencyKey: `booking-cancelled:${reference}`,
+      audience: "customer",
+      replyTo: company.email,
+    },
+    data.officeAddress
+      ? {
+          to: data.officeAddress,
+          ...officeBookingCancelledEmail(data.email, refund),
+          idempotencyKey: `office-booking-cancelled:${reference}`,
+          audience: "staff",
+          replyTo: data.email.customerEmail,
+        }
+      : null,
+  ]);
+}
+
+/**
+ * The manage link, sent again to the booking's own email address (BK-07).
+ * Keyed to the hour so a customer who asks twice gets one email, and someone
+ * hammering the form cannot turn it into a mail cannon.
+ */
+export async function sendManageLink(reference: string): Promise<void> {
+  const hour = new Date().toISOString().slice(0, 13);
+  await sendPair(reference, "manage link", (data) => [
+    {
+      to: data.email.customerEmail,
+      ...manageLinkEmail(reference, data.email.manageUrl),
+      idempotencyKey: `manage-link:${reference}:${hour}`,
+      audience: "customer",
+      replyTo: company.email,
+    },
+    null,
+  ]);
+}
+
+/** Loads the booking, builds up to two emails, sends them, logs. Never throws. */
+async function sendPair(
+  reference: string,
+  what: string,
+  build: (
+    data: NonNullable<Awaited<ReturnType<typeof bookingEmailData>>>,
+  ) => [OutgoingEmail, OutgoingEmail | null],
+): Promise<void> {
+  try {
+    const data = await bookingEmailData(reference);
+    if (!data) {
+      console.error(`[notifications] ${reference}: booking not found, no ${what} sent`);
+      return;
+    }
+
+    const [toCustomer, toOffice] = build(data);
+    const results = await Promise.all([
+      sendEmail(toCustomer),
+      toOffice ? sendEmail(toOffice) : Promise.resolve(null),
+    ]);
+
+    log(reference, `${what} email`, results[0]);
+    if (results[1]) log(reference, `${what} office alert`, results[1]);
+  } catch (error) {
+    console.error(`[notifications] ${reference}: ${what} sending failed`, error);
   }
 }
 

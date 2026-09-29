@@ -246,3 +246,188 @@ ${data.legs.map((leg) => legHtml(leg, data.legs)).join("\n")}
 
   return { subject, html, text };
 }
+
+/** One field that changed on a booking, in words a customer understands. */
+export interface BookingChange {
+  label: string;
+  from: string;
+  to: string;
+}
+
+function changesHtml(changes: readonly BookingChange[]): string {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${LINE};border-radius:8px;">
+<tr><td style="padding:8px 12px;color:${MUTED};font-size:13px;">What</td><td style="padding:8px 12px;color:${MUTED};font-size:13px;">Was</td><td style="padding:8px 12px;color:${MUTED};font-size:13px;">Now</td></tr>
+${changes
+  .map(
+    (change) =>
+      `<tr><td style="padding:8px 12px;vertical-align:top;">${escapeHtml(change.label)}</td><td style="padding:8px 12px;vertical-align:top;color:${MUTED};text-decoration:line-through;">${escapeHtml(change.from || "—")}</td><td style="padding:8px 12px;vertical-align:top;font-weight:700;">${escapeHtml(change.to || "—")}</td></tr>`,
+  )
+  .join("\n")}
+</table>`;
+}
+
+function changesText(changes: readonly BookingChange[]): string {
+  return changes
+    .map((change) => `${change.label}: ${change.from || "—"} → ${change.to || "—"}`)
+    .join("\n");
+}
+
+/** The customer's confirmation that their change went through (NOT-01, amendment). */
+export function bookingChangedEmail(
+  data: BookingEmailData,
+  changes: readonly BookingChange[],
+): BuiltEmail {
+  const subject = `Booking changed: ${data.reference}`;
+
+  const html = frame(
+    `Your booking ${data.reference} has been updated.`,
+    `<p style="margin:0 0 12px;font-size:20px;font-weight:700;">Your booking is updated</p>
+<p style="margin:0 0 16px;">We have made these changes to booking <strong>${escapeHtml(data.reference)}</strong>. Your fare is unchanged.</p>
+${changesHtml(changes)}
+${data.legs.map((leg) => legHtml(leg, data.legs)).join("\n")}
+<p style="margin:20px 0 8px;"><a href="${escapeHtml(data.manageUrl)}" style="display:inline-block;background:${GREEN};color:#ffffff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:10px;">View your booking</a></p>
+<p style="margin:16px 0 0;color:${MUTED};font-size:13px;">If you did not make this change, call us straight away on ${escapeHtml(company.phone)}.</p>`,
+  );
+
+  const text = [
+    `Your booking is updated`,
+    ``,
+    `We have made these changes to booking ${data.reference}. Your fare is unchanged.`,
+    ``,
+    changesText(changes),
+    ``,
+    ...data.legs.map((leg) => `${legText(leg, data.legs)}\n`),
+    `View your booking: ${data.manageUrl}`,
+    ``,
+    `If you did not make this change, call us straight away on ${company.phone}.`,
+  ].join("\n");
+
+  return { subject, html, text };
+}
+
+/** The office's alert that a customer changed a booking online (NOT-03). */
+export function officeBookingChangedEmail(
+  data: BookingEmailData,
+  changes: readonly BookingChange[],
+): BuiltEmail {
+  const subject = `${data.isTest ? "[TEST] " : ""}Booking changed ${data.reference}`;
+
+  const html = frame(
+    `${data.customerName} changed ${data.reference}.`,
+    `<p style="margin:0 0 12px;font-size:20px;font-weight:700;">Booking changed by the customer</p>
+<p style="margin:0 0 16px;">${escapeHtml(data.customerName)} (${escapeHtml(data.customerPhone)}) changed <strong>${escapeHtml(data.reference)}</strong> online. If a driver is already assigned, let them know.</p>
+${changesHtml(changes)}
+<p style="margin:20px 0 0;"><a href="${escapeHtml(data.adminUrl)}" style="color:${GREEN};font-weight:700;">Open the booking in the admin</a></p>`,
+  );
+
+  const text = [
+    `Booking changed by the customer`,
+    ``,
+    `${data.customerName} (${data.customerPhone}) changed ${data.reference} online. If a driver is already assigned, let them know.`,
+    ``,
+    changesText(changes),
+    ``,
+    `Admin: ${data.adminUrl}`,
+  ].join("\n");
+
+  return { subject, html, text };
+}
+
+/** What the customer is owed on cancelling, in words. */
+export type RefundStatement =
+  { kind: "full"; refundPence: number } | { kind: "partial"; refundPence: number | null };
+
+function refundWords(refund: RefundStatement): string {
+  if (refund.kind === "full") {
+    return `a full refund of ${formatPence(refund.refundPence)}`;
+  }
+  return refund.refundPence === null
+    ? "a partial refund, and our team will confirm the amount"
+    : `a partial refund of ${formatPence(refund.refundPence)}`;
+}
+
+/** The customer's confirmation of a cancellation (NOT-01). */
+export function bookingCancelledEmail(
+  data: BookingEmailData,
+  refund: RefundStatement,
+): BuiltEmail {
+  const subject = `Booking cancelled: ${data.reference}`;
+  const owed = refundWords(refund);
+
+  const html = frame(
+    `Booking ${data.reference} is cancelled.`,
+    `<p style="margin:0 0 12px;font-size:20px;font-weight:700;">Your booking is cancelled</p>
+<p style="margin:0 0 16px;">We have cancelled booking <strong>${escapeHtml(data.reference)}</strong>, and no car will come.</p>
+<p style="margin:0 0 16px;">You are due ${escapeHtml(owed)}. Refunds are made by our team, back to the card you paid with — we will be in touch to arrange it. Once it is on its way, it usually reaches your account within a few working days.</p>
+<p style="margin:16px 0 0;color:${MUTED};font-size:13px;">If you did not cancel this booking, call us straight away on ${escapeHtml(company.phone)}.</p>`,
+  );
+
+  const text = [
+    `Your booking is cancelled`,
+    ``,
+    `We have cancelled booking ${data.reference}, and no car will come.`,
+    ``,
+    `You are due ${owed}. Refunds are made by our team, back to the card you paid with — we will be in touch to arrange it. Once it is on its way, it usually reaches your account within a few working days.`,
+    ``,
+    `If you did not cancel this booking, call us straight away on ${company.phone}.`,
+  ].join("\n");
+
+  return { subject, html, text };
+}
+
+/** The office's alert for a cancellation, with the refund to make (NOT-03). */
+export function officeBookingCancelledEmail(
+  data: BookingEmailData,
+  refund: RefundStatement,
+): BuiltEmail {
+  const subject = `${data.isTest ? "[TEST] " : ""}Booking cancelled ${data.reference} — refund due`;
+  const owed = refundWords(refund);
+  const first = data.legs[0];
+  const due = first
+    ? `, which was due ${formatDate(first.pickupAt)} at ${formatTime(first.pickupAt)}`
+    : "";
+
+  const html = frame(
+    `${data.reference} cancelled online. Refund due.`,
+    `<p style="margin:0 0 12px;font-size:20px;font-weight:700;">Booking cancelled by the customer</p>
+<p style="margin:0 0 16px;">${escapeHtml(data.customerName)} (${escapeHtml(data.customerPhone)}, ${escapeHtml(data.customerEmail)}) cancelled <strong>${escapeHtml(data.reference)}</strong> online${escapeHtml(due)}. Its jobs are cancelled; tell the driver if one was assigned.</p>
+<p style="margin:0 0 16px;padding:10px 12px;background:#fff4e5;border:1px solid #e0b36b;border-radius:8px;"><strong>Refund to make:</strong> ${escapeHtml(owed)} of ${formatPence(data.totalPence)} paid. Refund it from the Stripe Dashboard and contact the customer.</p>
+<p style="margin:20px 0 0;"><a href="${escapeHtml(data.adminUrl)}" style="color:${GREEN};font-weight:700;">Open the booking in the admin</a></p>`,
+  );
+
+  const text = [
+    `Booking cancelled by the customer`,
+    ``,
+    `${data.customerName} (${data.customerPhone}, ${data.customerEmail}) cancelled ${data.reference} online${due}. Its jobs are cancelled; tell the driver if one was assigned.`,
+    ``,
+    `Refund to make: ${owed} of ${formatPence(data.totalPence)} paid. Refund it from the Stripe Dashboard and contact the customer.`,
+    ``,
+    `Admin: ${data.adminUrl}`,
+  ].join("\n");
+
+  return { subject, html, text };
+}
+
+/** The link to Manage booking, sent when a customer asks for it again (BK-07). */
+export function manageLinkEmail(reference: string, manageUrl: string): BuiltEmail {
+  const subject = `Your link to manage booking ${reference}`;
+
+  const html = frame(
+    `Your link to view or change booking ${reference}.`,
+    `<p style="margin:0 0 12px;font-size:20px;font-weight:700;">Manage your booking</p>
+<p style="margin:0 0 16px;">Here is the link to view, change or cancel booking <strong>${escapeHtml(reference)}</strong>.</p>
+<p style="margin:0 0 16px;"><a href="${escapeHtml(manageUrl)}" style="display:inline-block;background:${GREEN};color:#ffffff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:10px;">Manage booking</a></p>
+<p style="margin:16px 0 0;color:${MUTED};font-size:13px;">Keep this link private: anyone who has it can see and change the booking. If you did not ask for it, you can ignore this email.</p>`,
+  );
+
+  const text = [
+    `Manage your booking`,
+    ``,
+    `Here is the link to view, change or cancel booking ${reference}:`,
+    manageUrl,
+    ``,
+    `Keep this link private: anyone who has it can see and change the booking. If you did not ask for it, you can ignore this email.`,
+  ].join("\n");
+
+  return { subject, html, text };
+}

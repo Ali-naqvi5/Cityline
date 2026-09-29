@@ -1,24 +1,15 @@
-import {
-  CalendarPlus,
-  Check,
-  CircleAlert,
-  Clock,
-  Mail,
-  MapPin,
-  Phone,
-  Settings2,
-} from "lucide-react";
+import { CalendarPlus, Check, Mail, MapPin, Phone, Settings2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { BookingLegCard } from "@/components/booking/booking-leg-card";
+import { CannotShowBooking } from "@/components/booking/cannot-show-booking";
 import { Container } from "@/components/ui/container";
 import { formatReferenceForSpeech } from "@/domain/booking/reference";
 import { loadBooking } from "@/domain/booking/load-booking";
 import { formatPence } from "@/domain/money";
-import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { company, telHref } from "@/lib/company";
 import { policies } from "@/lib/policies";
-import { formatDate, formatTime } from "@/lib/time";
 import type { Job } from "@/payload-types";
 
 /**
@@ -47,15 +38,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
   referrer: "no-referrer",
 };
-
-function vehicleName(slug: string): string {
-  return VEHICLE_CLASSES.find((item) => item.slug === slug)?.name ?? slug;
-}
-
-function legHeading(job: Job, jobs: Job[]): string {
-  if (jobs.length < 2) return "Your journey";
-  return job.leg === "return" ? "Return journey" : "Outbound journey";
-}
 
 export default async function BookingConfirmedPage({
   params,
@@ -119,86 +101,7 @@ export default async function BookingConfirmedPage({
       <div className="gap-gutter grid lg:grid-cols-12">
         <div className="gap-space-lg flex flex-col lg:col-span-7">
           {jobs.map((job) => (
-            <section
-              key={job.id}
-              className="border-outline-variant rounded-card p-space-lg border"
-            >
-              <h2 className="text-headline-sm mb-space-md">{legHeading(job, jobs)}</h2>
-
-              <p className="text-title-md mb-space-sm tabular-nums">
-                {formatDate(new Date(job.pickupAt))} at{" "}
-                {formatTime(new Date(job.pickupAt))}
-              </p>
-
-              <ol className="gap-space-sm text-body-md flex flex-col">
-                <li className="flex gap-2">
-                  <MapPin aria-hidden className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-                  <span>
-                    <span className="text-body-sm text-on-surface-variant block">
-                      Pickup
-                    </span>
-                    {job.pickupAddress}
-                  </span>
-                </li>
-
-                {(job.viaStops ?? []).map((stop, index) => (
-                  <li key={index} className="text-on-surface-variant flex gap-2 pl-6">
-                    <span>
-                      <span className="text-body-sm block">Stop {index + 1}</span>
-                      {stop.address}
-                    </span>
-                  </li>
-                ))}
-
-                {job.dropoffAddress ? (
-                  <li className="flex gap-2">
-                    <MapPin
-                      aria-hidden
-                      className="text-primary mt-0.5 h-4 w-4 shrink-0"
-                    />
-                    <span>
-                      <span className="text-body-sm text-on-surface-variant block">
-                        Drop-off
-                      </span>
-                      {job.dropoffAddress}
-                    </span>
-                  </li>
-                ) : (
-                  <li className="flex gap-2">
-                    <Clock aria-hidden className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-                    <span>
-                      <span className="text-body-sm text-on-surface-variant block">
-                        Hourly hire
-                      </span>
-                      {job.hours} hours with your driver
-                    </span>
-                  </li>
-                )}
-              </ol>
-
-              <dl className="border-outline-variant mt-space-md pt-space-md text-body-md grid gap-2 border-t sm:grid-cols-2">
-                <div>
-                  <dt className="text-body-sm text-on-surface-variant">Vehicle</dt>
-                  <dd>{vehicleName(job.vehicleClassSlug)}</dd>
-                </div>
-                <div>
-                  <dt className="text-body-sm text-on-surface-variant">Passengers</dt>
-                  <dd className="tabular-nums">{job.passengers}</dd>
-                </div>
-                <div>
-                  <dt className="text-body-sm text-on-surface-variant">
-                    Name on the driver&rsquo;s board
-                  </dt>
-                  <dd>{job.nameBoardText ?? job.leadName}</dd>
-                </div>
-                {job.flightNumber ? (
-                  <div>
-                    <dt className="text-body-sm text-on-surface-variant">Flight</dt>
-                    <dd className="tabular-nums">{job.flightNumber}</dd>
-                  </div>
-                ) : null}
-              </dl>
-            </section>
+            <BookingLegCard key={job.id} job={job} jobs={jobs} />
           ))}
 
           {/*
@@ -331,59 +234,4 @@ function customerEmail(
   jobs: readonly Job[],
 ): string {
   return booking.bookerEmail ?? jobs[0]?.leadEmail ?? "your email address";
-}
-
-/**
- * Shown for both a reference that does not exist and a link whose token is
- * wrong or missing.
- *
- * Identical for both on purpose — see `load-booking.ts`. The copy assumes a
- * customer with a broken link rather than an intruder, because that is who
- * actually ends up here: mail clients truncate long URLs, and people copy them
- * by hand off a phone screen.
- */
-function CannotShowBooking() {
-  return (
-    <Container className="py-16">
-      <div className="max-w-2xl">
-        <p className="bg-surface-container-low text-on-surface-variant text-label-sm mb-space-md inline-flex items-center gap-1.5 rounded-full px-3 py-1">
-          <CircleAlert aria-hidden className="h-3.5 w-3.5" />
-          Link not recognised
-        </p>
-
-        <h1 className="text-headline-lg-mobile sm:text-headline-lg mb-space-md">
-          We cannot open that booking
-        </h1>
-
-        <div className="gap-space-md text-body-lg text-on-surface-variant flex flex-col">
-          <p>
-            The link we use to show a booking is long, and some email apps cut it short.
-            Opening it straight from your confirmation email usually fixes it.
-          </p>
-          <p>
-            If it still will not open, call us with your reference and we will pull the
-            booking up at our end. Nothing is lost — if you have had a confirmation email,
-            your car is booked.
-          </p>
-        </div>
-
-        <div className="gap-space-md mt-space-xl flex flex-wrap items-center">
-          <a
-            href={telHref()}
-            className="bg-primary-container text-on-primary hover:bg-secondary rounded-button text-label-md inline-flex h-12 items-center gap-2 px-6 font-semibold transition-colors"
-          >
-            <Phone aria-hidden className="h-4 w-4" />
-            Call {company.phone}
-          </a>
-          <p className="text-body-sm text-on-surface-variant">
-            {company.serviceHours}. Or email{" "}
-            <a href={`mailto:${company.email}`} className="text-primary hover:underline">
-              {company.email}
-            </a>
-            .
-          </p>
-        </div>
-      </div>
-    </Container>
-  );
 }

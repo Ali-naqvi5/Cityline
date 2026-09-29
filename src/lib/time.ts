@@ -133,3 +133,28 @@ export function londonToUtc(date: string, time: string): Date {
 
   return new Date(earlier);
 }
+
+/**
+ * A UTC instant as London's `yyyy-mm-dd` and `HH:mm` — the inverse of
+ * `londonToUtc`, for prefilling a date and time picker with a stored pickup.
+ */
+export function londonDateAndTime(instant: Date): { date: string; time: string } {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: DISPLAY_TIMEZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(instant)
+      .map((part) => [part.type, part.value]),
+  );
+
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    time: `${parts.hour}:${parts.minute}`,
+  };
+}

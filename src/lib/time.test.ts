@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDateTime, formatTime, londonToUtc } from "./time";
+import { formatDateTime, formatTime, londonDateAndTime, londonToUtc } from "./time";
 
 describe("londonToUtc", () => {
   it("treats winter wall time as GMT", () => {
@@ -99,5 +99,17 @@ describe("londonToUtc across a whole clock-change weekend", () => {
     // 25 October 2026: 02:00 BST becomes 01:00 GMT. Every wall time exists
     // here — two of them twice — so nothing may drift.
     expect(sweep("2026-10-23", 4)).toEqual([]);
+  });
+});
+
+describe("londonDateAndTime", () => {
+  it("is the inverse of londonToUtc, in summer and winter", () => {
+    for (const [date, time] of [
+      ["2027-01-14", "09:05"],
+      ["2027-07-14", "09:05"],
+      ["2026-07-02", "00:30"],
+    ] as const) {
+      expect(londonDateAndTime(londonToUtc(date, time))).toEqual({ date, time });
+    }
   });
 });
