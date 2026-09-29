@@ -16,6 +16,7 @@ import {
 import { quoteFor } from "@/domain/pricing/quote";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { payloadClient } from "@/lib/payload";
+import { allowRequest, TOO_MANY_ATTEMPTS } from "@/lib/request-limit";
 
 /**
  * Step 3 submit: validate the passenger, price the journey, store it, move on.
@@ -83,7 +84,11 @@ export async function saveDetails(
    */
   const windowProblem = await checkBookingAvailability(journey);
   if (windowProblem) {
-    return { errors: {}, message: bookingWindowMessage(windowProblem) };
+    return {
+      errors: {},
+      message: bookingWindowMessage(windowProblem),
+      offerTimeChange: true,
+    };
   }
 
   const extras = extrasFromFormData(formData);
@@ -97,6 +102,12 @@ export async function saveDetails(
           "You have chosen more child seats than passengers. Please check the numbers.",
       },
     };
+  }
+
+  // NFR-04. Counted only here, once the form is valid: every quote is a row,
+  // and a mistyped phone number should not use up anyone's allowance.
+  if (!(await allowRequest("quote"))) {
+    return { errors: {}, message: TOO_MANY_ATTEMPTS };
   }
 
   const quote = quoteFor(journey, vehicle, extras);

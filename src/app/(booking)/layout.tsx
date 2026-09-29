@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 
 import { SiteHeader } from "@/components/site/site-header";
 import { TrustBar } from "@/components/site/trust-bar";
@@ -13,8 +14,15 @@ import { legalNav } from "@/lib/navigation";
  * with a short one. Once someone has started booking, a four-column link farm
  * is mostly a set of exits — the only things they should need are a phone
  * number and the terms they are agreeing to.
+ *
+ * Every page here renders per request, which the nonce in its Content Security
+ * Policy requires (src/lib/csp.ts). A page built ahead of time would carry no
+ * nonce, and the policy would block its scripts. `connection()` makes that
+ * true for every page in the funnel, including ones added later.
  */
-export default function BookingLayout({ children }: LayoutProps<"/">) {
+export default async function BookingLayout({ children }: LayoutProps<"/">) {
+  await connection();
+
   return (
     <>
       <SiteHeader />

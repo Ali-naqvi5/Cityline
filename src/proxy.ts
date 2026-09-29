@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { contentSecurityPolicy, createNonce, policyKindFor } from "@/lib/csp";
+
 /**
- * Launch gate (PRD-02) and indexing headers (SEO-03).
+ * Launch gate (PRD-02), indexing headers (SEO-03) and the Content Security
+ * Policy (NFR-04).
  *
  * Next.js 16 renamed the `middleware.ts` convention to `proxy.ts`.
  * This file reads `process.env` directly rather than importing `src/env.ts`,
@@ -71,9 +74,26 @@ export default function proxy(request: NextRequest): NextResponse {
   const gated =
     gateOn && !hasPreviewCookie && !startsWithAny(pathname, GATE_EXEMPT_PREFIXES);
 
-  const response = gated
-    ? NextResponse.rewrite(new URL("/coming-soon", request.url))
-    : NextResponse.next();
+  // NFR-04, see src/lib/csp.ts. Next reads the nonce from the policy on the
+  // *request* and stamps it on its own scripts, so the nonce policy goes on
+  // both the request and the response.
+  const policyKind = policyKindFor(pathname, gated);
+  const dev = process.env.NODE_ENV === "development";
+  const nonce = policyKind === "nonce" ? createNonce() : undefined;
+  const policy = policyKind === "none" ? null : contentSecurityPolicy({ nonce, dev });
+
+  let response: NextResponse;
+  if (gated) {
+    response = NextResponse.rewrite(new URL("/coming-soon", request.url));
+  } else if (nonce && policy) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("Content-Security-Policy", policy);
+    response = NextResponse.next({ request: { headers: requestHeaders } });
+  } else {
+    response = NextResponse.next();
+  }
+
+  if (policy) response.headers.set("Content-Security-Policy", policy);
 
   if (gated || startsWithAny(pathname, NOINDEX_PREFIXES)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");

@@ -117,3 +117,49 @@ describe("launch gate off", () => {
     }
   });
 });
+
+describe("content security policy (NFR-04)", () => {
+  beforeEach(() => {
+    process.env.LAUNCH_GATE = "off";
+  });
+
+  const policyOf = (response: Response) =>
+    response.headers.get("Content-Security-Policy") ?? "";
+
+  /** NextResponse.next({ request: { headers } }) records overridden request headers here. */
+  const requestPolicyOf = (response: Response) =>
+    response.headers.get("x-middleware-request-content-security-policy") ?? "";
+
+  it("gives the payment page a fresh nonce, on the request as well as the response", () => {
+    const first = proxy(request("/book/payment?q=abc"));
+    const second = proxy(request("/book/payment?q=abc"));
+
+    const nonce = /'nonce-([^']+)'/.exec(policyOf(first))?.[1];
+    expect(nonce).toBeTruthy();
+    expect(requestPolicyOf(first)).toBe(policyOf(first));
+    expect(policyOf(second)).not.toBe(policyOf(first));
+  });
+
+  it("gives Manage booking the nonce policy too", () => {
+    expect(policyOf(proxy(request("/manage/CL-7K4Q2P")))).toContain("'strict-dynamic'");
+  });
+
+  it("gives the marketing pages the static policy, with no nonce", () => {
+    const policy = policyOf(proxy(request("/airports/heathrow")));
+    expect(policy).toContain("frame-ancestors 'none'");
+    expect(policy).not.toContain("'nonce-");
+    expect(requestPolicyOf(proxy(request("/")))).toBe("");
+  });
+
+  it("leaves the admin and the API without one", () => {
+    expect(policyOf(proxy(request("/admin")))).toBe("");
+    expect(policyOf(proxy(request("/api/webhooks/stripe")))).toBe("");
+  });
+
+  it("gives the coming-soon page the static policy even on a booking URL", () => {
+    process.env.LAUNCH_GATE = "on";
+    const policy = policyOf(proxy(request("/book/payment")));
+    expect(policy).toContain("'unsafe-inline'");
+    expect(policy).not.toContain("'nonce-");
+  });
+});

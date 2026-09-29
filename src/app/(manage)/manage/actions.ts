@@ -12,6 +12,7 @@ import {
 import { company } from "@/lib/company";
 import { payloadClient } from "@/lib/payload";
 import { policies } from "@/lib/policies";
+import { allowRequest, TOO_MANY_ATTEMPTS } from "@/lib/request-limit";
 import type { Customer } from "@/payload-types";
 
 import type { ManageFormState } from "./form-state";
@@ -22,6 +23,9 @@ import type { ManageFormState } from "./form-state";
  * The magic-link token arrives as a hidden field and is checked again inside
  * the domain functions — never trusted from the page that rendered the form.
  * Emails go out after the database has committed, and never block the reply.
+ *
+ * Each is rate limited (NFR-04): every change or cancellation emails the
+ * customer and the office, and every lookup can email a customer.
  */
 
 const field = (formData: FormData, name: string) => String(formData.get(name) ?? "");
@@ -37,6 +41,10 @@ export async function changeBookingAction(
 ): Promise<ManageFormState> {
   const reference = field(formData, "reference");
   const token = field(formData, "token");
+
+  if (!(await allowRequest("manageChange"))) {
+    return { errors: {}, message: TOO_MANY_ATTEMPTS };
+  }
 
   const jobIds = formData.getAll("jobId").map(Number).filter(Number.isInteger);
   const result = await changeBooking(reference, token, {
@@ -77,6 +85,10 @@ export async function cancelBookingAction(
   const reference = field(formData, "reference");
   const token = field(formData, "token");
 
+  if (!(await allowRequest("manageChange"))) {
+    return { errors: {}, message: TOO_MANY_ATTEMPTS };
+  }
+
   const result = await cancelBookingOnline(reference, token);
 
   switch (result.state) {
@@ -110,6 +122,12 @@ export async function requestManageLinkAction(
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     errors.email = "Enter the email you booked with";
   if (Object.keys(errors).length) return { errors };
+
+  // Says only that they tried too often, which is true whatever they typed,
+  // so it gives away nothing about whether the booking exists.
+  if (!(await allowRequest("manageLink"))) {
+    return { errors: {}, message: TOO_MANY_ATTEMPTS };
+  }
 
   const payload = await payloadClient();
   const found = await payload.find({

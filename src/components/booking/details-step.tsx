@@ -345,13 +345,18 @@ export function DetailsStep({
               role="alert"
               className="border-error/40 text-body-md rounded-card p-space-md border"
             >
-              {state.message}{" "}
-              <Link
-                href={`/book?${funnelQuery(journey)}`}
-                className="text-primary font-semibold underline"
-              >
-                Change the date or time
-              </Link>
+              {state.message}
+              {state.offerTimeChange ? (
+                <>
+                  {" "}
+                  <Link
+                    href={`/book?${funnelQuery(journey)}`}
+                    className="text-primary font-semibold underline"
+                  >
+                    Change the date or time
+                  </Link>
+                </>
+              ) : null}
             </p>
           ) : null}
 

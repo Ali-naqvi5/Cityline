@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 import { funnelParamsSchema } from "./funnel-params";
 import { passengerDetailsSchema } from "./passenger";
@@ -90,6 +90,8 @@ export interface DetailsFormState {
   errors: Record<string, string>;
   /** Set when something failed that is not tied to one field. */
   message?: string;
+  /** The message is about the date or time, so offer the way back to change it. */
+  offerTimeChange?: boolean;
 }
 
 /** Pulls `extra_<slug>` quantities out of the step 3 form. */

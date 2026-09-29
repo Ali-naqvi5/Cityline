@@ -54,6 +54,14 @@ export function LookupForm() {
         required
         error={state.errors.email}
       />
+      {state.message ? (
+        <p
+          role="alert"
+          className="border-error/40 text-body-md rounded-card p-space-md border"
+        >
+          {state.message}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={pending}

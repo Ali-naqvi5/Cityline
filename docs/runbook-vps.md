@@ -200,6 +200,23 @@ suspected compromise.
 - Email provider (Resend/Postmark) with SPF, DKIM and DMARC on the domain.
 - Twilio (SMS), Sentry, Backblaze B2.
 
+## 12. Security policy and rate limits (NFR-04)
+
+- **Content-Security-Policy** is set by `src/proxy.ts` (`src/lib/csp.ts`), not
+  by Caddy. Check it after a deploy:
+  `curl -sI https://citylineairporttransfers.com/book | grep -i content-security`
+  shows a `'nonce-…'`; the home page shows `'unsafe-inline'` instead. Adding a
+  new third-party script, frame or API (Google Maps for addresses, say) means
+  adding its origins in `src/lib/csp.ts`, or the browser blocks it.
+- **Rate limits** (`src/lib/rate-limit.ts`) are counted in the app's memory.
+  They are only correct with **one** app container. Scaling to two would let
+  each allow the full limit; move the counts to Postgres first. A restart
+  resets them, which is harmless.
+- They key on the client address Caddy puts last in `X-Forwarded-For`. Caddy
+  trusts that header only from private networks (`docker/Caddyfile`). If
+  Cloudflare or another proxy is ever put in front, `clientKey` must read that
+  proxy's header instead, or every visitor shares one limit.
+
 ## Never do this on the server
 
 - `docker compose down -v` or `docker volume prune` — destroys `pg_data` and

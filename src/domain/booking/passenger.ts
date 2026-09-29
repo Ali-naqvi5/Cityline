@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 /**
  * Step 3 — who is travelling and how we reach them (BK-01, BK-04, BK-06).

@@ -28,6 +28,23 @@ const eslintConfig = defineConfig([
     "src/payload-types.ts",
     "src/app/(payload)/admin/importMap.js",
   ]),
+  {
+    // Zod is configured once, for the Content Security Policy — see src/lib/zod.ts.
+    ignores: ["src/lib/zod.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "zod",
+              message: 'Import { z } from "@/lib/zod", which is configured for the CSP.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

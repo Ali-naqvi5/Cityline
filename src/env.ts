@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 /**
  * Validated environment (§16). Import this instead of touching `process.env`,

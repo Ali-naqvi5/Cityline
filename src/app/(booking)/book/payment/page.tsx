@@ -7,6 +7,7 @@ import { BookingWindowNotice } from "@/components/booking/booking-window-notice"
 import { FunnelProgress } from "@/components/booking/funnel-progress";
 import { PaymentPanel } from "@/components/booking/payment-panel";
 import { QuoteExpired } from "@/components/booking/quote-expired";
+import { TooManyAttempts } from "@/components/booking/too-many-attempts";
 import { Container } from "@/components/ui/container";
 import { funnelQuery } from "@/domain/booking/funnel-params";
 import { nameBoardText } from "@/domain/booking/passenger";
@@ -17,6 +18,7 @@ import { formatPence } from "@/domain/money";
 import { checkoutForQuote } from "@/domain/payments/checkout-for-quote";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { policies } from "@/lib/policies";
+import { allowRequest } from "@/lib/request-limit";
 import { stripeConfigured } from "@/lib/stripe";
 
 /**
@@ -99,6 +101,13 @@ export default async function PaymentStepPage({
    */
   let clientSecret: string | null = null;
   if (stripeConfigured()) {
+    // NFR-04: every view below is a Stripe API call.
+    if (!(await allowRequest("checkout"))) {
+      return (
+        <TooManyAttempts retryHref={`/book/payment?q=${encodeURIComponent(token)}`} />
+      );
+    }
+
     const checkout = await checkoutForQuote({
       id: loaded.id,
       expiresAt: loaded.expiresAt,

@@ -357,10 +357,10 @@ booking can be charged for seats nobody sits in. The child-seats page says
 "warns", accurately. Worth closing in `saveDetails` with the rest of step 3's
 server validation.
 
-**No Content-Security-Policy yet.** Planned for the S7 security pass. Stripe's
-required directives are now recorded beside the headers in `next.config.ts`.
-The `Permissions-Policy` already names Stripe's origins for `payment` —
-without that, Apple Pay and Google Pay never appear in Stripe's iframe.
+**Content-Security-Policy** is in place — see `src/lib/csp.ts` and the
+29 Sep 2026 entry below. The `Permissions-Policy` in `next.config.ts` names
+Stripe's origins for `payment` — without that, Apple Pay and Google Pay never
+appear in Stripe's iframe.
 
 **Testing payments locally** needs Docker (Postgres), a production build
 (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is baked in at build time) and
