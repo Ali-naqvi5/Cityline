@@ -3,7 +3,7 @@
 Where the build actually stands. Read this before starting work; update it
 before finishing.
 
-**Last updated:** 28 September 2026
+**Last updated:** 29 September 2026
 
 Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-deviations.md)
 (why the build differs from the designs), [`runbook-vps.md`](runbook-vps.md)
@@ -19,11 +19,11 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 | `pnpm typecheck`        | passing                               |
 | `pnpm lint`             | passing                               |
 | `pnpm format:check`     | passing                               |
-| `pnpm check:compliance` | passing — 150 files, wording + claims |
+| `pnpm check:compliance` | passing — 186 files, wording + claims |
 | `pnpm check:migrations` | passing — 2 migrations, additive only |
-| `pnpm test`             | passing — 275 tests across 20 files   |
+| `pnpm test`             | passing — 334 tests across 25 files   |
 | `pnpm build`            | passing                               |
-| `pnpm e2e`              | off until S3 (browsers not installed) |
+| `pnpm e2e`              | passing — 18 tests, 390px and 1440px  |
 
 History is on GitHub (`Ali-naqvi5/Cityline`, branch `main`). Pushing `main`
 deploys to production — there is no staging (see below).
@@ -39,7 +39,7 @@ deploys to production — there is no staging (see below).
 | S2     | Places, zones, pricing engine   | **Not started** — blocked on the launch price tables                             |
 | S3     | Quote, steps 1–2                | Steps 1–2 built on placeholder fares; `/quote` and Places autocomplete not built |
 | S4     | Steps 3–4, Stripe, confirmation | **Done in test mode.** Card payments through Stripe; live keys still to come     |
-| S5+    | Manage booking, pages, admin    | Help, policy and legal pages built; manage booking and admin not started         |
+| S5+    | Manage booking, pages, admin    | Manage booking, emails, help and legal pages built; **admin not started**        |
 
 The build ran ahead of S2, so **every fare on the site is a placeholder**. The
 funnel has four working screens standing on invented numbers.
@@ -71,9 +71,10 @@ funnel has four working screens standing on invented numbers.
 /info/cancellation   cancellations and refunds
 /info/payment        paying for a journey
 /info/lost-property  lost property
+/info/waiting-time   free waiting, from policies
+/info/accessibility  step-free and assistance, what we can and cannot do
 /luggage-guide       capacities, straight from VEHICLE_CLASSES
 /child-seats         seats and prices, straight from EXTRAS
-/reviews             noindex until genuine reviews exist (WEB-06)
 /book                step 1 · journey
 /book/vehicle        step 2 · vehicle choice
 /book/details        step 3 · passenger details and extras → quotes row
@@ -81,6 +82,10 @@ funnel has four working screens standing on invented numbers.
 /book/return         Stripe's return URL; fulfils, then redirects to the booking
 /book/confirmed/[ref]           confirmation; needs ?t=<manage token>
 /book/confirmed/[ref]/calendar  .ics download (NOT-01), same guard
+/manage              "email me my link" — same reply whether or not it matched
+/manage/[ref]        the booking; needs ?t=<manage token> (BK-07)
+/manage/[ref]/change date, time, flight, passenger, notes — no fare changes
+/manage/[ref]/cancel shows the refund, then cancels
 /coming-soon         launch gate target
 /api/health          deploy health check
 /api/cron            worker tick, called by VPS cron
@@ -107,6 +112,11 @@ funnel has four working screens standing on invented numbers.
 | `booking/load-booking.ts`          | booking by reference + magic-link token                    |
 | `booking/manage-token.ts`          | magic-link token; only its SHA-256 is stored (BK-07)       |
 | `booking/calendar.ts`              | RFC 5545 `.ics` builder (NOT-01)                           |
+| `booking/booking-window.ts`        | BK-05 notice, horizon, blackout; the customer's wording    |
+| `booking/booking-availability.ts`  | the daily cap, counted per London day, from the database   |
+| `booking/manage-rules.ts`          | 24-hour online window, refund terms (BK-07)                |
+| `booking/manage-booking.ts`        | change and cancel, with a `job_events` row per field       |
+| `notifications/booking-emails.ts`  | every email's subject, HTML and text; escaped              |
 | `jobs/reference.ts`                | `J-000001` job references, numeric ordering                |
 | `booking/rules.ts`                 | booking rules; moves to the Payload global in S8           |
 | `pricing/vehicle-classes.ts`       | the six classes — **placeholder fares**                    |
@@ -118,6 +128,11 @@ funnel has four working screens standing on invented numbers.
 
 Also `lib/time.ts` → `londonToUtc`: London wall time to a UTC instant, tested
 across both clock-change weekends. Every pickup time goes through it.
+`londonDateAndTime` is its inverse, for filling the change form.
+
+In `src/lib/`: `csp.ts` (the two Content Security Policies), `rate-limit.ts`
+(token buckets, client IP), `email.ts` (Nuntly), `zod.ts` (Zod, configured
+once — import `z` from here; ESLint enforces it).
 
 ### Infrastructure
 
@@ -132,17 +147,16 @@ deploy workflows, deploy script with pre-deploy dump and rollback.
 
 ### Pages
 
-Not built: manage booking (`/manage/[ref]`, and the amend and cancel screens),
-the route page template (`/transfers/[from]-to-[to]`), `/quote`, the blog, and
-the business pages.
+Not built, and **dropped by Cityline** (29 Sep 2026): `/quote`, the route
+pages (`/transfers/…`), terminal pages, the reviews page, the blog and the
+other phase-2 pages, a cash option, flight arrival times, a cookie banner and
+analytics. Do not build them without asking.
 
-**7 dead links remain, all on the home page**: the six `/transfers/*` route
-links in the popular-routes block, and `/business/corporate-accounts`. Every
-header and footer link now resolves (checked by crawling the built site — was
-18 this morning, 35 before that).
+**Every link resolves.** The home page's popular routes now point at the
+airport pages, and its corporate and cruise cards at the service pages.
 
-**The confirmation screen links to `/manage/[ref]`, which does not exist yet.**
-So does the calendar file. They 404 until manage booking is built.
+Still to come: the admin panel, real prices (S2), address suggestions (BK-02),
+Stripe live mode, and customer accounts.
 
 ### The database exists now
 
@@ -246,6 +260,49 @@ and is not in `node_modules`, so a `tsx` script importing `confirm.ts`,
 `load-quote.ts` or `load-booking.ts` fails with `ERR_MODULE_NOT_FOUND`. Map it
 to an empty module with a throwaway tsconfig `paths` entry when scripting.
 
+**Manage booking (BK-07) is online up to 24 hours before the next pickup.**
+`manage-rules.ts` decides; the page, both forms and both server actions all
+ask it. Inside 24 hours the page shows the phone number instead. Online
+changes are only the ones that cannot change the fare — date and time, flight,
+passenger name and phone, notes. **No money moves online**: cancelling shows
+the refund (full at 24 hours or more; partial inside, at
+`policies.lateCancellationRefundPercent`, which is `null` until Cityline sets
+it) and the office makes it. Every changed field writes a `job_events` row
+(`actor_type = customer`), in the same transaction as the change.
+
+**Emails go through Nuntly** (`lib/email.ts`, REST, with an idempotency key on
+every send). Confirmation (with the `.ics`), change, cancellation and "your
+link" go to the customer; a copy of each goes to `OFFICE_ALERT_EMAIL`. **Until
+launch, customer emails are redirected to the office** (`CUSTOMER_EMAILS`
+defaults to `staff-only`; set `live` to send to customers). A failed send is
+logged and never blocks the booking — and never retried, so today the office
+can miss a booking if Nuntly is down. The admin panel is the real safety net.
+
+**Booking rules (BK-05) are enforced on the server** at steps 2, 3 and 4, in
+whole minutes: with 3 hours' notice, 15:00 is bookable at 12:00 and 14:59 is
+not. The daily cap counts pickups per London day.
+
+**Test bookings are tagged.** Stripe's `livemode` sets `is_test` on the booking,
+its jobs, and a customer the booking created.
+
+**Two Content Security Policies** (`lib/csp.ts`, set in `proxy.ts`). `/book`
+and `/manage` get a per-request nonce with `'strict-dynamic'`; their layouts
+call `connection()` so every page there renders per request, which a nonce
+needs. Every other page stays static, with inline scripts allowed. Both allow
+Stripe, because a customer who clicks through from the home page pays under the
+home page's policy. `/admin` and `/api` get none. A new third-party script,
+frame or API needs its origins added there, or the browser blocks it.
+
+**Rate limits** (`lib/rate-limit.ts`, `lib/request-limit.ts`): quotes, payment
+page views (each a Stripe call), "email me the link", and changes and
+cancellations. In memory — correct for one app container only
+(`runbook-vps.md` §12). Admin login is Payload's: 5 failures lock the account
+for 10 minutes.
+
+**Destructive migration commands are blocked** (`migrate:fresh`, `reset`,
+`refresh`, `down`) through Payload's `bin` option. Override for a real need:
+`ALLOW_DESTRUCTIVE_MIGRATIONS=yes`.
+
 **The worker has a task registry with no tasks registered.** Handlers land in
 S4, S8 and S9.
 
@@ -325,8 +382,7 @@ now read them.
 
 **The sitemap applies SEO-01 itself.** Airport and seaport guides that fail the
 quality bar are left out, using the same `placeInternalLinkCount` helper the
-pages use, so the page's `noindex` and the sitemap cannot disagree. `/reviews`
-stays out while it has no genuine reviews to show.
+pages use, so the page's `noindex` and the sitemap cannot disagree.
 
 ---
 
@@ -350,12 +406,6 @@ stays out while it has no genuine reviews to show.
 vitest's platform binding, and `pnpm install` will report "Already up to date".
 Fix: `pnpm install --force`. Documented in `CLAUDE.md`; it has cost an hour
 twice.
-
-**Too many child seats is only a warning.** Step 3 warns when there are more
-child seats than passengers, but the server action does not reject it, so a
-booking can be charged for seats nobody sits in. The child-seats page says
-"warns", accurately. Worth closing in `saveDetails` with the rest of step 3's
-server validation.
 
 **Content-Security-Policy** is in place — see `src/lib/csp.ts` and the
 29 Sep 2026 entry below. The `Permissions-Policy` in `next.config.ts` names
@@ -384,9 +434,22 @@ Scroll first, wait, then click. Not a customer-facing problem.
 Stripe's fraud signals. Stripe is the payment processor, so this is expected,
 but the token is a bearer credential for that quote.
 
-**The reviews page was built without the design's copy.** The design's text
-invents testimonials and says "in standard app taxis"; neither can ship. The
-page shows only what Google and Trustpilot supply, which today is nothing.
+**Nuntly will not send until `citylineairporttransfers.com` is verified** in
+the Nuntly dashboard (DNS records). Until then every send fails with
+"domain … is not verified"; bookings are unaffected. Nuntly also answers a
+_repeat_ of a failed send (same idempotency key, within 24 hours) with
+422 "The response is invalid" rather than retrying it.
+
+**Stripe's Payment Element resists automation** (Stripe says so, and loads an
+invisible hCaptcha). `pnpm e2e` stops at the payment page; take a test payment
+by hand before a release: card `4242 4242 4242 4242`, and
+`4000 0025 0000 3155` for 3D Secure.
+
+**Dates in the funnel's summaries are ISO** (`2026-10-01 at 10:30`) at steps 2
+to 4, where every other page reads `Thu, 1 Oct 2026`.
+
+**The admin shows a React hydration error (#418)** in the browser console.
+Payload's own screen, not ours; to look at with the admin work.
 
 **`design/brand/Loader.json`** is a Lottie file, but not a vector one: three
 720×405 raster frames at 15fps, 0.2s total, no loop. As delivered it would
@@ -404,7 +467,8 @@ flash once and stop. Its intended use has not been confirmed.
 | Launch     | Fix the website on the Stripe profile: it reads `citylineariporttransfers.com`                              |
 | S4–S6      | Real phone number, company number, VAT status (decides how prices display)                                  |
 | S6         | Page copy for the phase-1 pages, meeting point text per terminal                                            |
-| S6         | Google Business Profile and Trustpilot URLs (`company.reviewProfiles`) — `/reviews` is empty until then     |
+| Launch     | Verify `citylineairporttransfers.com` in Nuntly, or name another verified sending address                   |
+| Launch     | The late-cancellation refund percentage (`policies.lateCancellationRefundPercent`)                          |
 | S6         | Whether to show the operator licence number: hidden on request, but CMP-09 expects it (`/legal/licensing`)  |
 | S0 (VPS)   | IONOS VPS purchase — see `runbook-vps.md`                                                                   |
 | S9         | Meta Business + a new phone number for WhatsApp — long lead time                                            |
@@ -415,13 +479,9 @@ Placeholders currently in the build are listed in `design-deviations.md` §11.
 
 ## Suggested next steps
 
-1. **Manage booking** (`/manage/[ref]`, BK-07). The confirmation screen and
-   the calendar file already link to it, and `loadBooking` is written for it.
-2. **The home page's seven dead links**: either build the route template
-   (phase 2 in §5, and bound by SEO-01) or point that block at pages that
-   exist until then.
-3. **Refunds** — cancellation (full) and cheaper amendments (partial), through
-   the Refunds API against the booking's payment. Needs manage booking first.
-4. **The confirmation email (NOT-01)** — `fulfilCheckoutSession` is where it
-   hangs off, and `manageTokenFor` gives the link.
-5. S2 proper, once the price tables land.
+1. **The admin panel** — bookings and jobs for the office, refunds, dispatch.
+   The emails and manage booking are waiting on it to be the safety net.
+2. **Verify the Nuntly domain**, then set `CUSTOMER_EMAILS=live` at launch.
+3. S2 proper, once the price tables land; BK-02 address suggestions with the
+   Google keys.
+4. Stripe live mode — `runbook-vps.md` §10.
