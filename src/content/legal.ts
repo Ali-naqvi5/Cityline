@@ -2,15 +2,13 @@ import { company, formattedAddress } from "@/lib/company";
 import { policies } from "@/lib/policies";
 
 /**
- * Terms and conditions, and the privacy notice (WEB-03, CMP-11).
+ * Terms and conditions, the privacy notice, and the cookie, licensing and
+ * complaints pages (WEB-03, CMP-11).
  *
- * ⚠️ **DRAFTS. Not legal advice, and not yet reviewed by a solicitor.**
- *
- * The project spec is explicit on both points: §4 says "have your T&Cs and
- * privacy policy checked by a UK solicitor", and S7 lists solicitor-reviewed
- * documents as an input Cityline must supply before launch. These pages exist
- * so the site is complete, the consent checkbox at checkout has something real
- * to link to, and a solicitor has a draft to mark up rather than a blank page.
+ * **Reviewed by Cityline's solicitor** (confirmed by Cityline, 29 Sep 2026), as
+ * §4 and S7 require. Treat the wording as approved: a change here is a change
+ * to the agreement with customers, so it goes back to the solicitor and the
+ * `updated` date moves with it.
  *
  * Written from scratch for Cityline. A competitor's terms were read for topic
  * coverage only — what a UK private hire operator's terms need to address —
@@ -34,7 +32,7 @@ export interface LegalSection {
 export interface LegalDocument {
   title: string;
   description: string;
-  /** ISO date this draft was written. */
+  /** ISO date this version took effect — shown as "Last updated". */
   updated: string;
   intro: string[];
   sections: LegalSection[];

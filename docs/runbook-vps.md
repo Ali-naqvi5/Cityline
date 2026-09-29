@@ -204,6 +204,11 @@ suspected compromise.
 
 - `docker compose down -v` or `docker volume prune` — destroys `pg_data` and
   `storage` (DATA-05).
+- `payload migrate:down`, `migrate:reset`, `migrate:refresh` or `migrate:fresh`
+  — each rolls back or wipes the database (DATA-03). They refuse to run unless
+  `ALLOW_DESTRUCTIVE_MIGRATIONS=yes` is set; never set it here. The server
+  image does not include the Payload CLI anyway: deploys run only the
+  forward-only `dist/migrate.js`.
 - Edit application files directly. Change them in git; CI redeploys.
 - Run a migration that drops or renames a column in one step (DATA-04).
 

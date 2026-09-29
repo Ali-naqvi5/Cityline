@@ -80,6 +80,7 @@ export async function fulfilCheckoutSession(sessionId: string): Promise<FulfilRe
     stripePaymentIntentId: paymentIntentId,
     amountPence: session.amount_total ?? 0,
     currency: session.currency ?? "",
+    livemode: session.livemode,
   };
 
   /*

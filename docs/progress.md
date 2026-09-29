@@ -61,11 +61,11 @@ funnel has four working screens standing on invented numbers.
 /fares               how pricing works (CMP-02)
 /services            hub + 7 service pages
 /seaports            hub + 5 seaport pages
-/terms               terms and conditions — DRAFT, unreviewed
-/privacy             privacy policy — DRAFT, unreviewed
-/cookies             cookie policy — DRAFT, unreviewed
+/terms               terms and conditions — solicitor-reviewed
+/privacy             privacy policy — solicitor-reviewed
+/cookies             cookie policy — solicitor-reviewed
 /legal/licensing     TfL licensing, what it means for a passenger
-/legal/complaints    complaints procedure — DRAFT, unreviewed
+/legal/complaints    complaints procedure — solicitor-reviewed
 /faq                 every help FAQ, one FAQPage block
 /info/meeting-points every airport and cruise terminal, from the place data
 /info/cancellation   cancellations and refunds
@@ -256,12 +256,11 @@ replaces its body without changing its shape. Do not reintroduce per-screen
 arithmetic: that is how step 4 came to promise "this total covers both
 journeys" while charging for one.
 
-**The terms, privacy, cookie and complaints pages are unreviewed drafts.**
-`src/content/legal.ts` carries them, and each page shows a visible "Draft —
-awaiting solicitor review" notice. (Licensing is factual and shows none.) §4 and S7 both require a UK solicitor to review them before launch.
-Every figure in them is read from `policies`/`company`, so they cannot drift
-from what the booking pages promise. Remove the notice by passing
-`draftNotice={false}` once the review is done.
+**The legal pages are solicitor-reviewed** (Cityline confirmed, 29 Sep 2026),
+so the draft notices are gone. `src/content/legal.ts` carries them. Every
+figure in them is read from `policies`/`company`, so they cannot drift from
+what the booking pages promise — but a wording change is a change to the
+customer agreement, and goes back to the solicitor.
 
 **Date and time use shadcn/ui, not native inputs.** `src/components/ui/`
 `calendar.tsx` + `date-time-picker.tsx`. Native pickers follow the _browser's_
@@ -405,7 +404,6 @@ flash once and stop. Its intended use has not been confirmed.
 | Launch     | Fix the website on the Stripe profile: it reads `citylineariporttransfers.com`                              |
 | S4–S6      | Real phone number, company number, VAT status (decides how prices display)                                  |
 | S6         | Page copy for the phase-1 pages, meeting point text per terminal                                            |
-| S7         | Solicitor-reviewed T&Cs, privacy, cookie and complaints policies                                            |
 | S6         | Google Business Profile and Trustpilot URLs (`company.reviewProfiles`) — `/reviews` is empty until then     |
 | S6         | Whether to show the operator licence number: hidden on request, but CMP-09 expects it (`/legal/licensing`)  |
 | S0 (VPS)   | IONOS VPS purchase — see `runbook-vps.md`                                                                   |

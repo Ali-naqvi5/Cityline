@@ -1,4 +1,3 @@
-import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -21,18 +20,7 @@ const siteUrl =
  * `max-w-2xl` on the body is deliberate: around 70 characters a line is what
  * long prose needs to stay readable, whatever the window is doing.
  */
-export function LegalPage({
-  document,
-  draftNotice = true,
-}: {
-  document: LegalDocument;
-  /**
-   * These are drafts until a solicitor has reviewed them (§4, S7). The notice
-   * is shown until Cityline confirms the review has happened — an unreviewed
-   * policy presented as final is worse than one that says what it is.
-   */
-  draftNotice?: boolean;
-}) {
+export function LegalPage({ document }: { document: LegalDocument }) {
   const slug = (heading: string) =>
     heading
       .toLowerCase()
@@ -53,17 +41,6 @@ export function LegalPage({
             {formatDate(new Date(`${document.updated}T00:00:00Z`))}
           </time>
         </p>
-
-        {draftNotice ? (
-          <p className="border-outline-variant bg-surface-container-low rounded-card p-space-md text-body-sm mt-space-lg flex gap-2.5 border">
-            <AlertTriangle aria-hidden className="text-primary mt-0.5 h-5 w-5 shrink-0" />
-            <span>
-              <strong className="text-on-surface">Draft.</strong> This document is
-              awaiting review by a solicitor and is published so it can be read and
-              commented on. It is not yet the final version.
-            </span>
-          </p>
-        ) : null}
 
         <div className="gap-space-md text-body-md text-on-surface-variant mt-space-lg flex flex-col">
           {document.intro.map((paragraph, index) => (

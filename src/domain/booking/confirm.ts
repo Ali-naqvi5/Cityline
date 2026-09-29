@@ -43,6 +43,13 @@ export interface ConfirmedPayment {
   stripePaymentIntentId: string;
   amountPence: number;
   currency: string;
+  /**
+   * Stripe's own `livemode`. A booking paid with test keys is a test booking
+   * (PRD-07): it carries `isTest` so reports and TfL exports leave it out.
+   * Taken from Stripe rather than from which key is configured, because
+   * Stripe is the one that knows whether real money moved.
+   */
+  livemode: boolean;
 }
 
 export type ConfirmResult =
@@ -235,7 +242,8 @@ export async function confirmBooking(
       req,
     });
 
-    const customer = await upsertCustomer(payload, details, req);
+    const isTest = !payment.livemode;
+    const customer = await upsertCustomer(payload, details, isTest, req);
 
     /*
      * A booking reference is random, and a collision is a one-in-a-billion
@@ -258,6 +266,7 @@ export async function confirmBooking(
         // CMP-02: what the customer agreed to, kept even if pricing changes.
         priceSnapshot: results.data,
         termsVersion: TERMS.updated,
+        isTest,
         manageTokenHash: hashManageToken(manageTokenFor(reference)),
       },
       overrideAccess: true,
@@ -303,6 +312,7 @@ export async function confirmBooking(
           paymentMethod: "web_prepaid",
           // JOB-07: price, customer and route come from the booking.
           locked: true,
+          isTest,
           driverNotes: details.notes || journey.notes || undefined,
         },
         overrideAccess: true,
@@ -384,10 +394,14 @@ function bookerFields(details: PassengerDetails) {
  * Marketing consent is only ever turned **on** here, never off: withdrawing it
  * is a deliberate act through an unsubscribe link, and a later booking made
  * without ticking the box is not that.
+ *
+ * `isTest` is only set on a customer this call **creates**. An existing
+ * customer who makes a test booking is still a real customer.
  */
 async function upsertCustomer(
   payload: PayloadClient,
   details: PassengerDetails,
+  isTest: boolean,
   req: TransactionReq,
 ) {
   const name = `${details.firstName} ${details.lastName}`.trim();
@@ -420,6 +434,7 @@ async function upsertCustomer(
   return payload.create({
     collection: "customers",
     data: {
+      isTest,
       email: details.email,
       name,
       phone: details.phone,

@@ -20,6 +20,27 @@ import { WebhookEvents } from "@/collections/WebhookEvents";
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
+ * Payload CLI commands that roll back or wipe the database (DATA-03). Each is
+ * replaced by a script that refuses — see `src/bin/refuse-destructive-migration.ts`.
+ * `ALLOW_DESTRUCTIVE_MIGRATIONS=yes` lifts the block for one deliberate run
+ * against a local development database, and never belongs on the server.
+ */
+const DESTRUCTIVE_MIGRATIONS = [
+  "migrate:down",
+  "migrate:reset",
+  "migrate:refresh",
+  "migrate:fresh",
+] as const;
+
+const destructiveMigrationGuard =
+  process.env.ALLOW_DESTRUCTIVE_MIGRATIONS === "yes"
+    ? []
+    : DESTRUCTIVE_MIGRATIONS.map((key) => ({
+        key,
+        scriptPath: path.resolve(dirname, "bin/refuse-destructive-migration.ts"),
+      }));
+
+/**
  * Payload CMS 3, running inside this Next.js app (§10).
  *
  * The spec schedules the admin for S8, last. It is here earlier for one
@@ -44,6 +65,10 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
  */
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SITE_URL,
+
+  // The Payload CLI checks `bin` before its own commands, so these names run
+  // the refusal script instead of touching the database.
+  bin: destructiveMigrationGuard,
 
   admin: {
     user: Users.slug,

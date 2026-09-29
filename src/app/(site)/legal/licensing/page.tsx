@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function LicensingPage() {
-  return <LegalPage document={LICENSING} draftNotice={false} />;
+  return <LegalPage document={LICENSING} />;
 }

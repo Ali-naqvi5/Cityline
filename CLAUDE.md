@@ -51,6 +51,12 @@ drop the parts of the schema that exist only in migrations: the partial unique
 index on jobs (booking, leg), the source/booking check constraint and
 `job_reference_seq`.
 
+**`migrate:down`, `migrate:reset`, `migrate:refresh` and `migrate:fresh` are
+blocked** (DATA-03) by `bin` scripts in `payload.config.ts` that refuse and exit
+
+1. To undo a migration, write a new forward one. Only for deliberately wiping a
+   local dev database: `ALLOW_DESTRUCTIVE_MIGRATIONS=yes` on that one command.
+
 Deploy: push to `main` → CI builds the image → SSH deploy. **Never edit files on the server.**
 
 ## Known trap: native bindings after a dependency change
