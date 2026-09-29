@@ -2,7 +2,10 @@
 
 import { redirect } from "next/navigation";
 
-import { parseFunnelParams } from "@/domain/booking/funnel-params";
+import { checkBookingAvailability } from "@/domain/booking/booking-availability";
+import { bookingWindowMessage } from "@/domain/booking/booking-window";
+import { largestParty, parseFunnelParams } from "@/domain/booking/funnel-params";
+import { childSeatsExceedPassengers } from "@/domain/pricing/extras";
 import { passengerDetailsSchema } from "@/domain/booking/passenger";
 import {
   createQuoteToken,
@@ -73,7 +76,29 @@ export async function saveDetails(
     redirect(`/book/vehicle?${journeyQuery.toString()}`);
   }
 
+  /*
+   * BK-05, on the server. The form posts whatever the browser holds, and the
+   * browser may have been open for an hour — so the date and time are checked
+   * again here, not trusted from step 2.
+   */
+  const windowProblem = await checkBookingAvailability(journey);
+  if (windowProblem) {
+    return { errors: {}, message: bookingWindowMessage(windowProblem) };
+  }
+
   const extras = extrasFromFormData(formData);
+
+  // The form warns about this as you type; this is the rule. A child seat is
+  // fitted for someone travelling, so there cannot be more seats than people.
+  if (childSeatsExceedPassengers(extras, largestParty(journey).passengers)) {
+    return {
+      errors: {
+        extras:
+          "You have chosen more child seats than passengers. Please check the numbers.",
+      },
+    };
+  }
+
   const quote = quoteFor(journey, vehicle, extras);
   const token = createQuoteToken();
 

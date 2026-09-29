@@ -63,7 +63,7 @@ export const SERVICES = [
     icon: "briefcase",
     title: "Corporate accounts",
     body: "Itemised monthly invoicing, priority dispatch and a named account contact.",
-    href: "/business/corporate-accounts",
+    href: "/services/corporate",
   },
   {
     icon: "award",
@@ -81,7 +81,7 @@ export const SERVICES = [
     icon: "ship",
     title: "Cruise and seaport transfers",
     body: "Direct transfers between London airports and Southampton, Dover and Harwich.",
-    href: "/services/airport-transfers",
+    href: "/services/seaport-transfers",
   },
   {
     icon: "camera",
@@ -93,49 +93,55 @@ export const SERVICES = [
   },
 ] as const;
 
-/** PLACEHOLDER fares — replaced by the launch price tables in S2. */
+/**
+ * PLACEHOLDER fares — replaced by the launch price tables in S2.
+ *
+ * Each links to its airport guide, which has the fare table and the quote
+ * widget. The design linked them to per-route pages, which Cityline dropped
+ * from this build (29 Sep 2026), so two routes share the Heathrow page.
+ */
 export const POPULAR_ROUTES = [
   {
     from: "Central London (W1)",
     to: "Heathrow T2 and T3",
     duration: "45–60 min",
     pricePence: 6200,
-    href: "/transfers/central-london-to-heathrow",
+    href: "/airports/heathrow",
   },
   {
     from: "Canary Wharf (E14)",
     to: "London City",
     duration: "15–20 min",
     pricePence: 3800,
-    href: "/transfers/canary-wharf-to-london-city",
+    href: "/airports/london-city",
   },
   {
     from: "Westminster (SW1)",
     to: "Gatwick South",
     duration: "65–80 min",
     pricePence: 7800,
-    href: "/transfers/westminster-to-gatwick",
+    href: "/airports/gatwick",
   },
   {
     from: "City of London (EC2)",
     to: "Stansted",
     duration: "60–75 min",
     pricePence: 8400,
-    href: "/transfers/city-of-london-to-stansted",
+    href: "/airports/stansted",
   },
   {
     from: "Kensington (W8)",
     to: "Heathrow T5",
     duration: "35–45 min",
     pricePence: 5800,
-    href: "/transfers/kensington-to-heathrow",
+    href: "/airports/heathrow",
   },
   {
     from: "King's Cross (N1)",
     to: "Luton",
     duration: "55–70 min",
     pricePence: 7200,
-    href: "/transfers/kings-cross-to-luton",
+    href: "/airports/luton",
   },
 ] as const;
 

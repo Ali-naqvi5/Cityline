@@ -23,7 +23,6 @@ import { ScrollStagger, StaggerItem } from "@/components/motion/scroll-stagger";
 import { QuoteWidget } from "@/components/site/quote-widget";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { earliestBookableDate } from "@/domain/booking/journey";
 import { AIRPORT_CARDS, POPULAR_ROUTES, SERVICES, WHY_CITYLINE } from "@/content/home";
 import { formatPence } from "@/domain/money";
 import { policies, policyCopy } from "@/lib/policies";
@@ -139,7 +138,7 @@ function Hero() {
 
           <div className="w-full lg:col-span-5">
             <h2 className="sr-only">Get a price</h2>
-            <QuoteWidget minDate={earliestBookableDate()} />
+            <QuoteWidget />
           </div>
         </div>
       </Container>
@@ -279,7 +278,7 @@ function PopularRoutes() {
 
         <ul className="border-outline-variant bg-surface-container-lowest divide-outline-variant shadow-card rounded-card divide-y overflow-hidden border">
           {POPULAR_ROUTES.map((route) => (
-            <li key={route.href}>
+            <li key={`${route.from}|${route.to}`}>
               <Link
                 href={route.href}
                 className="hover:bg-surface-container-low p-space-lg flex flex-wrap items-center justify-between gap-3 transition-colors"

@@ -1,14 +1,7 @@
-import { bookingRules } from "@/domain/booking/rules";
+import { noticePhrase } from "@/domain/booking/booking-window";
 import type { PlaceFaq } from "@/domain/places/types";
 import { company } from "@/lib/company";
 import { policies } from "@/lib/policies";
-
-/** "3 hours", "90 minutes" — the minimum notice as a person would say it. */
-function noticeInWords(minutes: number): string {
-  if (minutes % 60 !== 0) return `${minutes} minutes`;
-  const hours = minutes / 60;
-  return hours === 1 ? "1 hour" : `${hours} hours`;
-}
 
 /**
  * The help pages' FAQs, in one place (WEB-03).
@@ -30,7 +23,7 @@ export const HELP_FAQS = {
     },
     {
       question: "How far ahead do I need to book?",
-      answer: `Online bookings need at least ${noticeInWords(bookingRules().minNoticeMinutes)} notice before pickup. For anything sooner, call us on ${company.phone} and we will see what we can do.`,
+      answer: `Online bookings need at least ${noticePhrase()} before pickup. For anything sooner, call us on ${company.phone} and we will see what we can do.`,
     },
     {
       question: "Is the fare per person or for the whole vehicle?",

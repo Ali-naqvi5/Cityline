@@ -6,7 +6,6 @@ import Link from "next/link";
 import { QuoteWidget } from "@/components/site/quote-widget";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Container } from "@/components/ui/container";
-import { earliestBookableDate } from "@/domain/booking/journey";
 import { formatPence } from "@/domain/money";
 import { AIRPORTS } from "@/domain/places/airports";
 import { cheapestIndicativePence } from "@/domain/pricing/indicative";
@@ -49,7 +48,7 @@ export default function AirportsHubPage() {
 
             <div className="lg:col-span-5">
               <h2 className="sr-only">Get a price</h2>
-              <QuoteWidget minDate={earliestBookableDate()} />
+              <QuoteWidget />
             </div>
           </div>
         </Container>

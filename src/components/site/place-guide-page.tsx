@@ -8,7 +8,6 @@ import { QuoteWidget } from "@/components/site/quote-widget";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { earliestBookableDate } from "@/domain/booking/journey";
 import { formatPence } from "@/domain/money";
 import type { PlaceGuide } from "@/domain/places/types";
 import { cheapestIndicativePence } from "@/domain/pricing/indicative";
@@ -128,7 +127,7 @@ export function PlaceGuidePage({
             <div className="lg:col-span-5">
               <h2 className="sr-only">Get a price for a {place.name} transfer</h2>
               {/* SEO-08: the quote widget appears on every landing page. */}
-              <QuoteWidget minDate={earliestBookableDate()} />
+              <QuoteWidget />
             </div>
           </div>
         </Container>

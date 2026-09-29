@@ -51,17 +51,6 @@ export const company = {
   /** Confirmed by Cityline: the phones are staffed around the clock (CMP-07). */
   serviceHours: "24/7 dispatch",
 
-  /**
-   * Public review profiles (WEB-06). The reviews page links to these and, once
-   * a feed is wired up, shows what customers wrote there — never anything
-   * written or chosen by us.
-   * TODO(Cityline): the Google Business Profile and Trustpilot URLs.
-   */
-  reviewProfiles: {
-    google: null as string | null,
-    trustpilot: null as string | null,
-  },
-
   // TODO(Cityline): supplied with the phase-1 page copy (§16).
   companyNumber: null as string | null,
   /** null = not VAT registered, which changes how prices are displayed (§17). */
@@ -84,22 +73,6 @@ export function siteUrl(): string {
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://citylineairporttransfers.com";
 
   return configured.replace(/\/+$/, "");
-}
-
-/**
- * The review profiles that are actually set, in display order (WEB-06).
- *
- * The reviews page and the sitemap both read this: with none configured the
- * page has nothing genuine to show, so it is `noindex` and left out of the
- * sitemap, and the two must agree about that.
- */
-export function reviewProfileLinks(): { name: string; href: string }[] {
-  const { google, trustpilot } = company.reviewProfiles;
-
-  return [
-    { name: "Google", href: google },
-    { name: "Trustpilot", href: trustpilot },
-  ].filter((profile): profile is { name: string; href: string } => Boolean(profile.href));
 }
 
 export function formattedAddress(): string {

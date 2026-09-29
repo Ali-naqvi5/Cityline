@@ -155,7 +155,15 @@ export function checkPickupTiming(
 ): TimingProblem | null {
   const rules = bookingRules();
 
-  const minutesAway = (pickupAt.getTime() - now.getTime()) / 60_000;
+  /*
+   * Whole minutes, the way a customer reads a clock. With three hours' notice,
+   * at 12:00 a 15:00 pickup is accepted and 14:59 is not (Cityline, 29 Sep
+   * 2026). Comparing to the second would refuse 15:00 to someone who pressed
+   * "continue" at 12:00:30 — technically 179.5 minutes, but nobody would call
+   * that less than three hours.
+   */
+  const nowToTheMinute = Math.floor(now.getTime() / 60_000) * 60_000;
+  const minutesAway = (pickupAt.getTime() - nowToTheMinute) / 60_000;
   if (minutesAway < rules.minNoticeMinutes) {
     return { reason: "too_soon", minNoticeMinutes: rules.minNoticeMinutes };
   }
@@ -180,21 +188,5 @@ export function checkPickupTiming(
   return null;
 }
 
-/**
- * The earliest date a customer can pick, as `yyyy-mm-dd` in London time, so a
- * date picker cannot offer a day we would only reject later (BK-05).
- *
- * Lives here rather than in a component: it reads the clock, which makes it
- * impure, and it is the kind of off-by-one-day logic that deserves a test.
- */
-export function earliestBookableDate(now: Date = new Date()): string {
-  const rules = bookingRules();
-  const earliest = new Date(now.getTime() + rules.minNoticeMinutes * 60_000);
-
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Europe/London",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(earliest);
-}
+// Lives in its own module so browser code can use it without pulling in Zod.
+export { earliestBookableDate } from "./booking-dates";

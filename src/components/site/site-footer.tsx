@@ -6,7 +6,6 @@ import {
   companyNav,
   helpNav,
   legalNav,
-  live,
   primaryNav,
   seaportsNav,
 } from "@/lib/navigation";
@@ -27,15 +26,14 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
   // The header no longer carries a top-level Airports menu, so the footer
   // reads the lists directly rather than digging them out of it.
-  const services =
-    live(primaryNav).find((item) => item.href === "/services")?.children ?? [];
+  const services = primaryNav.find((item) => item.href === "/services")?.children ?? [];
 
   const columns = [
     { heading: "Airports", items: [...airportsNav] },
     { heading: "Seaports", items: [...seaportsNav] },
     { heading: "Services", items: services },
-    { heading: "Help and support", items: live(helpNav) },
-    { heading: "Company and legal", items: [...live(companyNav), ...legalNav] },
+    { heading: "Help and support", items: [...helpNav] },
+    { heading: "Company and legal", items: [...companyNav, ...legalNav] },
   ];
 
   return (

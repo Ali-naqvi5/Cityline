@@ -3,12 +3,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { BookingWindowNotice } from "@/components/booking/booking-window-notice";
 import { FunnelProgress } from "@/components/booking/funnel-progress";
 import { PaymentPanel } from "@/components/booking/payment-panel";
 import { QuoteExpired } from "@/components/booking/quote-expired";
 import { Container } from "@/components/ui/container";
 import { funnelQuery } from "@/domain/booking/funnel-params";
 import { nameBoardText } from "@/domain/booking/passenger";
+import { checkBookingAvailability } from "@/domain/booking/booking-availability";
 import { loadQuote } from "@/domain/booking/load-quote";
 import { manageTokenFor } from "@/domain/booking/manage-token";
 import { formatPence } from "@/domain/money";
@@ -79,6 +81,16 @@ export default async function PaymentStepPage({
   const quote = { lines: results.lines, legs: results.legs };
   const total = results.totalPence;
   const draft = { details, extras };
+
+  /*
+   * BK-05, one last time before any money is taken. The quote may be up to 30
+   * minutes old, and a pickup that was three hours away at step 3 can be less
+   * by now.
+   */
+  const windowProblem = await checkBookingAvailability(journey);
+  if (windowProblem) {
+    return <BookingWindowNotice problem={windowProblem} journey={journey} step={4} />;
+  }
 
   /*
    * The quote's Checkout Session, created on first view and reused after. Only

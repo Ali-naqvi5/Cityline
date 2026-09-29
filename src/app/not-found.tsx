@@ -1,8 +1,8 @@
-import { ArrowRight, Phone, Plane, Ship, Tag, Wrench } from "lucide-react";
+import { Phone, Plane, Ship, Tag, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ButtonLink } from "@/components/ui/button";
+import { QuoteWidget } from "@/components/site/quote-widget";
 import { Container } from "@/components/ui/container";
 import { company, telHref } from "@/lib/company";
 
@@ -54,32 +54,28 @@ const DESTINATIONS = [
 export default function NotFound() {
   return (
     <Container className="py-16 sm:py-24">
-      <div className="max-w-2xl">
-        <p className="text-label-sm text-on-surface-variant mb-space-sm tabular-nums">
-          404
-        </p>
-
-        <h1 className="text-headline-lg-mobile sm:text-headline-lg mb-space-md">
-          We cannot find that page
-        </h1>
-
-        <div className="gap-space-md text-body-lg text-on-surface-variant flex flex-col">
-          <p>
-            The link may be out of date, or the address may have a typo in it. Everything
-            else on the site is where it was.
+      <div className="gap-gutter grid items-start lg:grid-cols-12">
+        <div className="lg:col-span-7">
+          <p className="text-label-sm text-on-surface-variant mb-space-sm tabular-nums">
+            404
           </p>
-          <p>
-            If you already have a booking, the link in your confirmation email opens it.
-          </p>
-        </div>
 
-        <div className="gap-space-md mt-space-xl flex flex-wrap items-center">
-          <ButtonLink href="/book">
-            Get a price
-            <ArrowRight aria-hidden className="h-4 w-4" />
-          </ButtonLink>
+          <h1 className="text-headline-lg-mobile sm:text-headline-lg mb-space-md">
+            We cannot find that page
+          </h1>
 
-          <p className="text-body-sm text-on-surface-variant flex items-center gap-1.5">
+          <div className="gap-space-md text-body-lg text-on-surface-variant flex max-w-2xl flex-col">
+            <p>
+              The link may be out of date, or the address may have a typo in it.
+              Everything else on the site is where it was.
+            </p>
+            <p>
+              If you were about to book, you can get a price right here. If you already
+              have a booking, the link in your confirmation email opens it.
+            </p>
+          </div>
+
+          <p className="text-body-md text-on-surface-variant mt-space-xl flex items-center gap-1.5">
             <Phone aria-hidden className="h-4 w-4" />
             Or call{" "}
             <a href={telHref()} className="text-primary tabular-nums hover:underline">
@@ -87,6 +83,16 @@ export default function NotFound() {
             </a>{" "}
             — {company.serviceHours}.
           </p>
+        </div>
+
+        {/*
+         * SEO-08: the quote widget on the 404 too. Someone who followed a stale
+         * search result usually still wants the thing they were searching for —
+         * a price — and this is the shortest way back to it.
+         */}
+        <div className="lg:col-span-5">
+          <h2 className="sr-only">Get a price</h2>
+          <QuoteWidget />
         </div>
       </div>
 

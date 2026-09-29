@@ -37,11 +37,6 @@ describe("sitemap", () => {
     for (const port of SEAPORTS) expect(listed).toContain(`/seaports/${port.slug}`);
   });
 
-  it("leaves out /reviews while there are no genuine reviews to show (WEB-06)", () => {
-    vi.stubEnv("LAUNCH_GATE", "off");
-    expect(paths()).not.toContain("/reviews");
-  });
-
   it("lists the help and legal pages", () => {
     vi.stubEnv("LAUNCH_GATE", "off");
     const listed = paths();

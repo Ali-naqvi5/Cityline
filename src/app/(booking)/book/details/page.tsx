@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { BookingWindowNotice } from "@/components/booking/booking-window-notice";
 import { DetailsStep } from "@/components/booking/details-step";
+import { checkBookingAvailability } from "@/domain/booking/booking-availability";
 import { FunnelProgress } from "@/components/booking/funnel-progress";
 import { Container } from "@/components/ui/container";
 import {
@@ -35,6 +37,12 @@ export default async function DetailsStepPage({
   const vehicle = VEHICLE_CLASSES.find((item) => item.slug === journey.vehicle);
   if (!vehicle) {
     redirect(`/book/vehicle?${funnelQuery({ ...journey, vehicle: undefined })}`);
+  }
+
+  // BK-05 again: the link may be old, or the clock has moved on since step 2.
+  const windowProblem = await checkBookingAvailability(journey);
+  if (windowProblem) {
+    return <BookingWindowNotice problem={windowProblem} journey={journey} step={3} />;
   }
 
   return (

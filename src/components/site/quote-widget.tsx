@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useId, useRef, useState, type ReactNode } from "react";
 
+import { useEarliestBookableDate } from "@/components/booking/use-earliest-bookable-date";
 import { DatePicker, TimePicker } from "@/components/ui/date-time-picker";
 import { bookingRules } from "@/domain/booking/rules";
 
@@ -61,20 +62,12 @@ const FIELD =
   "bg-surface-container-low/70 focus:bg-surface-container-lowest text-body-md " +
   "text-on-surface placeholder:text-on-surface-variant/60 rounded-input h-12 w-full transition-all";
 
-export function QuoteWidget({
-  variant = "hero",
-  minDate,
-}: {
-  variant?: "hero" | "inline";
-  /**
-   * Earliest bookable date (yyyy-mm-dd), from `earliestBookableDate()` on the
-   * server (BK-05). Computed there rather than here because it reads the clock,
-   * which is impure in a render and would mismatch across midnight.
-   */
-  minDate?: string;
-}) {
+export function QuoteWidget({ variant = "hero" }: { variant?: "hero" | "inline" }) {
   const rules = bookingRules();
   const ids = useId();
+  // Worked out in the browser: the pages carrying this widget are mostly
+  // static, and a date baked in at build time goes stale (BK-05).
+  const minDate = useEarliestBookableDate();
 
   const [tab, setTab] = useState<ServiceTab>("route");
 

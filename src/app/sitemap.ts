@@ -9,7 +9,7 @@ import {
   type PlaceGuide,
 } from "@/domain/places/types";
 import { TABLE_CLASSES } from "@/domain/pricing/indicative";
-import { reviewProfileLinks, siteUrl } from "@/lib/company";
+import { siteUrl } from "@/lib/company";
 
 /**
  * SEO-01: a place guide that fails the quality bar is rendered `noindex` *and*
@@ -92,11 +92,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/info/cancellation", 0.5),
     entry("/info/payment", 0.5),
     entry("/info/lost-property", 0.4),
-
-    // Only once there are genuine reviews to show — the page is `noindex`
-    // until then, and the sitemap must not contradict it.
-    ...(reviewProfileLinks().length > 0 ? [entry("/reviews", 0.5)] : []),
-
     // Legal pages are indexable — customers look for them before paying — but
     // they are not what anyone should land on first.
     entry("/terms", 0.3, "yearly"),

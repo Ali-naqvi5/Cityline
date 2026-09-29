@@ -247,7 +247,7 @@ export function DetailsStep({
               })}
             </ul>
 
-            {tooManySeats ? (
+            {tooManySeats || state.errors.extras ? (
               <p role="alert" className="text-body-sm text-error">
                 You have chosen more child seats than passengers. A seat is fitted for a
                 passenger who is travelling, so please check the numbers.
@@ -334,6 +334,26 @@ export function DetailsStep({
               </span>
             </label>
           </section>
+
+          {/*
+           * Problems that belong to the booking rather than a field — a pickup
+           * that has become too soon while the form was open, a fully booked
+           * day. Shown where the customer is looking when they press continue.
+           */}
+          {state.message ? (
+            <p
+              role="alert"
+              className="border-error/40 text-body-md rounded-card p-space-md border"
+            >
+              {state.message}{" "}
+              <Link
+                href={`/book?${funnelQuery(journey)}`}
+                className="text-primary font-semibold underline"
+              >
+                Change the date or time
+              </Link>
+            </p>
+          ) : null}
 
           <div className="border-outline-variant pt-space-lg flex flex-col gap-3 border-t sm:flex-row sm:items-center sm:justify-between">
             <p className="text-body-sm text-on-surface-variant" aria-live="polite">

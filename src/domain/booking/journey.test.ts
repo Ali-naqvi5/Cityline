@@ -175,6 +175,33 @@ describe("checkPickupTiming", () => {
       "too_far_ahead",
     );
   });
+
+  describe("exactly three hours counts (Cityline's rule, 29 Sep 2026)", () => {
+    // 12:00 London on 29 Sep 2026 is 11:00 UTC (BST).
+    const noon = new Date("2026-09-29T11:00:00Z");
+    const at = (hhmm: string) => new Date(`2026-09-29T${hhmm}:00+01:00`);
+
+    it("accepts 15:00 and later at 12:00", () => {
+      expect(checkPickupTiming(at("15:00"), noon)).toBeNull();
+      expect(checkPickupTiming(at("15:01"), noon)).toBeNull();
+    });
+
+    it("refuses 14:59 at 12:00", () => {
+      expect(checkPickupTiming(at("14:59"), noon)?.reason).toBe("too_soon");
+    });
+
+    it("still accepts 15:00 when it is 12:00 and some seconds", () => {
+      // The customer reads 12:00 on their clock; the seconds must not cost them
+      // the 15:00 slot.
+      const noonAndABit = new Date("2026-09-29T11:00:59Z");
+      expect(checkPickupTiming(at("15:00"), noonAndABit)).toBeNull();
+    });
+
+    it("refuses 15:00 once the clock reads 12:01", () => {
+      const oneMinutePast = new Date("2026-09-29T11:01:00Z");
+      expect(checkPickupTiming(at("15:00"), oneMinutePast)?.reason).toBe("too_soon");
+    });
+  });
 });
 
 describe("earliestBookableDate", () => {

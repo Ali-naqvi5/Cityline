@@ -2,14 +2,10 @@
  * The site map as data (§5). The header, the footer, breadcrumbs and
  * sitemap.xml all read from here, so a page cannot appear in one and be missing
  * from another (SEO-07).
- *
- * Phase 2 entries are marked and are not rendered until their pages exist.
  */
 export interface NavItem {
   label: string;
   href: string;
-  /** Phase 2 pages (§5) stay out of the navigation until they are built. */
-  phase2?: boolean;
   /**
    * Menus go two levels deep at most: Services → Airport transfers → the six
    * airports. Anything deeper stops being a menu and starts being a maze, and
@@ -89,11 +85,15 @@ export const helpNav: readonly NavItem[] = [
   { label: "Frequently asked questions", href: "/faq" },
 ] as const;
 
+/**
+ * About and Contact, which the header also carries. SEO-07 wants the one
+ * canonical Contact page linked identically from both. The phase 2 pages that
+ * used to sit here (reviews, driver recruitment, corporate accounts, blog) were
+ * dropped from this build by Cityline on 29 Sep 2026.
+ */
 export const companyNav: readonly NavItem[] = [
-  { label: "Reviews", href: "/reviews" },
-  { label: "Drive with us", href: "/drive-with-us", phase2: true },
-  { label: "Corporate accounts", href: "/business/corporate-accounts", phase2: true },
-  { label: "Blog", href: "/blog", phase2: true },
+  { label: "About us", href: "/about" },
+  { label: "Contact us", href: "/contact" },
 ] as const;
 
 /** CMP-09 and CMP-11 pages. These are never hidden. */
@@ -104,10 +104,3 @@ export const legalNav: readonly NavItem[] = [
   { label: "Licensing", href: "/legal/licensing" },
   { label: "Complaints", href: "/legal/complaints" },
 ] as const;
-
-/** Drops phase 2 entries until those pages exist. */
-export function live(items: readonly NavItem[]): NavItem[] {
-  return items
-    .filter((item) => !item.phase2)
-    .map((item) => (item.children ? { ...item, children: live(item.children) } : item));
-}

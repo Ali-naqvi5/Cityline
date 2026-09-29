@@ -9,7 +9,6 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { SERVICES, serviceBySlug } from "@/content/services";
-import { earliestBookableDate } from "@/domain/booking/journey";
 import { formatPence } from "@/domain/money";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { company, telHref } from "@/lib/company";
@@ -87,7 +86,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[serv
             <div className="lg:col-span-5">
               <h2 className="sr-only">Get a price</h2>
               {/* SEO-08: the quote widget appears on every landing page. */}
-              <QuoteWidget minDate={earliestBookableDate()} />
+              <QuoteWidget />
             </div>
           </div>
         </Container>

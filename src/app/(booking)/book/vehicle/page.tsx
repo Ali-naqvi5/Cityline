@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { BookingWindowNotice } from "@/components/booking/booking-window-notice";
 import { FunnelProgress } from "@/components/booking/funnel-progress";
 import { JourneySummary } from "@/components/booking/journey-summary";
 import { VehicleList } from "@/components/booking/vehicle-list";
 import { Container } from "@/components/ui/container";
+import { checkBookingAvailability } from "@/domain/booking/booking-availability";
 import {
   funnelQuery,
   hasJourney,
@@ -38,6 +40,12 @@ export default async function VehicleStepPage({
   // them back to step 1 rather than showing an empty summary.
   if (!hasJourney(journey)) {
     redirect(`/book?${funnelQuery(journey)}`);
+  }
+
+  // BK-05 on the server: the date picker is a convenience, not the rule.
+  const windowProblem = await checkBookingAvailability(journey);
+  if (windowProblem) {
+    return <BookingWindowNotice problem={windowProblem} journey={journey} step={2} />;
   }
 
   // One vehicle carries the whole booking, so it has to fit the busiest leg —

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { ButtonLink } from "@/components/ui/button";
 import { company, telHref } from "@/lib/company";
-import { live, primaryNav } from "@/lib/navigation";
+import { primaryNav } from "@/lib/navigation";
 
 import { MobileNav } from "./mobile-nav";
 import { NavDropdown } from "./nav-dropdown";
@@ -19,7 +19,7 @@ import { NavDropdown } from "./nav-dropdown";
  * (`company.phoneIsPlaceholder`) until Cityline supplies the real booking line.
  */
 export function SiteHeader() {
-  const nav = live(primaryNav);
+  const nav = [...primaryNav];
 
   return (
     <header className="bg-surface-container-lowest/95 shadow-header fixed top-0 z-40 w-full backdrop-blur-md">

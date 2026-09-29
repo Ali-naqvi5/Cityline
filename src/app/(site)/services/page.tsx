@@ -6,7 +6,6 @@ import { QuoteWidget } from "@/components/site/quote-widget";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Container } from "@/components/ui/container";
 import { SERVICES } from "@/content/services";
-import { earliestBookableDate } from "@/domain/booking/journey";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://citylineairporttransfers.com";
@@ -39,7 +38,7 @@ export default function ServicesHubPage() {
 
             <div className="lg:col-span-5">
               <h2 className="sr-only">Get a price</h2>
-              <QuoteWidget minDate={earliestBookableDate()} />
+              <QuoteWidget />
             </div>
           </div>
         </Container>
