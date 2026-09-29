@@ -2,7 +2,7 @@
 # Restore a dump into a target database. Used for the monthly restore test into
 # staging (DATA-09) — a backup that has never been restored does not count.
 #
-#   docker compose run --rm backup restore.sh /backups/daily/cityline-2027....enc cityline_staging
+#   docker compose run --rm --entrypoint restore.sh backup /backups/daily/cityline-2027....enc cityline_restore_test
 set -euo pipefail
 
 FILE="${1:?usage: restore.sh <encrypted-dump> <target-database>}"

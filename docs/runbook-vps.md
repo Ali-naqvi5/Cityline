@@ -71,12 +71,23 @@ and redeploy):
 - `scripts/deploy.sh` → `/srv/cityline/deploy.sh`, `chmod +x`
 
 Create `/srv/cityline/.env.production` from `.env.example`, with real values.
-**It never goes in git.** `chmod 600 .env.production`.
+**It never goes in git.** `chmod 600 .env.production`. Set
+`GHCR_OWNER=ali-naqvi5` (image names are lowercase) and leave `APP_TAG` out —
+every deploy sets it.
 
-Log in to the container registry once, with a read-only token:
+Compose reads the values it substitutes into `compose.yaml`
+(`POSTGRES_PASSWORD`, `GHCR_OWNER`) from a file called `.env`, not from
+`env_file`, so link the two — one file to maintain:
 
 ```bash
-echo "<ghcr-read-token>" | docker login ghcr.io -u <github-user> --password-stdin
+ln -s .env.production .env
+```
+
+Log in to the container registry once, as `cityline`, with a classic GitHub
+token that has only the `read:packages` scope:
+
+```bash
+echo "<ghcr-read-token>" | docker login ghcr.io -u Ali-naqvi5 --password-stdin
 ```
 
 ## 5. DNS at IONOS
@@ -103,12 +114,16 @@ the webspace.
 In `.env.production` set `LAUNCH_GATE=on` **before** the first `docker compose up`.
 The public must never see a half-built site (PRD-02).
 
-```bash
-cd /srv/cityline
-APP_TAG=<sha-from-ci> docker compose up -d
-docker compose logs -f app
-curl -fsS https://citylineairporttransfers.com/api/health   # → coming-soon is served, health is JSON
-```
+The order matters — the database has to be running for `deploy.sh`, and the
+tables only exist once it has migrated. Step by step in
+[`deployment-guide.md`](deployment-guide.md):
+
+1. `docker compose up -d db`
+2. Push `main`; GitHub Actions runs `deploy.sh`, which migrates and starts
+   `app` and `worker`.
+3. `APP_TAG=$(cat .last-good-tag) docker compose up -d caddy backup`
+4. **Straight away**, open `/admin` and create the first admin user. Until a
+   user exists, whoever opens `/admin` first can create one.
 
 Preview as an owner: `https://citylineairporttransfers.com/?preview=<PREVIEW_TOKEN>`.
 
@@ -119,8 +134,11 @@ crontab -e -u cityline
 ```
 
 ```cron
-* * * * * curl -fsS -m 50 -X POST -H "Authorization: Bearer <CRON_SECRET>" http://127.0.0.1:3000/api/cron >/dev/null 2>&1
+* * * * * curl -fsS -m 50 -X POST -H "Authorization: Bearer <CRON_SECRET>" https://citylineairporttransfers.com/api/cron >/dev/null 2>&1
 ```
+
+Through Caddy, not `127.0.0.1:3000`: the app's port is not published to the
+host.
 
 The `worker` container already ticks every 60 seconds; this is the safety net,
 and the tick is safe to run twice.
@@ -131,13 +149,16 @@ and the tick is safe to run twice.
    Backblaze B2 keys in `.env.production`. **Store the archive password in a
    password manager** — an encrypted dump you cannot decrypt is not a backup.
 2. Turn on **IONOS Cloud Backup / snapshots** for the whole VPS in the control panel.
-3. Force one run and check it lands in both remotes:
+3. Force one run and check it lands in both remotes. `--entrypoint` is
+   needed: the container's entrypoint is the nightly loop, which ignores
+   arguments.
    ```bash
-   docker compose run --rm backup backup.sh
+   docker compose run --rm --entrypoint backup.sh backup
    ```
-4. **Restore test** into a scratch database:
+4. **Restore test** into a scratch database, then drop it:
    ```bash
-   docker compose run --rm backup restore.sh /backups/daily/<file>.enc cityline_restore_test
+   docker compose run --rm --entrypoint restore.sh backup /backups/daily/<file>.enc cityline_restore_test
+   docker compose exec db dropdb -U cityline cityline_restore_test
    ```
    Record it in the log at the bottom of this file. Repeat monthly (DATA-09).
 

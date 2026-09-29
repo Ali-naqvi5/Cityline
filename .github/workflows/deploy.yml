@@ -45,8 +45,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Image names must be lowercase, and the repository owner (Ali-naqvi5)
+      # is not; `${VAR,,}` lowercases it. The VPS pulls the same lowercase name
+      # (GHCR_OWNER in /srv/cityline/.env.production).
       - id: meta
-        run: echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/cityline-web" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -62,8 +67,8 @@ jobs:
           file: docker/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/cityline-web:${{ steps.meta.outputs.tag }}
-            ghcr.io/${{ github.repository_owner }}/cityline-web:latest
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
