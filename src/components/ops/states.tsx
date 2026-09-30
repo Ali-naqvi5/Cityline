@@ -81,3 +81,12 @@ export function NoAccess({ reason }: { reason: "deactivated" | "role" }) {
     </div>
   );
 }
+
+/** A whole page for someone who may not open it. */
+export function DeniedPage({ reason }: { reason: "deactivated" | "role" }) {
+  return (
+    <div className="ops-root min-h-dvh p-4">
+      <NoAccess reason={reason} />
+    </div>
+  );
+}

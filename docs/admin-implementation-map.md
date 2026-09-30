@@ -121,30 +121,30 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 |                | Dispatch board, assign driver                                                 | ⬜                                                            |
 |                | Bookings, customers, quotes                                                   | 🔧 raw Payload                                                |
 |                | Amend booking, refunds, payment links                                         | ⬜                                                            |
-| Fleet          | Drivers, vehicles, documents, compliance, suppliers                           | ⬜                                                            |
+| Fleet          | Drivers, vehicles, documents, compliance, suppliers                           | ✅ 1 Oct; supplier money waits on Finance                     |
 | Messaging      | Send on WhatsApp (prefilled), passenger details                               | ⬜                                                            |
 | Alerts         | Notification centre                                                           | ⬜                                                            |
 | Finance        | Job finance, costs, driver pay, statements, supplier money, expenses, reports | ⬜                                                            |
 | Reports        | TfL register, run sheet, jobs/driver/vehicle/supplier reports                 | ⬜                                                            |
-| Administration | Staff + 2FA, audit log, booking rules, company details                        | ⬜                                                            |
+| Administration | Staff + 2FA, audit log, booking rules, company details                        | 🔧 audit log ✅ 1 Oct; staff, 2FA, settings to build          |
 |                | Prices & catalogue                                                            | ⬜ (needs real price tables)                                  |
 |                | Media / content                                                               | ⬜                                                            |
 
 ## Server-side rules: status
 
-| Rule                                                 | Status                                                             |
-| ---------------------------------------------------- | ------------------------------------------------------------------ |
-| Website bookings cannot be created by hand           | ✅ bookings `create: false`; ⬜ jobs `source = website` from staff |
-| Job source immutable                                 | 🔧 admin read-only only; ⬜ server hook                            |
-| Protected website job fields                         | ⬜                                                                 |
-| Status transitions valid, timestamped, attributed    | ⬜                                                                 |
-| Expired driver / vehicle / wrong class cannot assign | ⬜                                                                 |
-| Supplier reference unique per supplier               | ⬜                                                                 |
-| Refunds staff-only, audited                          | ⬜                                                                 |
-| Role permissions server-side                         | ✅ 1 Oct — matrix on every collection, view and action             |
-| Bank details owner-only                              | ⬜                                                                 |
-| Test bookings out of reports / TfL export            | ✅ `isTest` exists; ⬜ in queries                                  |
-| Audit record for important mutations                 | 🔧 `job-events` for customer changes; ⬜ general audit log         |
+| Rule                                                 | Status                                                                             |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Website bookings cannot be created by hand           | ✅ bookings and jobs (hook)                                                        |
+| Job source immutable                                 | ✅ hook                                                                            |
+| Protected website job fields                         | ✅ hook; Amend booking is the sanctioned path                                      |
+| Status transitions valid, timestamped, attributed    | ⬜                                                                                 |
+| Expired driver / vehicle / wrong class cannot assign | 🔧 rules ✅ (`domain/dispatch/eligibility.ts`); enforced at assignment in Dispatch |
+| Supplier reference unique per supplier               | ✅ hook + partial unique index                                                     |
+| Refunds staff-only, audited                          | ⬜                                                                                 |
+| Role permissions server-side                         | ✅ 1 Oct — matrix on every collection, view and action                             |
+| Bank details owner-only                              | ✅ field access + AES-256-GCM                                                      |
+| Test bookings out of reports / TfL export            | ✅ `isTest` exists; ⬜ in queries                                                  |
+| Audit record for important mutations                 | ✅ `audit-log` on jobs, bookings, customers, fleet, suppliers, staff               |
 
 ## Build order
 

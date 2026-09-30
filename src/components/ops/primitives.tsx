@@ -1,3 +1,4 @@
+import { CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 
@@ -275,4 +276,32 @@ export function Field({
 /** A value that has not been recorded, said plainly rather than shown as 0. */
 export function NotRecorded({ children = "Not recorded yet" }: { children?: ReactNode }) {
   return <span className="text-ink-4">{children}</span>;
+}
+
+/** A one-line result after an action: "Driver added", "Could not send". */
+export function Notice({
+  tone,
+  children,
+}: {
+  tone: "ok" | "danger";
+  children: ReactNode;
+}) {
+  return (
+    <div
+      role="status"
+      className={cx(
+        "mb-4 flex items-start gap-2 rounded-md border px-3 py-2.5 text-sm print:hidden",
+        tone === "ok"
+          ? "border-ok-line bg-ok-soft text-ok"
+          : "border-danger-line bg-danger-soft text-danger",
+      )}
+    >
+      {tone === "ok" ? (
+        <CheckCircle2 aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+      ) : (
+        <XCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+      )}
+      {children}
+    </div>
+  );
 }

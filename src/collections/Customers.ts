@@ -2,6 +2,8 @@ import type { CollectionConfig } from "payload";
 
 import { allow } from "@/access/staff";
 
+import { auditChanges } from "./hooks/audit";
+
 /**
  * People who have booked (§14 `customers`).
  *
@@ -21,6 +23,11 @@ export const Customers: CollectionConfig = {
     create: () => false, // created by checkout, never by hand
     update: allow("customers.edit"),
     delete: () => false, // DATA-11: never permanently deleted
+  },
+  hooks: {
+    afterChange: [
+      auditChanges<{ id: number; email: string }>({ label: (doc) => doc.email }),
+    ],
   },
   fields: [
     { name: "email", type: "email", required: true, unique: true, index: true },

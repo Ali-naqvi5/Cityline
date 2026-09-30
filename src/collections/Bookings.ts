@@ -2,6 +2,8 @@ import type { CollectionConfig } from "payload";
 
 import { allow } from "@/access/staff";
 
+import { auditChanges } from "./hooks/audit";
+
 /**
  * A website order (§14 `bookings`).
  *
@@ -31,6 +33,11 @@ export const Bookings: CollectionConfig = {
     create: () => false, // BK-09: created by the Stripe webhook, never by hand
     update: allow("bookings.amend"),
     delete: () => false, // DATA-11: archived, never deleted
+  },
+  hooks: {
+    afterChange: [
+      auditChanges<{ id: number; reference: string }>({ label: (doc) => doc.reference }),
+    ],
   },
   fields: [
     {

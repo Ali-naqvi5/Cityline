@@ -5,6 +5,7 @@ import { useActionState } from "react";
 
 import { cancelBookingAction } from "@/app/(public)/(manage)/manage/actions";
 import { EMPTY_FORM_STATE } from "@/app/(public)/(manage)/manage/form-state";
+import { submitWithoutReset } from "@/lib/form-submit";
 
 /** The confirm button for a cancellation, with a pending state (BK-07). */
 export function CancelForm({
@@ -22,7 +23,11 @@ export function CancelForm({
   );
 
   return (
-    <form action={formAction} className="gap-space-md flex flex-col">
+    <form
+      action={formAction}
+      onSubmit={submitWithoutReset(formAction)}
+      className="gap-space-md flex flex-col"
+    >
       <input type="hidden" name="reference" value={reference} />
       <input type="hidden" name="token" value={token} />
 

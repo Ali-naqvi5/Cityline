@@ -2,6 +2,9 @@ import type { CollectionConfig } from "payload";
 
 import { allow } from "@/access/staff";
 
+import { auditChanges } from "./hooks/audit";
+import { enforceJobRules } from "./hooks/jobs";
+
 /**
  * The one job register, for every source (§2, §14 `jobs`).
  *
@@ -42,6 +45,12 @@ export const Jobs: CollectionConfig = {
     update: allow("jobs.edit"),
     delete: () => false, // DATA-11: archived, never deleted
   },
+  hooks: {
+    beforeChange: [enforceJobRules],
+    afterChange: [
+      auditChanges<{ id: number; reference: string }>({ label: (doc) => doc.reference }),
+    ],
+  },
   fields: [
     // --- Identity ---------------------------------------------------------
     {
@@ -69,6 +78,22 @@ export const Jobs: CollectionConfig = {
       admin: {
         readOnly: true,
         description: "Required and immutable (§2). Website jobs come only from checkout.",
+      },
+    },
+    {
+      name: "supplier",
+      type: "relationship",
+      relationTo: "suppliers",
+      index: true,
+      admin: { description: "Required for supplier jobs (JOB-01)." },
+    },
+    {
+      name: "supplierReference",
+      type: "text",
+      index: true,
+      admin: {
+        description:
+          "The supplier's booking reference. Unique per supplier — the same job cannot be entered twice (JOB-03).",
       },
     },
     { name: "booking", type: "relationship", relationTo: "bookings", index: true },
@@ -177,6 +202,8 @@ export const Jobs: CollectionConfig = {
             { label: "Cancelled", value: "cancelled" },
           ],
         },
+        { name: "driver", type: "relationship", relationTo: "drivers", index: true },
+        { name: "vehicle", type: "relationship", relationTo: "vehicles", index: true },
         {
           name: "driverPhvNo",
           type: "text",
@@ -229,6 +256,22 @@ export const Jobs: CollectionConfig = {
             { label: "Bank transfer", value: "bank" },
             { label: "On account", value: "account" },
           ],
+        },
+        {
+          name: "commissionBp",
+          type: "number",
+          min: 0,
+          max: 10_000,
+          admin: {
+            description:
+              "The supplier's commission rate when the job was entered. A later change to the supplier's default does not alter it (FIN-00).",
+          },
+        },
+        {
+          name: "commissionPence",
+          type: "number",
+          min: 0,
+          admin: { description: "What the supplier keeps. Editable per job." },
         },
         {
           name: "paymentFeePence",

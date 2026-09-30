@@ -89,3 +89,9 @@ export function param(
   if (Array.isArray(value)) return value[0] ?? "";
   return typeof value === "string" ? value : "";
 }
+
+/** The nth path segment after /admin, e.g. `segment(props, 1)` is ":id" in /drivers/:id. */
+export function segment(props: AdminViewServerProps, index: number): string {
+  const segments = (props.params?.segments as string[] | undefined) ?? [];
+  return segments[index] ?? "";
+}

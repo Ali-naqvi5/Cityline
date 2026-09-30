@@ -169,6 +169,17 @@ See `docs/admin-implementation-map.md`. Rules that are easy to break:
   `bg-accent-soft`, pixel sizes; Payload's root font is 13px) and no preflight.
   In ops components use `cx` from `components/ops/primitives`, **not** `cn`:
   `cn`'s merge tables drop the custom token classes as "conflicts".
+- **Forms submit with `submitWithoutReset`** (`lib/form-submit.ts`) as
+  `onSubmit`, keeping `action={dispatch}` for no-JS. React 19 clears a
+  `<form action>` after every submission, errors included — it once wiped
+  customers' details on booking step 3.
+- Server-side form helpers (`zodErrors`, `payloadErrors`) are in
+  `admin/form-errors.ts` (server-only); `admin/form-state.ts` stays
+  client-safe. Payload's `ValidationError` is recognised by shape, not
+  `instanceof` (the bundle can hold two copies of the class).
+- Private uploads (licences, receipts) go to the `private-files` collection,
+  stored under `STORAGE_PATH/private`; Payload serves them only after the
+  collection's `read` access passes.
 - Nothing is shown as working before it works: unbuilt screens are "Soon" in
   the navigation; values not recorded say so rather than showing £0.00.
 

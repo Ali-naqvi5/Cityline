@@ -169,7 +169,7 @@ export const NAV: NavSection[] = [
         href: "/admin/drivers",
         icon: "drivers",
         capability: "drivers.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "vehicles",
@@ -177,7 +177,7 @@ export const NAV: NavSection[] = [
         href: "/admin/vehicles",
         icon: "vehicles",
         capability: "vehicles.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "compliance",
@@ -185,7 +185,7 @@ export const NAV: NavSection[] = [
         href: "/admin/compliance",
         icon: "compliance",
         capability: "compliance.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "suppliers",
@@ -193,7 +193,7 @@ export const NAV: NavSection[] = [
         href: "/admin/suppliers",
         icon: "suppliers",
         capability: "suppliers.view",
-        ready: false,
+        ready: true,
       },
     ],
   },
@@ -323,7 +323,7 @@ export const NAV: NavSection[] = [
         href: "/admin/audit",
         icon: "audit",
         capability: "audit.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "prices",

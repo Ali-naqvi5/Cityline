@@ -8,6 +8,7 @@ import { EMPTY_FORM_STATE } from "@/app/(public)/(manage)/manage/form-state";
 import { useEarliestBookableDate } from "@/components/booking/use-earliest-bookable-date";
 import { DatePicker, TimePicker } from "@/components/ui/date-time-picker";
 import { Field, fieldControlClasses } from "@/components/ui/field";
+import { submitWithoutReset } from "@/lib/form-submit";
 
 /**
  * The Manage booking change form (BK-07).
@@ -64,7 +65,11 @@ export function ChangeForm({
     }));
 
   return (
-    <form action={formAction} className="gap-space-xl flex max-w-2xl flex-col">
+    <form
+      action={formAction}
+      onSubmit={submitWithoutReset(formAction)}
+      className="gap-space-xl flex max-w-2xl flex-col"
+    >
       <input type="hidden" name="reference" value={reference} />
       <input type="hidden" name="token" value={token} />
 

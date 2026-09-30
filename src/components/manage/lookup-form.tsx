@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { requestManageLinkAction } from "@/app/(public)/(manage)/manage/actions";
 import { EMPTY_FORM_STATE } from "@/app/(public)/(manage)/manage/form-state";
 import { Field } from "@/components/ui/field";
+import { submitWithoutReset } from "@/lib/form-submit";
 
 /**
  * "Send me my link again." The reply never says whether anything matched —
@@ -34,7 +35,11 @@ export function LookupForm() {
   }
 
   return (
-    <form action={formAction} className="gap-space-md flex max-w-md flex-col">
+    <form
+      action={formAction}
+      onSubmit={submitWithoutReset(formAction)}
+      className="gap-space-md flex max-w-md flex-col"
+    >
       <Field
         id="reference"
         name="reference"

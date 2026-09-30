@@ -7,6 +7,7 @@ import {
   Info,
   ListChecks,
   PoundSterling,
+  ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
@@ -35,6 +36,7 @@ import {
 } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { EmptyState, NoAccess } from "@/components/ops/states";
+import { DOCUMENT_LABELS, type DocumentType } from "@/domain/compliance/documents";
 import { vehicleClassName } from "@/domain/jobs/labels";
 import type { Role } from "@/domain/staff/permissions";
 import type { Job } from "@/payload-types";
@@ -113,7 +115,14 @@ function AlertsPanel({ data, role }: { data: DashboardData; role: Role }) {
   const urgent = data.jobs?.urgent ?? [];
   const recent = data.bookings?.recent ?? [];
   const cancelled = data.bookings?.cancelledThisWeek ?? [];
-  const count = urgent.length + recent.length + cancelled.length;
+  const documents = data.compliance?.urgent ?? [];
+  const laterDocuments = data.compliance?.laterCount ?? 0;
+  const count =
+    urgent.length +
+    documents.length +
+    recent.length +
+    cancelled.length +
+    (laterDocuments ? 1 : 0);
 
   return (
     <Panel
@@ -127,7 +136,7 @@ function AlertsPanel({ data, role }: { data: DashboardData; role: Role }) {
       {count === 0 ? (
         <EmptyState
           title="All clear"
-          description="No unassigned pickups in the next 24 hours, and no new bookings or cancellations to look at."
+          description="No unassigned pickups in the next 24 hours, no documents expiring, and no new bookings or cancellations to look at."
         />
       ) : (
         <ul className="divide-line divide-y">
@@ -145,6 +154,34 @@ function AlertsPanel({ data, role }: { data: DashboardData; role: Role }) {
               />
             );
           })}
+          {documents.map((item) => {
+            const blocked = item.status === "missing" || item.status === "expired";
+            const label = DOCUMENT_LABELS[item.type as DocumentType];
+            return (
+              <AlertRow
+                key={`doc-${item.kind}-${item.ownerId}-${item.type}`}
+                tone="danger"
+                icon={<ShieldAlert aria-hidden className="h-4 w-4" />}
+                title={
+                  blocked
+                    ? `${item.ownerName}: ${label} ${item.status === "missing" ? "missing" : "expired"} — assignment blocked`
+                    : `${item.ownerName}: ${label} expires ${item.expiresAt ? relative(new Date(item.expiresAt), data.now) : "soon"}`
+                }
+                detail={item.kind === "driver" ? "Driver" : "Vehicle"}
+                href={`/admin/${item.kind}s/${item.ownerId}`}
+              />
+            );
+          })}
+          {laterDocuments ? (
+            <AlertRow
+              key="docs-later"
+              tone="warn"
+              icon={<ShieldAlert aria-hidden className="h-4 w-4" />}
+              title={`${laterDocuments} document${laterDocuments === 1 ? "" : "s"} expire within 30 days`}
+              detail="Renew them before they block assignment."
+              href="/admin/compliance"
+            />
+          ) : null}
           {recent.map((booking) => (
             <AlertRow
               key={`booking-${booking.id}`}
@@ -170,8 +207,7 @@ function AlertsPanel({ data, role }: { data: DashboardData; role: Role }) {
       {role === "owner" || role === "controller" ? (
         <p className="border-line text-ink-3 flex items-start gap-2 border-t px-4 py-2.5 text-xs">
           <Info aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          Document expiry and failed-message alerts appear here once drivers, vehicles and
-          messaging are set up.
+          Failed-message alerts appear here once driver messaging is set up.
         </p>
       ) : null}
     </Panel>

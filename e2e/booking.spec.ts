@@ -101,6 +101,27 @@ test("books from the journey to the payment page, at the fare it quoted", async 
   expect(page.url()).not.toContain("07700");
 });
 
+test("keeps what the customer typed when the server refuses step 3", async ({ page }) => {
+  // React 19 resets a <form action> after it runs, even when it returns
+  // errors; this once wiped the customer's details on every refusal.
+  await page.goto(`/book/details?${journey({ vehicle: "saloon" })}`);
+  await page.fill('[name="firstName"]', "Keep");
+  await page.fill('[name="lastName"]', "Typed");
+  await page.fill('[name="email"]', "keep@example.com");
+  await page.fill('[name="phone"]', "12345"); // the browser accepts it; the server does not
+  await page.check('[name="acceptedTerms"]');
+  await page.getByRole("button", { name: /continue to payment/i }).click();
+
+  await expect(page.getByText(/Enter a phone number we can reach you on/)).toBeVisible();
+  await expect(page.locator('[name="firstName"]')).toHaveValue("Keep");
+  await expect(page.locator('[name="email"]')).toHaveValue("keep@example.com");
+  await expect(page.locator('[name="acceptedTerms"]')).toBeChecked();
+
+  await page.fill('[name="phone"]', "07700 900123");
+  await page.getByRole("button", { name: /continue to payment/i }).click();
+  await expect(page).toHaveURL(/\/book\/payment\?q=/);
+});
+
 test("refuses a pickup inside the minimum notice, and says why", async ({ page }) => {
   await page.goto(`/book/vehicle?${journey({ date: londonToday(), time: "00:00" })}`);
 

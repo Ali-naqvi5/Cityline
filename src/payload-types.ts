@@ -75,7 +75,14 @@ export interface Config {
     payments: Payment;
     refunds: Refund;
     'webhook-events': WebhookEvent;
+    drivers: Driver;
+    'driver-documents': DriverDocument;
+    vehicles: Vehicle;
+    'vehicle-documents': VehicleDocument;
+    suppliers: Supplier;
+    'private-files': PrivateFile;
     users: User;
+    'audit-log': AuditLog;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -91,7 +98,14 @@ export interface Config {
     payments: PaymentsSelect<false> | PaymentsSelect<true>;
     refunds: RefundsSelect<false> | RefundsSelect<true>;
     'webhook-events': WebhookEventsSelect<false> | WebhookEventsSelect<true>;
+    drivers: DriversSelect<false> | DriversSelect<true>;
+    'driver-documents': DriverDocumentsSelect<false> | DriverDocumentsSelect<true>;
+    vehicles: VehiclesSelect<false> | VehiclesSelect<true>;
+    'vehicle-documents': VehicleDocumentsSelect<false> | VehicleDocumentsSelect<true>;
+    suppliers: SuppliersSelect<false> | SuppliersSelect<true>;
+    'private-files': PrivateFilesSelect<false> | PrivateFilesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -283,6 +297,14 @@ export interface Job {
    * Required and immutable (§2). Website jobs come only from checkout.
    */
   source: 'website' | 'supplier' | 'phone' | 'whatsapp' | 'email' | 'account' | 'other';
+  /**
+   * Required for supplier jobs (JOB-01).
+   */
+  supplier?: (number | null) | Supplier;
+  /**
+   * The supplier's booking reference. Unique per supplier — the same job cannot be entered twice (JOB-03).
+   */
+  supplierReference?: string | null;
   booking?: (number | null) | Booking;
   /**
    * One job per leg. Unique per (booking, leg).
@@ -336,6 +358,8 @@ export interface Job {
       }[]
     | null;
   status: 'unassigned' | 'assigned' | 'driver_confirmed' | 'completed' | 'no_show' | 'cancelled';
+  driver?: (number | null) | Driver;
+  vehicle?: (number | null) | Vehicle;
   /**
    * Copied onto the job at assignment, not looked up later (CMP-03). The register must show the number that applied on the day.
    */
@@ -358,6 +382,14 @@ export interface Job {
   customerPricePence: number;
   paymentMethod: 'web_prepaid' | 'supplier' | 'cash' | 'card_link' | 'bank' | 'account';
   /**
+   * The supplier's commission rate when the job was entered. A later change to the supplier's default does not alter it (FIN-00).
+   */
+  commissionBp?: number | null;
+  /**
+   * What the supplier keeps. Editable per job.
+   */
+  commissionPence?: number | null;
+  /**
    * Stripe's fee, from the webhook.
    */
   paymentFeePence?: number | null;
@@ -375,6 +407,93 @@ export interface Job {
   isTest?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "suppliers".
+ */
+export interface Supplier {
+  id: number;
+  name: string;
+  /**
+   * Basis points: 1800 = 18%. New jobs start from this.
+   */
+  defaultCommissionBp: number;
+  /**
+   * Days after the trip the supplier normally pays.
+   */
+  paymentTermsDays?: number | null;
+  contactName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  dashboardUrl?: string | null;
+  notes?: string | null;
+  active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drivers".
+ */
+export interface Driver {
+  id: number;
+  firstName: string;
+  lastName: string;
+  /**
+   * Set from the first and last name.
+   */
+  fullName?: string | null;
+  /**
+   * WhatsApp number, stored as +44…
+   */
+  phone: string;
+  email?: string | null;
+  address?: string | null;
+  dateOfBirth?: string | null;
+  photo?: (number | null) | PrivateFile;
+  status: 'active' | 'suspended' | 'left';
+  employmentType: 'self_employed' | 'employee';
+  startDate?: string | null;
+  endDate?: string | null;
+  payRule: 'fixed' | 'percent' | 'rate_card';
+  payFixedPence?: number | null;
+  /**
+   * Basis points: 7000 = 70%.
+   */
+  payPercentBp?: number | null;
+  showPayInMessages: 'default' | 'show' | 'hide';
+  /**
+   * When the driver agreed to receive jobs on WhatsApp (WA-05).
+   */
+  whatsappConsentAt?: string | null;
+  bankDetailsSealed?: string | null;
+  bankAccountLast4?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Private uploads. Never public.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "private-files".
+ */
+export interface PrivateFile {
+  id: number;
+  purpose: 'driver_document' | 'vehicle_document' | 'driver_photo' | 'receipt' | 'other';
+  uploadedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -405,6 +524,28 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vehicles".
+ */
+export interface Vehicle {
+  id: number;
+  registration: string;
+  make: string;
+  model: string;
+  colour: string;
+  vehicleClassSlug: 'saloon' | 'estate' | 'executive' | 'mpv-5' | 'mpv-8' | 'minibus-16';
+  seats?: number | null;
+  ownership: 'company' | 'driver' | 'hired';
+  status: 'active' | 'off_road' | 'sold';
+  /**
+   * Drivers who normally use this vehicle.
+   */
+  drivers?: (number | Driver)[] | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Append-only history. Rows are never edited or removed.
@@ -495,6 +636,71 @@ export interface WebhookEvent {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "driver-documents".
+ */
+export interface DriverDocument {
+  id: number;
+  driver: number | Driver;
+  type: 'phv_licence' | 'dvla_licence' | 'dbs' | 'right_to_work' | 'other';
+  /**
+   * The PHV licence number is copied onto each job at assignment (CMP-03).
+   */
+  number?: string | null;
+  issuedAt?: string | null;
+  expiresAt?: string | null;
+  file?: (number | null) | PrivateFile;
+  verifiedBy?: (number | null) | User;
+  verifiedAt?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vehicle-documents".
+ */
+export interface VehicleDocument {
+  id: number;
+  vehicle: number | Vehicle;
+  type: 'phv_vehicle_licence' | 'mot' | 'insurance' | 'v5c' | 'service';
+  number?: string | null;
+  issuedAt?: string | null;
+  expiresAt?: string | null;
+  file?: (number | null) | PrivateFile;
+  verifiedBy?: (number | null) | User;
+  verifiedAt?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Append-only. Written by the system on every staff change.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-log".
+ */
+export interface AuditLog {
+  id: number;
+  entity: string;
+  docId: string;
+  docLabel?: string | null;
+  action: 'create' | 'update' | 'delete';
+  changes?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  user?: (number | null) | User;
+  role?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -550,8 +756,36 @@ export interface PayloadLockedDocument {
         value: number | WebhookEvent;
       } | null)
     | ({
+        relationTo: 'drivers';
+        value: number | Driver;
+      } | null)
+    | ({
+        relationTo: 'driver-documents';
+        value: number | DriverDocument;
+      } | null)
+    | ({
+        relationTo: 'vehicles';
+        value: number | Vehicle;
+      } | null)
+    | ({
+        relationTo: 'vehicle-documents';
+        value: number | VehicleDocument;
+      } | null)
+    | ({
+        relationTo: 'suppliers';
+        value: number | Supplier;
+      } | null)
+    | ({
+        relationTo: 'private-files';
+        value: number | PrivateFile;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'audit-log';
+        value: number | AuditLog;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -659,6 +893,8 @@ export interface BookingsSelect<T extends boolean = true> {
 export interface JobsSelect<T extends boolean = true> {
   reference?: T;
   source?: T;
+  supplier?: T;
+  supplierReference?: T;
   booking?: T;
   leg?: T;
   returnOfJob?: T;
@@ -700,6 +936,8 @@ export interface JobsSelect<T extends boolean = true> {
         id?: T;
       };
   status?: T;
+  driver?: T;
+  vehicle?: T;
   driverPhvNo?: T;
   vehicleReg?: T;
   takenByUser?: T;
@@ -712,6 +950,8 @@ export interface JobsSelect<T extends boolean = true> {
   cancelReason?: T;
   customerPricePence?: T;
   paymentMethod?: T;
+  commissionBp?: T;
+  commissionPence?: T;
   paymentFeePence?: T;
   locked?: T;
   driverNotes?: T;
@@ -781,6 +1021,122 @@ export interface WebhookEventsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drivers_select".
+ */
+export interface DriversSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  fullName?: T;
+  phone?: T;
+  email?: T;
+  address?: T;
+  dateOfBirth?: T;
+  photo?: T;
+  status?: T;
+  employmentType?: T;
+  startDate?: T;
+  endDate?: T;
+  payRule?: T;
+  payFixedPence?: T;
+  payPercentBp?: T;
+  showPayInMessages?: T;
+  whatsappConsentAt?: T;
+  bankDetailsSealed?: T;
+  bankAccountLast4?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "driver-documents_select".
+ */
+export interface DriverDocumentsSelect<T extends boolean = true> {
+  driver?: T;
+  type?: T;
+  number?: T;
+  issuedAt?: T;
+  expiresAt?: T;
+  file?: T;
+  verifiedBy?: T;
+  verifiedAt?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vehicles_select".
+ */
+export interface VehiclesSelect<T extends boolean = true> {
+  registration?: T;
+  make?: T;
+  model?: T;
+  colour?: T;
+  vehicleClassSlug?: T;
+  seats?: T;
+  ownership?: T;
+  status?: T;
+  drivers?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vehicle-documents_select".
+ */
+export interface VehicleDocumentsSelect<T extends boolean = true> {
+  vehicle?: T;
+  type?: T;
+  number?: T;
+  issuedAt?: T;
+  expiresAt?: T;
+  file?: T;
+  verifiedBy?: T;
+  verifiedAt?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "suppliers_select".
+ */
+export interface SuppliersSelect<T extends boolean = true> {
+  name?: T;
+  defaultCommissionBp?: T;
+  paymentTermsDays?: T;
+  contactName?: T;
+  email?: T;
+  phone?: T;
+  dashboardUrl?: T;
+  notes?: T;
+  active?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "private-files_select".
+ */
+export interface PrivateFilesSelect<T extends boolean = true> {
+  purpose?: T;
+  uploadedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -805,6 +1161,21 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-log_select".
+ */
+export interface AuditLogSelect<T extends boolean = true> {
+  entity?: T;
+  docId?: T;
+  docLabel?: T;
+  action?: T;
+  changes?: T;
+  user?: T;
+  role?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

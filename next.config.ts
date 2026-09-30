@@ -41,7 +41,13 @@ const nextConfig: NextConfig = {
   // The public site and Payload's admin have separate root layouts, so a URL
   // that matches nothing has no layout to render in; `app/global-not-found.tsx`
   // is served instead.
-  experimental: { globalNotFound: true },
+  experimental: {
+    globalNotFound: true,
+    // Driver and vehicle documents are uploaded through server actions; the
+    // default 1 MB would refuse a phone photo of a licence. Files themselves
+    // are capped at 10 MB in src/admin/schemas/fleet.ts.
+    serverActions: { bodySizeLimit: "12mb" },
+  },
 
   // Hides the floating Next.js badge in the corner during development. It
   // overlaps the bottom-left of the page and gets in the way of reviewing

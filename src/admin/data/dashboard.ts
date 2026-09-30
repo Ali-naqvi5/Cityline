@@ -3,6 +3,7 @@ import "server-only";
 import type { Payload } from "payload";
 
 import { addDays, londonDay, londonDayBounds, mondayOf } from "@/admin/format";
+import { loadComplianceItems, type ComplianceItem } from "@/admin/data/fleet";
 import { OPEN_STATUSES } from "@/domain/jobs/labels";
 import { can, type Role } from "@/domain/staff/permissions";
 import type { Booking, Job, User } from "@/payload-types";
@@ -30,6 +31,8 @@ export interface DashboardData {
     recent: Booking[];
     cancelledThisWeek: Booking[];
   };
+  /** Blocked or urgent documents, and how many more expire within 30 days. */
+  compliance: null | { urgent: ComplianceItem[]; laterCount: number };
   money: null | {
     monthLabel: string;
     revenuePence: number;
@@ -249,5 +252,20 @@ export async function loadDashboard(
       })()
     : null;
 
-  return { now, jobs, bookings, money };
+  const compliance = can(user.role, "compliance.view")
+    ? await (async () => {
+        const { drivers, vehicles } = await loadComplianceItems(payload, user, now);
+        const all = [...drivers, ...vehicles];
+        return {
+          urgent: all.filter((item) =>
+            ["missing", "expired", "expiring_7"].includes(item.status),
+          ),
+          laterCount: all.filter(
+            (item) => item.status === "expiring_14" || item.status === "expiring_30",
+          ).length,
+        };
+      })()
+    : null;
+
+  return { now, jobs, bookings, compliance, money };
 }

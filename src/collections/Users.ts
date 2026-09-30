@@ -1,6 +1,8 @@
 import { APIError, type CollectionConfig, type FieldAccess } from "payload";
 
 import { allow } from "@/access/staff";
+
+import { auditChanges } from "./hooks/audit";
 import { staffCan, type StaffIdentity } from "@/domain/staff/permissions";
 
 /**
@@ -48,6 +50,20 @@ export const Users: CollectionConfig = {
           );
         }
       },
+    ],
+    afterChange: [
+      auditChanges<{ id: number; name?: string | null; email: string }>({
+        label: (doc) => doc.name || doc.email,
+        ignore: [
+          "lastLoginAt",
+          "loginAttempts",
+          "lockUntil",
+          "resetPasswordToken",
+          "resetPasswordExpiration",
+          "hash",
+          "salt",
+        ],
+      }),
     ],
     afterLogin: [
       async ({ req, user }) => {

@@ -20,6 +20,7 @@ import {
 import { quoteFor } from "@/domain/pricing/quote";
 import type { VehicleClass } from "@/domain/pricing/vehicle-classes";
 import { policies } from "@/lib/policies";
+import { submitWithoutReset } from "@/lib/form-submit";
 
 /**
  * Step 3 (BK-01, BK-04, BK-06), ported from the step 3 design.
@@ -58,7 +59,7 @@ export function DetailsStep({
   }
 
   return (
-    <form action={formAction}>
+    <form action={formAction} onSubmit={submitWithoutReset(formAction)}>
       {/* Carries the journey through to step 4 — no personal data in the URL. */}
       <input
         type="hidden"

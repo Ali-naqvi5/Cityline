@@ -7,14 +7,21 @@ import { buildConfig } from "payload";
 
 import { migrations } from "@/migrations";
 
+import { AuditLog } from "@/collections/AuditLog";
 import { Bookings } from "@/collections/Bookings";
 import { Customers } from "@/collections/Customers";
+import { DriverDocuments } from "@/collections/DriverDocuments";
+import { Drivers } from "@/collections/Drivers";
 import { JobEvents } from "@/collections/JobEvents";
 import { Jobs } from "@/collections/Jobs";
 import { Payments } from "@/collections/Payments";
+import { PrivateFiles } from "@/collections/PrivateFiles";
 import { Quotes } from "@/collections/Quotes";
 import { Refunds } from "@/collections/Refunds";
+import { Suppliers } from "@/collections/Suppliers";
 import { Users } from "@/collections/Users";
+import { VehicleDocuments } from "@/collections/VehicleDocuments";
+import { Vehicles } from "@/collections/Vehicles";
 import { WebhookEvents } from "@/collections/WebhookEvents";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -110,6 +117,90 @@ export default buildConfig({
           exact: true,
           meta: { title: "Job" },
         },
+        opsDrivers: {
+          Component: "@/admin/views/drivers#DriversView",
+          path: "/drivers",
+          exact: true,
+          meta: { title: "Drivers" },
+        },
+        opsDriverNew: {
+          Component: "@/admin/views/driver-edit#DriverEditView",
+          path: "/drivers/new",
+          exact: true,
+          meta: { title: "Add a driver" },
+        },
+        opsDriverEdit: {
+          Component: "@/admin/views/driver-edit#DriverEditView",
+          path: "/drivers/:id/edit",
+          exact: true,
+          meta: { title: "Edit driver" },
+        },
+        opsDriver: {
+          Component: "@/admin/views/driver#DriverView",
+          path: "/drivers/:id",
+          exact: true,
+          meta: { title: "Driver" },
+        },
+        opsVehicles: {
+          Component: "@/admin/views/vehicles#VehiclesView",
+          path: "/vehicles",
+          exact: true,
+          meta: { title: "Vehicles" },
+        },
+        opsVehicleNew: {
+          Component: "@/admin/views/vehicle-edit#VehicleEditView",
+          path: "/vehicles/new",
+          exact: true,
+          meta: { title: "Add a vehicle" },
+        },
+        opsVehicleEdit: {
+          Component: "@/admin/views/vehicle-edit#VehicleEditView",
+          path: "/vehicles/:id/edit",
+          exact: true,
+          meta: { title: "Edit vehicle" },
+        },
+        opsVehicle: {
+          Component: "@/admin/views/vehicle#VehicleView",
+          path: "/vehicles/:id",
+          exact: true,
+          meta: { title: "Vehicle" },
+        },
+        opsCompliance: {
+          Component: "@/admin/views/compliance#ComplianceView",
+          path: "/compliance",
+          exact: true,
+          meta: { title: "Compliance" },
+        },
+        opsSuppliers: {
+          Component: "@/admin/views/suppliers#SuppliersView",
+          path: "/suppliers",
+          exact: true,
+          meta: { title: "Suppliers" },
+        },
+        opsSupplierNew: {
+          Component: "@/admin/views/supplier-edit#SupplierEditView",
+          path: "/suppliers/new",
+          exact: true,
+          meta: { title: "Add a supplier" },
+        },
+        opsSupplierEdit: {
+          Component: "@/admin/views/supplier-edit#SupplierEditView",
+          path: "/suppliers/:id/edit",
+          exact: true,
+          meta: { title: "Edit supplier" },
+        },
+        opsSupplier: {
+          Component: "@/admin/views/supplier#SupplierView",
+          path: "/suppliers/:id",
+          exact: true,
+          meta: { title: "Supplier" },
+        },
+        opsAudit: {
+          Component: "@/admin/views/audit#AuditView",
+          path: "/audit",
+          exact: true,
+          meta: { title: "Audit log" },
+        },
         opsSettings: {
           Component: "@/admin/views/settings#SettingsView",
           path: "/settings",
@@ -130,8 +221,16 @@ export default buildConfig({
     Payments,
     Refunds,
     WebhookEvents,
-    // Staff accounts for the admin itself.
+    // Fleet, compliance and suppliers (S8).
+    Drivers,
+    DriverDocuments,
+    Vehicles,
+    VehicleDocuments,
+    Suppliers,
+    PrivateFiles,
+    // Staff accounts for the admin itself, and what they change.
     Users,
+    AuditLog,
   ],
 
   editor: lexicalEditor(),
