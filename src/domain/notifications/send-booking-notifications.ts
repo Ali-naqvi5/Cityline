@@ -145,9 +145,9 @@ export async function sendBookingCancelledNotifications(
  * Keyed to the hour so a customer who asks twice gets one email, and someone
  * hammering the form cannot turn it into a mail cannon.
  */
-export async function sendManageLink(reference: string): Promise<void> {
+export async function sendManageLink(reference: string): Promise<SendResult> {
   const hour = new Date().toISOString().slice(0, 13);
-  await sendPair(reference, "manage link", (data) => [
+  return sendPair(reference, "manage link", (data) => [
     {
       to: data.email.customerEmail,
       ...manageLinkEmail(reference, data.email.manageUrl),
@@ -159,19 +159,22 @@ export async function sendManageLink(reference: string): Promise<void> {
   ]);
 }
 
-/** Loads the booking, builds up to two emails, sends them, logs. Never throws. */
+/**
+ * Loads the booking, builds up to two emails, sends them, logs. Never throws.
+ * Returns how the customer's email went, for a caller that must say so.
+ */
 async function sendPair(
   reference: string,
   what: string,
   build: (
     data: NonNullable<Awaited<ReturnType<typeof bookingEmailData>>>,
   ) => [OutgoingEmail, OutgoingEmail | null],
-): Promise<void> {
+): Promise<SendResult> {
   try {
     const data = await bookingEmailData(reference);
     if (!data) {
       console.error(`[notifications] ${reference}: booking not found, no ${what} sent`);
-      return;
+      return { sent: false, reason: "booking not found" };
     }
 
     const [toCustomer, toOffice] = build(data);
@@ -182,8 +185,13 @@ async function sendPair(
 
     log(reference, `${what} email`, results[0]);
     if (results[1]) log(reference, `${what} office alert`, results[1]);
+    return results[0];
   } catch (error) {
     console.error(`[notifications] ${reference}: ${what} sending failed`, error);
+    return {
+      sent: false,
+      reason: error instanceof Error ? error.message : "sending failed",
+    };
   }
 }
 

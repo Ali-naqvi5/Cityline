@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { allow } from "@/access/staff";
+
 /**
  * The one job register, for every source (§2, §14 `jobs`).
  *
@@ -35,9 +37,9 @@ export const Jobs: CollectionConfig = {
     description: "Every job, every source. The TfL booking register (CMP-03).",
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
-    create: ({ req }) => Boolean(req.user),
-    update: ({ req }) => Boolean(req.user),
+    read: allow("jobs.view"),
+    create: allow("jobs.edit"),
+    update: allow("jobs.edit"),
     delete: () => false, // DATA-11: archived, never deleted
   },
   fields: [

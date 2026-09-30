@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { allow } from "@/access/staff";
+
 /** Refunds against a payment (§14 `refunds`, PAY-02). */
 export const Refunds: CollectionConfig = {
   slug: "refunds",
@@ -8,7 +10,7 @@ export const Refunds: CollectionConfig = {
     defaultColumns: ["payment", "amountPence", "reason", "createdAt"],
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
+    read: allow("refunds.view"),
     create: () => false, // written by the Stripe webhook
     update: () => false,
     delete: () => false,

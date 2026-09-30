@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 
+import { allow } from "@/access/staff";
 import { bookingRules } from "@/domain/booking/rules";
 
 /**
@@ -32,7 +33,7 @@ export const Quotes: CollectionConfig = {
     description: "Priced journeys awaiting checkout. Expire after 30 minutes.",
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
+    read: allow("quotes.view"),
     create: () => false, // created by the funnel, never by hand
     update: () => false,
     delete: () => false,

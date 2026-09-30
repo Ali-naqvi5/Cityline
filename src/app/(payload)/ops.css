@@ -1,0 +1,198 @@
+/*
+ * Cityline operations UI — the styles for the custom admin screens.
+ *
+ * Loaded after Payload's own CSS in the admin root layout. Three things about
+ * Payload decide how this file is written (docs/admin-implementation-map.md):
+ *
+ *   1. Payload's styles live in `@layer payload-default`. The layers below are
+ *      declared after it, so these win without `!important`.
+ *   2. Payload defines `--color-blue-*`, `--color-base-*`, `--font-serif`,
+ *      `--font-mono` and more. Tailwind's default theme would overwrite them
+ *      and repaint Payload's own screens, so its colours, fonts and sizes are
+ *      cleared and replaced with names Payload does not use.
+ *   3. Payload sets the root font size to 13px (12px on small screens), so
+ *      every size here is in pixels, not rem.
+ *
+ * No preflight: Tailwind's global reset would restyle Payload's screens. The
+ * scoped reset under `.ops-root` does the same job for ours only.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+
+@source "../../admin";
+@source "../../components/ops";
+
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --container-*: initial;
+
+  --spacing: 4px;
+
+  --font-ui:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+
+  --text-2xs: 11px;
+  --text-2xs--line-height: 16px;
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 13px;
+  --text-sm--line-height: 20px;
+  --text-base: 14px;
+  --text-base--line-height: 20px;
+  --text-md: 15px;
+  --text-md--line-height: 22px;
+  --text-lg: 16px;
+  --text-lg--line-height: 24px;
+  --text-xl: 18px;
+  --text-xl--line-height: 26px;
+  --text-2xl: 20px;
+  --text-2xl--line-height: 28px;
+  --text-3xl: 24px;
+  --text-3xl--line-height: 32px;
+
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(16 24 40 / 0.08), 0 1px 2px rgb(16 24 40 / 0.04);
+  --shadow-md: 0 4px 12px -2px rgb(16 24 40 / 0.1), 0 2px 4px -2px rgb(16 24 40 / 0.06);
+  --shadow-lg: 0 16px 40px -8px rgb(16 24 40 / 0.18);
+
+  --container-xs: 320px;
+  --container-sm: 384px;
+  --container-md: 448px;
+  --container-lg: 512px;
+  --container-xl: 576px;
+  --container-2xl: 672px;
+  --container-3xl: 768px;
+  --container-4xl: 896px;
+  --container-5xl: 1024px;
+  --container-6xl: 1152px;
+  --container-7xl: 1280px;
+
+  /* Surfaces and text */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-canvas: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-sunken: #f2f4f7;
+  --color-line: #e4e7ec;
+  --color-line-strong: #d0d5dd;
+  --color-ink: #101828;
+  --color-ink-2: #344054;
+  --color-ink-3: #667085;
+  --color-ink-4: #98a2b3;
+
+  /* State colours (the only colour in the UI; always paired with text) */
+  --color-accent: #1d4ed8;
+  --color-accent-hover: #1e40af;
+  --color-accent-soft: #eef4ff;
+  --color-accent-line: #c7d7fe;
+  --color-ok: #067647;
+  --color-ok-soft: #ecfdf3;
+  --color-ok-line: #abefc6;
+  --color-warn: #b54708;
+  --color-warn-soft: #fffaeb;
+  --color-warn-line: #fedf89;
+  --color-danger: #b42318;
+  --color-danger-hover: #912018;
+  --color-danger-soft: #fef3f2;
+  --color-danger-line: #fecdca;
+  --color-special: #5925dc;
+  --color-special-soft: #f4f3ff;
+  --color-special-line: #d9d6fe;
+}
+
+@layer base {
+  .ops-root {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+    color: var(--color-ink);
+    background: var(--color-canvas);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  .ops-root *,
+  .ops-root *::before,
+  .ops-root *::after {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--color-line);
+  }
+
+  .ops-root
+    :where(h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, dt, figure, blockquote, pre) {
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: normal;
+  }
+
+  .ops-root :where(ul, ol) {
+    list-style: none;
+  }
+
+  .ops-root :where(a) {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  .ops-root :where(button, input, select, textarea) {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    margin: 0;
+    background-color: transparent;
+    border-radius: 0;
+  }
+
+  .ops-root :where(button, [role="button"]) {
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .ops-root :where(button:disabled) {
+    cursor: not-allowed;
+  }
+
+  .ops-root :where(table) {
+    border-collapse: collapse;
+    text-indent: 0;
+  }
+
+  .ops-root :where(svg) {
+    flex-shrink: 0;
+  }
+
+  .ops-root :where(:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .ops-root :where(input:focus-visible, select:focus-visible, textarea:focus-visible) {
+    outline-offset: 0;
+  }
+
+  @media print {
+    .ops-root {
+      background: #ffffff;
+    }
+  }
+}

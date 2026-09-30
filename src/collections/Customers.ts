@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { allow } from "@/access/staff";
+
 /**
  * People who have booked (§14 `customers`).
  *
@@ -15,9 +17,9 @@ export const Customers: CollectionConfig = {
   slug: "customers",
   admin: { useAsTitle: "email", defaultColumns: ["email", "name", "phone"] },
   access: {
-    read: ({ req }) => Boolean(req.user),
+    read: allow("customers.view"),
     create: () => false, // created by checkout, never by hand
-    update: ({ req }) => Boolean(req.user),
+    update: allow("customers.edit"),
     delete: () => false, // DATA-11: never permanently deleted
   },
   fields: [

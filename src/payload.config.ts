@@ -75,6 +75,49 @@ export default buildConfig({
     meta: {
       titleSuffix: "· Cityline",
     },
+    // Light only: the operations screens are designed in light, and Payload's
+    // own forms follow the device's dark mode otherwise.
+    theme: "light",
+    components: {
+      graphics: {
+        Logo: "@/admin/components/brand#AdminLogo",
+        Icon: "@/admin/components/brand#AdminIcon",
+      },
+      beforeNavLinks: ["@/admin/components/brand#BackToOperations"],
+      /*
+       * The operations screens (docs/admin-implementation-map.md). Each is a
+       * custom view Payload renders without its own frame; each checks the
+       * signed-in user itself (`requireStaff`), because Payload does not
+       * redirect signed-out visitors away from custom views.
+       */
+      views: {
+        dashboard: { Component: "@/admin/views/dashboard-redirect#DashboardRedirect" },
+        opsDashboard: {
+          Component: "@/admin/views/dashboard#DashboardView",
+          path: "/dashboard",
+          exact: true,
+          meta: { title: "Dashboard" },
+        },
+        opsJobs: {
+          Component: "@/admin/views/jobs#JobsView",
+          path: "/jobs",
+          exact: true,
+          meta: { title: "Jobs" },
+        },
+        opsJob: {
+          Component: "@/admin/views/job#JobView",
+          path: "/jobs/:id",
+          exact: true,
+          meta: { title: "Job" },
+        },
+        opsSettings: {
+          Component: "@/admin/views/settings#SettingsView",
+          path: "/settings",
+          exact: true,
+          meta: { title: "Settings" },
+        },
+      },
+    },
   },
 
   collections: [

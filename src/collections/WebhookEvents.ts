@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { allow } from "@/access/staff";
+
 /**
  * Every webhook we have already processed (§14 `webhook_events`).
  *
@@ -16,7 +18,7 @@ export const WebhookEvents: CollectionConfig = {
     description: "Idempotency ledger. One row per event we have handled.",
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
+    read: allow("system.view"),
     create: () => false,
     update: () => false,
     delete: () => false,

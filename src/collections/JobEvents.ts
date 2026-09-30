@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { allow } from "@/access/staff";
+
 /**
  * The change log on a job (§14 `job_events`, JOB-08).
  *
@@ -16,8 +18,8 @@ export const JobEvents: CollectionConfig = {
     description: "Append-only history. Rows are never edited or removed.",
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
-    create: ({ req }) => Boolean(req.user),
+    read: allow("jobs.view"),
+    create: allow("jobs.edit"),
     update: () => false, // append-only (§14)
     delete: () => false,
   },

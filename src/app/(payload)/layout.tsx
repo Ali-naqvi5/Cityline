@@ -11,6 +11,10 @@ import config from "@payload-config";
 import { RootLayout, handleServerFunctions } from "@payloadcms/next/layouts";
 import { importMap } from "./admin/importMap";
 import "@payloadcms/next/css";
+// After Payload's CSS: the custom operations screens. See ops.css.
+import "./ops.css";
+
+import { adminFont } from "@/admin/font";
 
 type Args = { children: React.ReactNode };
 
@@ -21,7 +25,12 @@ const serverFunction: ServerFunctionClient = async function (args) {
 
 export default function Layout({ children }: Args) {
   return (
-    <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
+    <RootLayout
+      config={config}
+      htmlProps={{ className: adminFont.variable }}
+      importMap={importMap}
+      serverFunction={serverFunction}
+    >
       {children}
     </RootLayout>
   );

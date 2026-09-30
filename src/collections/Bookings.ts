@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { allow } from "@/access/staff";
+
 /**
  * A website order (§14 `bookings`).
  *
@@ -25,9 +27,9 @@ export const Bookings: CollectionConfig = {
     description: "Website orders. Created by checkout only.",
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
+    read: allow("bookings.view"),
     create: () => false, // BK-09: created by the Stripe webhook, never by hand
-    update: ({ req }) => Boolean(req.user),
+    update: allow("bookings.amend"),
     delete: () => false, // DATA-11: archived, never deleted
   },
   fields: [

@@ -131,21 +131,46 @@ Until the Figma file arrives, build with neutral styling and restyle in S1.
 ## Structure
 
 ```
-src/app/(site)        public pages and templates (§5)
-src/app/(booking)     /quote + 4-step funnel + /book/confirmed/[ref]
-src/app/(manage)      magic-link self-service
-src/app/(account)     phase 2
-src/app/(payload)     admin (built last)
-src/app/api           quotes, bookings, stripe + whatsapp webhooks, cron, health
-src/collections       Payload collections (jobs, drivers, vehicles, places, pages …)
-src/admin-views       jobs board, dispatch, run-sheet, statements, reports
-src/components/ui     design-system components (from Figma)
-src/components/site   page blocks
-src/domain/*          pricing, booking, jobs, finance, messaging, compliance, seo
-src/worker            outbox handlers, scheduled tasks
-src/migrations        committed, reviewed migrations
-docker/               Dockerfile, Caddyfile, backup image
+src/app/(public)          the public site's root layout (SiteHtml) and, inside it:
+  (site)                  public pages and templates (§5)
+  (booking)               4-step funnel + /book/confirmed/[ref]
+  (manage)                magic-link self-service
+  coming-soon             launch gate target
+src/app/(payload)         Payload's own root layout; /admin and Payload's API
+src/app/global-not-found  404 for unmatched URLs (two root layouts, so no shared one)
+src/app/api               stripe webhook, cron, health
+src/admin                 the operations screens: views, actions, data, nav, guard
+src/components/ops        the operations UI kit (shell, tables, badges, states)
+src/access                collection access helpers (from the permission matrix)
+src/collections           Payload collections
+src/components/ui         design-system components (from the designs)
+src/components/site       page blocks
+src/domain/*              pricing, booking, jobs, staff permissions, notifications
+src/worker                outbox handlers, scheduled tasks
+src/migrations            committed, reviewed migrations
+docker/                   Dockerfile, Caddyfile, backup image
 ```
+
+## Admin (operations screens)
+
+See `docs/admin-implementation-map.md`. Rules that are easy to break:
+
+- **Every custom view calls `requireStaff(props, capability, returnTo)` first;
+  every server action calls `staffForAction(capability)`** (`src/admin/guard.ts`).
+  Payload does _not_ redirect signed-out visitors away from custom views.
+- **One permission matrix**, `src/domain/staff/permissions.ts`. Navigation,
+  views, actions and collection `access` (`src/access/staff.ts`) all read it.
+  Never check a role name directly.
+- Admin reads and writes go through the Local API **as the user**
+  (`user, overrideAccess: false`), so collection access applies.
+- New or renamed views: register in `payload.config.ts` →
+  `admin.components.views`, then `pnpm exec payload generate:importmap`.
+- Styles: `src/app/(payload)/ops.css` — its own tokens (`text-ink-3`,
+  `bg-accent-soft`, pixel sizes; Payload's root font is 13px) and no preflight.
+  In ops components use `cx` from `components/ops/primitives`, **not** `cn`:
+  `cn`'s merge tables drop the custom token classes as "conflicts".
+- Nothing is shown as working before it works: unbuilt screens are "Soon" in
+  the navigation; values not recorded say so rather than showing £0.00.
 
 ## Definition of done (every task)
 

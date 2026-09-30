@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { allow } from "@/access/staff";
+
 /**
  * Money taken (§14 `payments`, PAY-01).
  *
@@ -18,7 +20,7 @@ export const Payments: CollectionConfig = {
     defaultColumns: ["booking", "amountPence", "status", "kind", "createdAt"],
   },
   access: {
-    read: ({ req }) => Boolean(req.user),
+    read: allow("payments.view"),
     create: () => false, // written by the Stripe webhook
     update: () => false,
     delete: () => false,
