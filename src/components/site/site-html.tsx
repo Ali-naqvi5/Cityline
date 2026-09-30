@@ -1,9 +1,8 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
 import { MotionProvider } from "@/components/motion/motion-provider";
 
-import "./globals.css";
+import "@/app/globals.css";
 
 /**
  * Inter, per the design system (DESIGN.md "Typography"). Self-hosted by
@@ -20,22 +19,16 @@ const inter = Inter({
   display: "swap",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://citylineairporttransfers.com";
-
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Cityline Airport Transfers — licensed London airport transfers",
-    template: "%s · Cityline Airport Transfers",
-  },
-  description:
-    "Fixed-price London airport transfers from a TfL licensed private hire operator. Book direct, with the price agreed before you travel.",
-  applicationName: "Cityline Airport Transfers",
-  formatDetection: { telephone: true },
-};
-
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * The public site's `<html>` and `<body>`.
+ *
+ * The public site and the admin each have their own root layout —
+ * `app/(public)/layout.tsx` and `app/(payload)/layout.tsx` — because Payload
+ * renders its own `<html>`; one root layout around both nested two documents
+ * and broke the admin. `app/global-not-found.tsx` has no layout at all, so it
+ * uses this too, which keeps the 404 identical to every other public page.
+ */
+export function SiteHtml({ children }: { children: React.ReactNode }) {
   return (
     // `data-scroll-behavior` tells Next the smooth scrolling in globals.css is
     // deliberate, so it suppresses its console warning — and, more usefully, it
@@ -46,6 +39,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-scroll-behavior="smooth"
       className={`${inter.variable} h-full`}
     >
+      {/* A root document for the App Router, where `<head>` is correct; the
+          rule is for the Pages Router's `next/head`. */}
+      {/* eslint-disable-next-line @next/next/no-head-element */}
       <head>
         {/*
           Motion renders its `initial` state into the server HTML, so a reveal

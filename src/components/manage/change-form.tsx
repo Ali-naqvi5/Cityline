@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
-import { changeBookingAction } from "@/app/(manage)/manage/actions";
-import { EMPTY_FORM_STATE } from "@/app/(manage)/manage/form-state";
+import { changeBookingAction } from "@/app/(public)/(manage)/manage/actions";
+import { EMPTY_FORM_STATE } from "@/app/(public)/(manage)/manage/form-state";
 import { useEarliestBookableDate } from "@/components/booking/use-earliest-bookable-date";
 import { DatePicker, TimePicker } from "@/components/ui/date-time-picker";
 import { Field, fieldControlClasses } from "@/components/ui/field";

@@ -38,6 +38,11 @@ const nextConfig: NextConfig = {
 
   poweredByHeader: false,
 
+  // The public site and Payload's admin have separate root layouts, so a URL
+  // that matches nothing has no layout to render in; `app/global-not-found.tsx`
+  // is served instead.
+  experimental: { globalNotFound: true },
+
   // Hides the floating Next.js badge in the corner during development. It
   // overlaps the bottom-left of the page and gets in the way of reviewing
   // designs; it never appears in production either way.

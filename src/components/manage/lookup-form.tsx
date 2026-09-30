@@ -3,8 +3,8 @@
 import { MailCheck } from "lucide-react";
 import { useActionState } from "react";
 
-import { requestManageLinkAction } from "@/app/(manage)/manage/actions";
-import { EMPTY_FORM_STATE } from "@/app/(manage)/manage/form-state";
+import { requestManageLinkAction } from "@/app/(public)/(manage)/manage/actions";
+import { EMPTY_FORM_STATE } from "@/app/(public)/(manage)/manage/form-state";
 import { Field } from "@/components/ui/field";
 
 /**

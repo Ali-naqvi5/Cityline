@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { cancelBookingAction } from "@/app/(manage)/manage/actions";
-import { EMPTY_FORM_STATE } from "@/app/(manage)/manage/form-state";
+import { cancelBookingAction } from "@/app/(public)/(manage)/manage/actions";
+import { EMPTY_FORM_STATE } from "@/app/(public)/(manage)/manage/form-state";
 
 /** The confirm button for a cancellation, with a pending state (BK-07). */
 export function CancelForm({
