@@ -20,7 +20,6 @@ import { buttonClass } from "@/components/ops/primitives";
 export interface SupplierFormValues {
   id?: number;
   name: string;
-  commissionPercent: string;
   paymentTermsDays: string;
   contactName: string;
   email: string;
@@ -46,7 +45,7 @@ export function SupplierForm({
 
       <FormSection
         title="Supplier"
-        description="A change to the commission applies to new jobs only; each job keeps the rate it was entered with."
+        description="Partners take their cut before they send a job, so a job's price is what Cityline receives."
       >
         <FormField id="name" label="Name" required error={e.name}>
           <input
@@ -55,23 +54,6 @@ export function SupplierForm({
             defaultValue={values.name}
             className={inputClass()}
             {...invalid(e.name, "name")}
-          />
-        </FormField>
-        <FormField
-          id="commissionPercent"
-          label="Default commission (%)"
-          required
-          error={e.commissionPercent}
-          hint="What the supplier keeps of the customer price."
-        >
-          <input
-            id="commissionPercent"
-            name="commissionPercent"
-            inputMode="decimal"
-            defaultValue={values.commissionPercent}
-            placeholder="18"
-            className={inputClass("tabular-nums")}
-            {...invalid(e.commissionPercent, "commissionPercent")}
           />
         </FormField>
         <FormField

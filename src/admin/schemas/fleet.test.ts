@@ -18,25 +18,25 @@ const driver = {
   address: "",
   dateOfBirth: "1985-06-01",
   status: "active",
-  employmentType: "self_employed",
   startDate: "",
   endDate: "",
-  payRule: "fixed",
-  payFixed: "35.50",
-  payPercent: "",
-  showPayInMessages: "default",
   whatsappConsent: true,
   notes: "",
 };
 
 describe("driverSchema", () => {
-  it("accepts a valid driver and stores pay in pence and the phone as +44", () => {
+  it("accepts a valid driver and stores the phone as +44", () => {
     const parsed = driverSchema.parse(driver);
     const data = driverData(parsed);
     expect(data.phone).toBe("+447700900456");
-    expect(data.payFixedPence).toBe(3550);
-    expect(data.payPercentBp).toBeNull();
     expect(data.whatsappConsentAt).toBeTruthy();
+  });
+
+  it("records no pay or employment terms: pay is agreed per booking", () => {
+    const data = driverData(driverSchema.parse(driver));
+    expect(Object.keys(data)).not.toEqual(
+      expect.arrayContaining(["payRule", "employmentType", "showPayInMessages"]),
+    );
   });
 
   it("keeps the original consent date when the form is saved again", () => {
@@ -47,17 +47,6 @@ describe("driverSchema", () => {
   it("refuses a phone number that cannot be dialled", () => {
     const result = driverSchema.safeParse({ ...driver, phone: "123" });
     expect(result.success).toBe(false);
-  });
-
-  it("needs a percentage for a percentage pay rule, and stores it in basis points", () => {
-    expect(
-      driverSchema.safeParse({ ...driver, payRule: "percent", payPercent: "" }).success,
-    ).toBe(false);
-    const data = driverData(
-      driverSchema.parse({ ...driver, payRule: "percent", payPercent: "70" }),
-    );
-    expect(data.payPercentBp).toBe(7000);
-    expect(data.payFixedPence).toBeNull();
   });
 });
 
@@ -80,11 +69,10 @@ describe("vehicleSchema", () => {
 });
 
 describe("supplierSchema", () => {
-  it("stores commission in basis points", () => {
+  it("records the supplier without any commission: partners take their cut first", () => {
     const data = supplierData(
       supplierSchema.parse({
         name: "Trip.com",
-        commissionPercent: "18",
         paymentTermsDays: "30",
         contactName: "",
         email: "",
@@ -94,7 +82,8 @@ describe("supplierSchema", () => {
         active: true,
       }),
     );
-    expect(data.defaultCommissionBp).toBe(1800);
+    expect(data).toMatchObject({ name: "Trip.com", paymentTermsDays: 30 });
+    expect(data).not.toHaveProperty("defaultCommissionBp");
   });
 });
 

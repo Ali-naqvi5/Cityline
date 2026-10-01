@@ -26,13 +26,8 @@ export interface DriverFormValues {
   address: string;
   dateOfBirth: string;
   status: string;
-  employmentType: string;
   startDate: string;
   endDate: string;
-  payRule: string;
-  payFixed: string;
-  payPercent: string;
-  showPayInMessages: string;
   whatsappConsent: boolean;
   notes: string;
 }
@@ -123,7 +118,7 @@ export function DriverForm({
       </FormSection>
 
       <FormSection
-        title="Employment"
+        title="Status"
         description="A suspended or departed driver cannot be given jobs."
       >
         <FormField id="status" label="Status" required error={e.status}>
@@ -136,22 +131,6 @@ export function DriverForm({
             <option value="active">Active</option>
             <option value="suspended">Suspended</option>
             <option value="left">Left</option>
-          </select>
-        </FormField>
-        <FormField
-          id="employmentType"
-          label="Employment"
-          required
-          error={e.employmentType}
-        >
-          <select
-            id="employmentType"
-            name="employmentType"
-            defaultValue={values.employmentType}
-            className={inputClass()}
-          >
-            <option value="self_employed">Self-employed</option>
-            <option value="employee">Employee</option>
           </select>
         </FormField>
         <FormField id="startDate" label="Start date" error={e.startDate}>
@@ -176,79 +155,10 @@ export function DriverForm({
       </FormSection>
 
       <FormSection
-        title="Pay"
-        description="Fills in the driver's pay on each job when they are assigned. Staff can still change it on the job. Can be changed at any time."
-      >
-        <FormField id="payRule" label="Pay rule" required error={e.payRule}>
-          <select
-            id="payRule"
-            name="payRule"
-            defaultValue={values.payRule === "rate_card" ? "fixed" : values.payRule}
-            className={inputClass()}
-          >
-            <option value="fixed">Fixed amount per job</option>
-            <option value="percent">Percentage of net revenue</option>
-          </select>
-        </FormField>
-        <div className="hidden sm:block" />
-        <FormField
-          id="payFixed"
-          label="Fixed amount (£)"
-          error={e.payFixed}
-          hint="Used when the rule is a fixed amount."
-        >
-          <input
-            id="payFixed"
-            name="payFixed"
-            inputMode="decimal"
-            defaultValue={values.payFixed}
-            placeholder="35.00"
-            className={inputClass("tabular-nums")}
-            {...invalid(e.payFixed, "payFixed")}
-          />
-        </FormField>
-        <FormField
-          id="payPercent"
-          label="Percentage (%)"
-          error={e.payPercent}
-          hint="Used when the rule is a percentage."
-        >
-          <input
-            id="payPercent"
-            name="payPercent"
-            inputMode="decimal"
-            defaultValue={values.payPercent}
-            placeholder="70"
-            className={inputClass("tabular-nums")}
-            {...invalid(e.payPercent, "payPercent")}
-          />
-        </FormField>
-        <p className="text-ink-3 text-xs sm:col-span-2">
-          Rate cards by route and vehicle class arrive with the finance screens.
-        </p>
-      </FormSection>
-
-      <FormSection
         title="Job messages"
         description="WhatsApp messages go only to a driver who has agreed to them (WA-05)."
       >
-        <FormField
-          id="showPayInMessages"
-          label="Pay in job messages"
-          error={e.showPayInMessages}
-        >
-          <select
-            id="showPayInMessages"
-            name="showPayInMessages"
-            defaultValue={values.showPayInMessages}
-            className={inputClass()}
-          >
-            <option value="default">Use the company default</option>
-            <option value="show">Show the pay</option>
-            <option value="hide">Hide the pay</option>
-          </select>
-        </FormField>
-        <div className="flex items-end">
+        <div className="sm:col-span-2">
           <label
             htmlFor="whatsappConsent"
             className="text-ink-2 flex min-h-10 cursor-pointer items-center gap-2 text-sm"

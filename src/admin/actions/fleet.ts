@@ -37,13 +37,8 @@ function driverForm(formData: FormData) {
     address: text(formData, "address"),
     dateOfBirth: text(formData, "dateOfBirth"),
     status: text(formData, "status"),
-    employmentType: text(formData, "employmentType"),
     startDate: text(formData, "startDate"),
     endDate: text(formData, "endDate"),
-    payRule: text(formData, "payRule"),
-    payFixed: text(formData, "payFixed"),
-    payPercent: text(formData, "payPercent"),
-    showPayInMessages: text(formData, "showPayInMessages"),
     whatsappConsent: checked(formData, "whatsappConsent"),
     notes: text(formData, "notes"),
   };
@@ -202,7 +197,6 @@ export async function saveSupplierAction(
 
   const parsed = supplierSchema.safeParse({
     name: text(formData, "name"),
-    commissionPercent: text(formData, "commissionPercent"),
     paymentTermsDays: text(formData, "paymentTermsDays"),
     contactName: text(formData, "contactName"),
     email: text(formData, "email"),

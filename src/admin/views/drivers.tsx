@@ -13,7 +13,7 @@ import { Badge, ButtonLink, PageHeader, Panel } from "@/components/ops/primitive
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
 import { isBlocking } from "@/domain/compliance/documents";
-import { DRIVER_STATUS_LABELS, EMPLOYMENT_LABELS } from "@/domain/fleet/labels";
+import { DRIVER_STATUS_LABELS } from "@/domain/fleet/labels";
 import { can } from "@/domain/staff/permissions";
 
 /** Drivers (spec §20): who they are, whether they can work, their next job. */
@@ -209,14 +209,15 @@ export async function DriversView(props: AdminViewServerProps) {
                 ),
               },
               {
-                key: "employment",
-                header: "Employment",
+                key: "whatsapp",
+                header: "WhatsApp",
                 hideBelow: "xl",
-                cell: ({ driver }) => (
-                  <span className="text-ink-2">
-                    {EMPLOYMENT_LABELS[driver.employmentType]}
-                  </span>
-                ),
+                cell: ({ driver }) =>
+                  driver.whatsappConsentAt ? (
+                    <span className="text-ink-2">Agreed</span>
+                  ) : (
+                    <span className="text-ink-4">Not agreed</span>
+                  ),
               },
               {
                 key: "compliance",

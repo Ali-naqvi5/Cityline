@@ -8,9 +8,8 @@ import { auditChanges } from "./hooks/audit";
  * Partner platforms that send Cityline jobs — Trip.com and others (§2,
  * §14 `suppliers`).
  *
- * The default commission is a setting (FIN-00): changing it applies to new
- * jobs only, because each job records the rate it was entered with. Every
- * change is in the audit log.
+ * No commission is recorded: partners take their cut before they send a job,
+ * so the price on the job is what Cityline receives (Cityline, 2 Oct 2026).
  */
 interface SupplierDoc {
   id: number;
@@ -21,7 +20,7 @@ export const Suppliers: CollectionConfig = {
   slug: "suppliers",
   admin: {
     useAsTitle: "name",
-    defaultColumns: ["name", "defaultCommissionBp", "paymentTermsDays", "active"],
+    defaultColumns: ["name", "paymentTermsDays", "active"],
   },
   access: {
     read: allowAny("suppliers.view", "supplierMoney.view"),
@@ -34,15 +33,6 @@ export const Suppliers: CollectionConfig = {
   },
   fields: [
     { name: "name", type: "text", required: true, unique: true, index: true },
-    {
-      name: "defaultCommissionBp",
-      type: "number",
-      required: true,
-      defaultValue: 0,
-      min: 0,
-      max: 10_000,
-      admin: { description: "Basis points: 1800 = 18%. New jobs start from this." },
-    },
     {
       name: "paymentTermsDays",
       type: "number",

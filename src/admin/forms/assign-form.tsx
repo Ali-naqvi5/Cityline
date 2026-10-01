@@ -6,7 +6,13 @@ import { useActionState, useState } from "react";
 
 import { assignDriverAction } from "@/admin/actions/dispatch";
 import { EMPTY_FORM } from "@/admin/form-state";
-import { FormMessage, SubmitButton, submitWith } from "@/components/ops/form";
+import {
+  FormMessage,
+  inputClass,
+  invalid,
+  SubmitButton,
+  submitWith,
+} from "@/components/ops/form";
 import { Badge, buttonClass, cx } from "@/components/ops/primitives";
 
 export interface AssignChoice {
@@ -32,10 +38,12 @@ export function AssignForm({
   notifyPassenger,
   canEmailPassenger,
   cancelHref,
+  driverPricePence,
 }: {
   jobId: number;
   choices: AssignChoice[];
   notifyPassenger: boolean;
+  driverPricePence: number | null;
   canEmailPassenger: boolean;
   cancelHref: string;
 }) {
@@ -133,6 +141,41 @@ export function AssignForm({
         ) : (
           <p className="text-ink-3 text-sm">Choose a driver above.</p>
         )}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="driverPrice" className="text-ink-2 text-sm font-medium">
+            Driver price
+          </label>
+          <div className="relative w-36">
+            <span
+              aria-hidden
+              className="text-ink-3 pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-base lg:text-sm"
+            >
+              £
+            </span>
+            <input
+              id="driverPrice"
+              name="driverPrice"
+              inputMode="decimal"
+              autoComplete="off"
+              defaultValue={
+                driverPricePence === null ? "" : (driverPricePence / 100).toFixed(2)
+              }
+              placeholder="0.00"
+              className={inputClass("pl-7 tabular-nums")}
+              {...invalid(state.errors.driverPrice, "driverPrice")}
+            />
+          </div>
+          {state.errors.driverPrice ? (
+            <p id="driverPrice-error" className="text-danger text-sm">
+              {state.errors.driverPrice}
+            </p>
+          ) : (
+            <p className="text-ink-3 text-xs">
+              What Cityline pays the driver for this booking. It goes in their WhatsApp
+              message; it can also be written later on the booking.
+            </p>
+          )}
+        </div>
         {canEmailPassenger ? (
           <label
             htmlFor="notifyPassenger"

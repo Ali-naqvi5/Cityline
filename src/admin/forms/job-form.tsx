@@ -55,7 +55,6 @@ export interface JobFormValues {
   extras: Record<string, number>;
   price: string;
   paymentMethod: string;
-  commissionPercent: string;
   driverNotes: string;
   internalNotes: string;
   notifyPassenger: boolean;
@@ -65,7 +64,6 @@ export interface JobFormValues {
 export interface SupplierChoice {
   id: number;
   name: string;
-  commissionPercent: string;
 }
 
 function Check({
@@ -123,18 +121,12 @@ export function JobForm({
   );
   const e = state.errors;
   const [source, setSource] = useState(values.source);
-  const [commission, setCommission] = useState(values.commissionPercent);
   const [stops, setStops] = useState(() =>
     values.stops.map((address, index) => ({ key: index, address })),
   );
   const [nextKey, setNextKey] = useState(values.stops.length);
   const website = mode === "website";
   const supplierJob = source === "supplier";
-
-  function chooseSupplier(id: string) {
-    const supplier = suppliers.find((item) => String(item.id) === id);
-    if (supplier) setCommission(supplier.commissionPercent);
-  }
 
   return (
     <form onSubmit={submitWith(action)} className="flex flex-col gap-6" noValidate>
@@ -183,7 +175,6 @@ export function JobForm({
                   id="supplier"
                   name="supplier"
                   defaultValue={values.supplier}
-                  onChange={(event) => chooseSupplier(event.target.value)}
                   className={inputClass()}
                   {...invalid(e.supplier, "supplier")}
                 >
@@ -519,7 +510,17 @@ export function JobForm({
             title="Price"
             description="The fare agreed before the journey (CMP-02)."
           >
-            <FormField id="price" label="Agreed price (£)" required error={e.price}>
+            <FormField
+              id="price"
+              label="Agreed price (£)"
+              required
+              error={e.price}
+              hint={
+                supplierJob
+                  ? "What the supplier pays Cityline — their cut is already taken."
+                  : undefined
+              }
+            >
               <input
                 id="price"
                 name="price"
@@ -551,25 +552,6 @@ export function JobForm({
                 ))}
               </select>
             </FormField>
-            {supplierJob ? (
-              <FormField
-                id="commissionPercent"
-                label="Supplier commission (%)"
-                required
-                error={e.commissionPercent}
-                hint="From the supplier's default. Change it if this job differs."
-              >
-                <input
-                  id="commissionPercent"
-                  name="commissionPercent"
-                  inputMode="decimal"
-                  value={commission}
-                  onChange={(event) => setCommission(event.target.value)}
-                  className={inputClass("tabular-nums")}
-                  {...invalid(e.commissionPercent, "commissionPercent")}
-                />
-              </FormField>
-            ) : null}
           </FormSection>
         </>
       ) : null}
@@ -661,7 +643,7 @@ export function JobForm({
           {mode === "new"
             ? values.returnOf
               ? "Create return trip"
-              : "Create job"
+              : "Create booking"
             : "Save changes"}
         </SubmitButton>
         <Link href={cancelHref} className={buttonClass("ghost", "md")}>

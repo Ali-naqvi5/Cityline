@@ -1,11 +1,6 @@
 import { isValidDay } from "@/admin/format";
 import { normalisePhone } from "@/domain/booking/passenger";
-import {
-  applyBasisPoints,
-  parsePounds,
-  type BasisPoints,
-  type Pence,
-} from "@/domain/money";
+import { parsePounds, type Pence } from "@/domain/money";
 import { EXTRAS } from "@/domain/pricing/extras";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { MAX_STOPS, STAFF_PAYMENT_METHODS, STAFF_SOURCES } from "@/domain/jobs/labels";
@@ -91,7 +86,6 @@ export const jobSchema = z
     extras: z.record(z.string(), z.number().int().min(0).max(9)),
     price: z.string().min(1, "Enter the agreed price."),
     paymentMethod: z.enum(STAFF_PAYMENT_METHODS, { message: "Choose how it is paid." }),
-    commissionPercent: z.string(),
     driverNotes: z.string().max(2000),
     internalNotes: z.string().max(2000),
     notifyPassenger: z.boolean(),
@@ -105,15 +99,6 @@ export const jobSchema = z
       if (!job.supplier) issue("supplier", "Choose the supplier this job came from.");
       if (!job.supplierReference.trim())
         issue("supplierReference", "Enter the supplier's booking reference.");
-      const percent = Number(job.commissionPercent);
-      if (
-        job.commissionPercent.trim() === "" ||
-        !Number.isFinite(percent) ||
-        percent < 0 ||
-        percent > 100
-      ) {
-        issue("commissionPercent", "Enter the supplier's commission, 0–100%.");
-      }
     }
     if (!job.dropoffAddress.trim()) {
       const hours = Number(job.hours);
@@ -179,7 +164,6 @@ export function jobForm(formData: FormData): Record<string, unknown> {
     extras,
     price: text("price"),
     paymentMethod: text("paymentMethod"),
-    commissionPercent: text("commissionPercent"),
     driverNotes: text("driverNotes"),
     internalNotes: text("internalNotes"),
     notifyPassenger: formData.get("notifyPassenger") === "on",
@@ -191,9 +175,6 @@ export function jobForm(formData: FormData): Record<string, unknown> {
 export function jobData(form: JobForm) {
   const price = parsePounds(form.price) as Pence;
   const supplierJob = form.source === "supplier";
-  const commissionBp = supplierJob
-    ? (Math.round(Number(form.commissionPercent) * 100) as BasisPoints)
-    : null;
   const flight = form.flightNumber.replace(/\s+/g, "").toUpperCase();
 
   return {
@@ -230,8 +211,6 @@ export function jobData(form: JobForm) {
     })),
     customerPricePence: price,
     paymentMethod: form.paymentMethod,
-    commissionBp,
-    commissionPence: commissionBp === null ? null : applyBasisPoints(price, commissionBp),
     driverNotes: form.driverNotes || null,
     internalNotes: form.internalNotes || null,
     notifyPassenger: form.notifyPassenger,

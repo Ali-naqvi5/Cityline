@@ -14,9 +14,8 @@ import { auditChanges } from "./hooks/audit";
  * one. Bank details are sealed (`lib/sealed.ts`) and readable by the owner
  * alone — not controllers, not accounts (spec §22).
  *
- * Pay rules are settings, changed any time (FIN-00): a fixed amount per job,
- * a percentage of net revenue, or a rate card. The rule fills in each job's
- * driver pay at assignment; staff can still change it on the job.
+ * There are no pay rules here: what a driver is paid is agreed per booking and
+ * written on the booking (`jobs.driverPricePence`).
  */
 
 const bankDetailsAccess: FieldAccess = ({ req }) =>
@@ -31,7 +30,7 @@ export const Drivers: CollectionConfig = {
   slug: "drivers",
   admin: {
     useAsTitle: "fullName",
-    defaultColumns: ["fullName", "status", "phone", "employmentType"],
+    defaultColumns: ["fullName", "status", "phone"],
   },
   access: {
     read: allow("drivers.view"),
@@ -95,48 +94,8 @@ export const Drivers: CollectionConfig = {
         { label: "Left", value: "left" },
       ],
     },
-    {
-      name: "employmentType",
-      type: "select",
-      required: true,
-      defaultValue: "self_employed",
-      options: [
-        { label: "Self-employed", value: "self_employed" },
-        { label: "Employee", value: "employee" },
-      ],
-    },
     { name: "startDate", type: "date" },
     { name: "endDate", type: "date" },
-    {
-      name: "payRule",
-      type: "select",
-      required: true,
-      defaultValue: "fixed",
-      options: [
-        { label: "Fixed amount per job", value: "fixed" },
-        { label: "Percentage of net revenue", value: "percent" },
-        { label: "Rate card", value: "rate_card" },
-      ],
-    },
-    { name: "payFixedPence", type: "number", min: 0 },
-    {
-      name: "payPercentBp",
-      type: "number",
-      min: 0,
-      max: 10_000,
-      admin: { description: "Basis points: 7000 = 70%." },
-    },
-    {
-      name: "showPayInMessages",
-      type: "select",
-      required: true,
-      defaultValue: "default",
-      options: [
-        { label: "Use the company default", value: "default" },
-        { label: "Show pay in job messages", value: "show" },
-        { label: "Hide pay in job messages", value: "hide" },
-      ],
-    },
     {
       name: "whatsappConsentAt",
       type: "date",

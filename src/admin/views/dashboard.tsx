@@ -189,7 +189,7 @@ function AlertsPanel({ data, role }: { data: DashboardData; role: Role }) {
               icon={<Globe aria-hidden className="h-4 w-4" />}
               title={`New website booking ${booking.reference}`}
               detail={`${money(booking.totalPence)} · booked ${stamp(new Date(booking.createdAt))}`}
-              href={`/admin/jobs?q=${encodeURIComponent(booking.reference)}&when=all`}
+              href={`/admin/bookings?q=${encodeURIComponent(booking.reference)}&when=all`}
             />
           ))}
           {cancelled.map((booking) => (
@@ -199,7 +199,7 @@ function AlertsPanel({ data, role }: { data: DashboardData; role: Role }) {
               icon={<Ban aria-hidden className="h-4 w-4" />}
               title={`Booking ${booking.reference} was cancelled`}
               detail={`${booking.cancelReason || "No reason recorded"} · ${booking.cancelledAt ? stamp(new Date(booking.cancelledAt)) : ""}`}
-              href={`/admin/jobs?q=${encodeURIComponent(booking.reference)}&when=all`}
+              href={`/admin/bookings?q=${encodeURIComponent(booking.reference)}&when=all`}
             />
           ))}
         </ul>
@@ -219,8 +219,8 @@ function UpcomingPanel({ jobs, now }: { jobs: Job[]; now: Date }) {
     <Panel
       title="Next pickups"
       actions={
-        <ButtonLink href="/admin/jobs" size="sm" variant="ghost">
-          All jobs
+        <ButtonLink href="/admin/bookings" size="sm" variant="ghost">
+          All bookings
         </ButtonLink>
       }
       bodyClassName="p-0"
@@ -364,9 +364,9 @@ export async function DashboardView(props: AdminViewServerProps) {
         title={`${greeting(data.now)}${firstName ? `, ${firstName}` : ""}`}
         actions={
           data.jobs ? (
-            <ButtonLink href="/admin/jobs?view=day" variant="primary">
+            <ButtonLink href="/admin/bookings?when=today" variant="primary">
               <ListChecks aria-hidden className="h-4 w-4" />
-              Today&apos;s jobs
+              Today&apos;s bookings
             </ButtonLink>
           ) : null
         }
@@ -396,15 +396,15 @@ export async function DashboardView(props: AdminViewServerProps) {
               {data.jobs ? (
                 <>
                   <MetricCard
-                    label="Jobs today"
+                    label="Bookings today"
                     value={data.jobs.today}
-                    href="/admin/jobs?view=day"
+                    href="/admin/bookings?when=today"
                     icon={<CalendarDays aria-hidden className="h-4 w-4" />}
                   />
                   <MetricCard
-                    label="Jobs this week"
+                    label="Bookings this week"
                     value={data.jobs.thisWeek}
-                    href="/admin/jobs?view=week"
+                    href="/admin/bookings?when=week"
                     icon={<ListChecks aria-hidden className="h-4 w-4" />}
                   />
                   <MetricCard
@@ -422,7 +422,7 @@ export async function DashboardView(props: AdminViewServerProps) {
                         ? `${data.jobs.urgent.length} within 24 hours`
                         : "None within 24 hours"
                     }
-                    href="/admin/jobs?unassigned=1"
+                    href="/admin/bookings?status=unassigned"
                     icon={<CircleDashed aria-hidden className="h-4 w-4" />}
                   />
                 </>

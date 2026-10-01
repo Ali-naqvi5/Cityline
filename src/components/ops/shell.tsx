@@ -113,10 +113,13 @@ function SidebarSections({
 export function OpsShell({
   user,
   active,
+  wide,
   children,
 }: {
   user: ShellUser;
   active: string;
+  /** Use the whole screen width — for dense registers such as Bookings. */
+  wide?: boolean;
   children: ReactNode;
 }) {
   const sections = navFor(user.role);
@@ -180,9 +183,15 @@ export function OpsShell({
           </Link>
 
           {canSearchJobs ? (
-            <form role="search" action="/admin/jobs" className="relative max-w-xl flex-1">
+            <form
+              role="search"
+              action="/admin/bookings"
+              className="relative max-w-xl flex-1"
+            >
+              {/* Search every date: an old booking is as findable as tomorrow's. */}
+              <input type="hidden" name="when" value="all" />
               <label htmlFor="ops-search" className="sr-only">
-                Search jobs
+                Search bookings
               </label>
               <Search
                 aria-hidden
@@ -193,7 +202,7 @@ export function OpsShell({
                 name="q"
                 type="search"
                 autoComplete="off"
-                placeholder="Search jobs: reference, passenger, phone, flight"
+                placeholder="Search bookings: reference, passenger, phone, flight"
                 className="border-line-strong bg-surface placeholder:text-ink-4 h-9 w-full rounded-md border pr-3 pl-8 text-sm"
               />
             </form>
@@ -212,7 +221,10 @@ export function OpsShell({
 
         <main
           id="ops-main"
-          className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-5 pb-28 sm:px-6 lg:px-8 lg:pt-6 lg:pb-10"
+          className={cx(
+            "mx-auto w-full flex-1 px-4 pt-5 pb-28 sm:px-6 lg:px-8 lg:pt-6 lg:pb-10",
+            wide ? "max-w-none" : "max-w-[1440px]",
+          )}
         >
           {children}
         </main>

@@ -400,13 +400,9 @@ export interface Job {
   customerPricePence: number;
   paymentMethod: 'web_prepaid' | 'supplier' | 'cash' | 'card_link' | 'bank' | 'account';
   /**
-   * The supplier's commission rate when the job was entered. A later change to the supplier's default does not alter it (FIN-00).
+   * What the driver is paid for this booking, agreed per booking and written on it. Integer pence.
    */
-  commissionBp?: number | null;
-  /**
-   * What the supplier keeps. Editable per job.
-   */
-  commissionPence?: number | null;
+  driverPricePence?: number | null;
   /**
    * Stripe's fee, from the webhook.
    */
@@ -436,10 +432,6 @@ export interface Job {
 export interface Supplier {
   id: number;
   name: string;
-  /**
-   * Basis points: 1800 = 18%. New jobs start from this.
-   */
-  defaultCommissionBp: number;
   /**
    * Days after the trip the supplier normally pays.
    */
@@ -474,16 +466,8 @@ export interface Driver {
   dateOfBirth?: string | null;
   photo?: (number | null) | PrivateFile;
   status: 'active' | 'suspended' | 'left';
-  employmentType: 'self_employed' | 'employee';
   startDate?: string | null;
   endDate?: string | null;
-  payRule: 'fixed' | 'percent' | 'rate_card';
-  payFixedPence?: number | null;
-  /**
-   * Basis points: 7000 = 70%.
-   */
-  payPercentBp?: number | null;
-  showPayInMessages: 'default' | 'show' | 'hide';
   /**
    * When the driver agreed to receive jobs on WhatsApp (WA-05).
    */
@@ -980,8 +964,7 @@ export interface JobsSelect<T extends boolean = true> {
   passengerMessageAt?: T;
   customerPricePence?: T;
   paymentMethod?: T;
-  commissionBp?: T;
-  commissionPence?: T;
+  driverPricePence?: T;
   paymentFeePence?: T;
   locked?: T;
   driverNotes?: T;
@@ -1063,13 +1046,8 @@ export interface DriversSelect<T extends boolean = true> {
   dateOfBirth?: T;
   photo?: T;
   status?: T;
-  employmentType?: T;
   startDate?: T;
   endDate?: T;
-  payRule?: T;
-  payFixedPence?: T;
-  payPercentBp?: T;
-  showPayInMessages?: T;
   whatsappConsentAt?: T;
   bankDetailsSealed?: T;
   bankAccountLast4?: T;
@@ -1135,7 +1113,6 @@ export interface VehicleDocumentsSelect<T extends boolean = true> {
  */
 export interface SuppliersSelect<T extends boolean = true> {
   name?: T;
-  defaultCommissionBp?: T;
   paymentTermsDays?: T;
   contactName?: T;
   email?: T;

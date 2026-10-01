@@ -55,31 +55,28 @@ describe("the staff job form", () => {
     expect(data.nameBoardText).toBe("Jane Smith");
     expect(data.extras).toEqual([{ slug: "child-seat", quantity: 1, unitPricePence: 0 }]);
     expect(data.supplier).toBeNull();
-    expect(data.commissionPence).toBeNull();
   });
 
   it("does not offer website as a source", () => {
     expect(errors({ source: "website" }).source).toMatch(/Choose where/);
   });
 
-  it("needs a supplier's name, reference and commission, and works out the commission", () => {
+  it("needs a supplier's name and reference, and keeps the whole price: partners take their cut first", () => {
     expect(errors({ source: "supplier", paymentMethod: "supplier" })).toMatchObject({
       supplier: expect.stringMatching(/supplier/),
       supplierReference: expect.stringMatching(/reference/),
-      commissionPercent: expect.stringMatching(/commission/),
     });
     const result = parse({
       source: "supplier",
       supplier: "3",
       supplierReference: " tc-991 ",
-      commissionPercent: "18",
       paymentMethod: "supplier",
     });
     const data = jobData(result.data!);
     expect(data.supplier).toBe(3);
     expect(data.supplierReference).toBe("TC-991");
-    expect(data.commissionBp).toBe(1800);
-    expect(data.commissionPence).toBe(990);
+    expect(data.customerPricePence).toBe(5500);
+    expect(data).not.toHaveProperty("commissionPence");
   });
 
   it("refuses cash on a supplier job", () => {
@@ -88,7 +85,6 @@ describe("the staff job form", () => {
         source: "supplier",
         supplier: "3",
         supplierReference: "X",
-        commissionPercent: "10",
         paymentMethod: "cash",
       }).paymentMethod,
     ).toMatch(/paid by the supplier/);

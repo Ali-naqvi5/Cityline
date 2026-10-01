@@ -191,6 +191,10 @@ See `docs/admin-implementation-map.md`. Rules that are easy to break:
 data`. To pass a value from `beforeChange` to `afterChange`, use
   `req.context`; nested Local API calls replace it, so a destructured
   `context` argument goes stale.
+- **No supplier commission and no driver pay rules** (Cityline, 2 Oct 2026):
+  partners take their cut before sending a job, and a driver's pay is the
+  driver price written on each booking. Drivers are independent — never
+  show employment wording.
 - WhatsApp is "click to send" (`wa.me` link with the message written) until
   the Business API is connected; the job records only what is known — that
   the message was opened — and the controller marks delivered or read.

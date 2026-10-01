@@ -115,7 +115,7 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 | -------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | Shell          | Sidebar, top bar, mobile tab bar, role filtering                              | ✅ 1 Oct                                                      |
 | Dashboard      | Owner / Controller / Accounts / Editor                                        | ✅ 1 Oct; compliance and message alerts wait on those screens |
-| Operations     | Jobs list / day / week, filters, search                                       | ✅ 1 Oct; supplier and driver filters wait on those records   |
+| Operations     | Bookings dashboard: every source, filters, search, colour by status/client    | ✅ 2 Oct; replaced the jobs list (`/admin/jobs` redirects)    |
 |                | Job detail workspace + timeline                                               | ✅ 1 Oct; assign, status, WhatsApp, passenger email, history  |
 |                | Create job, return trip, duplicate checks                                     | ✅ 1 Oct; website jobs edit operational details only          |
 |                | Dispatch board, assign driver                                                 | ✅ 1 Oct                                                      |
@@ -124,7 +124,7 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 | Fleet          | Drivers, vehicles, documents, compliance, suppliers                           | ✅ 1 Oct; supplier money waits on Finance                     |
 | Messaging      | Send on WhatsApp (prefilled), passenger details                               | ✅ 1 Oct; wa.me link, statuses marked by hand; email only     |
 | Alerts         | Notification centre                                                           | ⬜                                                            |
-| Finance        | Job finance, costs, driver pay, statements, supplier money, expenses, reports | ⬜                                                            |
+| Finance        | Job finance, costs, driver pay, statements, supplier money, expenses, reports | 🔧 driver price per booking and profit ✅ 2 Oct; rest ⬜      |
 | Reports        | TfL register, run sheet, jobs/driver/vehicle/supplier reports                 | ⬜                                                            |
 | Administration | Staff + 2FA, audit log, booking rules, company details                        | 🔧 audit log ✅ 1 Oct; staff, 2FA, settings to build          |
 |                | Prices & catalogue                                                            | ⬜ (needs real price tables)                                  |
@@ -157,9 +157,6 @@ Left open from phase 4, by design or waiting on another phase:
   delivered, read or not delivered by hand. Automatic sending, delivery reports
   and reminders (WA-01 to WA-04) need the WhatsApp Business API and approved
   templates.
-- Driver pay is not in the WhatsApp message yet: there is no pay calculation
-  until Finance (phase 8), when it follows each driver's "pay in messages"
-  setting and a company default.
 - Driver details reach the passenger by email only; SMS (NOT-02) needs a
   provider.
 - Website jobs are cancelled from the booking (phase 5), so the payment is
@@ -177,10 +174,17 @@ Left open from phase 4, by design or waiting on another phase:
    link or partial refund, resend manage link.
 6. **Records** — TfL register, run sheet, audit log, alerts centre.
 7. **Staff** — staff screen, 2FA, staff register (CMP-06).
-8. **Finance** — job finance and costs, driver pay rules, statements,
-   supplier money, expenses, reports, encrypted bank details.
+8. **Finance** — job costs, driver statements (the sum of each booking's
+   driver price), supplier money, expenses, reports.
 9. **Settings** — booking rules, company details, then prices and catalogue
    when the real price tables arrive; media.
 
 Not built, by decision: flight tracking, cash for website bookings, a driver
 app, GPS, automatic allocation.
+
+Money rules decided by Cityline on 2 Oct 2026: drivers are independent and the
+system records no pay rules or employment terms for them — what a driver is
+paid is written on each booking (`driverPricePence`). Partners take their cut
+before sending a job, so there is no supplier commission anywhere: a job's
+price is Cityline's. Profit is price − card fees − driver price
+(`domain/finance/booking-money.ts`).

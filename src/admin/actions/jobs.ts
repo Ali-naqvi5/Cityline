@@ -14,7 +14,7 @@ import type { Booking } from "@/payload-types";
 export async function resendManageLinkAction(formData: FormData): Promise<void> {
   const { payload, user } = await staffForAction("bookings.amend");
   const jobId = Number(formData.get("jobId"));
-  if (!Number.isInteger(jobId)) redirect("/admin/jobs");
+  if (!Number.isInteger(jobId)) redirect("/admin/bookings");
 
   const job = await payload.findByID({
     collection: "jobs",

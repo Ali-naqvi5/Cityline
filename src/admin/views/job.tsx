@@ -24,6 +24,7 @@ import {
 import { resendManageLinkAction } from "@/admin/actions/jobs";
 import { auditValue } from "@/admin/audit-format";
 import { money, pickupLabel, relative, stamp } from "@/admin/format";
+import { DriverPriceForm } from "@/admin/forms/driver-price-form";
 import { WhatsAppButton } from "@/admin/forms/whatsapp-button";
 import { param, requireStaff } from "@/admin/guard";
 import { ActionButton, ConfirmDialog } from "@/components/ops/dialog";
@@ -66,6 +67,7 @@ import {
   type DriverMessageKind,
 } from "@/domain/messaging/driver-message";
 import { EXTRAS } from "@/domain/pricing/extras";
+import { bookingMoney } from "@/domain/finance/booking-money";
 import { can } from "@/domain/staff/permissions";
 import { company } from "@/lib/company";
 import type {
@@ -112,7 +114,7 @@ function timelineFor(job: Job, events: JobEvent[]): TimelineEntry[] {
   const entries: TimelineEntry[] = [
     {
       id: "created",
-      title: job.source === "website" ? "Booked on the website" : "Job created",
+      title: job.source === "website" ? "Booked on the website" : "Booking created",
       actor: job.source === "website" ? "Website checkout" : taker?.name || "Staff",
       at: new Date(job.takenAt || job.createdAt),
       tone: "info",
@@ -169,7 +171,7 @@ function timelineFor(job: Job, events: JobEvent[]): TimelineEntry[] {
         tone = /NOT sent|not delivered/.test(event.newValue ?? "") ? "danger" : "ok";
         break;
       default:
-        title = "Job created";
+        title = "Booking created";
     }
 
     entries.push({
@@ -199,7 +201,7 @@ const NOTICES: Record<string, { tone: "ok" | "danger"; text: string }> = {
     tone: "danger",
     text: "This job has no website booking, so there is no link to send.",
   },
-  created: { tone: "ok", text: "Job created." },
+  created: { tone: "ok", text: "Booking created." },
   saved: { tone: "ok", text: "Changes saved." },
   assigned: { tone: "ok", text: "Driver assigned. Send them the job on WhatsApp below." },
   "driver-removed": { tone: "ok", text: "Driver removed. The job is unassigned again." },
@@ -208,6 +210,7 @@ const NOTICES: Record<string, { tone: "ok" | "danger"; text: string }> = {
   "status-no_show": { tone: "ok", text: "Marked as a no-show." },
   "status-cancelled": { tone: "ok", text: "Job cancelled." },
   "details-sent": { tone: "ok", text: "Driver details emailed to the passenger." },
+  "driver-price": { tone: "ok", text: "Driver price saved." },
   "details-failed": {
     tone: "danger",
     text: "The driver details could not be emailed. The reason is in the history below.",
@@ -295,12 +298,12 @@ export async function JobView(props: AdminViewServerProps) {
 
   if (!job) {
     return (
-      <OpsShell user={user} active="jobs">
+      <OpsShell user={user} active="bookings">
         <Panel>
           <EmptyState
-            title="No job with that number"
+            title="No booking with that number"
             description="It may have been typed wrongly, or the link is out of date."
-            action={<ButtonLink href="/admin/jobs">Back to jobs</ButtonLink>}
+            action={<ButtonLink href="/admin/bookings">Back to bookings</ButtonLink>}
           />
         </Panel>
       </OpsShell>
@@ -370,8 +373,11 @@ export async function JobView(props: AdminViewServerProps) {
   );
 
   const feesKnown = (job.paymentFeePence ?? 0) > 0;
-  const commissionPence = job.commissionPence ?? 0;
-  const netPence = job.customerPricePence - commissionPence - (job.paymentFeePence ?? 0);
+  const takings = bookingMoney({
+    customerPricePence: job.customerPricePence,
+    paymentFeePence: job.paymentFeePence,
+    driverPricePence: job.driverPricePence,
+  });
   const messageStatus =
     MESSAGE_STATUS[job.driverMessageStatus] ?? MESSAGE_STATUS.not_sent!;
   const passengerStatus =
@@ -379,14 +385,14 @@ export async function JobView(props: AdminViewServerProps) {
   const emailedNow = param(props.searchParams, "emailed");
 
   return (
-    <OpsShell user={user} active="jobs">
+    <OpsShell user={user} active="bookings">
       <div className="mb-3 print:hidden">
         <Link
-          href="/admin/jobs"
+          href="/admin/bookings"
           className="text-ink-3 hover:text-ink inline-flex items-center gap-1 text-sm"
         >
           <ArrowLeft aria-hidden className="h-4 w-4" />
-          Jobs
+          Bookings
         </Link>
       </div>
 
@@ -712,6 +718,27 @@ export async function JobView(props: AdminViewServerProps) {
               </Field>
             </Fields>
 
+            <div className="border-line mt-4 border-t pt-4">
+              {dispatches ? (
+                <DriverPriceForm
+                  key={job.driverPricePence ?? "none"}
+                  jobId={job.id}
+                  pricePence={job.driverPricePence ?? null}
+                />
+              ) : (
+                <Fields className="sm:grid-cols-1">
+                  <Field label="Driver price">
+                    {job.driverPricePence === null ||
+                    job.driverPricePence === undefined ? (
+                      <NotRecorded>Not written yet</NotRecorded>
+                    ) : (
+                      <span className="tabular-nums">{money(job.driverPricePence)}</span>
+                    )}
+                  </Field>
+                </Fields>
+              )}
+            </div>
+
             {dispatches && !closed && (actions.length || driver) ? (
               <div className="border-line mt-4 flex flex-wrap gap-2 border-t pt-4 print:hidden">
                 {actions.includes("driver_confirmed") ? (
@@ -931,21 +958,6 @@ export async function JobView(props: AdminViewServerProps) {
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt className="text-ink-3">Supplier commission</dt>
-                  <dd className="tabular-nums">
-                    {job.source === "supplier" ? (
-                      job.commissionPence !== null &&
-                      job.commissionPence !== undefined ? (
-                        `− ${money(job.commissionPence)}${job.commissionBp ? ` (${job.commissionBp / 100}%)` : ""}`
-                      ) : (
-                        <NotRecorded />
-                      )
-                    ) : (
-                      "£0.00 — direct"
-                    )}
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-3">
                   <dt className="text-ink-3">Card fees</dt>
                   <dd className="tabular-nums">
                     {feesKnown ? `− ${money(job.paymentFeePence)}` : <NotRecorded />}
@@ -954,7 +966,7 @@ export async function JobView(props: AdminViewServerProps) {
                 <div className="border-line flex justify-between gap-3 border-t pt-2">
                   <dt className="text-ink font-medium">Net revenue</dt>
                   <dd className="font-semibold tabular-nums">
-                    {money(netPence)}
+                    {money(takings.netPence)}
                     {!feesKnown && job.paymentMethod === "web_prepaid" ? (
                       <span className="text-ink-3 block text-right text-xs font-normal">
                         before card fees
@@ -963,21 +975,27 @@ export async function JobView(props: AdminViewServerProps) {
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt className="text-ink-3">Driver pay</dt>
-                  <dd>
-                    <NotRecorded />
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <dt className="text-ink-3">Job costs</dt>
-                  <dd>
-                    <NotRecorded>None recorded</NotRecorded>
+                  <dt className="text-ink-3">Driver price</dt>
+                  <dd className="tabular-nums">
+                    {takings.driverPricePence === null ? (
+                      <NotRecorded>Not written yet</NotRecorded>
+                    ) : (
+                      `− ${money(takings.driverPricePence)}`
+                    )}
                   </dd>
                 </div>
                 <div className="border-line flex justify-between gap-3 border-t pt-2">
                   <dt className="text-ink font-medium">Profit</dt>
-                  <dd className="text-right">
-                    <NotRecorded>Needs driver pay</NotRecorded>
+                  <dd className="text-right font-semibold tabular-nums">
+                    {takings.profitPence === null ? (
+                      <NotRecorded>Needs the driver price</NotRecorded>
+                    ) : (
+                      <span
+                        className={takings.profitPence < 0 ? "text-danger" : undefined}
+                      >
+                        {money(takings.profitPence)}
+                      </span>
+                    )}
                   </dd>
                 </div>
               </dl>

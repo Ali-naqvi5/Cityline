@@ -2,6 +2,7 @@ import * as migration_20260928_123901_initial from "./20260928_123901_initial";
 import * as migration_20260928_175436_checkout_session_and_job_sequence from "./20260928_175436_checkout_session_and_job_sequence";
 import * as migration_20260930_221901_fleet_compliance_suppliers from "./20260930_221901_fleet_compliance_suppliers";
 import * as migration_20260930_235218_dispatch_and_messages from "./20260930_235218_dispatch_and_messages";
+import * as migration_20261001_194400_booking_driver_price from "./20261001_194400_booking_driver_price";
 
 export const migrations = [
   {
@@ -23,5 +24,10 @@ export const migrations = [
     up: migration_20260930_235218_dispatch_and_messages.up,
     down: migration_20260930_235218_dispatch_and_messages.down,
     name: "20260930_235218_dispatch_and_messages",
+  },
+  {
+    up: migration_20261001_194400_booking_driver_price.up,
+    down: migration_20261001_194400_booking_driver_price.down,
+    name: "20261001_194400_booking_driver_price",
   },
 ];

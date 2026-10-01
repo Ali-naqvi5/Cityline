@@ -19,6 +19,7 @@ import { relId } from "@/domain/dispatch/assignment";
 import { possibleDuplicates } from "@/domain/jobs/duplicates";
 import { isJobStatus } from "@/domain/jobs/labels";
 import { nextJobReference } from "@/domain/jobs/next-reference";
+import { parsePounds } from "@/domain/money";
 import type { DriverMessageKind } from "@/domain/messaging/driver-message";
 import { driverDetailsEmail } from "@/domain/notifications/booking-emails";
 import { sendEmail } from "@/lib/email";
@@ -225,6 +226,14 @@ export async function assignDriverAction(
     };
   }
 
+  const price = driverPriceFrom(formData);
+  if (price === "invalid") {
+    return {
+      errors: { driverPrice: DRIVER_PRICE_MESSAGE },
+      message: "Check the driver's price.",
+    };
+  }
+
   const previousDriver = relId(job.driver);
   let saved: Job;
   try {
@@ -235,6 +244,9 @@ export async function assignDriverAction(
         driver: driverId,
         vehicle: vehicleId,
         notifyPassenger: formData.get("notifyPassenger") === "on",
+        // Left as it was when the box is empty: a change of driver keeps the
+        // agreed price unless a new one is written.
+        ...(price === null ? {} : { driverPricePence: price }),
       },
       user,
       overrideAccess: false,
@@ -278,6 +290,48 @@ export async function removeDriverAction(
   redirect(
     `/admin/jobs/${job.id}?notice=driver-removed${previousDriver ? `&previous=${previousDriver}` : ""}`,
   );
+}
+
+// --- Driver price ---------------------------------------------------------------
+
+const DRIVER_PRICE_MESSAGE = "Enter the driver's price in pounds, such as 35 or 35.50.";
+
+/** The driver's price from a form: pence, null when empty, or "invalid". */
+function driverPriceFrom(formData: FormData): number | null | "invalid" {
+  const value = text(formData, "driverPrice");
+  if (!value) return null;
+  const pence = parsePounds(value);
+  return pence === null || pence < 0 ? "invalid" : pence;
+}
+
+/**
+ * What the driver is paid for this booking — agreed per booking and written
+ * on it, by whoever dispatches. Clearing the box clears the price.
+ */
+export async function setDriverPriceAction(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { payload, user } = await staffForAction("jobs.dispatch");
+  const job = await jobFor(payload, user, Number(text(formData, "jobId")));
+  if (!job) return { errors: {}, message: "That booking no longer exists." };
+
+  const price = driverPriceFrom(formData);
+  if (price === "invalid") {
+    return { errors: { driverPrice: DRIVER_PRICE_MESSAGE }, message: "" };
+  }
+  try {
+    await payload.update({
+      collection: "jobs",
+      id: job.id,
+      data: { driverPricePence: price },
+      user,
+      overrideAccess: false,
+    });
+  } catch (error) {
+    return payloadErrors(error, "saving a driver's price");
+  }
+  redirect(`/admin/jobs/${job.id}?notice=driver-price`);
 }
 
 // --- Status ---------------------------------------------------------------------
@@ -477,7 +531,7 @@ async function emailDriverDetails(
 export async function sendDriverDetailsAction(formData: FormData): Promise<void> {
   const { payload, user } = await staffForAction("jobs.dispatch");
   const job = await jobFor(payload, user, Number(text(formData, "jobId")));
-  if (!job) redirect("/admin/jobs");
+  if (!job) redirect("/admin/bookings");
   const sent = await emailDriverDetails(payload, user, job.id, "resend");
   redirect(`/admin/jobs/${job.id}?notice=${sent ? "details-sent" : "details-failed"}`);
 }

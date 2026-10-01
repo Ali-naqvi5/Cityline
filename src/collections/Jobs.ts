@@ -314,20 +314,13 @@ export const Jobs: CollectionConfig = {
           ],
         },
         {
-          name: "commissionBp",
+          name: "driverPricePence",
           type: "number",
           min: 0,
-          max: 10_000,
           admin: {
             description:
-              "The supplier's commission rate when the job was entered. A later change to the supplier's default does not alter it (FIN-00).",
+              "What the driver is paid for this booking, agreed per booking and written on it. Integer pence.",
           },
-        },
-        {
-          name: "commissionPence",
-          type: "number",
-          min: 0,
-          admin: { description: "What the supplier keeps. Editable per job." },
         },
         {
           name: "paymentFeePence",

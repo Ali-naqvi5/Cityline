@@ -154,3 +154,80 @@ export function Pagination({
     </nav>
   );
 }
+
+/**
+ * First · Previous · 1 2 3 … · Next · Last, with the total — for long
+ * registers where staff jump pages rather than step through them.
+ */
+export function NumberedPagination({
+  page,
+  totalPages,
+  totalDocs,
+  hrefFor,
+}: {
+  page: number;
+  totalPages: number;
+  totalDocs: number;
+  hrefFor: (page: number) => string;
+}) {
+  if (totalPages <= 1) return null;
+  const start = Math.max(1, Math.min(page - 3, totalPages - 6));
+  const pages = Array.from(
+    { length: Math.min(7, totalPages) },
+    (_, index) => start + index,
+  );
+  const item =
+    "inline-flex h-9 min-w-9 items-center justify-center rounded-md px-2.5 text-sm font-medium lg:h-8 lg:min-w-8";
+  const link = `${item} border border-line-strong bg-surface text-ink-2 shadow-xs hover:bg-sunken`;
+  const off = `${item} text-ink-4`;
+  return (
+    <nav aria-label="Pages" className="flex flex-wrap items-center gap-1.5">
+      {page > 1 ? (
+        <>
+          <Link href={hrefFor(1)} className={link}>
+            First
+          </Link>
+          <Link href={hrefFor(page - 1)} className={link} rel="prev">
+            Previous
+          </Link>
+        </>
+      ) : (
+        <>
+          <span className={off}>First</span>
+          <span className={off}>Previous</span>
+        </>
+      )}
+      {pages.map((number) =>
+        number === page ? (
+          <span
+            key={number}
+            aria-current="page"
+            className={`${item} bg-accent text-white tabular-nums`}
+          >
+            {number}
+          </span>
+        ) : (
+          <Link key={number} href={hrefFor(number)} className={`${link} tabular-nums`}>
+            {number}
+          </Link>
+        ),
+      )}
+      {page < totalPages ? (
+        <>
+          <Link href={hrefFor(page + 1)} className={link} rel="next">
+            Next
+          </Link>
+          <Link href={hrefFor(totalPages)} className={link}>
+            Last
+          </Link>
+        </>
+      ) : (
+        <>
+          <span className={off}>Next</span>
+          <span className={off}>Last</span>
+        </>
+      )}
+      <span className="text-ink-3 ml-1 text-sm tabular-nums">{totalDocs} bookings</span>
+    </nav>
+  );
+}

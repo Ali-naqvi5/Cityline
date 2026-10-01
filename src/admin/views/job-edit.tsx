@@ -51,7 +51,6 @@ const EMPTY: JobFormValues = {
   extras: {},
   price: "",
   paymentMethod: "",
-  commissionPercent: "",
   driverNotes: "",
   internalNotes: "",
   notifyPassenger: true,
@@ -90,10 +89,6 @@ function valuesFrom(job: Job): JobFormValues {
     ),
     price: (job.customerPricePence / 100).toFixed(2),
     paymentMethod: job.paymentMethod,
-    commissionPercent:
-      job.commissionBp === null || job.commissionBp === undefined
-        ? ""
-        : String(job.commissionBp / 100),
     driverNotes: job.driverNotes ?? "",
     internalNotes: job.internalNotes ?? "",
     notifyPassenger: job.notifyPassenger ?? true,
@@ -147,11 +142,11 @@ export async function JobEditView(props: AdminViewServerProps) {
 
   if (sourceJobId && !job) {
     return (
-      <OpsShell user={user} active="jobs">
+      <OpsShell user={user} active="bookings">
         <Panel>
           <EmptyState
-            title="No job with that number"
-            action={<ButtonLink href="/admin/jobs">Back to jobs</ButtonLink>}
+            title="No booking with that number"
+            action={<ButtonLink href="/admin/bookings">Back to bookings</ButtonLink>}
           />
         </Panel>
       </OpsShell>
@@ -170,7 +165,6 @@ export async function JobEditView(props: AdminViewServerProps) {
   const supplierChoices: SupplierChoice[] = suppliers.docs.map((supplier: Supplier) => ({
     id: supplier.id,
     name: supplier.name,
-    commissionPercent: String(supplier.defaultCommissionBp / 100),
   }));
 
   const website = !isNew && job?.source === "website";
@@ -179,16 +173,16 @@ export async function JobEditView(props: AdminViewServerProps) {
   const back = isNew
     ? job
       ? `/admin/jobs/${job.id}`
-      : "/admin/jobs"
+      : "/admin/bookings"
     : `/admin/jobs/${job!.id}`;
   const title = isNew
     ? job
       ? `Return trip for ${job.reference}`
-      : "New job"
+      : "New booking"
     : `Edit ${job!.reference}`;
 
   return (
-    <OpsShell user={user} active="jobs">
+    <OpsShell user={user} active="bookings">
       <div className="mb-3">
         <Link
           href={back}

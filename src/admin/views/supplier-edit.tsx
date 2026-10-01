@@ -22,7 +22,6 @@ export async function SupplierEditView(props: AdminViewServerProps) {
 
   let values: SupplierFormValues = {
     name: "",
-    commissionPercent: "",
     paymentTermsDays: "30",
     contactName: "",
     email: "",
@@ -56,7 +55,6 @@ export async function SupplierEditView(props: AdminViewServerProps) {
     values = {
       id: supplier.id,
       name: supplier.name,
-      commissionPercent: String(supplier.defaultCommissionBp / 100),
       paymentTermsDays: supplier.paymentTermsDays
         ? String(supplier.paymentTermsDays)
         : "",

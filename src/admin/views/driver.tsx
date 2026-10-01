@@ -4,7 +4,7 @@ import type { AdminViewServerProps } from "payload";
 
 import { verifyDocumentAction } from "@/admin/actions/fleet";
 import { loadDrivers } from "@/admin/data/fleet";
-import { money, pickupLabel, stamp } from "@/admin/format";
+import { pickupLabel, stamp } from "@/admin/format";
 import { BankDetailsForm } from "@/admin/forms/bank-details-form";
 import { DocumentForm } from "@/admin/forms/document-form";
 import { param, requireStaff, segment } from "@/admin/guard";
@@ -34,11 +34,7 @@ import {
   EXPIRING_TYPES,
   type DocumentType,
 } from "@/domain/compliance/documents";
-import {
-  DRIVER_STATUS_LABELS,
-  EMPLOYMENT_LABELS,
-  PAY_MESSAGE_LABELS,
-} from "@/domain/fleet/labels";
+import { DRIVER_STATUS_LABELS } from "@/domain/fleet/labels";
 import { OPEN_STATUSES } from "@/domain/jobs/labels";
 import { can } from "@/domain/staff/permissions";
 import { formatDate } from "@/lib/time";
@@ -127,17 +123,6 @@ export async function DriverView(props: AdminViewServerProps) {
   const canVerify = can(user.role, "compliance.verify");
   const seesBank = can(user.role, "drivers.bankDetails");
   const notice = NOTICES[param(props.searchParams, "notice")];
-
-  const pay =
-    driver.payRule === "percent"
-      ? driver.payPercentBp
-        ? `${driver.payPercentBp / 100}% of net revenue`
-        : "Percentage, not set"
-      : driver.payRule === "fixed"
-        ? driver.payFixedPence
-          ? `${money(driver.payFixedPence)} per job`
-          : "Fixed amount, not set"
-        : "Rate card";
 
   return (
     <OpsShell user={user} active="drivers">
@@ -378,8 +363,10 @@ export async function DriverView(props: AdminViewServerProps) {
                   <NotRecorded>Not recorded</NotRecorded>
                 )}
               </Field>
-              <Field label="Employment">
-                {EMPLOYMENT_LABELS[driver.employmentType]}
+              <Field label="With Cityline">
+                {!driver.startDate && !driver.endDate ? (
+                  <NotRecorded>Dates not recorded</NotRecorded>
+                ) : null}
                 {driver.startDate ? (
                   <span className="text-ink-3 block text-sm">
                     Since {formatDate(new Date(driver.startDate))}
@@ -394,12 +381,8 @@ export async function DriverView(props: AdminViewServerProps) {
             </Fields>
           </Panel>
 
-          <Panel title="Pay and messages">
+          <Panel title="Job messages">
             <Fields className="sm:grid-cols-1">
-              <Field label="Pay rule">{pay}</Field>
-              <Field label="Pay in job messages">
-                {PAY_MESSAGE_LABELS[driver.showPayInMessages]}
-              </Field>
               <Field label="WhatsApp consent">
                 {driver.whatsappConsentAt ? (
                   `Given ${formatDate(new Date(driver.whatsappConsentAt))}`

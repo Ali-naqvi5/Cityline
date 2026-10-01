@@ -21,7 +21,7 @@ import { can } from "@/domain/staff/permissions";
 
 const NOTICES: Record<string, string> = {
   created: "Supplier added. Their jobs can now be entered with the supplier's reference.",
-  saved: "Changes saved. A new commission applies to jobs entered from now on.",
+  saved: "Changes saved.",
 };
 
 export async function SupplierView(props: AdminViewServerProps) {
@@ -124,11 +124,7 @@ export async function SupplierView(props: AdminViewServerProps) {
         }
       />
 
-      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <MetricCard
-          label="Default commission"
-          value={`${supplier.defaultCommissionBp / 100}%`}
-        />
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-3">
         <MetricCard label="Jobs" value={total.totalDocs} />
         <MetricCard label="Completed" value={completed.totalDocs} />
         <MetricCard

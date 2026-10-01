@@ -40,7 +40,7 @@ export interface DriverMessageJob {
   driverNotes: string | null;
   /** Set only when the passenger pays the driver in cash. */
   cashToCollectPence: number | null;
-  /** Set only when the driver's messages show pay. */
+  /** What the driver is paid for this booking, once it is written. */
   payPence: number | null;
 }
 
@@ -116,7 +116,9 @@ export function driverMessage(
     ...(job.cashToCollectPence
       ? ["", `*Collect in cash: ${formatPence(job.cashToCollectPence as Pence)}*`]
       : []),
-    ...(job.payPence !== null ? [`Your pay: ${formatPence(job.payPence as Pence)}`] : []),
+    ...(job.payPence !== null
+      ? [`Your price: ${formatPence(job.payPence as Pence)}`]
+      : []),
     "",
     `Office: ${officePhone}`,
     kind === "new"
@@ -136,8 +138,8 @@ export function whatsappLink(phone: string, text: string): string {
 
 /**
  * A stored job as the message needs it. Cash to collect is the fare when the
- * passenger pays the driver; driver pay is left out until pay rules exist
- * (spec §31), when it follows the driver's "pay in messages" setting.
+ * passenger pays the driver; the driver's price is the one written on the
+ * booking, so the driver sees what they will be paid.
  */
 export function messageJobFrom(job: Job): DriverMessageJob {
   return {
@@ -162,6 +164,6 @@ export function messageJobFrom(job: Job): DriverMessageJob {
     })),
     driverNotes: job.driverNotes ?? null,
     cashToCollectPence: job.paymentMethod === "cash" ? job.customerPricePence : null,
-    payPence: null,
+    payPence: job.driverPricePence ?? null,
   };
 }

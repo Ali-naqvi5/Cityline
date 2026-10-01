@@ -102,6 +102,7 @@ export async function JobAssignView(props: AdminViewServerProps) {
               choices={choices}
               notifyPassenger={job.notifyPassenger ?? true}
               canEmailPassenger={Boolean(job.leadEmail || job.bookerEmail)}
+              driverPricePence={job.driverPricePence ?? null}
               cancelHref={back}
             />
           ) : (

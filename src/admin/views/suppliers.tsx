@@ -55,7 +55,7 @@ export async function SuppliersView(props: AdminViewServerProps) {
     <OpsShell user={user} active="suppliers">
       <PageHeader
         title="Suppliers"
-        description="Partner platforms that send jobs, and the commission each keeps."
+        description="Partner platforms that send jobs. Their cut is taken before a job arrives."
         actions={
           <div className="flex flex-wrap gap-2">
             <ButtonLink
@@ -78,7 +78,7 @@ export async function SuppliersView(props: AdminViewServerProps) {
           <EmptyState
             icon={<Building2 aria-hidden className="h-5 w-5" />}
             title="No suppliers yet"
-            description="Add Trip.com and any other platform that sends you jobs, with the commission each keeps."
+            description="Add Trip.com and any other platform that sends you jobs."
             action={
               canEdit ? (
                 <ButtonLink href="/admin/suppliers/new" variant="primary" size="sm">
@@ -98,7 +98,6 @@ export async function SuppliersView(props: AdminViewServerProps) {
                 <div>
                   <p className="text-ink text-base font-medium">{supplier.name}</p>
                   <p className="text-ink-3 text-sm">
-                    {supplier.defaultCommissionBp / 100}% commission ·{" "}
                     {counts.get(supplier.id)?.total ?? 0} jobs
                   </p>
                 </div>
@@ -116,15 +115,6 @@ export async function SuppliersView(props: AdminViewServerProps) {
                   >
                     {supplier.name}
                   </Link>
-                ),
-              },
-              {
-                key: "commission",
-                header: "Default commission",
-                cell: (supplier) => (
-                  <span className="tabular-nums">
-                    {supplier.defaultCommissionBp / 100}%
-                  </span>
                 ),
               },
               {

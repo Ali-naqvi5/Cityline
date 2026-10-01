@@ -217,7 +217,7 @@ export async function DispatchView(props: AdminViewServerProps) {
           can(user.role, "jobs.edit") ? (
             <ButtonLink href="/admin/jobs/new" variant="primary">
               <Plus aria-hidden className="h-4 w-4" />
-              New job
+              New booking
             </ButtonLink>
           ) : null
         }

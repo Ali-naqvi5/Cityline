@@ -111,6 +111,27 @@
   --color-special: #5925dc;
   --color-special-soft: #f4f3ff;
   --color-special-line: #d9d6fe;
+
+  /* Client colours: one per supplier on the bookings dashboard, so a
+     controller can tell Trip.com from Webby at a glance. Never a status. */
+  --color-cat-1: #0e7490;
+  --color-cat-1-soft: #ecfeff;
+  --color-cat-1-line: #a5f3fc;
+  --color-cat-2: #6d28d9;
+  --color-cat-2-soft: #f5f3ff;
+  --color-cat-2-line: #ddd6fe;
+  --color-cat-3: #4d7c0f;
+  --color-cat-3-soft: #f7fee7;
+  --color-cat-3-line: #d9f99d;
+  --color-cat-4: #be123c;
+  --color-cat-4-soft: #fff1f2;
+  --color-cat-4-line: #fecdd3;
+  --color-cat-5: #c2410c;
+  --color-cat-5-soft: #fff7ed;
+  --color-cat-5-line: #fed7aa;
+  --color-cat-6: #3730a3;
+  --color-cat-6-soft: #eef2ff;
+  --color-cat-6-line: #c7d2fe;
 }
 
 @layer base {

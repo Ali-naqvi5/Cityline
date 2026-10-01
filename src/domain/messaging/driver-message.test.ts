@@ -40,10 +40,10 @@ describe("the driver's WhatsApp job message", () => {
     expect(text).toContain("Notes: Call on landing");
     expect(text).toContain("Office: +44 7926 608888");
     expect(text).not.toContain("cash");
-    expect(text).not.toContain("pay");
+    expect(text).not.toContain("Your price");
   });
 
-  it("shows cash to collect and pay only when set", () => {
+  it("shows cash to collect and the driver's price only when set", () => {
     const text = driverMessage(
       "update",
       { ...job, cashToCollectPence: 5500, payPence: 3500 },
@@ -51,7 +51,7 @@ describe("the driver's WhatsApp job message", () => {
     );
     expect(text).toContain("*UPDATED JOB J-000123*");
     expect(text).toContain("*Collect in cash: £55.00*");
-    expect(text).toContain("Your pay: £35.00");
+    expect(text).toContain("Your price: £35.00");
   });
 
   it("tells a driver plainly when a job is taken away or cancelled", () => {

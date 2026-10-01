@@ -28,7 +28,7 @@ export const TRACKED_FIELDS: Record<string, string> = {
   supplierReference: "Supplier reference",
   customerPricePence: "Price",
   paymentMethod: "Payment",
-  commissionPence: "Supplier commission",
+  driverPricePence: "Driver price",
   driverNotes: "Driver notes",
   internalNotes: "Internal notes",
   notifyPassenger: "Passenger email setting",

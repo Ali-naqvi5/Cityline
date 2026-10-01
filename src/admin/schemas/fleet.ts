@@ -6,7 +6,6 @@ import {
   VEHICLE_DOCUMENT_TYPES,
   type DocumentType,
 } from "@/domain/compliance/documents";
-import { parsePounds } from "@/domain/money";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { londonToUtc } from "@/lib/time";
 import { z } from "@/lib/zod";
@@ -56,38 +55,12 @@ export const driverSchema = z
     address: z.string().max(500),
     dateOfBirth: optionalDay,
     status: z.enum(["active", "suspended", "left"]),
-    employmentType: z.enum(["self_employed", "employee"]),
     startDate: optionalDay,
     endDate: optionalDay,
-    payRule: z.enum(["fixed", "percent"]),
-    payFixed: z.string(),
-    payPercent: z.string(),
-    showPayInMessages: z.enum(["default", "show", "hide"]),
     whatsappConsent: z.boolean(),
     notes: z.string().max(2000),
   })
   .superRefine((driver, ctx) => {
-    if (
-      driver.payRule === "fixed" &&
-      driver.payFixed &&
-      parsePounds(driver.payFixed) === null
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["payFixed"],
-        message: "Enter an amount such as 35 or 35.50.",
-      });
-    }
-    if (driver.payRule === "percent") {
-      const percent = Number(driver.payPercent);
-      if (!driver.payPercent || !(percent > 0 && percent <= 100)) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["payPercent"],
-          message: "Enter a percentage between 1 and 100.",
-        });
-      }
-    }
     if (driver.startDate && driver.endDate && driver.endDate < driver.startDate) {
       ctx.addIssue({
         code: "custom",
@@ -108,15 +81,8 @@ export function driverData(input: DriverInput, previousConsentAt?: string | null
     address: input.address || null,
     dateOfBirth: dayToIso(input.dateOfBirth),
     status: input.status,
-    employmentType: input.employmentType,
     startDate: dayToIso(input.startDate),
     endDate: dayToIso(input.endDate),
-    payRule: input.payRule,
-    payFixedPence:
-      input.payRule === "fixed" && input.payFixed ? parsePounds(input.payFixed) : null,
-    payPercentBp:
-      input.payRule === "percent" ? Math.round(Number(input.payPercent) * 100) : null,
-    showPayInMessages: input.showPayInMessages,
     // Keep the original consent date; record it when first given.
     whatsappConsentAt: input.whatsappConsent
       ? (previousConsentAt ?? new Date().toISOString())
@@ -178,12 +144,6 @@ export function vehicleData(input: VehicleInput) {
 
 export const supplierSchema = z.object({
   name: z.string().min(1, "Enter the supplier's name.").max(80),
-  commissionPercent: z
-    .string()
-    .refine(
-      (value) => value !== "" && Number(value) >= 0 && Number(value) <= 100,
-      "Enter a percentage from 0 to 100.",
-    ),
   paymentTermsDays: z
     .string()
     .refine(
@@ -211,7 +171,6 @@ export type SupplierInput = z.infer<typeof supplierSchema>;
 export function supplierData(input: SupplierInput) {
   return {
     name: input.name,
-    defaultCommissionBp: Math.round(Number(input.commissionPercent) * 100),
     paymentTermsDays: input.paymentTermsDays ? Number(input.paymentTermsDays) : null,
     contactName: input.contactName || null,
     email: input.email || null,

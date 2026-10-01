@@ -105,11 +105,17 @@ export default buildConfig({
           exact: true,
           meta: { title: "Dashboard" },
         },
+        opsBookings: {
+          Component: "@/admin/views/bookings#BookingsView",
+          path: "/bookings",
+          exact: true,
+          meta: { title: "Bookings" },
+        },
         opsJobs: {
-          Component: "@/admin/views/jobs#JobsView",
+          Component: "@/admin/views/jobs-redirect#JobsRedirect",
           path: "/jobs",
           exact: true,
-          meta: { title: "Jobs" },
+          meta: { title: "Bookings" },
         },
         opsJobNew: {
           Component: "@/admin/views/job-edit#JobEditView",
