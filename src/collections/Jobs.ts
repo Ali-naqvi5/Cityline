@@ -101,6 +101,16 @@ export const Jobs: CollectionConfig = {
     },
     { name: "booking", type: "relationship", relationTo: "bookings", index: true },
     {
+      name: "customer",
+      type: "relationship",
+      relationTo: "customers",
+      index: true,
+      admin: {
+        description:
+          "Who booked: from checkout for website bookings, matched by phone or email for office bookings. Empty for supplier passengers.",
+      },
+    },
+    {
       name: "leg",
       type: "select",
       options: [

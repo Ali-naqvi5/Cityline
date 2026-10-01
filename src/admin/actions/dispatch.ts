@@ -15,6 +15,7 @@ import {
   websiteJobData,
   websiteJobSchema,
 } from "@/admin/schemas/job";
+import { findOrCreateCustomer } from "@/domain/customers/link";
 import { relId } from "@/domain/dispatch/assignment";
 import { possibleDuplicates } from "@/domain/jobs/duplicates";
 import { isJobStatus } from "@/domain/jobs/labels";
@@ -176,11 +177,25 @@ export async function saveJobAction(
 
   let savedId: number;
   try {
+    // One history per person: an office booking belongs to the customer with
+    // this email, or this phone and name — or to a new one. A supplier's
+    // passengers are the supplier's customers, so are not recorded.
+    const customer =
+      data.source !== "supplier" && !(existing && existing.customer)
+        ? await findOrCreateCustomer(
+            payload,
+            { name: data.leadName, phone: data.leadPhone, email: data.leadEmail },
+            { user, overrideAccess: false },
+            data.isTest,
+          )
+        : null;
+    const linked = customer ? { customer: customer.id } : {};
+
     if (existing) {
       const saved = await payload.update({
         collection: "jobs",
         id: existing.id,
-        data,
+        data: { ...data, ...linked },
         user,
         overrideAccess: false,
       });
@@ -190,6 +205,7 @@ export async function saveJobAction(
         collection: "jobs",
         data: {
           ...data,
+          ...linked,
           reference: await nextJobReference(payload),
           status: "unassigned",
           driverMessageStatus: "not_sent",

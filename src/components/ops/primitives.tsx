@@ -20,11 +20,11 @@ const BUTTON_BASE =
   "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md font-medium transition-colors select-none disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none";
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-accent text-white shadow-xs hover:bg-accent-hover",
+  primary: "bg-accent text-on-solid shadow-xs hover:bg-accent-hover",
   secondary:
     "border border-line-strong bg-surface text-ink-2 shadow-xs hover:bg-sunken hover:text-ink",
   ghost: "text-ink-2 hover:bg-sunken hover:text-ink",
-  danger: "bg-danger text-white shadow-xs hover:bg-danger-hover",
+  danger: "bg-danger text-on-solid shadow-xs hover:bg-danger-hover",
 };
 
 // Touch targets are larger below the desktop breakpoint (spec §45).

@@ -164,11 +164,14 @@ export function NumberedPagination({
   totalPages,
   totalDocs,
   hrefFor,
+  noun = "bookings",
 }: {
   page: number;
   totalPages: number;
   totalDocs: number;
   hrefFor: (page: number) => string;
+  /** What is being counted, plural: "bookings", "customers". */
+  noun?: string;
 }) {
   if (totalPages <= 1) return null;
   const start = Math.max(1, Math.min(page - 3, totalPages - 6));
@@ -202,7 +205,7 @@ export function NumberedPagination({
           <span
             key={number}
             aria-current="page"
-            className={`${item} bg-accent text-white tabular-nums`}
+            className={`${item} bg-accent text-on-solid tabular-nums`}
           >
             {number}
           </span>
@@ -227,7 +230,9 @@ export function NumberedPagination({
           <span className={off}>Last</span>
         </>
       )}
-      <span className="text-ink-3 ml-1 text-sm tabular-nums">{totalDocs} bookings</span>
+      <span className="text-ink-3 ml-1 text-sm tabular-nums">
+        {totalDocs} {noun}
+      </span>
     </nav>
   );
 }

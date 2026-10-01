@@ -79,6 +79,7 @@ import { can } from "@/domain/staff/permissions";
 import { company } from "@/lib/company";
 import type {
   Booking,
+  Customer,
   Driver,
   Job,
   JobEvent,
@@ -388,6 +389,8 @@ export async function JobView(props: AdminViewServerProps) {
 
   const booking =
     typeof job.booking === "object" ? (job.booking as Booking | null) : null;
+  const customer =
+    typeof job.customer === "object" ? (job.customer as Customer | null) : null;
   const supplier =
     typeof job.supplier === "object" ? (job.supplier as Supplier | null) : null;
   const driver = typeof job.driver === "object" ? (job.driver as Driver | null) : null;
@@ -568,9 +571,23 @@ export async function JobView(props: AdminViewServerProps) {
               </Field>
               <Field label="Flight">{job.flightNumber || "—"}</Field>
               <Field label="Passengers and bags">
-                {job.passengers} passengers · {job.largeBags} large, {job.smallBags} small
-                bags
+                {job.passengers} {job.passengers === 1 ? "passenger" : "passengers"} ·{" "}
+                {job.largeBags} large, {job.smallBags} small{" "}
+                {job.largeBags + job.smallBags === 1 ? "bag" : "bags"}
               </Field>
+              {customer ? (
+                <Field label="Customer">
+                  <Link
+                    href={`/admin/customers/${customer.id}`}
+                    className="text-accent font-medium hover:underline"
+                  >
+                    {customer.name}
+                  </Link>
+                  <span className="text-ink-3 block text-sm">
+                    Every booking they have made
+                  </span>
+                </Field>
+              ) : null}
               <Field label="Lead passenger">
                 {job.leadName}
                 {job.nameBoardText && job.nameBoardText !== job.leadName ? (

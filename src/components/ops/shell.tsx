@@ -19,6 +19,8 @@ export interface ShellUser {
   name?: string | null;
   email: string;
   role: Role;
+  /** Light, dark or the device's choice — each person's own, from Settings. */
+  opsTheme?: "light" | "dark" | "system" | null;
 }
 
 function initials(user: ShellUser): string {
@@ -37,7 +39,7 @@ function Logo({ className }: { className?: string }) {
       width={708}
       height={531}
       priority
-      className={className}
+      className={cx("ops-logo", className)}
     />
   );
 }
@@ -127,7 +129,10 @@ export function OpsShell({
   const canSearchJobs = can(user.role, "jobs.view");
 
   return (
-    <div className="ops-root min-h-dvh lg:grid lg:grid-cols-[248px_minmax(0,1fr)] print:block">
+    <div
+      data-ops-theme={user.opsTheme ?? "light"}
+      className="ops-root min-h-dvh lg:grid lg:grid-cols-[248px_minmax(0,1fr)] print:block"
+    >
       <a
         href="#ops-main"
         className="bg-surface sr-only z-50 rounded-md px-3 py-2 text-sm font-medium focus:not-sr-only focus:fixed focus:top-2 focus:left-2"

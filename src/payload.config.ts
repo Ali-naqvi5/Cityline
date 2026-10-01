@@ -82,9 +82,9 @@ export default buildConfig({
     meta: {
       titleSuffix: "· Cityline",
     },
-    // Light only: the operations screens are designed in light, and Payload's
-    // own forms follow the device's dark mode otherwise.
-    theme: "light",
+    // Each person's light or dark choice, set in Settings → Appearance and
+    // carried to Payload's own screens by its theme cookie.
+    theme: "all",
     components: {
       graphics: {
         Logo: "@/admin/components/brand#AdminLogo",
@@ -140,6 +140,30 @@ export default buildConfig({
           path: "/jobs/:id",
           exact: true,
           meta: { title: "Job" },
+        },
+        opsCustomers: {
+          Component: "@/admin/views/customers#CustomersView",
+          path: "/customers",
+          exact: true,
+          meta: { title: "Customers" },
+        },
+        opsCustomerNew: {
+          Component: "@/admin/views/customer-edit#CustomerEditView",
+          path: "/customers/new",
+          exact: true,
+          meta: { title: "Add customer" },
+        },
+        opsCustomerEdit: {
+          Component: "@/admin/views/customer-edit#CustomerEditView",
+          path: "/customers/:id/edit",
+          exact: true,
+          meta: { title: "Edit customer" },
+        },
+        opsCustomer: {
+          Component: "@/admin/views/customer#CustomerView",
+          path: "/customers/:id",
+          exact: true,
+          meta: { title: "Customer" },
         },
         opsDispatch: {
           Component: "@/admin/views/dispatch#DispatchView",

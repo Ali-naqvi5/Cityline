@@ -420,7 +420,7 @@ function BookingsTable({
     <div className="hidden overflow-x-auto lg:block">
       <table className="w-full border-collapse text-xs">
         <caption className="sr-only">Bookings</caption>
-        <thead className="bg-ink text-white">
+        <thead className="bg-header text-white">
           <tr>
             <th scope="col" className={TH}>
               Booking

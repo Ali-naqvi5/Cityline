@@ -119,7 +119,7 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 |                | Job detail workspace + timeline                                               | ✅ 1 Oct; assign, status, WhatsApp, passenger email, history  |
 |                | Create job, return trip, duplicate checks                                     | ✅ 1 Oct; website jobs edit operational details only          |
 |                | Dispatch board, assign driver                                                 | ✅ 1 Oct                                                      |
-|                | Bookings, customers, quotes                                                   | 🔧 raw Payload                                                |
+|                | Customers; quotes, website orders                                             | 🔧 customers ✅ 2 Oct; quotes listed as Soon                  |
 |                | Amend booking, refunds, payment links                                         | ⬜                                                            |
 | Fleet          | Drivers, vehicles, documents, compliance, suppliers                           | ✅ 1 Oct; supplier money waits on Finance                     |
 | Messaging      | Send on WhatsApp (prefilled), passenger details                               | ✅ 1 Oct; wa.me link, statuses marked by hand; email only     |

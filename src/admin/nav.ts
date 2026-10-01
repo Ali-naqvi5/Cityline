@@ -139,7 +139,7 @@ export const NAV: NavSection[] = [
         href: "/admin/customers",
         icon: "customers",
         capability: "customers.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "quotes",
@@ -354,7 +354,7 @@ export const NAV: NavSection[] = [
         label: "Settings",
         href: "/admin/settings",
         icon: "settings",
-        capability: "system.view",
+        capability: "dashboard",
         ready: true,
       },
     ],

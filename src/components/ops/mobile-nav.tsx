@@ -106,7 +106,7 @@ export function MobileNav({
             type="button"
             aria-label="Close"
             tabIndex={-1}
-            className="bg-ink/40 absolute inset-0"
+            className="absolute inset-0 bg-black/50"
             onClick={() => setOpen(false)}
           />
           <div className="bg-surface absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-xl pb-[env(safe-area-inset-bottom)] shadow-lg">

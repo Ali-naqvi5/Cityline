@@ -165,6 +165,11 @@ See `docs/admin-implementation-map.md`. Rules that are easy to break:
   (`user, overrideAccess: false`), so collection access applies.
 - New or renamed views: register in `payload.config.ts` →
   `admin.components.views`, then `pnpm exec payload generate:importmap`.
+- **Dark mode** is each person's choice (Settings → Appearance, `users.opsTheme`),
+  set as `data-ops-theme` on the shell. Colours are tokens with a dark block
+  in `ops.css`; never hard-code a colour, use `text-on-solid` on solid
+  buttons, and do not use `light-dark()` — the CSS build rewrites it so it
+  resolves once, at the page root, and every colour turns transparent.
 - Styles: `src/app/(payload)/ops.css` — its own tokens (`text-ink-3`,
   `bg-accent-soft`, pixel sizes; Payload's root font is 13px) and no preflight.
   In ops components use `cx` from `components/ops/primitives`, **not** `cn`:

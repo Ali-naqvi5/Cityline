@@ -168,7 +168,32 @@ export async function JobEditView(props: AdminViewServerProps) {
   }));
 
   const website = !isNew && job?.source === "website";
-  const values = !job ? EMPTY : isNew ? returnValuesFrom(job) : valuesFrom(job);
+  // "New booking" from a customer's page starts with who they are.
+  const customerId =
+    isNew && !job ? Number(param(props.searchParams, "customer")) || null : null;
+  const customer = customerId
+    ? await payload.findByID({
+        collection: "customers",
+        id: customerId,
+        depth: 0,
+        user,
+        overrideAccess: false,
+        disableErrors: true,
+      })
+    : null;
+  const values = !job
+    ? customer
+      ? {
+          ...EMPTY,
+          source: "phone",
+          leadName: customer.name,
+          leadPhone: customer.phone,
+          leadEmail: customer.email ?? "",
+        }
+      : EMPTY
+    : isNew
+      ? returnValuesFrom(job)
+      : valuesFrom(job);
   const mode = isNew ? "new" : website ? "website" : "edit";
   const back = isNew
     ? job

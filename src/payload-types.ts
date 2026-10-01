@@ -151,12 +151,16 @@ export interface UserAuthOperations {
  */
 export interface Customer {
   id: number;
-  email: string;
+  email?: string | null;
   name: string;
   phone: string;
   marketingConsent?: boolean | null;
   marketingConsentAt?: string | null;
   stripeCustomerId?: string | null;
+  /**
+   * Office notes: always needs a child seat, VIP, flights often delayed. Never shown to the customer.
+   */
+  notes?: string | null;
   /**
    * PRD-07: excluded from reports and TfL exports.
    */
@@ -306,6 +310,10 @@ export interface Job {
    */
   supplierReference?: string | null;
   booking?: (number | null) | Booking;
+  /**
+   * Who booked: from checkout for website bookings, matched by phone or email for office bookings. Empty for supplier passengers.
+   */
+  customer?: (number | null) | Customer;
   /**
    * One job per leg. Unique per (booking, leg).
    */
@@ -534,6 +542,10 @@ export interface User {
   role: 'owner' | 'controller' | 'accounts' | 'editor';
   active?: boolean | null;
   lastLoginAt?: string | null;
+  /**
+   * How the operations screens look for this person. Each member of staff chooses their own in Settings.
+   */
+  opsTheme: 'light' | 'dark' | 'system';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -869,6 +881,7 @@ export interface CustomersSelect<T extends boolean = true> {
   marketingConsent?: T;
   marketingConsentAt?: T;
   stripeCustomerId?: T;
+  notes?: T;
   isTest?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -925,6 +938,7 @@ export interface JobsSelect<T extends boolean = true> {
   supplier?: T;
   supplierReference?: T;
   booking?: T;
+  customer?: T;
   leg?: T;
   returnOfJob?: T;
   pickupAt?: T;
@@ -1178,6 +1192,7 @@ export interface UsersSelect<T extends boolean = true> {
   role?: T;
   active?: T;
   lastLoginAt?: T;
+  opsTheme?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

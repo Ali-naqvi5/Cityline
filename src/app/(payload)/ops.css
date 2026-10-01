@@ -80,6 +80,12 @@
   --container-6xl: 1152px;
   --container-7xl: 1280px;
 
+  /*
+   * Colours, light. The dark values are below, applied on the shell when a
+   * member of staff chooses Dark in Settings (`data-ops-theme` on .ops-root),
+   * or "Match the device" on a device set to dark.
+   */
+
   /* Surfaces and text */
   --color-white: #ffffff;
   --color-black: #000000;
@@ -92,6 +98,10 @@
   --color-ink-2: #344054;
   --color-ink-3: #667085;
   --color-ink-4: #98a2b3;
+  /* Text on a solid accent or danger button. */
+  --color-on-solid: #ffffff;
+  /* The bookings register's header bar: dark in both themes. */
+  --color-header: #101828;
 
   /* State colours (the only colour in the UI; always paired with text) */
   --color-accent: #1d4ed8;
@@ -134,7 +144,127 @@
   --color-cat-6-line: #c7d2fe;
 }
 
+/*
+ * Dark theme. The same tokens with their dark values, redefined on the shell
+ * so every utility built on them follows. Written out twice — for Dark, and
+ * for "Match the device" on a dark device — because a media query cannot sit
+ * inside a selector. (Not `light-dark()`: the CSS build rewrites it for older
+ * browsers in a way that resolves once, at the page root.)
+ */
 @layer base {
+  .ops-root[data-ops-theme="dark"] {
+    --color-canvas: #0e1117;
+    --color-surface: #161b22;
+    --color-sunken: #1c2230;
+    --color-line: #2a3140;
+    --color-line-strong: #3a4354;
+    --color-ink: #f0f3f8;
+    --color-ink-2: #cdd4df;
+    --color-ink-3: #9aa4b5;
+    --color-ink-4: #6b7587;
+    --color-on-solid: #0b1220;
+    --color-header: #232b38;
+    --color-accent: #7ea3ff;
+    --color-accent-hover: #a3bdff;
+    --color-accent-soft: #16213a;
+    --color-accent-line: #2b3d66;
+    --color-ok: #5fd39a;
+    --color-ok-soft: #0f2a1d;
+    --color-ok-line: #1f5a3c;
+    --color-warn: #f5b74a;
+    --color-warn-soft: #2b2110;
+    --color-warn-line: #6a4d16;
+    --color-danger: #ff8a7a;
+    --color-danger-hover: #ffaa9e;
+    --color-danger-soft: #331512;
+    --color-danger-line: #6e2b24;
+    --color-special: #b9aefc;
+    --color-special-soft: #211b3f;
+    --color-special-line: #43398f;
+    --color-cat-1: #4fd1e5;
+    --color-cat-1-soft: #0e2a31;
+    --color-cat-1-line: #1d5560;
+    --color-cat-2: #c4a8ff;
+    --color-cat-2-soft: #23193d;
+    --color-cat-2-line: #4a3585;
+    --color-cat-3: #a3d65c;
+    --color-cat-3-soft: #1c2610;
+    --color-cat-3-line: #3f5a1d;
+    --color-cat-4: #ff8fa8;
+    --color-cat-4-soft: #331420;
+    --color-cat-4-line: #6e2a3d;
+    --color-cat-5: #ffa66b;
+    --color-cat-5-soft: #331d10;
+    --color-cat-5-line: #6e3a1c;
+    --color-cat-6: #a5b4fc;
+    --color-cat-6-soft: #1b1d3d;
+    --color-cat-6-line: #3c4194;
+  }
+  @media (prefers-color-scheme: dark) {
+    .ops-root[data-ops-theme="system"] {
+      --color-canvas: #0e1117;
+      --color-surface: #161b22;
+      --color-sunken: #1c2230;
+      --color-line: #2a3140;
+      --color-line-strong: #3a4354;
+      --color-ink: #f0f3f8;
+      --color-ink-2: #cdd4df;
+      --color-ink-3: #9aa4b5;
+      --color-ink-4: #6b7587;
+      --color-on-solid: #0b1220;
+      --color-header: #232b38;
+      --color-accent: #7ea3ff;
+      --color-accent-hover: #a3bdff;
+      --color-accent-soft: #16213a;
+      --color-accent-line: #2b3d66;
+      --color-ok: #5fd39a;
+      --color-ok-soft: #0f2a1d;
+      --color-ok-line: #1f5a3c;
+      --color-warn: #f5b74a;
+      --color-warn-soft: #2b2110;
+      --color-warn-line: #6a4d16;
+      --color-danger: #ff8a7a;
+      --color-danger-hover: #ffaa9e;
+      --color-danger-soft: #331512;
+      --color-danger-line: #6e2b24;
+      --color-special: #b9aefc;
+      --color-special-soft: #211b3f;
+      --color-special-line: #43398f;
+      --color-cat-1: #4fd1e5;
+      --color-cat-1-soft: #0e2a31;
+      --color-cat-1-line: #1d5560;
+      --color-cat-2: #c4a8ff;
+      --color-cat-2-soft: #23193d;
+      --color-cat-2-line: #4a3585;
+      --color-cat-3: #a3d65c;
+      --color-cat-3-soft: #1c2610;
+      --color-cat-3-line: #3f5a1d;
+      --color-cat-4: #ff8fa8;
+      --color-cat-4-soft: #331420;
+      --color-cat-4-line: #6e2a3d;
+      --color-cat-5: #ffa66b;
+      --color-cat-5-soft: #331d10;
+      --color-cat-5-line: #6e3a1c;
+      --color-cat-6: #a5b4fc;
+      --color-cat-6-soft: #1b1d3d;
+      --color-cat-6-line: #3c4194;
+    }
+  }
+}
+
+@layer base {
+  /* Native controls — date pickers, menus, scrollbars — follow the theme. */
+  /* Set on the shell only; dialogs inside it inherit. */
+  .ops-root[data-ops-theme="light"] {
+    color-scheme: light;
+  }
+  .ops-root[data-ops-theme="dark"] {
+    color-scheme: dark;
+  }
+  .ops-root[data-ops-theme="system"] {
+    color-scheme: light dark;
+  }
+
   .ops-root {
     font-family: var(--font-ui);
     font-size: 14px;
@@ -211,8 +341,26 @@
     outline-offset: 0;
   }
 
+  /* The logo is drawn in dark slate: on the dark theme it sits on a white tile. */
+  .ops-root[data-ops-theme="dark"] .ops-logo {
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 2px 6px;
+    box-sizing: content-box;
+  }
+  @media (prefers-color-scheme: dark) {
+    .ops-root[data-ops-theme="system"] .ops-logo {
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 2px 6px;
+      box-sizing: content-box;
+    }
+  }
+
   @media print {
-    .ops-root {
+    .ops-root,
+    .ops-root[data-ops-theme] {
+      color-scheme: light;
       background: #ffffff;
     }
   }

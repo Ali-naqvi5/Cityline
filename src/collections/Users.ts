@@ -56,6 +56,7 @@ export const Users: CollectionConfig = {
         label: (doc) => doc.name || doc.email,
         ignore: [
           "lastLoginAt",
+          "opsTheme",
           "loginAttempts",
           "lockUntil",
           "resetPasswordToken",
@@ -111,6 +112,21 @@ export const Users: CollectionConfig = {
         readOnly: true,
         // Written at each login; meaningless on a form creating the account.
         condition: (data) => Boolean(data?.id),
+      },
+    },
+    {
+      name: "opsTheme",
+      type: "select",
+      required: true,
+      defaultValue: "light",
+      options: [
+        { label: "Light", value: "light" },
+        { label: "Dark", value: "dark" },
+        { label: "Match the device", value: "system" },
+      ],
+      admin: {
+        description:
+          "How the operations screens look for this person. Each member of staff chooses their own in Settings.",
       },
     },
   ],

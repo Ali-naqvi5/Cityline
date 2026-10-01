@@ -1,6 +1,7 @@
 import "server-only";
 
 import { TERMS } from "@/content/legal";
+import { sameName } from "@/domain/customers/match";
 import { nextJobReference } from "@/domain/jobs/next-reference";
 import { chosenExtras } from "@/domain/pricing/extras";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
@@ -278,6 +279,7 @@ export async function confirmBooking(
           reference: jobReferences[index] ?? (await nextJobReference(payload)),
           source: "website",
           booking: booking.id,
+          customer: customer.id,
           leg: leg.leg,
           pickupAt: londonToUtc(leg.date, leg.time).toISOString(),
           pickupAddress: leg.pickup,
@@ -379,6 +381,12 @@ function bookerFields(details: PassengerDetails) {
 /**
  * One customer row per email, so a repeat booker is one record rather than five.
  *
+ * Someone the office first booked by phone has a record with their phone and
+ * name but no email. When they book online, that record is theirs: it is
+ * found by phone and name (`domain/customers/match.ts`) and gains the email,
+ * so their history stays in one place. A different name on the same phone is
+ * a different person, and gets a record of their own.
+ *
  * Marketing consent is only ever turned **on** here, never off: withdrawing it
  * is a deliberate act through an unsubscribe link, and a later booking made
  * without ticking the box is not that.
@@ -402,7 +410,19 @@ async function upsertCustomer(
     req,
   });
 
-  const found = existing.docs[0];
+  let found = existing.docs[0];
+  if (!found) {
+    const samePhone = await payload.find({
+      collection: "customers",
+      where: {
+        and: [{ phone: { equals: details.phone } }, { email: { exists: false } }],
+      },
+      limit: 20,
+      overrideAccess: true,
+      req,
+    });
+    found = samePhone.docs.find((customer) => sameName(customer.name, name));
+  }
   if (found) {
     return payload.update({
       collection: "customers",
@@ -410,6 +430,7 @@ async function upsertCustomer(
       data: {
         name,
         phone: details.phone,
+        email: details.email,
         ...(details.marketingConsent
           ? { marketingConsent: true, marketingConsentAt: new Date().toISOString() }
           : {}),
