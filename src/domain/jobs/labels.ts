@@ -73,3 +73,25 @@ export function vehicleClassName(slug: string | null | undefined): string {
   if (!slug) return "—";
   return VEHICLE_CLASSES.find((vehicle) => vehicle.slug === slug)?.name ?? slug;
 }
+
+/** Sources staff may enter a job from — never "website" (§2). */
+export const STAFF_SOURCES = [
+  "supplier",
+  "phone",
+  "whatsapp",
+  "email",
+  "account",
+  "other",
+] as const satisfies readonly JobSource[];
+
+/** How a staff job is paid. "Paid on the website" belongs to checkout alone. */
+export const STAFF_PAYMENT_METHODS = [
+  "supplier",
+  "cash",
+  "card_link",
+  "bank",
+  "account",
+] as const;
+
+/** Most via stops a job can have. */
+export const MAX_STOPS = 4;

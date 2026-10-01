@@ -431,3 +431,65 @@ export function manageLinkEmail(reference: string, manageUrl: string): BuiltEmai
 
   return { subject, html, text };
 }
+
+export interface DriverDetailsEmailData {
+  /** The reference the customer knows: the booking's, or the job's. */
+  reference: string;
+  pickupAt: Date;
+  pickup: string;
+  driverFirstName: string;
+  phvLicence: string;
+  vehicle: string;
+  colour: string;
+  registration: string;
+}
+
+/**
+ * Who is coming (NOT-02, CMP-04): the driver's first name and PHV licence
+ * number, the car and its registration — enough to recognise the car and
+ * check it is a licensed one — and the office number, never the driver's own.
+ */
+export function driverDetailsEmail(data: DriverDetailsEmailData): BuiltEmail {
+  const pickupWhen = `${formatDate(data.pickupAt)} at ${formatTime(data.pickupAt)}`;
+  const car = `${data.colour} ${data.vehicle}`;
+  const subject = `Your driver for ${pickupWhen}: ${data.driverFirstName}, ${data.registration}`;
+
+  const rows: [string, string][] = [
+    ["Pickup", `${escapeHtml(pickupWhen)}<br>${escapeHtml(data.pickup)}`],
+    ["Driver", escapeHtml(data.driverFirstName)],
+    ["PHV licence", escapeHtml(data.phvLicence)],
+    ["Car", escapeHtml(car)],
+    ["Registration", `<strong>${escapeHtml(data.registration)}</strong>`],
+  ];
+
+  const html = frame(
+    `${data.driverFirstName} will drive you, in a ${car}, ${data.registration}.`,
+    `<p style="margin:0 0 12px;font-size:20px;font-weight:700;">Your driver</p>
+<p style="margin:0 0 16px;">Here are the details of the driver for booking <strong>${escapeHtml(data.reference)}</strong>. Please check the registration before you get in.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${LINE};border-radius:8px;">
+${rows
+  .map(
+    ([label, value]) =>
+      `<tr><td style="padding:8px 12px;width:34%;vertical-align:top;color:${MUTED};font-size:13px;">${label}</td><td style="padding:8px 12px;vertical-align:top;">${value}</td></tr>`,
+  )
+  .join("\n")}
+</table>
+<p style="margin:16px 0 0;color:${MUTED};font-size:13px;">Your driver is licensed by ${escapeHtml(company.licensingAuthority)}. If you cannot find them, call us on ${escapeHtml(company.phone)}.</p>`,
+  );
+
+  const text = [
+    `Your driver`,
+    ``,
+    `The driver for booking ${data.reference}. Please check the registration before you get in.`,
+    ``,
+    `Pickup: ${pickupWhen}, ${data.pickup}`,
+    `Driver: ${data.driverFirstName}`,
+    `PHV licence: ${data.phvLicence}`,
+    `Car: ${car}`,
+    `Registration: ${data.registration}`,
+    ``,
+    `Your driver is licensed by ${company.licensingAuthority}. If you cannot find them, call us on ${company.phone}.`,
+  ].join("\n");
+
+  return { subject, html, text };
+}

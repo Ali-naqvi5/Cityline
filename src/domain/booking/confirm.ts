@@ -1,9 +1,7 @@
 import "server-only";
 
-import { sql, type PostgresAdapter } from "@payloadcms/db-postgres";
-
 import { TERMS } from "@/content/legal";
-import { formatJobReference } from "@/domain/jobs/reference";
+import { nextJobReference } from "@/domain/jobs/next-reference";
 import { chosenExtras } from "@/domain/pricing/extras";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { payloadClient } from "@/lib/payload";
@@ -302,6 +300,8 @@ export async function confirmBooking(
             unitPricePence: extra.pricePence,
           })),
           status: "unassigned",
+          driverMessageStatus: "not_sent",
+          passengerMessageStatus: "not_sent",
           /*
            * `takenAt` is set but `takenByUser` is not: §14 wants both who took
            * the booking and when, and for a website job the answer to the
@@ -360,18 +360,6 @@ async function bookingForPayment(
 
   const booking = found.docs[0]?.booking;
   return booking && typeof booking === "object" ? booking.reference : null;
-}
-
-/** `J-000042`, from the database sequence (see the second migration). */
-async function nextJobReference(payload: PayloadClient): Promise<string> {
-  // Payload types `db` as its generic adapter; `payload.config.ts` configures
-  // the Postgres one, which is what exposes Drizzle for raw SQL.
-  const db = payload.db as unknown as PostgresAdapter;
-  const result = await db.drizzle.execute<{ n: string }>(
-    sql`select nextval('job_reference_seq') as n`,
-  );
-
-  return formatJobReference(Number(result.rows[0]?.n));
 }
 
 /**

@@ -11,3 +11,17 @@ export interface FormState {
 }
 
 export const EMPTY_FORM: FormState = { errors: {} };
+
+/** A job that may be the one being entered (spec §14), for the warning. */
+export interface DuplicateSummary {
+  id: number;
+  reference: string;
+  when: string;
+  passenger: string;
+  reasons: string[];
+}
+
+/** The job form also warns about possible duplicates before saving. */
+export interface JobFormState extends FormState {
+  duplicates?: DuplicateSummary[];
+}

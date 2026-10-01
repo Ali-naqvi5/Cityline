@@ -61,10 +61,13 @@ export const enforceJobRules: CollectionBeforeChangeHook = async ({
     data.supplierReference = normaliseSupplierReference(data.supplierReference) || null;
   }
 
-  // JOB-03: one supplier reference, once, per supplier. The database has a
-  // unique index too; this check exists to say which job already has it.
+  // JOB-03: one supplier reference, once, per supplier — once for each leg,
+  // since a supplier's round trip is often one reference for both journeys.
+  // The database has a unique index too; this check exists to say which job
+  // already has it.
   const supplier = data.supplier ?? originalDoc?.supplier;
   const reference = data.supplierReference ?? originalDoc?.supplierReference;
+  const leg = data.leg ?? originalDoc?.leg ?? null;
   if (supplier && reference) {
     const supplierId = typeof supplier === "object" ? supplier.id : supplier;
     const existing = await req.payload.find({
@@ -73,6 +76,9 @@ export const enforceJobRules: CollectionBeforeChangeHook = async ({
         and: [
           { supplier: { equals: supplierId } },
           { supplierReference: { equals: reference } },
+          leg === "return"
+            ? { leg: { equals: "return" } }
+            : { or: [{ leg: { exists: false } }, { leg: { equals: "outbound" } }] },
           ...(originalDoc?.id ? [{ id: { not_equals: originalDoc.id } }] : []),
         ],
       },
@@ -86,7 +92,7 @@ export const enforceJobRules: CollectionBeforeChangeHook = async ({
       fail([
         {
           path: "supplierReference",
-          message: `This supplier reference is already entered as ${duplicate.reference}.`,
+          message: `This supplier reference is already entered as ${duplicate.reference}${leg === "return" ? " (return)" : ""}.`,
         },
       ]);
     }

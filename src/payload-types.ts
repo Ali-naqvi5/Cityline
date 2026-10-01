@@ -344,6 +344,12 @@ export interface Job {
   leadName: string;
   leadPhone: string;
   leadEmail?: string | null;
+  /**
+   * Who booked, when it is not the passenger — a PA, a travel agent. Staff jobs only; a website booking keeps its booker on the booking.
+   */
+  bookerName?: string | null;
+  bookerPhone?: string | null;
+  bookerEmail?: string | null;
   meetAndGreet?: boolean | null;
   /**
    * What goes on the driver's board. The travelling passenger's name, not the booker's.
@@ -373,9 +379,21 @@ export interface Job {
   dispatchedByUser?: (number | null) | User;
   dispatchedAt?: string | null;
   subcontractorName?: string | null;
+  driverConfirmedAt?: string | null;
   completedAt?: string | null;
+  noShowAt?: string | null;
   cancelledAt?: string | null;
   cancelReason?: string | null;
+  /**
+   * The job message to the assigned driver. Reset when the driver changes.
+   */
+  driverMessageStatus: 'not_sent' | 'sent' | 'delivered' | 'read' | 'failed';
+  driverMessageAt?: string | null;
+  /**
+   * The driver's details emailed to the passenger (NOT-02).
+   */
+  passengerMessageStatus: 'not_sent' | 'sent' | 'failed';
+  passengerMessageAt?: string | null;
   /**
    * CMP-02: a fare must be agreed before the journey and recorded. Integer pence (NFR-08).
    */
@@ -399,6 +417,9 @@ export interface Job {
   locked?: boolean | null;
   driverNotes?: string | null;
   internalNotes?: string | null;
+  /**
+   * Email the passenger their driver's details when a driver is assigned (NOT-02). Some suppliers contact their passengers themselves.
+   */
   notifyPassenger?: boolean | null;
   archivedAt?: string | null;
   /**
@@ -925,6 +946,9 @@ export interface JobsSelect<T extends boolean = true> {
   leadName?: T;
   leadPhone?: T;
   leadEmail?: T;
+  bookerName?: T;
+  bookerPhone?: T;
+  bookerEmail?: T;
   meetAndGreet?: T;
   nameBoardText?: T;
   extras?:
@@ -945,9 +969,15 @@ export interface JobsSelect<T extends boolean = true> {
   dispatchedByUser?: T;
   dispatchedAt?: T;
   subcontractorName?: T;
+  driverConfirmedAt?: T;
   completedAt?: T;
+  noShowAt?: T;
   cancelledAt?: T;
   cancelReason?: T;
+  driverMessageStatus?: T;
+  driverMessageAt?: T;
+  passengerMessageStatus?: T;
+  passengerMessageAt?: T;
   customerPricePence?: T;
   paymentMethod?: T;
   commissionBp?: T;

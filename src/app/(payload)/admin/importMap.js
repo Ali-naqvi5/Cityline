@@ -4,7 +4,10 @@ import { BackToOperations as BackToOperations_c53658d87906801e13270722b09ddbac }
 import { DashboardRedirect as DashboardRedirect_bc25e25fd530623dfbb02f2d0f51c35b } from "@/admin/views/dashboard-redirect";
 import { DashboardView as DashboardView_56545e2ed34b3ba298fe73d88e9741df } from "@/admin/views/dashboard";
 import { JobsView as JobsView_8a9dc34559c7c40308915b39114dd36a } from "@/admin/views/jobs";
+import { JobEditView as JobEditView_018c9dbcfb5d9bf039216b2afabfaa1f } from "@/admin/views/job-edit";
+import { JobAssignView as JobAssignView_3457d931df502da08feb7d7f38e85e25 } from "@/admin/views/job-assign";
 import { JobView as JobView_5c855259d8c4cca848a8268fc94ea8f6 } from "@/admin/views/job";
+import { DispatchView as DispatchView_759e910e4ca7fcbc505c8147263dddbf } from "@/admin/views/dispatch";
 import { DriversView as DriversView_5b3d267809e9c8ef7944527d000d51ca } from "@/admin/views/drivers";
 import { DriverEditView as DriverEditView_3ac60765cb47a383e9bd29ba945977f7 } from "@/admin/views/driver-edit";
 import { DriverView as DriverView_132979e2a4b45245f77bf426a5370f41 } from "@/admin/views/driver";
@@ -29,7 +32,11 @@ export const importMap = {
     DashboardRedirect_bc25e25fd530623dfbb02f2d0f51c35b,
   "@/admin/views/dashboard#DashboardView": DashboardView_56545e2ed34b3ba298fe73d88e9741df,
   "@/admin/views/jobs#JobsView": JobsView_8a9dc34559c7c40308915b39114dd36a,
+  "@/admin/views/job-edit#JobEditView": JobEditView_018c9dbcfb5d9bf039216b2afabfaa1f,
+  "@/admin/views/job-assign#JobAssignView":
+    JobAssignView_3457d931df502da08feb7d7f38e85e25,
   "@/admin/views/job#JobView": JobView_5c855259d8c4cca848a8268fc94ea8f6,
+  "@/admin/views/dispatch#DispatchView": DispatchView_759e910e4ca7fcbc505c8147263dddbf,
   "@/admin/views/drivers#DriversView": DriversView_5b3d267809e9c8ef7944527d000d51ca,
   "@/admin/views/driver-edit#DriverEditView":
     DriverEditView_3ac60765cb47a383e9bd29ba945977f7,

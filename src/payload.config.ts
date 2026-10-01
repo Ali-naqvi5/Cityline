@@ -111,11 +111,35 @@ export default buildConfig({
           exact: true,
           meta: { title: "Jobs" },
         },
+        opsJobNew: {
+          Component: "@/admin/views/job-edit#JobEditView",
+          path: "/jobs/new",
+          exact: true,
+          meta: { title: "New job" },
+        },
+        opsJobEdit: {
+          Component: "@/admin/views/job-edit#JobEditView",
+          path: "/jobs/:id/edit",
+          exact: true,
+          meta: { title: "Edit job" },
+        },
+        opsJobAssign: {
+          Component: "@/admin/views/job-assign#JobAssignView",
+          path: "/jobs/:id/assign",
+          exact: true,
+          meta: { title: "Assign driver" },
+        },
         opsJob: {
           Component: "@/admin/views/job#JobView",
           path: "/jobs/:id",
           exact: true,
           meta: { title: "Job" },
+        },
+        opsDispatch: {
+          Component: "@/admin/views/dispatch#DispatchView",
+          path: "/dispatch",
+          exact: true,
+          meta: { title: "Dispatch" },
         },
         opsDrivers: {
           Component: "@/admin/views/drivers#DriversView",

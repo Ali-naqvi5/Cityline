@@ -157,6 +157,15 @@ describe("checkEligibility", () => {
     expect(upgrade.warnings.join(" ")).toMatch(/upgrade/);
   });
 
+  it("warns, without refusing, when the vehicle is not one the driver uses", () => {
+    const result = checkEligibility(input({ linked: false }));
+    expect(result.eligible).toBe(true);
+    expect(result.warnings).toContain(
+      "This vehicle is not one the driver normally uses.",
+    );
+    expect(checkEligibility(input({ linked: true })).warnings).toEqual([]);
+  });
+
   it("refuses a suspended driver or an off-road vehicle", () => {
     expect(
       checkEligibility(

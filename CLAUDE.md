@@ -182,6 +182,18 @@ See `docs/admin-implementation-map.md`. Rules that are easy to break:
   collection's `read` access passes.
 - Nothing is shown as working before it works: unbuilt screens are "Soon" in
   the navigation; values not recorded say so rather than showing £0.00.
+- **Job rules live in the jobs collection's hooks**
+  (`collections/hooks/jobs.ts`, `job-dispatch.ts`), not in screens: driver
+  eligibility at the pickup time, copying the PHV number and registration,
+  the status order (`domain/jobs/status.ts`), and the job's history rows for
+  staff changes. Payload fills unchanged fields from the stored record before
+  `beforeChange` runs — detect changes by comparing values, never by `key in
+data`. To pass a value from `beforeChange` to `afterChange`, use
+  `req.context`; nested Local API calls replace it, so a destructured
+  `context` argument goes stale.
+- WhatsApp is "click to send" (`wa.me` link with the message written) until
+  the Business API is connected; the job records only what is known — that
+  the message was opened — and the controller marks delivered or read.
 
 ## Definition of done (every task)
 

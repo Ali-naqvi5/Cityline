@@ -21,6 +21,7 @@ import {
  * Warnings — the controller is told, and may go ahead:
  *   - a document runs out within 30 days of the pickup;
  *   - the vehicle is a different class that can still do the job (an upgrade);
+ *   - the vehicle is not one the driver normally uses;
  *   - the driver has another job within 90 minutes.
  */
 
@@ -59,6 +60,8 @@ export interface EligibilityInput {
   };
   /** Pickup times of the driver's other open jobs. */
   otherPickups: readonly Date[];
+  /** Whether the vehicle lists this driver as one who normally uses it. */
+  linked?: boolean;
 }
 
 export interface Eligibility {
@@ -67,7 +70,7 @@ export interface Eligibility {
   warnings: string[];
 }
 
-const CLASH_MINUTES = 90;
+export const CLASH_MINUTES = 90;
 const WARN_DAYS = 30;
 
 function label(type: string): string {
@@ -114,6 +117,10 @@ export function checkEligibility(input: EligibilityInput): Eligibility {
     warnings.push(
       "Different vehicle class from the booking — an upgrade for the customer.",
     );
+  }
+
+  if (input.linked === false) {
+    warnings.push("This vehicle is not one the driver normally uses.");
   }
 
   // Documents that are fine at the pickup but run out soon after it.

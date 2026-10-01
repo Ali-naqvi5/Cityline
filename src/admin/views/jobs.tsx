@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Plane, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plane, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
@@ -34,7 +34,13 @@ import {
   TestBadge,
   UrgentBadge,
 } from "@/components/ops/jobs";
-import { buttonClass, cx, PageHeader, Panel } from "@/components/ops/primitives";
+import {
+  buttonClass,
+  ButtonLink,
+  cx,
+  PageHeader,
+  Panel,
+} from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { EmptyState, ErrorState, NoAccess } from "@/components/ops/states";
 import {
@@ -45,6 +51,7 @@ import {
   vehicleClassName,
 } from "@/domain/jobs/labels";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
+import { can } from "@/domain/staff/permissions";
 import type { Booking, Job } from "@/payload-types";
 
 /**
@@ -588,7 +595,17 @@ export async function JobsView(props: AdminViewServerProps) {
       <PageHeader
         title="Jobs"
         description="Every job from every source — the booking register TfL inspects."
-        actions={<ViewTabs filters={filters} />}
+        actions={
+          <>
+            <ViewTabs filters={filters} />
+            {can(user.role, "jobs.edit") ? (
+              <ButtonLink href="/admin/jobs/new" variant="primary">
+                <Plus aria-hidden className="h-4 w-4" />
+                New job
+              </ButtonLink>
+            ) : null}
+          </>
+        }
       />
 
       <Panel bodyClassName="p-0">

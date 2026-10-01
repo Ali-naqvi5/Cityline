@@ -116,13 +116,13 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 | Shell          | Sidebar, top bar, mobile tab bar, role filtering                              | ✅ 1 Oct                                                      |
 | Dashboard      | Owner / Controller / Accounts / Editor                                        | ✅ 1 Oct; compliance and message alerts wait on those screens |
 | Operations     | Jobs list / day / week, filters, search                                       | ✅ 1 Oct; supplier and driver filters wait on those records   |
-|                | Job detail workspace + timeline                                               | ✅ 1 Oct; read-only plus resend manage link                   |
-|                | Create job, return trip, duplicate checks                                     | ⬜                                                            |
-|                | Dispatch board, assign driver                                                 | ⬜                                                            |
+|                | Job detail workspace + timeline                                               | ✅ 1 Oct; assign, status, WhatsApp, passenger email, history  |
+|                | Create job, return trip, duplicate checks                                     | ✅ 1 Oct; website jobs edit operational details only          |
+|                | Dispatch board, assign driver                                                 | ✅ 1 Oct                                                      |
 |                | Bookings, customers, quotes                                                   | 🔧 raw Payload                                                |
 |                | Amend booking, refunds, payment links                                         | ⬜                                                            |
 | Fleet          | Drivers, vehicles, documents, compliance, suppliers                           | ✅ 1 Oct; supplier money waits on Finance                     |
-| Messaging      | Send on WhatsApp (prefilled), passenger details                               | ⬜                                                            |
+| Messaging      | Send on WhatsApp (prefilled), passenger details                               | ✅ 1 Oct; wa.me link, statuses marked by hand; email only     |
 | Alerts         | Notification centre                                                           | ⬜                                                            |
 | Finance        | Job finance, costs, driver pay, statements, supplier money, expenses, reports | ⬜                                                            |
 | Reports        | TfL register, run sheet, jobs/driver/vehicle/supplier reports                 | ⬜                                                            |
@@ -132,23 +132,38 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 
 ## Server-side rules: status
 
-| Rule                                                 | Status                                                                             |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Website bookings cannot be created by hand           | ✅ bookings and jobs (hook)                                                        |
-| Job source immutable                                 | ✅ hook                                                                            |
-| Protected website job fields                         | ✅ hook; Amend booking is the sanctioned path                                      |
-| Status transitions valid, timestamped, attributed    | ⬜                                                                                 |
-| Expired driver / vehicle / wrong class cannot assign | 🔧 rules ✅ (`domain/dispatch/eligibility.ts`); enforced at assignment in Dispatch |
-| Supplier reference unique per supplier               | ✅ hook + partial unique index                                                     |
-| Refunds staff-only, audited                          | ⬜                                                                                 |
-| Role permissions server-side                         | ✅ 1 Oct — matrix on every collection, view and action                             |
-| Bank details owner-only                              | ✅ field access + AES-256-GCM                                                      |
-| Test bookings out of reports / TfL export            | ✅ `isTest` exists; ⬜ in queries                                                  |
-| Audit record for important mutations                 | ✅ `audit-log` on jobs, bookings, customers, fleet, suppliers, staff               |
+| Rule                                                 | Status                                                                         |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Website bookings cannot be created by hand           | ✅ bookings and jobs (hook)                                                    |
+| Job source immutable                                 | ✅ hook                                                                        |
+| Protected website job fields                         | ✅ hook; Amend booking is the sanctioned path                                  |
+| Status transitions valid, timestamped, attributed    | ✅ `domain/jobs/status.ts`, enforced by the jobs hook; history rows per change |
+| Expired driver / vehicle / wrong class cannot assign | ✅ jobs hook on every write (`hooks/job-dispatch.ts`), API included            |
+| Supplier reference unique per supplier               | ✅ hook + partial unique index, per leg (a round trip shares one reference)    |
+| Refunds staff-only, audited                          | ⬜                                                                             |
+| Role permissions server-side                         | ✅ 1 Oct — matrix on every collection, view and action                         |
+| Bank details owner-only                              | ✅ field access + AES-256-GCM                                                  |
+| Test bookings out of reports / TfL export            | ✅ `isTest` exists; ⬜ in queries                                              |
+| Audit record for important mutations                 | ✅ `audit-log` on jobs, bookings, customers, fleet, suppliers, staff           |
 
 ## Build order
 
 Phase 1 (foundation) landed on 1 Oct 2026, with the jobs register and job detail from phase 2.
+Phases 3 (fleet and compliance) and 4 (dispatch) landed on 1 Oct 2026.
+
+Left open from phase 4, by design or waiting on another phase:
+
+- WhatsApp goes through `wa.me` links: the controller presses send, and marks
+  delivered, read or not delivered by hand. Automatic sending, delivery reports
+  and reminders (WA-01 to WA-04) need the WhatsApp Business API and approved
+  templates.
+- Driver pay is not in the WhatsApp message yet: there is no pay calculation
+  until Finance (phase 8), when it follows each driver's "pay in messages"
+  setting and a company default.
+- Driver details reach the passenger by email only; SMS (NOT-02) needs a
+  provider.
+- Website jobs are cancelled from the booking (phase 5), so the payment is
+  settled with them; the job page does not offer it.
 
 1. **Foundation** — root layout split; permission matrix and role-based access;
    ops styling, shell and components; guarded dashboard.

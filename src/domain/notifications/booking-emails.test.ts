@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   confirmationEmail,
+  driverDetailsEmail,
   escapeHtml,
   officeNewBookingEmail,
   type BookingEmailData,
@@ -125,5 +126,34 @@ describe("escaping", () => {
       expect(email.html).not.toContain('<a href="https://evil.example"');
       expect(email.html).toContain("&lt;a href=&quot;https://evil.example&quot;&gt;");
     }
+  });
+});
+
+describe("driverDetailsEmail", () => {
+  const email = driverDetailsEmail({
+    reference: "CL-7K4Q2P",
+    pickupAt: new Date("2026-10-05T10:00:00Z"),
+    pickup: "Heathrow Terminal 5",
+    driverFirstName: "Sam",
+    phvLicence: "PHV-123456",
+    vehicle: "Toyota Prius",
+    colour: "Black",
+    registration: "AB12CDE",
+  });
+
+  it("says who is coming and in what, in London time", () => {
+    expect(email.subject).toBe("Your driver for 5 Oct 2026 at 11:00: Sam, AB12CDE");
+    for (const part of [email.html, email.text]) {
+      expect(part).toContain("Sam");
+      expect(part).toContain("PHV-123456");
+      expect(part).toContain("Black Toyota Prius");
+      expect(part).toContain("AB12CDE");
+      expect(part).toContain("Transport for London");
+    }
+  });
+
+  it("gives the office number, never a driver's surname or phone", () => {
+    expect(email.text).toContain("+44 7926 608888");
+    expect(email.text).not.toMatch(/Taylor|\+447700/);
   });
 });

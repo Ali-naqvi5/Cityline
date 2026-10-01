@@ -3,6 +3,7 @@ import type { CollectionConfig } from "payload";
 import { allow } from "@/access/staff";
 
 import { auditChanges } from "./hooks/audit";
+import { applyDispatchRules, recordJobHistory } from "./hooks/job-dispatch";
 import { enforceJobRules } from "./hooks/jobs";
 
 /**
@@ -29,8 +30,9 @@ import { enforceJobRules } from "./hooks/jobs";
  *   `locked` marks the website fields the amend flow owns (JOB-07): price,
  *   customer and route come from the booking and are not edited here.
  *
- * Driver, vehicle and supplier relationships arrive with those collections in
- * S8; the columns are deliberately not stubbed as loose text in the meantime.
+ * Assigning a driver, the status order and the job's own history are enforced
+ * by hooks (`hooks/job-dispatch.ts`) on every write, not only by the screens:
+ * an expired driver cannot be given a job through the API either.
  */
 export const Jobs: CollectionConfig = {
   slug: "jobs",
@@ -46,9 +48,10 @@ export const Jobs: CollectionConfig = {
     delete: () => false, // DATA-11: archived, never deleted
   },
   hooks: {
-    beforeChange: [enforceJobRules],
+    beforeChange: [enforceJobRules, applyDispatchRules],
     afterChange: [
       auditChanges<{ id: number; reference: string }>({ label: (doc) => doc.reference }),
+      recordJobHistory,
     ],
   },
   fields: [
@@ -161,6 +164,16 @@ export const Jobs: CollectionConfig = {
         { name: "leadName", type: "text", required: true, index: true },
         { name: "leadPhone", type: "text", required: true, index: true },
         { name: "leadEmail", type: "email" },
+        {
+          name: "bookerName",
+          type: "text",
+          admin: {
+            description:
+              "Who booked, when it is not the passenger — a PA, a travel agent. Staff jobs only; a website booking keeps its booker on the booking.",
+          },
+        },
+        { name: "bookerPhone", type: "text" },
+        { name: "bookerEmail", type: "email" },
         { name: "meetAndGreet", type: "checkbox", defaultValue: true },
         {
           name: "nameBoardText",
@@ -223,9 +236,52 @@ export const Jobs: CollectionConfig = {
         { name: "dispatchedByUser", type: "relationship", relationTo: "users" },
         { name: "dispatchedAt", type: "date" },
         { name: "subcontractorName", type: "text" },
+        { name: "driverConfirmedAt", type: "date" },
         { name: "completedAt", type: "date" },
+        { name: "noShowAt", type: "date" },
         { name: "cancelledAt", type: "date" },
         { name: "cancelReason", type: "textarea" },
+      ],
+    },
+
+    // --- Messages (WA-03, NOT-02) --------------------------------------------
+    {
+      type: "collapsible",
+      label: "Messages",
+      fields: [
+        {
+          name: "driverMessageStatus",
+          type: "select",
+          required: true,
+          defaultValue: "not_sent",
+          options: [
+            { label: "Not sent", value: "not_sent" },
+            { label: "Sent", value: "sent" },
+            { label: "Delivered", value: "delivered" },
+            { label: "Read", value: "read" },
+            { label: "Failed", value: "failed" },
+          ],
+          admin: {
+            description:
+              "The job message to the assigned driver. Reset when the driver changes.",
+          },
+        },
+        { name: "driverMessageAt", type: "date" },
+        {
+          name: "passengerMessageStatus",
+          type: "select",
+          required: true,
+          defaultValue: "not_sent",
+          options: [
+            { label: "Not sent", value: "not_sent" },
+            { label: "Sent", value: "sent" },
+            { label: "Failed", value: "failed" },
+          ],
+          admin: {
+            description: "The driver's details emailed to the passenger (NOT-02).",
+          },
+        },
+        { name: "passengerMessageAt", type: "date" },
       ],
     },
 
@@ -294,7 +350,15 @@ export const Jobs: CollectionConfig = {
     // --- Notes ------------------------------------------------------------
     { name: "driverNotes", type: "textarea" },
     { name: "internalNotes", type: "textarea" },
-    { name: "notifyPassenger", type: "checkbox", defaultValue: true },
+    {
+      name: "notifyPassenger",
+      type: "checkbox",
+      defaultValue: true,
+      admin: {
+        description:
+          "Email the passenger their driver's details when a driver is assigned (NOT-02). Some suppliers contact their passengers themselves.",
+      },
+    },
     { name: "archivedAt", type: "date" },
     {
       name: "isTest",

@@ -131,7 +131,7 @@ export const NAV: NavSection[] = [
         href: "/admin/dispatch",
         icon: "dispatch",
         capability: "jobs.dispatch",
-        ready: false,
+        ready: true,
       },
       {
         id: "customers",
@@ -413,7 +413,7 @@ export const MOBILE_TABS: MobileTab[] = [
     href: "/admin/dispatch",
     icon: "dispatch",
     capability: "jobs.dispatch",
-    ready: false,
+    ready: true,
   },
   {
     id: "alerts",
