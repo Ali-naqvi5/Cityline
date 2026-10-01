@@ -5,10 +5,21 @@ import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
  * select options; the labels are what the admin shows.
  */
 
+/**
+ * The job cycle, in the order it runs (Cityline, 2 Oct 2026):
+ *
+ *   Unassigned → Assigned → Driver confirmed → DOW → DAP → POB → Completed
+ *                                                     ↘ PNS
+ *
+ * and Cancelled. See `status.ts` for the rules that move a job along it.
+ */
 export const JOB_STATUSES = [
   "unassigned",
   "assigned",
   "driver_confirmed",
+  "on_the_way",
+  "at_pickup",
+  "on_board",
   "completed",
   "no_show",
   "cancelled",
@@ -19,8 +30,24 @@ export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
   unassigned: "Unassigned",
   assigned: "Assigned",
   driver_confirmed: "Driver confirmed",
+  on_the_way: "Driver on the way",
+  at_pickup: "Driver at pickup",
+  on_board: "Passenger on board",
   completed: "Completed",
-  no_show: "No-show",
+  no_show: "Passenger no-show",
+  cancelled: "Cancelled",
+};
+
+/** What the office calls each stage on the phone and in the register. */
+export const JOB_STATUS_SHORT: Record<JobStatus, string> = {
+  unassigned: "Unassigned",
+  assigned: "Assigned",
+  driver_confirmed: "Confirmed",
+  on_the_way: "DOW",
+  at_pickup: "DAP",
+  on_board: "POB",
+  completed: "Completed",
+  no_show: "PNS",
   cancelled: "Cancelled",
 };
 
@@ -62,11 +89,14 @@ export function isJobSource(value: unknown): value is JobSource {
   return typeof value === "string" && (JOB_SOURCES as readonly string[]).includes(value);
 }
 
-/** Statuses where the job is still to happen. */
+/** Statuses where the job is still to happen or is under way. */
 export const OPEN_STATUSES: readonly JobStatus[] = [
   "unassigned",
   "assigned",
   "driver_confirmed",
+  "on_the_way",
+  "at_pickup",
+  "on_board",
 ];
 
 export function vehicleClassName(slug: string | null | undefined): string {

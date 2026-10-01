@@ -167,3 +167,8 @@ export function messageJobFrom(job: Job): DriverMessageJob {
     payPence: job.driverPricePence ?? null,
   };
 }
+
+/** A WhatsApp chat with this number, for a call or a message typed by hand. */
+export function whatsappChat(phone: string): string {
+  return `https://wa.me/${phone.replace(/\D/g, "")}`;
+}

@@ -54,6 +54,17 @@ describe("parseBookingFilters", () => {
     });
   });
 
+  it("lets pickup dates decide over a preset", () => {
+    expect(
+      parseBookingFilters({ when: "today", from: "2026-10-05", to: "2026-10-06" }),
+    ).toMatchObject({ when: "range", from: "2026-10-05", to: "2026-10-06" });
+    expect(parseBookingFilters({ when: "all", to: "2026-10-06" })).toMatchObject({
+      when: "range",
+      from: "",
+      to: "2026-10-06",
+    });
+  });
+
   it("reads pickup dates as a range, and 'none' as no driver", () => {
     expect(
       parseBookingFilters({ from: "2026-10-05", to: "2026-10-06", driver: "none" }),
@@ -103,10 +114,19 @@ describe("buildBookingsWhere", () => {
     ).toBe(false);
   });
 
-  it("reads 'open' as every status not yet finished", () => {
+  it("reads 'open' as every booking not yet finished, under way ones included", () => {
     const where = buildBookingsWhere(parseBookingFilters({ status: "open" }), NOW);
     expect(conditions(where)).toContainEqual({
-      status: { in: ["unassigned", "assigned", "driver_confirmed"] },
+      status: {
+        in: [
+          "unassigned",
+          "assigned",
+          "driver_confirmed",
+          "on_the_way",
+          "at_pickup",
+          "on_board",
+        ],
+      },
     });
   });
 

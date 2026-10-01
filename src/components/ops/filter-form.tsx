@@ -49,6 +49,20 @@ export function FilterForm({
         // Controls without a name (the phone "Filters" toggle) are not filters.
         if (!target.name) return;
         const form = event.currentTarget;
+        // Filters that exclude each other: `data-clear="from,to"` empties
+        // those fields, `data-set="when=all"` sets one — so a date range and
+        // a preset such as "Today" never pull in different directions.
+        for (const name of (target.dataset.clear ?? "").split(",").filter(Boolean)) {
+          const field = form.elements.namedItem(name);
+          if (field instanceof HTMLInputElement) field.value = "";
+        }
+        const [setName, setValue] = (target.dataset.set ?? "").split("=");
+        if (setName && setValue !== undefined) {
+          const field = form.elements.namedItem(setName);
+          if (field instanceof HTMLSelectElement || field instanceof HTMLInputElement) {
+            field.value = setValue;
+          }
+        }
         if (timer.current) clearTimeout(timer.current);
         if (target.type === "search" || target.type === "text") {
           timer.current = setTimeout(() => navigate(form), 400);

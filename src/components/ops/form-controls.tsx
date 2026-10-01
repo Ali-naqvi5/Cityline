@@ -44,12 +44,7 @@ export function Checkbox({
       htmlFor={id}
       className="text-ink-2 flex h-10 cursor-pointer items-center gap-2 text-sm whitespace-nowrap lg:h-9"
     >
-      <input
-        id={id}
-        type="checkbox"
-        className="h-4 w-4 accent-[var(--color-accent)]"
-        {...props}
-      />
+      <input id={id} type="checkbox" className="accent-accent h-4 w-4" {...props} />
       {label}
     </label>
   );

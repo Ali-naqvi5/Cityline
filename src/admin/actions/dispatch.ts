@@ -336,17 +336,32 @@ export async function setDriverPriceAction(
 
 // --- Status ---------------------------------------------------------------------
 
+/** Only admin pages, so a form cannot be used to send staff off the site. */
+function safeReturn(value: string): string | null {
+  return /^\/admin\/[\w\-/?=&%.+,]*$/.test(value) ? value : null;
+}
+
+/**
+ * Moves a booking to another stage of its cycle (spec §10, Cityline's cycle
+ * of 2 Oct 2026): one stage forward, or back any number. The jobs hook holds
+ * the rules, so this is refused exactly as an API call would be.
+ *
+ * The no-show dialog can carry a new driver price in the same step — a driver
+ * who waited for a passenger who never came is often paid less. A form on
+ * the dispatch board or the bookings dashboard says where to return to, so
+ * an operator moving jobs on stays where they are.
+ */
 export async function setStatusAction(
   _previous: FormState,
   formData: FormData,
 ): Promise<FormState> {
   const { payload, user } = await staffForAction("jobs.dispatch");
   const job = await jobFor(payload, user, Number(text(formData, "jobId")));
-  if (!job) return { errors: {}, message: "That job no longer exists." };
+  if (!job) return { errors: {}, message: "That booking no longer exists." };
 
   const status = text(formData, "status");
-  if (!isJobStatus(status) || status === "assigned" || status === "unassigned") {
-    return { errors: {}, message: "That is not a status you can set here." };
+  if (!isJobStatus(status) || status === "unassigned") {
+    return { errors: {}, message: "That is not a stage you can set here." };
   }
   const reason = text(formData, "reason");
   if (status === "cancelled") {
@@ -358,21 +373,32 @@ export async function setStatusAction(
       };
     }
     if (!reason) {
-      return { errors: { reason: "Say why the job is cancelled." }, message: "" };
+      return { errors: { reason: "Say why the booking is cancelled." }, message: "" };
     }
+  }
+  const price = driverPriceFrom(formData);
+  if (price === "invalid") {
+    return { errors: { driverPrice: DRIVER_PRICE_MESSAGE }, message: "" };
   }
 
   try {
     await payload.update({
       collection: "jobs",
       id: job.id,
-      data: { status, ...(status === "cancelled" ? { cancelReason: reason } : {}) },
+      data: {
+        status,
+        ...(status === "cancelled" ? { cancelReason: reason } : {}),
+        ...(price === null ? {} : { driverPricePence: price }),
+      },
       user,
       overrideAccess: false,
     });
   } catch (error) {
-    return payloadErrors(error, "changing a job's status");
+    return payloadErrors(error, "changing a booking's stage");
   }
+
+  const back = safeReturn(text(formData, "returnTo"));
+  if (back) redirect(back);
   redirect(`/admin/jobs/${job.id}?notice=status-${status}`);
 }
 

@@ -168,7 +168,7 @@ export function DriverForm({
               name="whatsappConsent"
               type="checkbox"
               defaultChecked={values.whatsappConsent}
-              className="h-4 w-4 accent-[var(--color-accent)]"
+              className="accent-accent h-4 w-4"
             />
             The driver has agreed to receive jobs on WhatsApp
           </label>

@@ -80,7 +80,7 @@ export function AssignForm({
                     value={choice.pair}
                     checked={active}
                     onChange={() => setSelected(choice.pair)}
-                    className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-accent)]"
+                    className="accent-accent mt-1 h-4 w-4 shrink-0"
                   />
                   <span className="flex min-w-0 flex-1 flex-col gap-1">
                     <span className="flex flex-wrap items-center gap-2">
@@ -186,7 +186,7 @@ export function AssignForm({
               name="notifyPassenger"
               type="checkbox"
               defaultChecked={notifyPassenger}
-              className="h-4 w-4 accent-[var(--color-accent)]"
+              className="accent-accent h-4 w-4"
             />
             Email the passenger their driver&apos;s details
           </label>

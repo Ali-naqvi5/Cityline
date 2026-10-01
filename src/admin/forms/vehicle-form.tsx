@@ -183,7 +183,7 @@ export function VehicleForm({
                   name="drivers"
                   value={driver.id}
                   defaultChecked={values.drivers.includes(driver.id)}
-                  className="h-4 w-4 accent-[var(--color-accent)]"
+                  className="accent-accent h-4 w-4"
                 />
                 {driver.name}
               </label>

@@ -23,15 +23,25 @@ export function legHeading(job: Job, jobs: readonly Job[]): string {
 }
 
 const STATUS_NOTE: Partial<Record<Job["status"], string>> = {
+  on_the_way: "Your driver is on the way",
+  at_pickup: "Your driver has arrived",
   cancelled: "Cancelled",
   completed: "Completed",
   no_show: "Marked as a no-show",
 };
 
+/** Stages at which the passenger is shown who is driving them. */
+const DRIVER_SHOWN: readonly Job["status"][] = [
+  "assigned",
+  "driver_confirmed",
+  "on_the_way",
+  "at_pickup",
+  "on_board",
+];
+
 export function BookingLegCard({ job, jobs }: { job: Job; jobs: readonly Job[] }) {
   const assigned =
-    (job.status === "assigned" || job.status === "driver_confirmed") &&
-    (job.driverPhvNo || job.vehicleReg);
+    DRIVER_SHOWN.includes(job.status) && (job.driverPhvNo || job.vehicleReg);
   const statusNote = STATUS_NOTE[job.status];
 
   return (

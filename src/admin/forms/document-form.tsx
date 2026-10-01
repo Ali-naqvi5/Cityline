@@ -111,7 +111,7 @@ export function DocumentForm({
           name="checked"
           type="checkbox"
           defaultChecked
-          className="h-4 w-4 accent-[var(--color-accent)]"
+          className="accent-accent h-4 w-4"
         />
         I have checked the original document
       </label>

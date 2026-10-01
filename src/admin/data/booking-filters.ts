@@ -39,6 +39,16 @@ export const WHEN_LABELS: Record<BookingsWhen, string> = {
   range: "Pickup dates",
 };
 
+/** The presets on the Pickup list. A date range comes from its own fields. */
+export const WHEN_PRESETS: BookingsWhen[] = [
+  "upcoming",
+  "today",
+  "tomorrow",
+  "week",
+  "past",
+  "all",
+];
+
 export const PAGE_SIZES = [30, 50, 100] as const;
 export type PageSize = (typeof PAGE_SIZES)[number];
 
@@ -85,12 +95,10 @@ const WHENS = Object.keys(WHEN_LABELS) as BookingsWhen[];
 export function parseBookingFilters(params: Params): BookingFilters {
   const from = isValidDay(read(params, "from")) ? read(params, "from") : "";
   const to = isValidDay(read(params, "to")) ? read(params, "to") : "";
+  // Pickup dates, when given, decide the range: they are the more exact choice.
   const whenParam = read(params, "when") as BookingsWhen;
-  const when: BookingsWhen = WHENS.includes(whenParam)
-    ? whenParam
-    : from || to
-      ? "range"
-      : "upcoming";
+  const when: BookingsWhen =
+    from || to ? "range" : WHENS.includes(whenParam) ? whenParam : "upcoming";
 
   const status = read(params, "status");
   const source = read(params, "source");

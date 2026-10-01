@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   MessageCircle,
+  Phone,
   Plane,
   Plus,
   UserPlus,
@@ -18,6 +19,7 @@ import {
   londonDayBounds,
   relative,
 } from "@/admin/format";
+import { NextStageButtons } from "@/admin/forms/stage-controls";
 import { param, requireStaff } from "@/admin/guard";
 import { FilterForm } from "@/components/ops/filter-form";
 import { Checkbox, Label, Select } from "@/components/ops/form-controls";
@@ -66,10 +68,14 @@ function rangeFor(range: Range, now: Date): { from: Date; to: Date } {
   }
 }
 
+// The same colour per stage as the status badges and the bookings dashboard.
 const STATUS_EDGE: Record<string, string> = {
   unassigned: "border-l-warn",
   assigned: "border-l-accent",
-  driver_confirmed: "border-l-ok",
+  driver_confirmed: "border-l-cat-6",
+  on_the_way: "border-l-cat-1",
+  at_pickup: "border-l-cat-5",
+  on_board: "border-l-special",
 };
 
 const MESSAGE_LABEL: Record<string, string> = {
@@ -84,10 +90,12 @@ function BoardCard({
   job,
   now,
   dispatches,
+  returnTo,
 }: {
   job: Job;
   now: Date;
   dispatches: boolean;
+  returnTo: string;
 }) {
   const at = new Date(job.pickupAt);
   const urgent = isUrgent(job, now);
@@ -144,7 +152,19 @@ function BoardCard({
       <div className="flex min-w-0 flex-col gap-1 md:w-52 md:shrink-0">
         {driver ? (
           <>
-            <p className="text-ink truncate text-sm font-medium">{driver.fullName}</p>
+            <p className="flex items-center gap-1.5">
+              <span className="text-ink truncate text-sm font-medium">
+                {driver.fullName}
+              </span>
+              <a
+                href={`tel:${driver.phone}`}
+                aria-label={`Call ${driver.fullName}`}
+                title={`Call ${driver.phone}`}
+                className="text-accent hover:bg-accent-soft relative z-10 rounded-sm p-1"
+              >
+                <Phone aria-hidden className="h-3.5 w-3.5" />
+              </a>
+            </p>
             <p className="text-ink-3 flex items-center gap-2 text-xs">
               <span className="tabular-nums">{job.vehicleReg}</span>
               <span className="inline-flex items-center gap-1">
@@ -160,8 +180,17 @@ function BoardCard({
         )}
       </div>
 
-      <div className="flex items-center justify-between gap-2 md:w-48 md:shrink-0 md:justify-end">
-        <JobStatusBadge status={job.status} />
+      <div className="flex flex-wrap items-center justify-between gap-2 md:w-64 md:shrink-0 md:justify-end">
+        <JobStatusBadge status={job.status} short />
+        {dispatches && relId(job.driver) ? (
+          <NextStageButtons
+            job={job}
+            now={now}
+            compact
+            returnTo={returnTo}
+            className="relative z-10"
+          />
+        ) : null}
         {dispatches && !relId(job.driver) ? (
           <ButtonLink
             href={`/admin/jobs/${job.id}/assign`}
@@ -207,6 +236,11 @@ export async function DispatchView(props: AdminViewServerProps) {
   const urgent = [...overdue, ...upcoming].filter((job) => isUrgent(job, now));
   const needDriver = upcoming.filter((job) => job.status === "unassigned").length;
   const dispatches = can(user.role, "jobs.dispatch");
+  // Stage buttons on the cards bring the operator back here, filters intact.
+  const query = new URLSearchParams();
+  if (range !== "next24") query.set("range", range);
+  if (onlyUnassigned) query.set("unassigned", "1");
+  const returnTo = `/admin/dispatch${query.size ? `?${query}` : ""}`;
 
   return (
     <OpsShell user={user} active="dispatch">
@@ -277,11 +311,18 @@ export async function DispatchView(props: AdminViewServerProps) {
             <Badge tone="danger">{overdue.length}</Badge>
           </h2>
           <p className="text-ink-3 mb-3 text-sm">
-            Mark each one completed, no-show or cancelled so the register is right.
+            Under way, or not closed yet: move each one on to Completed or PNS so the
+            register is right.
           </p>
           <ul className="flex flex-col gap-2">
             {overdue.map((job) => (
-              <BoardCard key={job.id} job={job} now={now} dispatches={dispatches} />
+              <BoardCard
+                key={job.id}
+                job={job}
+                now={now}
+                dispatches={dispatches}
+                returnTo={returnTo}
+              />
             ))}
           </ul>
         </section>
@@ -312,7 +353,13 @@ export async function DispatchView(props: AdminViewServerProps) {
             </h2>
             <ul className="flex flex-col gap-2">
               {jobs.map((job) => (
-                <BoardCard key={job.id} job={job} now={now} dispatches={dispatches} />
+                <BoardCard
+                  key={job.id}
+                  job={job}
+                  now={now}
+                  dispatches={dispatches}
+                  returnTo={returnTo}
+                />
               ))}
             </ul>
           </section>

@@ -8,7 +8,11 @@ import {
 import { checkAssignment, relId } from "@/domain/dispatch/assignment";
 import { trackedChanges } from "@/domain/jobs/history";
 import { isJobStatus, type JobStatus } from "@/domain/jobs/labels";
-import { isFinal, statusChangeProblem } from "@/domain/jobs/status";
+import {
+  beforeBoarding,
+  previousStages,
+  statusChangeProblem,
+} from "@/domain/jobs/status";
 import type { Job } from "@/payload-types";
 
 /**
@@ -29,11 +33,31 @@ function fail(req: PayloadRequest, errors: { path: string; message: string }[]):
 
 /** Status changes that simply follow the driver being given or taken away. */
 function followsDriver(from: JobStatus, to: JobStatus): boolean {
-  return (
-    (from === "unassigned" && to === "assigned") ||
-    (from !== "unassigned" && to === "unassigned") ||
-    (from === "driver_confirmed" && to === "assigned")
-  );
+  return to === "unassigned" || (to === "assigned" && beforeBoarding(from));
+}
+
+/** The time recorded for reaching each stage. */
+const STAGE_TIMES = {
+  driver_confirmed: "driverConfirmedAt",
+  on_the_way: "onTheWayAt",
+  at_pickup: "atPickupAt",
+  on_board: "onBoardAt",
+  completed: "completedAt",
+  no_show: "noShowAt",
+} as const satisfies Partial<Record<JobStatus, keyof Job>>;
+
+/**
+ * Stamps the time a stage is reached, and clears the times of every stage
+ * not on the way to it — stepping back from POB to DAP undoes POB's time.
+ * The job's history still records both moves.
+ */
+function stampStages(job: JobData, to: JobStatus, at: string) {
+  if (to === "cancelled") return; // keeps how far the job had got
+  const path = new Set<JobStatus>([to, ...previousStages(to)]);
+  for (const [stage, field] of Object.entries(STAGE_TIMES) as [JobStatus, keyof Job][]) {
+    if (stage === to) (job as Record<string, unknown>)[field] = at;
+    else if (!path.has(stage)) (job as Record<string, unknown>)[field] = null;
+  }
 }
 
 export const applyDispatchRules: CollectionBeforeChangeHook = async ({
@@ -63,31 +87,6 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
     job.takenAt ??= now.toISOString();
   }
 
-  // A job that happened, did not happen or was cancelled keeps that outcome
-  // and the driver it had.
-  if (operation === "update" && isFinal(from)) {
-    if (requested !== from) {
-      fail(req, [
-        {
-          path: "status",
-          message: statusChangeProblem({
-            from,
-            to: requested,
-            hasDriver: before.driver !== null,
-            pickupAt,
-            now,
-          })!,
-        },
-      ]);
-    }
-    if (driver !== before.driver || vehicle !== before.vehicle) {
-      fail(req, [
-        { path: "driver", message: "This job is closed, so its driver cannot change." },
-      ]);
-    }
-    return job;
-  }
-
   // Asking for Unassigned is asking for the driver to be taken off.
   if (requested === "unassigned" && from !== "unassigned") {
     driver = null;
@@ -97,6 +96,20 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
   let status = requested;
   const driverChanged = driver !== before.driver || vehicle !== before.vehicle;
 
+  // From POB on the passenger is in the car, or the job is over: the driver
+  // it was done by stays on the record.
+  if (operation === "update" && driverChanged && !beforeBoarding(from)) {
+    fail(req, [
+      {
+        path: "driver",
+        message:
+          from === "cancelled"
+            ? "This booking is cancelled, so its driver cannot change."
+            : "The driver cannot change once the passenger is on board. Step the booking back first.",
+      },
+    ]);
+  }
+
   if (driverChanged && driver === null) {
     Object.assign(job, {
       driver: null,
@@ -105,11 +118,10 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
       vehicleReg: null,
       dispatchedByUser: null,
       dispatchedAt: null,
-      driverConfirmedAt: null,
       driverMessageStatus: "not_sent",
       driverMessageAt: null,
     });
-    if (status === "assigned" || status === "driver_confirmed") status = "unassigned";
+    if (status !== "cancelled") status = "unassigned";
   } else if (driverChanged && driver !== null) {
     if (vehicle === null) {
       fail(req, [
@@ -155,13 +167,13 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
       vehicleReg: check.vehicle.registration,
       dispatchedByUser: req.user?.id ?? null,
       dispatchedAt: now.toISOString(),
-      driverConfirmedAt: null,
       driverMessageStatus: "not_sent",
       driverMessageAt: null,
       passengerMessageStatus: "not_sent",
       passengerMessageAt: null,
     });
-    if (status === "unassigned" || status === "driver_confirmed") status = "assigned";
+    // A new driver starts the cycle again: they have not confirmed yet.
+    status = "assigned";
     // On `req.context`, not the hook's `context` argument: the lookups above
     // replace `req.context` with a copy, and the after-change hook reads this.
     req.context.assignedDriver = `${check.driver.fullName ?? "Driver"} · ${check.vehicle.registration}`;
@@ -200,11 +212,10 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
     if (problem) fail(req, [{ path: "status", message: problem }]);
 
     job.status = status;
-    const at = now.toISOString();
-    if (status === "driver_confirmed") job.driverConfirmedAt = at;
-    if (status === "completed") job.completedAt ??= at;
-    if (status === "no_show") job.noShowAt = at;
-    if (status === "cancelled") job.cancelledAt ??= at;
+    stampStages(job, status, now.toISOString());
+    if (status === "cancelled") job.cancelledAt ??= now.toISOString();
+  } else if (driverChanged) {
+    stampStages(job, status, now.toISOString());
   }
 
   return job;

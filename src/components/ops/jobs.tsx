@@ -3,12 +3,14 @@ import {
   Ban,
   Briefcase,
   Building2,
+  Car,
   CheckCircle2,
   CircleDashed,
   CircleEllipsis,
   FlaskConical,
   Globe,
   Mail,
+  MapPin,
   MessageCircle,
   Phone,
   Plane,
@@ -21,6 +23,7 @@ import { clock, relative, shortDay } from "@/admin/format";
 import {
   JOB_SOURCE_LABELS,
   JOB_STATUS_LABELS,
+  JOB_STATUS_SHORT,
   isJobSource,
   isJobStatus,
   vehicleClassName,
@@ -29,26 +32,67 @@ import {
 } from "@/domain/jobs/labels";
 import type { Job } from "@/payload-types";
 
-import { Badge, cx, type Tone } from "./primitives";
+import { Badge, cx } from "./primitives";
 
 const ICON = "h-3.5 w-3.5";
 
-const STATUS_STYLE: Record<JobStatus, { tone: Tone; icon: React.ReactNode }> = {
-  unassigned: { tone: "warn", icon: <CircleDashed aria-hidden className={ICON} /> },
-  assigned: { tone: "info", icon: <UserCheck aria-hidden className={ICON} /> },
-  driver_confirmed: { tone: "special", icon: <UserCheck aria-hidden className={ICON} /> },
-  completed: { tone: "ok", icon: <CheckCircle2 aria-hidden className={ICON} /> },
-  no_show: { tone: "danger", icon: <UserX aria-hidden className={ICON} /> },
-  cancelled: { tone: "neutral", icon: <Ban aria-hidden className={ICON} /> },
+/**
+ * One colour per stage of the cycle, always with its name beside it (§53):
+ * the colour helps a controller scan the board, the text says what it is.
+ */
+export const STATUS_COLOURS: Record<JobStatus, string> = {
+  unassigned: "border-warn-line bg-warn-soft text-warn",
+  assigned: "border-accent-line bg-accent-soft text-accent",
+  driver_confirmed: "border-cat-6-line bg-cat-6-soft text-cat-6",
+  on_the_way: "border-cat-1-line bg-cat-1-soft text-cat-1",
+  at_pickup: "border-cat-5-line bg-cat-5-soft text-cat-5",
+  on_board: "border-special-line bg-special-soft text-special",
+  completed: "border-ok-line bg-ok-soft text-ok",
+  no_show: "border-cat-4-line bg-cat-4-soft text-cat-4",
+  cancelled: "border-line bg-sunken text-ink-2",
 };
 
-export function JobStatusBadge({ status }: { status: string }) {
+const STATUS_ICON: Record<JobStatus, React.ReactNode> = {
+  unassigned: <CircleDashed aria-hidden className={ICON} />,
+  assigned: <UserCheck aria-hidden className={ICON} />,
+  driver_confirmed: <UserCheck aria-hidden className={ICON} />,
+  on_the_way: <Car aria-hidden className={ICON} />,
+  at_pickup: <MapPin aria-hidden className={ICON} />,
+  on_board: <UsersRound aria-hidden className={ICON} />,
+  completed: <CheckCircle2 aria-hidden className={ICON} />,
+  no_show: <UserX aria-hidden className={ICON} />,
+  cancelled: <Ban aria-hidden className={ICON} />,
+};
+
+/**
+ * A job's stage. `short` shows the office's codes (DOW, DAP, POB, PNS) for
+ * tables and the board; screen readers always hear the full name.
+ */
+export function JobStatusBadge({ status, short }: { status: string; short?: boolean }) {
   if (!isJobStatus(status)) return <Badge>{status}</Badge>;
-  const { tone, icon } = STATUS_STYLE[status];
+  const long = JOB_STATUS_LABELS[status];
+  const code = JOB_STATUS_SHORT[status];
+  const showShort = short && code !== long;
   return (
-    <Badge tone={tone} icon={icon}>
-      {JOB_STATUS_LABELS[status]}
-    </Badge>
+    <span
+      title={long}
+      className={cx(
+        "inline-flex items-center gap-1 rounded-sm border px-1.5 py-px text-xs leading-4 font-medium whitespace-nowrap",
+        STATUS_COLOURS[status],
+      )}
+    >
+      {STATUS_ICON[status]}
+      {showShort ? (
+        <>
+          <span aria-hidden>{code}</span>
+          <span className="sr-only">{long}</span>
+        </>
+      ) : code !== long && code !== "Confirmed" ? (
+        `${code} · ${long}`
+      ) : (
+        long
+      )}
+    </span>
   );
 }
 

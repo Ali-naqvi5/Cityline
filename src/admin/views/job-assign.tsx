@@ -11,7 +11,7 @@ import { ButtonLink, PageHeader, Panel } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
 import { vehicleClassName } from "@/domain/jobs/labels";
-import { isFinal } from "@/domain/jobs/status";
+import { beforeBoarding, isFinal } from "@/domain/jobs/status";
 import type { Job } from "@/payload-types";
 
 /**
@@ -48,13 +48,17 @@ export async function JobAssignView(props: AdminViewServerProps) {
   }
 
   const back = `/admin/jobs/${job.id}`;
-  if (isFinal(job.status)) {
+  if (!beforeBoarding(job.status)) {
     return (
       <OpsShell user={user} active="dispatch">
         <Panel>
           <EmptyState
-            title={`${job.reference} is closed`}
-            description="Completed, no-show and cancelled jobs keep the driver they had."
+            title={
+              isFinal(job.status)
+                ? `${job.reference} is closed`
+                : `The passenger is on board ${job.reference}`
+            }
+            description="From POB on, a booking keeps the driver it had. Step it back first if the driver must change."
             action={<ButtonLink href={back}>Back to the job</ButtonLink>}
           />
         </Panel>

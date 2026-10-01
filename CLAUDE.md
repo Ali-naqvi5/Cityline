@@ -191,6 +191,10 @@ See `docs/admin-implementation-map.md`. Rules that are easy to break:
 data`. To pass a value from `beforeChange` to `afterChange`, use
   `req.context`; nested Local API calls replace it, so a destructured
   `context` argument goes stale.
+- **The job cycle** (Cityline, 2 Oct 2026): Unassigned → Assigned → Driver
+  confirmed → DOW → DAP → POB → Completed, or DAP → PNS; Cancelled before
+  POB. Forward one stage at a time, back any number (`domain/jobs/status.ts`,
+  enforced by the jobs hook). Stage times are cleared when stepped back over.
 - **No supplier commission and no driver pay rules** (Cityline, 2 Oct 2026):
   partners take their cut before sending a job, and a driver's pay is the
   driver price written on each booking. Drivers are independent — never

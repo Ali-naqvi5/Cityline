@@ -132,19 +132,19 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 
 ## Server-side rules: status
 
-| Rule                                                 | Status                                                                         |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Website bookings cannot be created by hand           | ✅ bookings and jobs (hook)                                                    |
-| Job source immutable                                 | ✅ hook                                                                        |
-| Protected website job fields                         | ✅ hook; Amend booking is the sanctioned path                                  |
-| Status transitions valid, timestamped, attributed    | ✅ `domain/jobs/status.ts`, enforced by the jobs hook; history rows per change |
-| Expired driver / vehicle / wrong class cannot assign | ✅ jobs hook on every write (`hooks/job-dispatch.ts`), API included            |
-| Supplier reference unique per supplier               | ✅ hook + partial unique index, per leg (a round trip shares one reference)    |
-| Refunds staff-only, audited                          | ⬜                                                                             |
-| Role permissions server-side                         | ✅ 1 Oct — matrix on every collection, view and action                         |
-| Bank details owner-only                              | ✅ field access + AES-256-GCM                                                  |
-| Test bookings out of reports / TfL export            | ✅ `isTest` exists; ⬜ in queries                                              |
-| Audit record for important mutations                 | ✅ `audit-log` on jobs, bookings, customers, fleet, suppliers, staff           |
+| Rule                                                 | Status                                                                      |
+| ---------------------------------------------------- | --------------------------------------------------------------------------- |
+| Website bookings cannot be created by hand           | ✅ bookings and jobs (hook)                                                 |
+| Job source immutable                                 | ✅ hook                                                                     |
+| Protected website job fields                         | ✅ hook; Amend booking is the sanctioned path                               |
+| Status transitions valid, timestamped, attributed    | ✅ DOW/DAP/POB/PNS cycle (2 Oct): forward one stage, back any; jobs hook    |
+| Expired driver / vehicle / wrong class cannot assign | ✅ jobs hook on every write (`hooks/job-dispatch.ts`), API included         |
+| Supplier reference unique per supplier               | ✅ hook + partial unique index, per leg (a round trip shares one reference) |
+| Refunds staff-only, audited                          | ⬜                                                                          |
+| Role permissions server-side                         | ✅ 1 Oct — matrix on every collection, view and action                      |
+| Bank details owner-only                              | ✅ field access + AES-256-GCM                                               |
+| Test bookings out of reports / TfL export            | ✅ `isTest` exists; ⬜ in queries                                           |
+| Audit record for important mutations                 | ✅ `audit-log` on jobs, bookings, customers, fleet, suppliers, staff        |
 
 ## Build order
 

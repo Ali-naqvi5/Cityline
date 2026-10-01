@@ -1,16 +1,15 @@
 import {
   ArrowLeft,
   Ban,
-  CheckCircle2,
   Lock,
   Mail,
+  MessageCircle,
   Pencil,
+  Phone,
   Printer,
   Repeat,
-  UserCheck,
   UserMinus,
   UserPlus,
-  UserX,
 } from "lucide-react";
 import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
@@ -25,10 +24,12 @@ import { resendManageLinkAction } from "@/admin/actions/jobs";
 import { auditValue } from "@/admin/audit-format";
 import { money, pickupLabel, relative, stamp } from "@/admin/format";
 import { DriverPriceForm } from "@/admin/forms/driver-price-form";
+import { NextStageButtons, StageProgress } from "@/admin/forms/stage-controls";
+import { StepBackForm } from "@/admin/forms/step-back-form";
 import { WhatsAppButton } from "@/admin/forms/whatsapp-button";
 import { param, requireStaff } from "@/admin/guard";
-import { ActionButton, ConfirmDialog } from "@/components/ops/dialog";
-import { TEXTAREA_CLASS } from "@/components/ops/form";
+import { ConfirmDialog } from "@/components/ops/dialog";
+import { TEXTAREA_CLASS } from "@/components/ops/form-classes";
 import { PrintButton } from "@/components/ops/filter-form";
 import {
   isUrgent,
@@ -55,14 +56,20 @@ import { Change, Timeline, type TimelineEntry } from "@/components/ops/timeline"
 import { TRACKED_FIELDS } from "@/domain/jobs/history";
 import {
   isJobStatus,
-  JOB_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
   vehicleClassName,
 } from "@/domain/jobs/labels";
-import { isFinal, statusActions } from "@/domain/jobs/status";
+import {
+  beforeBoarding,
+  isFinal,
+  previousStages,
+  stageIndex,
+  stageName,
+} from "@/domain/jobs/status";
 import {
   driverMessage,
   messageJobFrom,
+  whatsappChat,
   whatsappLink,
   type DriverMessageKind,
 } from "@/domain/messaging/driver-message";
@@ -95,7 +102,7 @@ function describeValue(
     const at = new Date(value);
     return Number.isNaN(at.getTime()) ? value : pickupLabel(at);
   }
-  if (field === "status" && isJobStatus(value)) return JOB_STATUS_LABELS[value];
+  if (field === "status" && isJobStatus(value)) return stageName(value);
   if (field === "vehicleClassSlug") return vehicleClassName(value);
   return auditValue(field ?? "", value) ?? "";
 }
@@ -137,21 +144,31 @@ function timelineFor(job: Job, events: JobEvent[]): TimelineEntry[] {
           />
         );
         break;
-      case "status_changed":
-        title = `Status: ${describeValue("status", event.newValue)}`;
-        detail = (
+      case "status_changed": {
+        const back =
+          isJobStatus(event.oldValue) &&
+          isJobStatus(event.newValue) &&
+          event.newValue !== "cancelled" &&
+          stageIndex(event.newValue) < stageIndex(event.oldValue);
+        title = isJobStatus(event.newValue)
+          ? `${back ? "Stepped back to " : ""}${stageName(event.newValue)}`
+          : `Status: ${event.newValue}`;
+        // A step back says what it undid; a step forward speaks for itself.
+        detail = back ? (
           <Change
             from={describeValue("status", event.oldValue)}
             to={describeValue("status", event.newValue)}
           />
-        );
-        tone =
-          event.newValue === "cancelled" || event.newValue === "no_show"
+        ) : undefined;
+        tone = back
+          ? "warn"
+          : event.newValue === "cancelled" || event.newValue === "no_show"
             ? "danger"
             : event.newValue === "completed"
               ? "ok"
               : "info";
         break;
+      }
       case "assigned":
         title = event.oldValue ? "Driver changed" : "Driver assigned";
         detail = event.oldValue ? (
@@ -191,6 +208,32 @@ function extraName(slug: string): string {
   return EXTRAS.find((extra) => extra.slug === slug)?.name ?? slug;
 }
 
+/** Call or WhatsApp someone from the booking — the operator runs jobs live. */
+function ContactButtons({ phone, who }: { phone: string; who: string }) {
+  return (
+    <span className="mt-1.5 flex flex-wrap gap-1.5 print:hidden">
+      <a
+        href={`tel:${phone}`}
+        className={buttonClass("secondary", "sm")}
+        aria-label={`Call ${who}`}
+      >
+        <Phone aria-hidden className="h-4 w-4" />
+        Call
+      </a>
+      <a
+        href={whatsappChat(phone)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={buttonClass("secondary", "sm")}
+        aria-label={`WhatsApp ${who}`}
+      >
+        <MessageCircle aria-hidden className="h-4 w-4" />
+        WhatsApp
+      </a>
+    </span>
+  );
+}
+
 const NOTICES: Record<string, { tone: "ok" | "danger"; text: string }> = {
   "link-sent": { tone: "ok", text: "Manage booking link emailed to the customer." },
   "link-failed": {
@@ -205,10 +248,11 @@ const NOTICES: Record<string, { tone: "ok" | "danger"; text: string }> = {
   saved: { tone: "ok", text: "Changes saved." },
   assigned: { tone: "ok", text: "Driver assigned. Send them the job on WhatsApp below." },
   "driver-removed": { tone: "ok", text: "Driver removed. The job is unassigned again." },
-  "status-driver_confirmed": { tone: "ok", text: "Marked as confirmed by the driver." },
-  "status-completed": { tone: "ok", text: "Job completed." },
-  "status-no_show": { tone: "ok", text: "Marked as a no-show." },
-  "status-cancelled": { tone: "ok", text: "Job cancelled." },
+  "status-no_show": {
+    tone: "ok",
+    text: "Passenger no-show recorded. If the driver's price changes, correct it below.",
+  },
+  "status-cancelled": { tone: "ok", text: "Booking cancelled." },
   "details-sent": { tone: "ok", text: "Driver details emailed to the passenger." },
   "driver-price": { tone: "ok", text: "Driver price saved." },
   "details-failed": {
@@ -361,16 +405,19 @@ export async function JobView(props: AdminViewServerProps) {
 
   const at = new Date(job.pickupAt);
   const urgent = isUrgent(job, now);
-  const message = NOTICES[notice];
+  const stageNotice = notice.startsWith("status-") ? notice.slice(7) : "";
+  const message =
+    NOTICES[notice] ??
+    (isJobStatus(stageNotice)
+      ? { tone: "ok" as const, text: `Now: ${stageName(stageNotice)}.` }
+      : undefined);
   const website = job.source === "website";
   const closed = isFinal(job.status);
   const seesFinance = can(user.role, "finance.jobs");
   const dispatches = can(user.role, "jobs.dispatch");
   const edits = can(user.role, "jobs.edit");
-  const pickupPassed = at.getTime() <= now.getTime();
-  const actions = statusActions(job.status).filter(
-    (status) => (status !== "completed" && status !== "no_show") || pickupPassed,
-  );
+  const status = job.status;
+  const changeable = beforeBoarding(status);
 
   const feesKnown = (job.paymentFeePence ?? 0) > 0;
   const takings = bookingMoney({
@@ -547,6 +594,7 @@ export async function JobView(props: AdminViewServerProps) {
                     {job.leadEmail}
                   </a>
                 ) : null}
+                <ContactButtons phone={job.leadPhone} who="the passenger" />
               </Field>
               <Field label="Booker">
                 {booking?.bookerName || job.bookerName ? (
@@ -632,10 +680,114 @@ export async function JobView(props: AdminViewServerProps) {
 
         <div className="flex min-w-0 flex-col gap-5">
           <Panel
+            title="Progress"
+            description={
+              dispatches && !closed
+                ? "Move the booking on as the driver reports in. One stage at a time."
+                : undefined
+            }
+            actions={<JobStatusBadge status={status} />}
+          >
+            <div className="flex flex-col gap-4">
+              <StageProgress job={job} />
+              {dispatches ? (
+                <>
+                  {driver ? (
+                    <NextStageButtons job={job} now={now} className="print:hidden" />
+                  ) : !closed ? (
+                    <p className="text-ink-3 text-sm">
+                      The cycle starts once a driver is assigned.
+                    </p>
+                  ) : null}
+                  <StepBackForm
+                    key={status}
+                    jobId={job.id}
+                    options={previousStages(status).map((stage) => ({
+                      value: stage,
+                      label: stageName(stage),
+                    }))}
+                  />
+                  {changeable && (driver || !website) ? (
+                    <div className="border-line flex flex-wrap gap-2 border-t pt-3 print:hidden">
+                      {driver ? (
+                        <ConfirmDialog
+                          label="Remove driver"
+                          icon={<UserMinus aria-hidden className="h-4 w-4" />}
+                          variant="ghost"
+                          size="sm"
+                          title={`Take ${driver.fullName} off this booking?`}
+                          confirmLabel="Remove driver"
+                          confirmVariant="danger"
+                          action={removeDriverAction}
+                          fields={{ jobId: job.id }}
+                        >
+                          <p>
+                            {job.reference} goes back to Unassigned and starts the cycle
+                            again with the next driver. You will be offered a WhatsApp
+                            message to tell {driver.firstName}.
+                          </p>
+                        </ConfirmDialog>
+                      ) : null}
+                      {!website ? (
+                        <ConfirmDialog
+                          label="Cancel booking"
+                          icon={<Ban aria-hidden className="h-4 w-4" />}
+                          variant="ghost"
+                          size="sm"
+                          title={`Cancel ${job.reference}?`}
+                          confirmLabel="Cancel booking"
+                          confirmVariant="danger"
+                          pendingLabel="Cancelling…"
+                          action={setStatusAction}
+                          fields={{ jobId: job.id, status: "cancelled" }}
+                        >
+                          <p>
+                            The booking for <strong>{job.leadName}</strong>,{" "}
+                            {pickupLabel(at)}, from {job.pickupAddress}
+                            {supplier
+                              ? ` (${supplier.name} ${job.supplierReference})`
+                              : ""}
+                            .
+                          </p>
+                          {driver ? (
+                            <p>
+                              {driver.fullName} is assigned. You will be offered a
+                              WhatsApp message to tell them.
+                            </p>
+                          ) : null}
+                          <label
+                            htmlFor="cancel-reason"
+                            className="text-ink-2 font-medium"
+                          >
+                            Why is it cancelled?
+                          </label>
+                          <textarea
+                            id="cancel-reason"
+                            name="reason"
+                            rows={2}
+                            required
+                            className={TEXTAREA_CLASS}
+                          />
+                        </ConfirmDialog>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {website && changeable ? (
+                    <p className="text-ink-3 text-xs">
+                      A website booking is cancelled from the booking, so its payment is
+                      settled with it.
+                    </p>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          </Panel>
+
+          <Panel
             title="Driver and dispatch"
             description="The TfL booking record (CMP-03)"
             actions={
-              dispatches && !closed && driver ? (
+              dispatches && changeable && driver ? (
                 <ButtonLink href={`/admin/jobs/${job.id}/assign`} size="sm">
                   Change
                 </ButtonLink>
@@ -652,12 +804,10 @@ export async function JobView(props: AdminViewServerProps) {
                     >
                       {driver.fullName}
                     </Link>
-                    <a
-                      href={`tel:${driver.phone}`}
-                      className="text-accent block text-sm tabular-nums hover:underline"
-                    >
+                    <span className="text-ink-3 block text-sm tabular-nums">
                       {driver.phone}
-                    </a>
+                    </span>
+                    <ContactButtons phone={driver.phone} who={driver.firstName} />
                   </>
                 ) : (
                   <NotRecorded>Not assigned</NotRecorded>
@@ -694,20 +844,6 @@ export async function JobView(props: AdminViewServerProps) {
                   <NotRecorded>Not dispatched</NotRecorded>
                 )}
               </Field>
-              {driver ? (
-                <Field label="Driver confirmation">
-                  {job.driverConfirmedAt ? (
-                    <>
-                      Confirmed{" "}
-                      <span className="text-ink-3 text-sm">
-                        {stamp(new Date(job.driverConfirmedAt))}
-                      </span>
-                    </>
-                  ) : (
-                    <NotRecorded>Not confirmed yet</NotRecorded>
-                  )}
-                </Field>
-              ) : null}
               <Field label="Taken by">
                 {website ? "The website (no staff involved)" : taker?.name || "—"}
                 {job.takenAt ? (
@@ -738,115 +874,9 @@ export async function JobView(props: AdminViewServerProps) {
                 </Fields>
               )}
             </div>
-
-            {dispatches && !closed && (actions.length || driver) ? (
-              <div className="border-line mt-4 flex flex-wrap gap-2 border-t pt-4 print:hidden">
-                {actions.includes("driver_confirmed") ? (
-                  <ActionButton
-                    label="Driver confirmed"
-                    icon={<UserCheck aria-hidden className="h-4 w-4" />}
-                    variant="primary"
-                    action={setStatusAction}
-                    fields={{ jobId: job.id, status: "driver_confirmed" }}
-                  />
-                ) : null}
-                {actions.includes("completed") ? (
-                  <ConfirmDialog
-                    label="Completed"
-                    icon={<CheckCircle2 aria-hidden className="h-4 w-4" />}
-                    variant={job.status === "driver_confirmed" ? "primary" : "secondary"}
-                    title={`Mark ${job.reference} completed?`}
-                    confirmLabel="Mark completed"
-                    action={setStatusAction}
-                    fields={{ jobId: job.id, status: "completed" }}
-                  >
-                    <p>
-                      This records that {driver?.fullName ?? "the driver"} did the job for{" "}
-                      {job.leadName} on {pickupLabel(at)}. A completed job cannot be
-                      reopened.
-                    </p>
-                  </ConfirmDialog>
-                ) : null}
-                {actions.includes("no_show") ? (
-                  <ConfirmDialog
-                    label="No-show"
-                    icon={<UserX aria-hidden className="h-4 w-4" />}
-                    title="Mark as a no-show?"
-                    confirmLabel="Mark no-show"
-                    confirmVariant="danger"
-                    action={setStatusAction}
-                    fields={{ jobId: job.id, status: "no_show" }}
-                  >
-                    <p>
-                      Use this when {job.leadName} did not turn up for the{" "}
-                      {pickupLabel(at)} pickup at {job.pickupAddress}. It cannot be
-                      undone.
-                    </p>
-                  </ConfirmDialog>
-                ) : null}
-                {driver ? (
-                  <ConfirmDialog
-                    label="Remove driver"
-                    icon={<UserMinus aria-hidden className="h-4 w-4" />}
-                    variant="ghost"
-                    title={`Take ${driver.fullName} off this job?`}
-                    confirmLabel="Remove driver"
-                    confirmVariant="danger"
-                    action={removeDriverAction}
-                    fields={{ jobId: job.id }}
-                  >
-                    <p>
-                      {job.reference} goes back to Unassigned. You will be offered a
-                      WhatsApp message to tell {driver.firstName}.
-                    </p>
-                  </ConfirmDialog>
-                ) : null}
-                {actions.includes("cancelled") && !website ? (
-                  <ConfirmDialog
-                    label="Cancel job"
-                    icon={<Ban aria-hidden className="h-4 w-4" />}
-                    variant="ghost"
-                    title={`Cancel ${job.reference}?`}
-                    confirmLabel="Cancel job"
-                    confirmVariant="danger"
-                    pendingLabel="Cancelling…"
-                    action={setStatusAction}
-                    fields={{ jobId: job.id, status: "cancelled" }}
-                  >
-                    <p>
-                      The job for <strong>{job.leadName}</strong>, {pickupLabel(at)}, from{" "}
-                      {job.pickupAddress}
-                      {supplier ? ` (${supplier.name} ${job.supplierReference})` : ""}.
-                    </p>
-                    {driver ? (
-                      <p>
-                        {driver.fullName} is assigned. You will be offered a WhatsApp
-                        message to tell them.
-                      </p>
-                    ) : null}
-                    <label htmlFor="cancel-reason" className="text-ink-2 font-medium">
-                      Why is it cancelled?
-                    </label>
-                    <textarea
-                      id="cancel-reason"
-                      name="reason"
-                      rows={2}
-                      required
-                      className={TEXTAREA_CLASS}
-                    />
-                  </ConfirmDialog>
-                ) : null}
-              </div>
-            ) : null}
-            {dispatches && website && !closed ? (
-              <p className="text-ink-3 mt-3 text-xs">
-                A website booking is cancelled from the booking, so its payment is settled
-                with it.
-              </p>
-            ) : null}
           </Panel>
 
-          {driver && dispatches ? (
+          {driver && dispatches && (!closed || status === "cancelled") ? (
             <Panel
               title="Driver's WhatsApp message"
               actions={<Badge tone={messageStatus.tone}>{messageStatus.label}</Badge>}

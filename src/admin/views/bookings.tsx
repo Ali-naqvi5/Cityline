@@ -20,8 +20,8 @@ import {
   PAGE_SIZES,
   parseBookingFilters,
   WHEN_LABELS,
+  WHEN_PRESETS,
   type BookingFilters,
-  type BookingsWhen,
 } from "@/admin/data/booking-filters";
 import {
   clock,
@@ -31,6 +31,7 @@ import {
   relative,
   shortDay,
 } from "@/admin/format";
+import { NextStageButtons } from "@/admin/forms/stage-controls";
 import { requireStaff } from "@/admin/guard";
 import { ClickableRow } from "@/components/ops/clickable-row";
 import { NumberedPagination } from "@/components/ops/data-table";
@@ -50,14 +51,14 @@ import { EmptyState, ErrorState, NoAccess } from "@/components/ops/states";
 import {
   JOB_SOURCE_LABELS,
   JOB_SOURCES,
-  JOB_STATUS_LABELS,
+  JOB_STATUS_SHORT,
   JOB_STATUSES,
   OPEN_STATUSES,
   PAYMENT_METHOD_LABELS,
   vehicleClassName,
   type JobStatus,
 } from "@/domain/jobs/labels";
-import { isFinal } from "@/domain/jobs/status";
+import { beforeBoarding, isFinal, stageName } from "@/domain/jobs/status";
 import { SERVICE_LABELS, serviceType, type ServiceType } from "@/domain/jobs/service";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { can } from "@/domain/staff/permissions";
@@ -72,20 +73,27 @@ import type { Booking, Driver, Job, Supplier, User } from "@/payload-types";
 
 // --- Colours ------------------------------------------------------------------
 
+// The same colour per stage as the status badges (`components/ops/jobs`).
 const ROW_TONE: Record<JobStatus, string> = {
   unassigned: "bg-warn-soft",
   assigned: "bg-accent-soft",
-  driver_confirmed: "bg-ok-soft",
+  driver_confirmed: "bg-cat-6-soft",
+  on_the_way: "bg-cat-1-soft",
+  at_pickup: "bg-cat-5-soft",
+  on_board: "bg-special-soft",
   completed: "bg-surface",
-  no_show: "bg-special-soft",
+  no_show: "bg-cat-4-soft",
   cancelled: "bg-sunken text-ink-3",
 };
 const EDGE: Record<JobStatus, string> = {
   unassigned: "border-l-warn",
   assigned: "border-l-accent",
-  driver_confirmed: "border-l-ok",
-  completed: "border-l-line-strong",
-  no_show: "border-l-special",
+  driver_confirmed: "border-l-cat-6",
+  on_the_way: "border-l-cat-1",
+  at_pickup: "border-l-cat-5",
+  on_board: "border-l-special",
+  completed: "border-l-ok",
+  no_show: "border-l-cat-4",
   cancelled: "border-l-line",
 };
 const URGENT_ROW = "bg-danger-soft";
@@ -186,36 +194,20 @@ function Filters({ filters, choices }: { filters: BookingFilters; choices: Choic
       <div className="col-span-2 hidden grid-cols-2 gap-3 peer-checked:grid md:col-span-4 md:grid md:grid-cols-4 xl:col-span-4 xl:grid-cols-4">
         <div>
           <Label htmlFor="bookings-when">Pickup</Label>
-          <Select id="bookings-when" name="when" defaultValue={filters.when}>
-            {(Object.keys(WHEN_LABELS) as BookingsWhen[]).map((when) => (
+          {/* A preset clears the dates below; dates set this to "All dates". */}
+          <Select
+            id="bookings-when"
+            name="when"
+            defaultValue={filters.when === "range" ? "all" : filters.when}
+            data-clear="from,to"
+          >
+            {WHEN_PRESETS.map((when) => (
               <option key={when} value={when}>
                 {WHEN_LABELS[when]}
               </option>
             ))}
           </Select>
         </div>
-        {filters.when === "range" ? (
-          <>
-            <div>
-              <Label htmlFor="bookings-from">Pickup from</Label>
-              <TextInput
-                id="bookings-from"
-                name="from"
-                type="date"
-                defaultValue={filters.from}
-              />
-            </div>
-            <div>
-              <Label htmlFor="bookings-to">Pickup to</Label>
-              <TextInput
-                id="bookings-to"
-                name="to"
-                type="date"
-                defaultValue={filters.to}
-              />
-            </div>
-          </>
-        ) : null}
         <div>
           <Label htmlFor="bookings-status">Status</Label>
           <Select id="bookings-status" name="status" defaultValue={filters.status}>
@@ -223,7 +215,7 @@ function Filters({ filters, choices }: { filters: BookingFilters; choices: Choic
             <option value="open">Open (not finished)</option>
             {JOB_STATUSES.map((status) => (
               <option key={status} value={status}>
-                {JOB_STATUS_LABELS[status]}
+                {stageName(status)}
               </option>
             ))}
           </Select>
@@ -239,9 +231,6 @@ function Filters({ filters, choices }: { filters: BookingFilters; choices: Choic
             ))}
           </Select>
         </div>
-      </div>
-
-      <div className="col-span-2 hidden grid-cols-2 gap-3 peer-checked:grid md:col-span-4 md:grid md:grid-cols-4 xl:col-span-6 xl:grid-cols-6">
         <div>
           <Label htmlFor="bookings-supplier">Client</Label>
           <Select
@@ -257,6 +246,9 @@ function Filters({ filters, choices }: { filters: BookingFilters; choices: Choic
             ))}
           </Select>
         </div>
+      </div>
+
+      <div className="col-span-2 hidden grid-cols-2 gap-3 peer-checked:grid md:col-span-4 md:grid md:grid-cols-4 xl:col-span-6 xl:grid-cols-6">
         <div>
           <Label htmlFor="bookings-driver">Driver</Label>
           <Select id="bookings-driver" name="driver" defaultValue={filters.driver ?? ""}>
@@ -303,14 +295,24 @@ function Filters({ filters, choices }: { filters: BookingFilters; choices: Choic
           </Select>
         </div>
         <div>
-          <Label htmlFor="bookings-per">Per page</Label>
-          <Select id="bookings-per" name="per" defaultValue={String(filters.perPage)}>
-            {PAGE_SIZES.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </Select>
+          <Label htmlFor="bookings-from">Pickup from</Label>
+          <TextInput
+            id="bookings-from"
+            name="from"
+            type="date"
+            defaultValue={filters.from}
+            data-set="when=all"
+          />
+        </div>
+        <div>
+          <Label htmlFor="bookings-to">Pickup to</Label>
+          <TextInput
+            id="bookings-to"
+            name="to"
+            type="date"
+            defaultValue={filters.to}
+            data-set="when=all"
+          />
         </div>
         <div>
           <Label htmlFor="bookings-created-from">Taken from</Label>
@@ -330,7 +332,17 @@ function Filters({ filters, choices }: { filters: BookingFilters; choices: Choic
             defaultValue={filters.createdTo}
           />
         </div>
-        <div className="col-span-2 flex flex-wrap items-end gap-x-4 md:col-span-2 xl:col-span-4">
+        <div>
+          <Label htmlFor="bookings-per">Per page</Label>
+          <Select id="bookings-per" name="per" defaultValue={String(filters.perPage)}>
+            {PAGE_SIZES.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="col-span-2 flex flex-wrap items-end gap-x-4 md:col-span-3 xl:col-span-3">
           <Checkbox
             id="bookings-no-price"
             name="noDriverPrice"
@@ -395,11 +407,14 @@ function BookingsTable({
   now,
   dispatches,
   edits,
+  returnTo,
 }: {
   jobs: Job[];
   now: Date;
   dispatches: boolean;
   edits: boolean;
+  /** Where the stage buttons bring the operator back to: this page, as filtered. */
+  returnTo: string;
 }) {
   return (
     <div className="hidden overflow-x-auto lg:block">
@@ -557,7 +572,7 @@ function BookingsTable({
                   )}
                 </td>
                 <td className={TD}>
-                  <JobStatusBadge status={job.status} />
+                  <JobStatusBadge status={job.status} short />
                 </td>
                 <td className={cx(TD, PAYMENT, "whitespace-nowrap")}>
                   <span className="text-ink-2">
@@ -591,8 +606,11 @@ function BookingsTable({
                   </span>
                 </td>
                 <td className={cx(TD, "text-right whitespace-nowrap")}>
-                  <span className="inline-flex gap-1">
-                    {dispatches && !closed ? (
+                  <span className="inline-flex items-start gap-1">
+                    {dispatches && driver ? (
+                      <NextStageButtons job={job} now={now} compact returnTo={returnTo} />
+                    ) : null}
+                    {dispatches && beforeBoarding(status) ? (
                       <Link
                         href={`/admin/jobs/${job.id}/assign`}
                         aria-label={`${driver ? "Change driver for" : "Assign a driver to"} ${job.reference}`}
@@ -660,7 +678,7 @@ function BookingCards({ jobs, now }: { jobs: Job[]; now: Date }) {
                   </span>
                 </span>
                 <span className="flex flex-col items-end gap-1">
-                  <JobStatusBadge status={job.status} />
+                  <JobStatusBadge status={job.status} short />
                   <ClientChip job={job} />
                 </span>
               </span>
@@ -711,14 +729,22 @@ function BookingCards({ jobs, now }: { jobs: Job[]; now: Date }) {
 function Legend() {
   const items: { label: string; className: string }[] = [
     { label: "No driver, due within 24 h", className: `${URGENT_ROW} ${URGENT_EDGE}` },
-    { label: "Unassigned", className: `${ROW_TONE.unassigned} ${EDGE.unassigned}` },
-    { label: "Assigned", className: `${ROW_TONE.assigned} ${EDGE.assigned}` },
-    {
-      label: "Driver confirmed",
-      className: `${ROW_TONE.driver_confirmed} ${EDGE.driver_confirmed}`,
-    },
-    { label: "Completed", className: `${ROW_TONE.completed} ${EDGE.completed}` },
-    { label: "Cancelled", className: `${ROW_TONE.cancelled} ${EDGE.cancelled}` },
+    ...(
+      [
+        "unassigned",
+        "assigned",
+        "driver_confirmed",
+        "on_the_way",
+        "at_pickup",
+        "on_board",
+        "no_show",
+        "completed",
+        "cancelled",
+      ] as const
+    ).map((status) => ({
+      label: JOB_STATUS_SHORT[status],
+      className: `${ROW_TONE[status]} ${EDGE[status]}`,
+    })),
   ];
   return (
     <ul aria-label="Row colours" className="hidden flex-wrap gap-x-3 gap-y-1 lg:flex">
@@ -943,6 +969,7 @@ export async function BookingsView(props: AdminViewServerProps) {
               now={now}
               dispatches={dispatches}
               edits={edits}
+              returnTo={bookingsHref(filters)}
             />
             <BookingCards jobs={result.docs} now={now} />
             {result.totalPages > 1 ? (

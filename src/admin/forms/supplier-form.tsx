@@ -126,7 +126,7 @@ export function SupplierForm({
               name="active"
               type="checkbox"
               defaultChecked={values.active}
-              className="h-4 w-4 accent-[var(--color-accent)]"
+              className="accent-accent h-4 w-4"
             />
             Active — new jobs can be entered for this supplier
           </label>

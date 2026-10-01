@@ -363,7 +363,16 @@ export interface Job {
         id?: string | null;
       }[]
     | null;
-  status: 'unassigned' | 'assigned' | 'driver_confirmed' | 'completed' | 'no_show' | 'cancelled';
+  status:
+    | 'unassigned'
+    | 'assigned'
+    | 'driver_confirmed'
+    | 'on_the_way'
+    | 'at_pickup'
+    | 'on_board'
+    | 'completed'
+    | 'no_show'
+    | 'cancelled';
   driver?: (number | null) | Driver;
   vehicle?: (number | null) | Vehicle;
   /**
@@ -380,7 +389,22 @@ export interface Job {
   dispatchedAt?: string | null;
   subcontractorName?: string | null;
   driverConfirmedAt?: string | null;
+  /**
+   * DOW
+   */
+  onTheWayAt?: string | null;
+  /**
+   * DAP
+   */
+  atPickupAt?: string | null;
+  /**
+   * POB
+   */
+  onBoardAt?: string | null;
   completedAt?: string | null;
+  /**
+   * PNS
+   */
   noShowAt?: string | null;
   cancelledAt?: string | null;
   cancelReason?: string | null;
@@ -954,6 +978,9 @@ export interface JobsSelect<T extends boolean = true> {
   dispatchedAt?: T;
   subcontractorName?: T;
   driverConfirmedAt?: T;
+  onTheWayAt?: T;
+  atPickupAt?: T;
+  onBoardAt?: T;
   completedAt?: T;
   noShowAt?: T;
   cancelledAt?: T;

@@ -6,7 +6,7 @@ import { useActionState, useEffect, useId, useRef, type ReactNode } from "react"
 import { EMPTY_FORM, type FormState } from "@/admin/form-state";
 
 import { FormMessage, SubmitButton, submitWith } from "./form";
-import { buttonClass, type ButtonVariant } from "./primitives";
+import { buttonClass, cx, type ButtonVariant } from "./primitives";
 
 /**
  * A button that asks first (spec §48). The dialog says what will happen and
@@ -20,6 +20,8 @@ export function ConfirmDialog({
   label,
   icon,
   variant = "secondary",
+  size = "md",
+  buttonTitle,
   title,
   children,
   confirmLabel,
@@ -31,6 +33,9 @@ export function ConfirmDialog({
   label: string;
   icon?: ReactNode;
   variant?: ButtonVariant;
+  size?: "sm" | "md";
+  /** A fuller description of the trigger, for a short label such as "PNS". */
+  buttonTitle?: string;
   title: string;
   /** What will happen, in plain words. */
   children: ReactNode;
@@ -57,7 +62,8 @@ export function ConfirmDialog({
     <>
       <button
         type="button"
-        className={buttonClass(variant, "md")}
+        className={buttonClass(variant, size)}
+        title={buttonTitle}
         onClick={() => dialog.current?.showModal()}
       >
         {icon}
@@ -120,29 +126,47 @@ export function ActionButton({
   label,
   icon,
   variant = "secondary",
+  size = "md",
   pendingLabel = "Saving…",
   action,
   fields,
+  className,
+  title,
 }: {
   label: string;
   icon?: ReactNode;
   variant?: ButtonVariant;
+  size?: "sm" | "md";
   pendingLabel?: string;
   action: (previous: FormState, formData: FormData) => Promise<FormState>;
   fields: Record<string, string | number>;
+  className?: string;
+  /** A fuller description, for a short label such as "DOW". */
+  title?: string;
 }) {
   const [state, dispatch, pending] = useActionState(action, EMPTY_FORM);
   return (
-    <form onSubmit={submitWith(dispatch)} className="flex flex-col gap-1">
+    <form
+      onSubmit={submitWith(dispatch)}
+      className={cx("flex flex-col gap-1", className)}
+      title={title}
+    >
       {Object.entries(fields).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
-      <SubmitButton pending={pending} variant={variant} pendingLabel={pendingLabel}>
+      <SubmitButton
+        pending={pending}
+        variant={variant}
+        size={size}
+        pendingLabel={pendingLabel}
+      >
         {icon}
         {label}
       </SubmitButton>
       {state.message ? (
-        <p className="text-danger max-w-xs text-sm">{state.message}</p>
+        <p role="alert" className="text-danger max-w-xs text-sm">
+          {state.message}
+        </p>
       ) : null}
     </form>
   );

@@ -71,16 +71,6 @@ export function FormField({
   );
 }
 
-const INPUT =
-  "block h-10 w-full rounded-md border border-line-strong bg-surface px-3 text-base text-ink shadow-xs placeholder:text-ink-4 aria-invalid:border-danger lg:h-9 lg:text-sm";
-
-export function inputClass(extra?: string): string {
-  return cx(INPUT, extra);
-}
-
-export const TEXTAREA_CLASS =
-  "block min-h-24 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-base text-ink shadow-xs placeholder:text-ink-4 aria-invalid:border-danger lg:text-sm";
-
 export function FormMessage({ state }: { state: FormState }) {
   if (!state.message) return null;
   return (
@@ -98,18 +88,20 @@ export function SubmitButton({
   children,
   pendingLabel = "Saving…",
   variant = "primary",
+  size = "md",
   pending: pendingProp,
 }: {
   children: ReactNode;
   pendingLabel?: string;
   variant?: ButtonVariant;
+  size?: "sm" | "md";
   /** From `useActionState`, for forms submitted with `submitWith`. */
   pending?: boolean;
 }) {
   const status = useFormStatus();
   const pending = pendingProp ?? status.pending;
   return (
-    <button type="submit" disabled={pending} className={buttonClass(variant, "md")}>
+    <button type="submit" disabled={pending} className={buttonClass(variant, size)}>
       {pending ? pendingLabel : children}
     </button>
   );
@@ -118,7 +110,5 @@ export function SubmitButton({
 /** See `lib/form-submit.ts`: submit without React 19's automatic form reset. */
 export { submitWithoutReset as submitWith } from "@/lib/form-submit";
 
-/** `aria-invalid` and `aria-describedby` for a control with an error. */
-export function invalid(error: string | undefined, id: string) {
-  return error ? { "aria-invalid": true, "aria-describedby": `${id}-error` } : {};
-}
+// Class helpers live in a plain module so server components can use them too.
+export { inputClass, invalid, TEXTAREA_CLASS } from "./form-classes";

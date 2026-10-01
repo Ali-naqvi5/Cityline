@@ -88,7 +88,7 @@ function Check({
           name={name}
           type="checkbox"
           defaultChecked={defaultChecked}
-          className="h-4 w-4 accent-[var(--color-accent)]"
+          className="accent-accent h-4 w-4"
         />
         {label}
       </label>
