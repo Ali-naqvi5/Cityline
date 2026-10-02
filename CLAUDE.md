@@ -204,6 +204,17 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   partners take their cut before sending a job, and a driver's pay is the
   driver price written on each booking. Drivers are independent — never
   show employment wording.
+- **Reports** (`admin/reports/`, `/admin/reports/*`) are dashboards over the
+  raw rows: the figures and charts first, then every row in a table and as a
+  CSV from `/api/reports/<report>` (`app/api/reports/[report]/route.ts`,
+  same capability as the screen; add new reports to its `REPORTS` table).
+  The screen and the CSV load through one function, so they always agree.
+  Test bookings are never counted. **No money outside Finance** — operational
+  reports load no prices. Periods come from `reports/period.ts`, each
+  compared with the one before; CSVs go through `lib/csv.ts`, which guards
+  against spreadsheet formulas. Charts are in `components/ops/charts/`: one
+  series colour (`viz`), a hover read-out on every mark (`data-tip-value`)
+  and the numbers as a table too.
 - WhatsApp is "click to send" (`wa.me` link with the message written) until
   the Business API is connected; the job records only what is known — that
   the message was opened — and the controller marks delivered or read.

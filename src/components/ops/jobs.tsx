@@ -77,7 +77,7 @@ export function JobStatusBadge({ status, short }: { status: string; short?: bool
     <span
       title={long}
       className={cx(
-        "inline-flex items-center gap-1 rounded-sm border px-1.5 py-px text-xs leading-4 font-medium whitespace-nowrap",
+        "relative inline-flex items-center gap-1 rounded-sm border px-1.5 py-px text-xs leading-4 font-medium whitespace-nowrap",
         STATUS_COLOURS[status],
       )}
     >

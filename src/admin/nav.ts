@@ -253,7 +253,7 @@ export const NAV: NavSection[] = [
         href: "/admin/reports/jobs",
         icon: "jobsReport",
         capability: "reports.operational",
-        ready: false,
+        ready: true,
       },
       {
         id: "driver-reports",

@@ -65,7 +65,7 @@ export function DataTable<T>({
         })}
       </ul>
 
-      <div className="hidden overflow-x-auto md:block">
+      <div className="relative hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <caption className="sr-only">{caption}</caption>
           <thead>

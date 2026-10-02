@@ -23,6 +23,8 @@ const GATE_EXEMPT_PREFIXES = [
   "/api/health",
   "/api/cron",
   "/api/webhooks",
+  // Staff downloads; each request is checked against the signed-in person.
+  "/api/reports",
   "/admin",
   "/coming-soon",
 ];

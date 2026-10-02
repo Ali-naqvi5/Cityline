@@ -417,7 +417,7 @@ function BookingsTable({
   returnTo: string;
 }) {
   return (
-    <div className="hidden overflow-x-auto lg:block">
+    <div className="relative hidden overflow-x-auto lg:block">
       <table className="w-full border-collapse text-xs">
         <caption className="sr-only">Bookings</caption>
         <thead className="bg-header text-white">

@@ -23,7 +23,10 @@ describe("sealed values", () => {
   it("refuses a tampered or foreign value", () => {
     const sealed = seal("secret");
     const parts = sealed.split(".");
-    const tampered = [parts[0], parts[1], parts[2], `A${parts[3]!.slice(1)}`].join(".");
+    // Change the first character of the body — to something it is not already.
+    const body = parts[3]!;
+    const flipped = `${body[0] === "A" ? "B" : "A"}${body.slice(1)}`;
+    const tampered = [parts[0], parts[1], parts[2], flipped].join(".");
     expect(open(tampered)).toBeNull();
     expect(open("not-ours")).toBeNull();
     expect(open(null)).toBeNull();

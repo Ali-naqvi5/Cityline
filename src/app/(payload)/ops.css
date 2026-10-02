@@ -142,6 +142,15 @@
   --color-cat-6: #3730a3;
   --color-cat-6-soft: #eef2ff;
   --color-cat-6-line: #c7d2fe;
+
+  /* Report charts. One series colour, and a one-hue scale for heatmaps
+     (fewer → more), each validated against its surface in both themes. */
+  --color-viz: #2a78d6;
+  --color-heat-1: #86b6ef;
+  --color-heat-2: #5598e7;
+  --color-heat-3: #2a78d6;
+  --color-heat-4: #1c5cab;
+  --color-heat-5: #104281;
 }
 
 /*
@@ -199,6 +208,12 @@
     --color-cat-6: #a5b4fc;
     --color-cat-6-soft: #1b1d3d;
     --color-cat-6-line: #3c4194;
+    --color-viz: #3987e5;
+    --color-heat-1: #184f95;
+    --color-heat-2: #256abf;
+    --color-heat-3: #3987e5;
+    --color-heat-4: #6da7ec;
+    --color-heat-5: #9ec5f4;
   }
   @media (prefers-color-scheme: dark) {
     .ops-root[data-ops-theme="system"] {
@@ -248,6 +263,12 @@
       --color-cat-6: #a5b4fc;
       --color-cat-6-soft: #1b1d3d;
       --color-cat-6-line: #3c4194;
+      --color-viz: #3987e5;
+      --color-heat-1: #184f95;
+      --color-heat-2: #256abf;
+      --color-heat-3: #3987e5;
+      --color-heat-4: #6da7ec;
+      --color-heat-5: #9ec5f4;
     }
   }
 }

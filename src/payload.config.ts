@@ -23,6 +23,7 @@ import { Users } from "@/collections/Users";
 import { VehicleDocuments } from "@/collections/VehicleDocuments";
 import { Vehicles } from "@/collections/Vehicles";
 import { WebhookEvents } from "@/collections/WebhookEvents";
+import { keepValidationMessages } from "@/collections/hooks/validation-errors";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -165,6 +166,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Customer" },
         },
+        opsJobsReport: {
+          Component: "@/admin/views/report-jobs#JobsReportView",
+          path: "/reports/jobs",
+          exact: true,
+          meta: { title: "Jobs Report" },
+        },
         opsDispatch: {
           Component: "@/admin/views/dispatch#DispatchView",
           path: "/dispatch",
@@ -288,6 +295,10 @@ export default buildConfig({
   ],
 
   editor: lexicalEditor(),
+
+  hooks: {
+    afterError: [keepValidationMessages],
+  },
 
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URL },

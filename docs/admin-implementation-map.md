@@ -125,7 +125,7 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 | Messaging      | Send on WhatsApp (prefilled), passenger details                               | ✅ 1 Oct; wa.me link, statuses marked by hand; email only     |
 | Alerts         | Notification centre                                                           | ⬜                                                            |
 | Finance        | Job finance, costs, driver pay, statements, supplier money, expenses, reports | 🔧 driver price per booking and profit ✅ 2 Oct; rest ⬜      |
-| Reports        | TfL register, run sheet, jobs/driver/vehicle/supplier reports                 | ⬜                                                            |
+| Reports        | TfL register, run sheet, jobs/driver/vehicle/supplier reports                 | 🔧 Jobs Report ✅ 2 Oct; the rest one at a time, then Finance |
 | Administration | Staff + 2FA, audit log, booking rules, company details                        | 🔧 audit log ✅ 1 Oct; staff, 2FA, settings to build          |
 |                | Prices & catalogue                                                            | ⬜ (needs real price tables)                                  |
 |                | Media / content                                                               | ⬜                                                            |
@@ -143,7 +143,7 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 | Refunds staff-only, audited                          | ⬜                                                                          |
 | Role permissions server-side                         | ✅ 1 Oct — matrix on every collection, view and action                      |
 | Bank details owner-only                              | ✅ field access + AES-256-GCM                                               |
-| Test bookings out of reports / TfL export            | ✅ `isTest` exists; ⬜ in queries                                           |
+| Test bookings out of reports / TfL export            | ✅ `isTest`; left out of the Jobs Report and its CSV; ⬜ TfL export         |
 | Audit record for important mutations                 | ✅ `audit-log` on jobs, bookings, customers, fleet, suppliers, staff        |
 
 ## Build order
