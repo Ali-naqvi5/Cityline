@@ -3,7 +3,7 @@
 Where the build actually stands. Read this before starting work; update it
 before finishing.
 
-**Last updated:** 29 September 2026
+**Last updated:** 6 October 2026
 
 Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-deviations.md)
 (why the build differs from the designs), [`runbook-vps.md`](runbook-vps.md)
@@ -19,11 +19,11 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 | `pnpm typecheck`        | passing                               |
 | `pnpm lint`             | passing                               |
 | `pnpm format:check`     | passing                               |
-| `pnpm check:compliance` | passing — 186 files, wording + claims |
-| `pnpm check:migrations` | passing — 2 migrations, additive only |
-| `pnpm test`             | passing — 334 tests across 25 files   |
+| `pnpm check:compliance` | passing — 348 files, wording + claims |
+| `pnpm check:migrations` | passing — 9 migrations, additive only |
+| `pnpm test`             | passing — 511 tests across 52 files   |
 | `pnpm build`            | passing                               |
-| `pnpm e2e`              | passing — 18 tests, 390px and 1440px  |
+| `pnpm e2e`              | last run 29 Sep — 18 tests passing    |
 
 History is on GitHub (`Ali-naqvi5/Cityline`, branch `main`). Pushing `main`
 deploys to production — there is no staging (see below).
@@ -39,7 +39,7 @@ deploys to production — there is no staging (see below).
 | S2     | Places, zones, pricing engine   | **Not started** — blocked on the launch price tables                             |
 | S3     | Quote, steps 1–2                | Steps 1–2 built on placeholder fares; `/quote` and Places autocomplete not built |
 | S4     | Steps 3–4, Stripe, confirmation | **Done in test mode.** Card payments through Stripe; live keys still to come     |
-| S5+    | Manage booking, pages, admin    | Manage booking, emails, help and legal pages built; **admin not started**        |
+| S5+    | Manage booking, pages, admin    | Manage booking, emails, help and legal pages built; **admin in progress**        |
 
 The build ran ahead of S2, so **every fare on the site is a placeholder**. The
 funnel has four working screens standing on invented numbers.
@@ -155,7 +155,9 @@ analytics. Do not build them without asking.
 **Every link resolves.** The home page's popular routes now point at the
 airport pages, and its corporate and cruise cards at the service pages.
 
-Still to come: the admin panel, real prices (S2), address suggestions (BK-02),
+Still to come: the rest of the admin panel (see
+[`admin-implementation-map.md`](admin-implementation-map.md) and "Pending"
+below), real prices (S2), address suggestions (BK-02),
 Stripe live mode, and customer accounts.
 
 ### The database exists now
@@ -454,6 +456,82 @@ Payload's own screen, not ours; to look at with the admin work.
 **`design/brand/Loader.json`** is a Lottie file, but not a vector one: three
 720×405 raster frames at 15fps, 0.2s total, no loop. As delivered it would
 flash once and stop. Its intended use has not been confirmed.
+
+---
+
+## Pending — put off by Cityline for now
+
+Sections proposed to Cityline on 6 Oct 2026 and put off by them. **Nothing
+here is built**; each report shows as "Soon" in the admin menu. The outlines
+below are what was proposed, with the questions still open — ask them again
+before building. Reports keep the pattern in `CLAUDE.md` (dashboard + raw CSV,
+by pickup date, no money outside Finance, test bookings never counted, Owner
+and Controller).
+
+### Supplier Report
+
+- **Would show:** bookings received per partner and their share of the work;
+  completed, PNS rate and cancellation rate side by side; the share sent
+  under 24 hours before pickup; volume over time; airports and services; how
+  far ahead each partner books; how often their jobs were changed after being
+  taken (from the job history); partners who sent nothing in the period.
+- **Downloads:** every partner booking (reference, pickup, route, status,
+  taken, number of changes, cancellation reason), and one row per partner.
+- **Open:** include website and phone bookings for comparison, or partners
+  only? Keep an operator licence number and expiry for partners that pass
+  jobs on as licensed London operators (good practice; not confirmed as a TfL
+  requirement on Cityline)?
+
+### Vehicle Report
+
+- **Would show:** vehicles used, bookings carried, bookings per vehicle, a
+  vehicles-by-day grid, who drove each car, upgrades (a bigger class sent
+  than booked), active vehicles with no bookings, licence/MOT/insurance due
+  in 30 and 60 days, one row per vehicle.
+- **TfL vehicle records to add** (Operator Handbook; kept 12 months after a
+  vehicle stops being available): registered keeper's name and address; the
+  dates the vehicle became and stopped being available (the second required
+  on "Sold or returned"); copies — files, not just entries — of the PHV
+  vehicle licence, the MOT and the hire-and-reward insurance (or a fleet
+  schedule showing the vehicle and its drivers covered); what each record
+  lacks, on the vehicle's page and in the report.
+- **Downloads:** bookings per vehicle, one row per vehicle, TfL vehicle
+  records.
+- **Open:** the handbook asks for an MOT certificate "no more than 6 months
+  old" (none for a car under 12 months old) — flag older than 6 months
+  (needs a "first registered" date) or only expired? Keep the upgrades
+  figure? Mileage is not recorded anywhere.
+
+### TfL Booking Register
+
+- **Would show:** TfL's record of every booking (reg. 11, Operator Handbook):
+  date made and journey date, passenger, pickup time and place, main
+  destination (street and postal area at least, full postcode best), fare
+  quoted, driver's name and PHV licence number, vehicle registration, the
+  operator sub-contracted to if any. Cancelled bookings kept and marked; test
+  bookings never. Records must be made before the journey and kept 12 months
+  (jobs and bookings are never deleted).
+- **Register health:** complete records out of the total; entered after the
+  pickup time; journeys started with no driver or vehicle recorded; a
+  destination too vague; no fare — each linking to the booking.
+- **Print and download:** an A4 landscape print layout (page numbers,
+  "printed on … by …") for a TfL officer, and CSV.
+- **Weekly operator upload:** TfL asks every Monday for the drivers (with PHV
+  licence numbers) and vehicles (registrations) used the week before — a
+  "last week" panel with a download.
+- **Open:** the fare has to be in the register (TfL requires it) — the one
+  price outside Finance, Owner and Controller only? On partner bookings,
+  record the price agreed with the partner? TfL's upload template, from
+  Cityline's TfL online account, to match its columns.
+
+### TfL gaps found while building the Driver Report
+
+1. The passenger "your driver" email has the driver's first name, PHV
+   licence number, car and registration, but **no photo of the driver** —
+   the handbook asks for one where the passenger can receive it.
+2. **Complaints and lost property records** — required by TfL, kept 12
+   months; there is nowhere in the admin to record them.
+3. The **weekly operator upload** — see the register above.
 
 ---
 
