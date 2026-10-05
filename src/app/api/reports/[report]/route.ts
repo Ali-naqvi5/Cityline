@@ -11,6 +11,7 @@ import {
   JOBS_CSV_COLUMNS,
   parseJobsReportFilters,
 } from "@/admin/reports/jobs-data";
+import { DRIVER_PAYMENTS_CSV_COLUMNS, loadPayments } from "@/admin/data/driver-pay";
 import { londonDay } from "@/admin/format";
 import { resolvePeriod } from "@/admin/reports/period";
 import {
@@ -107,6 +108,22 @@ const REPORTS: Record<
             csv: toCsv(rows, DRIVER_BOOKINGS_CSV_COLUMNS),
           };
       }
+    },
+  },
+  // Payments to drivers made in the period (by the date paid), voids marked.
+  "driver-payments": {
+    capability: "driverPay.view",
+    build: async ({ user, query, now }) => {
+      const payload = await payloadClient();
+      const period = resolvePeriod(query, now);
+      const payments = await loadPayments(payload, user, {
+        start: period.start,
+        end: period.end,
+      });
+      return {
+        filename: `cityline-driver-payments-${period.from}-to-${period.to}.csv`,
+        csv: toCsv(payments, DRIVER_PAYMENTS_CSV_COLUMNS),
+      };
     },
   },
   // One London day's bookings in pickup order — no prices; a driver's price

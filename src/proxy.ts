@@ -25,6 +25,9 @@ const GATE_EXEMPT_PREFIXES = [
   "/api/webhooks",
   // Staff downloads; each request is checked against the signed-in person.
   "/api/reports",
+  "/api/driver-pay",
+  // A driver's payment statement, opened from a signed, expiring link.
+  "/api/statements",
   "/admin",
   "/coming-soon",
 ];

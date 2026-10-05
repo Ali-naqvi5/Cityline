@@ -14,8 +14,9 @@
  *               compliance, suppliers, operational reports. No company
  *               finance, no bank details.
  *   Accounts    finance: payments, refunds, driver pay, supplier money,
- *               expenses, financial reports, and the money on each job. Jobs
- *               and bookings read-only, for context; no dispatch.
+ *               expenses, financial reports, and the money on each job —
+ *               and drivers' bank details, to pay them (Cityline, 6 Oct
+ *               2026). Jobs and bookings read-only, for context; no dispatch.
  *   Editor      website content and media only.
  */
 
@@ -108,6 +109,8 @@ const ACCOUNTS: readonly Capability[] = [
   "refunds.issue",
   "driverPay.view",
   "driverPay.manage",
+  // Accounts pays the drivers, so needs where to send the money.
+  "drivers.bankDetails",
   "supplierMoney.view",
   "supplierMoney.manage",
   "expenses.view",

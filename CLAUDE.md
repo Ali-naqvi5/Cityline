@@ -215,6 +215,18 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   against spreadsheet formulas. Charts are in `components/ops/charts/`: one
   series colour (`viz`), a hover read-out on every mark (`data-tip-value`)
   and the numbers as a table too.
+- **Driver Pay** (`/admin/driver-pay`, Owner and Accounts): what each driver
+  is owed for completed and PNS bookings — the driver price on each, less
+  cash a passenger paid them — up to any chosen day. A `driver-payments` row
+  covers a set of bookings; its collection hook works out the lines and
+  totals from the bookings (typed amounts are ignored) and refuses a booking
+  already paid, unpriced or someone else's. Payments are never edited or
+  deleted, only voided with a reason, which frees their bookings. Each has a
+  PDF statement (`domain/finance/statement-pdf.ts`, pdf-lib, standard
+  fonts) and a signed, expiring link for the driver
+  (`domain/finance/statement-link.ts`, `/api/statements/<token>`), sent with
+  the WhatsApp note. Not an invoice or a payslip — drivers are independent.
+  Refunds stay manual in Stripe (Cityline, 6 Oct 2026).
 - **Daily Run Sheet** (`/admin/reports/run-sheet`, `runSheet` capability):
   one London day, today by default, whole day or by driver; prints one
   driver to a page. The passenger's phone is on it; prices are not — a

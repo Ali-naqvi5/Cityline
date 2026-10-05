@@ -11,6 +11,7 @@ import { AuditLog } from "@/collections/AuditLog";
 import { Bookings } from "@/collections/Bookings";
 import { Customers } from "@/collections/Customers";
 import { DriverDocuments } from "@/collections/DriverDocuments";
+import { DriverPayments } from "@/collections/DriverPayments";
 import { Drivers } from "@/collections/Drivers";
 import { JobEvents } from "@/collections/JobEvents";
 import { Jobs } from "@/collections/Jobs";
@@ -178,6 +179,18 @@ export default buildConfig({
           exact: true,
           meta: { title: "Driver Report" },
         },
+        opsDriverPay: {
+          Component: "@/admin/views/driver-pay#DriverPayView",
+          path: "/driver-pay",
+          exact: true,
+          meta: { title: "Driver Pay" },
+        },
+        opsDriverPayDriver: {
+          Component: "@/admin/views/driver-pay-driver#DriverPayDriverView",
+          path: "/driver-pay/:id",
+          exact: true,
+          meta: { title: "Driver Pay" },
+        },
         opsRunSheet: {
           Component: "@/admin/views/report-run-sheet#RunSheetView",
           path: "/reports/run-sheet",
@@ -301,6 +314,8 @@ export default buildConfig({
     VehicleDocuments,
     Suppliers,
     PrivateFiles,
+    // Finance.
+    DriverPayments,
     // Staff accounts for the admin itself, and what they change.
     Users,
     AuditLog,

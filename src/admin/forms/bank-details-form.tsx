@@ -12,7 +12,7 @@ import {
   submitWith,
 } from "@/components/ops/form";
 
-/** Owner only. Sealed on the server before it is stored (spec §22). */
+/** Owner and Accounts. Sealed on the server before it is stored (spec §22). */
 export function BankDetailsForm({
   driverId,
   hasDetails,

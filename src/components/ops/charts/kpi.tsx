@@ -1,7 +1,11 @@
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { formatPence, type Pence } from "@/domain/money";
+
 import { cx } from "../primitives";
+
+const pounds = (pence: number) => formatPence(pence as Pence);
 
 /**
  * A headline figure with its change against the comparison period. The
@@ -33,7 +37,7 @@ export function KpiTile({
    * What the figure counts. A percentage changes by points ("+5 pts"), and
    * minutes by minutes — never by a percentage of themselves.
    */
-  unit?: "count" | "percent" | "minutes";
+  unit?: "count" | "percent" | "minutes" | "pence";
 }) {
   let delta: ReactNode = null;
   if (previous !== undefined && previous !== null && compareName) {
@@ -50,14 +54,16 @@ export function KpiTile({
           : unit === "minutes"
             ? `${sign}${change} min`
             : previous === 0
-              ? `${sign}${change}`
+              ? `${sign}${unit === "pence" ? pounds(change) : change}`
               : `${sign}${Math.round((change / previous) * 100)}%`;
     const before =
       unit === "percent"
         ? `${previous}%`
         : unit === "minutes"
           ? `${previous} min`
-          : previous;
+          : unit === "pence"
+            ? pounds(previous)
+            : previous;
     delta = (
       <p
         className={cx(

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   driverDayMessage,
   driverMessage,
+  paymentMessage,
   whatsappLink,
   type DriverMessageJob,
 } from "./driver-message";
@@ -109,5 +110,44 @@ describe("the driver's day on WhatsApp", () => {
     expect(driverDayMessage("Sam", [job], "+44 7926 608888")).toContain(
       "Sam, here is your job.",
     );
+  });
+});
+
+describe("the payment note on WhatsApp", () => {
+  const payment = {
+    reference: "DP-000012",
+    paidAt: new Date("2026-10-06T11:00:00Z"),
+    upTo: new Date("2026-10-05T11:00:00Z"),
+    method: "Bank transfer",
+    bankReference: "CITYLINE 12",
+    bookings: 3,
+    earnedPence: 14000,
+    cashPence: 5500,
+    amountPence: 8500,
+    statementUrl: "https://example.com/api/statements/abc",
+  };
+
+  it("says what was paid, how, for what, with the statement link", () => {
+    const text = paymentMessage("Sam", payment, "+44 7926 608888");
+    expect(text).toContain("*PAYMENT STATEMENT DP-000012*");
+    expect(text).toContain(
+      "Sam, we paid you £85.00 on 6 Oct 2026 by bank transfer (reference CITYLINE 12).",
+    );
+    expect(text).toContain("3 bookings up to 5 Oct 2026: £140.00");
+    expect(text).toContain("Less cash you collected: £55.00");
+    expect(text).toContain("Paid to you: £85.00");
+    expect(text).toContain(
+      "Your statement (PDF): https://example.com/api/statements/abc",
+    );
+  });
+
+  it("says so when the driver paid Cityline instead", () => {
+    const text = paymentMessage(
+      "Sam",
+      { ...payment, cashPence: 20000, amountPence: -6000, bankReference: null },
+      "+44 7926 608888",
+    );
+    expect(text).toContain("this settles £60.00 you paid Cityline");
+    expect(text).toContain("You paid Cityline: £60.00");
   });
 });

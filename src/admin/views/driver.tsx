@@ -556,7 +556,10 @@ export async function DriverView(props: AdminViewServerProps) {
           ) : null}
 
           {seesBank ? (
-            <Panel title="Bank details" description="Owner only. Stored encrypted.">
+            <Panel
+              title="Bank details"
+              description="Owner and Accounts only. Stored encrypted."
+            >
               <p className="text-ink-2 mb-4 text-sm">
                 {driver.bankAccountLast4 ? (
                   <>

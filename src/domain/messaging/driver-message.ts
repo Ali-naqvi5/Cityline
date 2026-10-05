@@ -212,3 +212,55 @@ export function messageJobFrom(job: Job): DriverMessageJob {
 export function whatsappChat(phone: string): string {
   return `https://wa.me/${phone.replace(/\D/g, "")}`;
 }
+
+export interface PaymentMessage {
+  reference: string;
+  paidAt: Date;
+  upTo: Date;
+  method: string;
+  bankReference: string | null;
+  bookings: number;
+  earnedPence: number;
+  cashPence: number;
+  amountPence: number;
+  /** The private link to the statement PDF. */
+  statementUrl: string;
+}
+
+const payDay = new Intl.DateTimeFormat("en-GB", {
+  timeZone: DISPLAY_TIMEZONE,
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
+/**
+ * The note that goes with a payment to a driver (Driver Pay): what was paid,
+ * how, for which bookings, and a link to the statement PDF — WhatsApp's
+ * click-to-send carries text, so the PDF travels as a link.
+ */
+export function paymentMessage(
+  firstName: string,
+  payment: PaymentMessage,
+  officePhone: string,
+): string {
+  const owedCityline = payment.amountPence < 0;
+  const amount = formatPence(Math.abs(payment.amountPence) as Pence);
+  const how = `${payment.method.toLowerCase()}${payment.bankReference ? ` (reference ${payment.bankReference})` : ""}`;
+  return [
+    `*PAYMENT STATEMENT ${payment.reference}*`,
+    owedCityline
+      ? `${firstName}, this settles ${amount} you paid Cityline on ${payDay.format(payment.paidAt)} by ${how}.`
+      : `${firstName}, we paid you ${amount} on ${payDay.format(payment.paidAt)} by ${how}.`,
+    "",
+    `${payment.bookings} ${payment.bookings === 1 ? "booking" : "bookings"} up to ${payDay.format(payment.upTo)}: ${formatPence(payment.earnedPence as Pence)}`,
+    ...(payment.cashPence
+      ? [`Less cash you collected: ${formatPence(payment.cashPence as Pence)}`]
+      : []),
+    owedCityline ? `You paid Cityline: ${amount}` : `Paid to you: ${amount}`,
+    "",
+    `Your statement (PDF): ${payment.statementUrl}`,
+    "",
+    `Office: ${officePhone}`,
+  ].join("\n");
+}

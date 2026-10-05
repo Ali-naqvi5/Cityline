@@ -81,6 +81,7 @@ export interface Config {
     'vehicle-documents': VehicleDocument;
     suppliers: Supplier;
     'private-files': PrivateFile;
+    'driver-payments': DriverPayment;
     users: User;
     'audit-log': AuditLog;
     'payload-kv': PayloadKv;
@@ -104,6 +105,7 @@ export interface Config {
     'vehicle-documents': VehicleDocumentsSelect<false> | VehicleDocumentsSelect<true>;
     suppliers: SuppliersSelect<false> | SuppliersSelect<true>;
     'private-files': PrivateFilesSelect<false> | PrivateFilesSelect<true>;
+    'driver-payments': DriverPaymentsSelect<false> | DriverPaymentsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -440,6 +442,11 @@ export interface Job {
    * Stripe's fee, from the webhook.
    */
   paymentFeePence?: number | null;
+  driverPayment?: (number | null) | DriverPayment;
+  /**
+   * The driver price when it was paid, to notice a later change.
+   */
+  driverPaidPricePence?: number | null;
   /**
    * JOB-07: website jobs lock price, customer and route. Changes go through the booking's amend flow.
    */
@@ -605,6 +612,60 @@ export interface Vehicle {
    */
   drivers?: (number | Driver)[] | null;
   notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Payments to drivers for their bookings. Voided, never edited or deleted.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "driver-payments".
+ */
+export interface DriverPayment {
+  id: number;
+  driver: number | Driver;
+  /**
+   * Covers bookings picked up on or before this day.
+   */
+  upTo: string;
+  paidAt: string;
+  method: 'bank_transfer' | 'cash' | 'other';
+  /**
+   * The bank reference.
+   */
+  reference?: string | null;
+  notes?: string | null;
+  /**
+   * The bookings paid for, as they were when paid.
+   */
+  lines?:
+    | {
+        job: number | Job;
+        jobReference?: string | null;
+        pickupAt?: string | null;
+        route?: string | null;
+        status?: string | null;
+        pricePence?: number | null;
+        cashPence?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Driver prices, pence.
+   */
+  earnedPence?: number | null;
+  /**
+   * Cash the driver collected, taken off. Pence.
+   */
+  cashPence?: number | null;
+  /**
+   * Paid: earned less cash. Below zero, the driver paid Cityline.
+   */
+  amountPence?: number | null;
+  recordedBy?: (number | null) | User;
+  voidedAt?: string | null;
+  voidReason?: string | null;
+  voidedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -843,6 +904,10 @@ export interface PayloadLockedDocument {
         value: number | PrivateFile;
       } | null)
     | ({
+        relationTo: 'driver-payments';
+        value: number | DriverPayment;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -1030,6 +1095,8 @@ export interface JobsSelect<T extends boolean = true> {
   paymentMethod?: T;
   driverPricePence?: T;
   paymentFeePence?: T;
+  driverPayment?: T;
+  driverPaidPricePence?: T;
   locked?: T;
   driverNotes?: T;
   internalNotes?: T;
@@ -1211,6 +1278,39 @@ export interface PrivateFilesSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "driver-payments_select".
+ */
+export interface DriverPaymentsSelect<T extends boolean = true> {
+  driver?: T;
+  upTo?: T;
+  paidAt?: T;
+  method?: T;
+  reference?: T;
+  notes?: T;
+  lines?:
+    | T
+    | {
+        job?: T;
+        jobReference?: T;
+        pickupAt?: T;
+        route?: T;
+        status?: T;
+        pricePence?: T;
+        cashPence?: T;
+        id?: T;
+      };
+  earnedPence?: T;
+  cashPence?: T;
+  amountPence?: T;
+  recordedBy?: T;
+  voidedAt?: T;
+  voidReason?: T;
+  voidedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

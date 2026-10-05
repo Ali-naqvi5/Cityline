@@ -140,7 +140,7 @@ export async function saveDriverPhotoAction(
   redirect(`/admin/drivers/${id}?notice=photo-saved`);
 }
 
-/** Owner only (spec §22): sealed before it is stored, never shown in lists. */
+/** Owner and Accounts (spec §22, widened 6 Oct 2026): sealed before it is stored, never shown in lists. */
 export async function saveBankDetailsAction(
   _previous: FormState,
   formData: FormData,

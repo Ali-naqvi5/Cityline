@@ -215,7 +215,7 @@ export const NAV: NavSection[] = [
         href: "/admin/driver-pay",
         icon: "driverPay",
         capability: "driverPay.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "supplier-money",

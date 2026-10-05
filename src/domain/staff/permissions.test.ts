@@ -25,16 +25,16 @@ describe("the permission matrix", () => {
     expect(can("controller", "tfl.register")).toBe(true);
   });
 
-  it("gives accounts the money but no dispatch, editing or bank details", () => {
+  it("gives accounts the money and bank details, but no dispatch or editing", () => {
     expect(can("accounts", "refunds.issue")).toBe(true);
     expect(can("accounts", "finance.jobs")).toBe(true);
     expect(can("accounts", "jobs.view")).toBe(true);
+    expect(can("accounts", "drivers.bankDetails")).toBe(true);
     for (const capability of [
       "jobs.edit",
       "jobs.dispatch",
       "bookings.amend",
       "drivers.edit",
-      "drivers.bankDetails",
       "staff.manage",
     ] as const) {
       expect(can("accounts", capability)).toBe(false);
@@ -47,8 +47,11 @@ describe("the permission matrix", () => {
     expect(can("editor", "customers.view")).toBe(false);
   });
 
-  it("keeps bank details to the owner alone", () => {
-    expect(ROLES.filter((role) => can(role, "drivers.bankDetails"))).toEqual(["owner"]);
+  it("keeps bank details to those who pay the drivers: owner and accounts", () => {
+    expect(ROLES.filter((role) => can(role, "drivers.bankDetails"))).toEqual([
+      "owner",
+      "accounts",
+    ]);
   });
 
   it("refuses an unknown role", () => {

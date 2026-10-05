@@ -354,6 +354,23 @@ export const Jobs: CollectionConfig = {
           admin: { description: "Stripe's fee, from the webhook." },
         },
         {
+          // Set by the payment to the driver that covers this booking (Driver
+          // Pay); cleared if that payment is voided.
+          name: "driverPayment",
+          type: "relationship",
+          relationTo: "driver-payments",
+          index: true,
+          admin: { readOnly: true },
+        },
+        {
+          name: "driverPaidPricePence",
+          type: "number",
+          admin: {
+            readOnly: true,
+            description: "The driver price when it was paid, to notice a later change.",
+          },
+        },
+        {
           name: "locked",
           type: "checkbox",
           defaultValue: false,

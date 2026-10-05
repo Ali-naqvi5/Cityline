@@ -13,7 +13,8 @@ import { auditChanges } from "./hooks/audit";
  * The phone is the driver's WhatsApp number, stored as E.164 and unique:
  * messages go only to a verified number (WA-05), and two drivers cannot share
  * one. Bank details are sealed (`lib/sealed.ts`) and readable by the owner
- * alone — not controllers, not accounts (spec §22).
+ * and Accounts, who pay the drivers — never controllers (spec §22, widened by
+ * Cityline on 6 Oct 2026).
  *
  * There are no pay rules here: what a driver is paid is agreed per booking and
  * written on the booking (`jobs.driverPricePence`).
