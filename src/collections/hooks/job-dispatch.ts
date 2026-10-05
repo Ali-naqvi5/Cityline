@@ -96,6 +96,27 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
   let status = requested;
   const driverChanged = driver !== before.driver || vehicle !== before.vehicle;
 
+  // Taking a driver off a booking, or giving it to someone else, needs a
+  // reason from whoever does it. It goes on the job's history and into the
+  // Driver Report, so a driver is never counted against without one.
+  const takenOff = before.driver !== null && driver !== before.driver;
+  const takenOffReason = String(job.takenOffReason ?? "").trim();
+  delete job.takenOffReason; // never stored on the job itself
+  if (
+    staff &&
+    operation === "update" &&
+    takenOff &&
+    requested !== "cancelled" &&
+    !takenOffReason
+  ) {
+    fail(req, [
+      {
+        path: "takenOffReason",
+        message: "Write why the driver is coming off this booking.",
+      },
+    ]);
+  }
+
   // From POB on the passenger is in the car, or the job is over: the driver
   // it was done by stays on the record.
   if (operation === "update" && driverChanged && !beforeBoarding(from)) {
@@ -218,6 +239,8 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
     stampStages(job, status, now.toISOString());
   }
 
+  // For the history row; set on every write so it never carries to another.
+  req.context.takenOffReason = takenOff ? takenOffReason || null : null;
   return job;
 };
 
@@ -242,6 +265,8 @@ export const recordJobHistory: CollectionAfterChangeHook = async ({
     field?: string;
     oldValue?: string | null;
     newValue?: string | null;
+    driverTakenOff?: number | null;
+    note?: string | null;
   }[] = [];
 
   const driverBefore = relId(previous.driver);
@@ -262,9 +287,21 @@ export const recordJobHistory: CollectionAfterChangeHook = async ({
       });
       before = `${old?.fullName ?? "Driver"} · ${previous.vehicleReg ?? "no vehicle"}`;
     }
+    // The driver who came off, and why — when it was the driver who changed,
+    // not just the vehicle.
+    const takenOff =
+      driverBefore !== null && driverBefore !== driverNow
+        ? {
+            driverTakenOff: driverBefore,
+            note:
+              typeof req.context.takenOffReason === "string"
+                ? req.context.takenOffReason
+                : null,
+          }
+        : {};
     events.push(
       driverNow === null
-        ? { type: "unassigned", field: "driver", oldValue: before }
+        ? { type: "unassigned", field: "driver", oldValue: before, ...takenOff }
         : {
             type: "assigned",
             field: "driver",
@@ -273,6 +310,7 @@ export const recordJobHistory: CollectionAfterChangeHook = async ({
               typeof req.context.assignedDriver === "string"
                 ? req.context.assignedDriver
                 : job.vehicleReg,
+            ...takenOff,
           },
     );
   }

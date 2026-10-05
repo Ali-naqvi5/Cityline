@@ -12,6 +12,7 @@ import {
   invalid,
   SubmitButton,
   submitWith,
+  TEXTAREA_CLASS,
 } from "@/components/ops/form";
 import { Badge, buttonClass, cx } from "@/components/ops/primitives";
 
@@ -31,6 +32,9 @@ export interface AssignChoice {
  * Choosing who does a job (spec §19). Only eligible pairs are offered; each
  * shows its warnings before it is chosen, and again beside the confirm
  * button. The server checks the choice again when it saves.
+ *
+ * Giving the job to someone else takes the current driver off it, so the
+ * reason is asked for — it goes on the job's history and the Driver Report.
  */
 export function AssignForm({
   jobId,
@@ -39,6 +43,7 @@ export function AssignForm({
   canEmailPassenger,
   cancelHref,
   driverPricePence,
+  current,
 }: {
   jobId: number;
   choices: AssignChoice[];
@@ -46,12 +51,18 @@ export function AssignForm({
   driverPricePence: number | null;
   canEmailPassenger: boolean;
   cancelHref: string;
+  /** The driver on the job now, if any. */
+  current: { id: number; name: string } | null;
 }) {
   const [state, action, pending] = useActionState(assignDriverAction, EMPTY_FORM);
   const [selected, setSelected] = useState(
     choices.find((choice) => choice.current)?.pair ?? "",
   );
   const chosen = choices.find((choice) => choice.pair === selected);
+  const replacing =
+    current !== null &&
+    chosen !== undefined &&
+    Number(selected.split(":")[0]) !== current.id;
 
   return (
     <form onSubmit={submitWith(action)} className="flex flex-col gap-4">
@@ -141,6 +152,31 @@ export function AssignForm({
         ) : (
           <p className="text-ink-3 text-sm">Choose a driver above.</p>
         )}
+        {replacing ? (
+          <div className="flex flex-col gap-1">
+            <label htmlFor="taken-off-reason" className="text-ink-2 text-sm font-medium">
+              Why is {current.name} coming off this booking?
+            </label>
+            <textarea
+              id="taken-off-reason"
+              name="reason"
+              rows={2}
+              maxLength={1000}
+              required
+              className={TEXTAREA_CLASS}
+              {...invalid(state.errors.reason, "taken-off-reason")}
+            />
+            {state.errors.reason ? (
+              <p id="taken-off-reason-error" className="text-danger text-sm">
+                {state.errors.reason}
+              </p>
+            ) : (
+              <p className="text-ink-3 text-xs">
+                Kept on the booking&apos;s history and shown in the Driver Report.
+              </p>
+            )}
+          </div>
+        ) : null}
         <div className="flex flex-col gap-1">
           <label htmlFor="driverPrice" className="text-ink-2 text-sm font-medium">
             Driver price

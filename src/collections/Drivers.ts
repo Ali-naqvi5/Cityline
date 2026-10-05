@@ -1,7 +1,8 @@
-import type { CollectionConfig, FieldAccess } from "payload";
+import { ValidationError, type CollectionConfig, type FieldAccess } from "payload";
 
 import { allow } from "@/access/staff";
 import { normalisePhone } from "@/domain/booking/passenger";
+import { isValidNiNumber, normaliseNiNumber } from "@/domain/fleet/driver-record";
 import { staffCan, type StaffIdentity } from "@/domain/staff/permissions";
 
 import { auditChanges } from "./hooks/audit";
@@ -16,10 +17,20 @@ import { auditChanges } from "./hooks/audit";
  *
  * There are no pay rules here: what a driver is paid is agreed per booking and
  * written on the booking (`jobs.driverPricePence`).
+ *
+ * The record also holds what TfL requires of every driver available to an
+ * operator (`domain/fleet/driver-record.ts`): National Insurance number,
+ * photograph, and the dates they became and stopped being available. It is
+ * never deleted — TfL wants it kept 12 months after the driver stops.
  */
 
 const bankDetailsAccess: FieldAccess = ({ req }) =>
   staffCan(req.user as StaffIdentity | null, "drivers.bankDetails");
+
+// The National Insurance number is for TfL's record, kept by those who keep
+// the record (owner, controller) — not everyone who can see a driver.
+const recordAccess: FieldAccess = ({ req }) =>
+  staffCan(req.user as StaffIdentity | null, "drivers.edit");
 
 interface DriverDoc {
   id: number;
@@ -50,13 +61,40 @@ export const Drivers: CollectionConfig = {
         if (typeof data.phone === "string") {
           data.phone = normalisePhone(data.phone) ?? data.phone;
         }
+        if (typeof data.nationalInsuranceNumber === "string") {
+          data.nationalInsuranceNumber =
+            normaliseNiNumber(data.nationalInsuranceNumber) || null;
+        }
+        return data;
+      },
+    ],
+    beforeChange: [
+      // TfL's record needs the date a driver stopped being available: asked
+      // for when they are marked as left, and kept from then on.
+      ({ data, originalDoc, collection, req }) => {
+        const leaving =
+          data.status === "left" &&
+          (originalDoc?.status !== "left" || Boolean(originalDoc?.endDate));
+        if (leaving && !data.endDate) {
+          throw new ValidationError({
+            collection: collection.slug,
+            errors: [
+              {
+                path: "endDate",
+                message:
+                  "Enter the date they stopped being available — TfL needs it on the driver's record.",
+              },
+            ],
+            req,
+          });
+        }
         return data;
       },
     ],
     afterChange: [
       auditChanges<DriverDoc>({
         label: (doc) => doc.fullName ?? `Driver ${doc.id}`,
-        redact: ["bankDetailsSealed", "bankAccountLast4"],
+        redact: ["bankDetailsSealed", "bankAccountLast4", "nationalInsuranceNumber"],
         ignore: ["fullName"],
       }),
     ],
@@ -81,6 +119,16 @@ export const Drivers: CollectionConfig = {
     { name: "email", type: "email" },
     { name: "address", type: "textarea" },
     { name: "dateOfBirth", type: "date" },
+    {
+      name: "nationalInsuranceNumber",
+      type: "text",
+      validate: (value: string | null | undefined) =>
+        !value ||
+        isValidNiNumber(value) ||
+        "Enter a valid National Insurance number, such as AB 12 34 56 C.",
+      access: { read: recordAccess, create: recordAccess, update: recordAccess },
+      admin: { description: "Part of TfL's driver record. Stored as AB123456C." },
+    },
     { name: "photo", type: "upload", relationTo: "private-files" },
     {
       name: "status",
@@ -94,8 +142,27 @@ export const Drivers: CollectionConfig = {
         { label: "Left", value: "left" },
       ],
     },
-    { name: "startDate", type: "date" },
-    { name: "endDate", type: "date" },
+    {
+      name: "startDate",
+      type: "date",
+      admin: { description: "When they became available to Cityline (TfL record)." },
+    },
+    {
+      name: "endDate",
+      type: "date",
+      admin: { description: "When they stopped being available (TfL record)." },
+    },
+    { name: "leftReason", type: "textarea" },
+    {
+      name: "leftForConduct",
+      type: "checkbox",
+      defaultValue: false,
+      admin: {
+        description:
+          "Stopped because of their conduct driving a PHV: TfL must be told within 14 days (form PHV/105).",
+      },
+    },
+    { name: "tflToldAt", type: "date", admin: { description: "When TfL was told." } },
     {
       name: "whatsappConsentAt",
       type: "date",

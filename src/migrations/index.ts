@@ -6,6 +6,7 @@ import * as migration_20261001_194400_booking_driver_price from "./20261001_1944
 import * as migration_20261001_213424_job_cycle_stages from "./20261001_213424_job_cycle_stages";
 import * as migration_20261001_224224_staff_theme from "./20261001_224224_staff_theme";
 import * as migration_20261001_224828_customers_section from "./20261001_224828_customers_section";
+import * as migration_20261005_143956_driver_records_and_taken_off from "./20261005_143956_driver_records_and_taken_off";
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20261001_224828_customers_section.up,
     down: migration_20261001_224828_customers_section.down,
     name: "20261001_224828_customers_section",
+  },
+  {
+    up: migration_20261005_143956_driver_records_and_taken_off.up,
+    down: migration_20261005_143956_driver_records_and_taken_off.down,
+    name: "20261005_143956_driver_records_and_taken_off",
   },
 ];

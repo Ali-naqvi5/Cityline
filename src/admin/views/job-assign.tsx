@@ -10,6 +10,7 @@ import { JobStatusBadge, Route } from "@/components/ops/jobs";
 import { ButtonLink, PageHeader, Panel } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
+import { relId } from "@/domain/dispatch/assignment";
 import { vehicleClassName } from "@/domain/jobs/labels";
 import { beforeBoarding, isFinal } from "@/domain/jobs/status";
 import type { Job } from "@/payload-types";
@@ -78,6 +79,17 @@ export async function JobAssignView(props: AdminViewServerProps) {
     current: option.current,
   }));
   const at = new Date(job.pickupAt);
+  const currentDriverId = relId(job.driver);
+  const currentDriver = currentDriverId
+    ? await payload.findByID({
+        collection: "drivers",
+        id: currentDriverId,
+        depth: 0,
+        user,
+        overrideAccess: false,
+        disableErrors: true,
+      })
+    : null;
 
   return (
     <OpsShell user={user} active="dispatch">
@@ -107,6 +119,14 @@ export async function JobAssignView(props: AdminViewServerProps) {
               notifyPassenger={job.notifyPassenger ?? true}
               canEmailPassenger={Boolean(job.leadEmail || job.bookerEmail)}
               driverPricePence={job.driverPricePence ?? null}
+              current={
+                currentDriverId
+                  ? {
+                      id: currentDriverId,
+                      name: currentDriver?.fullName ?? "The current driver",
+                    }
+                  : null
+              }
               cancelHref={back}
             />
           ) : (

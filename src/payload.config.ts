@@ -172,6 +172,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Jobs Report" },
         },
+        opsDriversReport: {
+          Component: "@/admin/views/report-drivers#DriversReportView",
+          path: "/reports/drivers",
+          exact: true,
+          meta: { title: "Driver Report" },
+        },
         opsDispatch: {
           Component: "@/admin/views/dispatch#DispatchView",
           path: "/dispatch",

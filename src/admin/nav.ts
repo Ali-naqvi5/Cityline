@@ -257,11 +257,11 @@ export const NAV: NavSection[] = [
       },
       {
         id: "driver-reports",
-        label: "Driver Reports",
+        label: "Driver Report",
         href: "/admin/reports/drivers",
         icon: "driverReports",
         capability: "reports.operational",
-        ready: false,
+        ready: true,
       },
       {
         id: "supplier-reports",

@@ -226,6 +226,26 @@ export async function saveJobAction(
 
 // --- Assign and remove ---------------------------------------------------------------
 
+const TAKEN_OFF_MESSAGE = "Write why the driver is coming off this booking.";
+
+/**
+ * The reason typed for taking a driver off, required whenever one is (the
+ * jobs hook insists too). Shown under the box as `reason`.
+ */
+function takenOffReasonFrom(formData: FormData): string | null {
+  const reason = text(formData, "reason").trim().slice(0, 1000);
+  return reason || null;
+}
+
+/** The hook's refusal, if any, under the reason box where it belongs. */
+function withReasonError(state: FormState): FormState {
+  const message = state.errors.takenOffReason;
+  if (!message) return state;
+  const errors: Record<string, string> = { ...state.errors, reason: message };
+  delete errors.takenOffReason;
+  return { ...state, errors };
+}
+
 export async function assignDriverAction(
   _previous: FormState,
   formData: FormData,
@@ -251,6 +271,12 @@ export async function assignDriverAction(
   }
 
   const previousDriver = relId(job.driver);
+  const replacing = previousDriver !== null && previousDriver !== driverId;
+  const reason = takenOffReasonFrom(formData);
+  if (replacing && !reason) {
+    return { errors: { reason: TAKEN_OFF_MESSAGE }, message: TAKEN_OFF_MESSAGE };
+  }
+
   let saved: Job;
   try {
     saved = (await payload.update({
@@ -259,6 +285,7 @@ export async function assignDriverAction(
       data: {
         driver: driverId,
         vehicle: vehicleId,
+        ...(replacing ? { takenOffReason: reason } : {}),
         notifyPassenger: formData.get("notifyPassenger") === "on",
         // Left as it was when the box is empty: a change of driver keeps the
         // agreed price unless a new one is written.
@@ -268,7 +295,7 @@ export async function assignDriverAction(
       overrideAccess: false,
     })) as Job;
   } catch (error) {
-    return payloadErrors(error, "assigning a driver");
+    return withReasonError(payloadErrors(error, "assigning a driver"));
   }
 
   let emailed = "";
@@ -291,17 +318,19 @@ export async function removeDriverAction(
   const job = await jobFor(payload, user, Number(text(formData, "jobId")));
   if (!job) return { errors: {}, message: "That job no longer exists." };
   const previousDriver = relId(job.driver);
+  const reason = takenOffReasonFrom(formData);
+  if (!reason) return { errors: { reason: TAKEN_OFF_MESSAGE }, message: "" };
 
   try {
     await payload.update({
       collection: "jobs",
       id: job.id,
-      data: { driver: null, vehicle: null },
+      data: { driver: null, vehicle: null, takenOffReason: reason },
       user,
       overrideAccess: false,
     });
   } catch (error) {
-    return payloadErrors(error, "removing a driver");
+    return withReasonError(payloadErrors(error, "removing a driver"));
   }
   redirect(
     `/admin/jobs/${job.id}?notice=driver-removed${previousDriver ? `&previous=${previousDriver}` : ""}`,

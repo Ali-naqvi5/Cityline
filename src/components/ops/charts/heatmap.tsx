@@ -14,6 +14,25 @@ const FULL_DAYS = [
 ];
 const STEPS = ["bg-heat-1", "bg-heat-2", "bg-heat-3", "bg-heat-4", "bg-heat-5"];
 
+/** The shade for a count: one hue, darker is more; nothing is the plain surface. */
+export function heatStep(value: number, max: number): string {
+  if (value === 0 || max === 0) return "bg-sunken";
+  return STEPS[Math.min(STEPS.length - 1, Math.ceil((value / max) * STEPS.length) - 1)]!;
+}
+
+/** "Fewer ▢▢▢▢▢▢ More", under every heat grid. */
+export function HeatLegend() {
+  return (
+    <div className="text-ink-3 mt-2 flex items-center justify-end gap-1.5 text-xs">
+      <span>Fewer</span>
+      {["bg-sunken", ...STEPS].map((swatch) => (
+        <span key={swatch} aria-hidden className={cx("h-3 w-4 rounded-[3px]", swatch)} />
+      ))}
+      <span>More</span>
+    </div>
+  );
+}
+
 const hour = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
 /**
@@ -29,10 +48,7 @@ export function Heatmap({
   singular?: string;
 }) {
   const max = Math.max(0, ...grid.flat());
-  const step = (value: number) =>
-    value === 0
-      ? "bg-sunken"
-      : STEPS[Math.min(STEPS.length - 1, Math.ceil((value / max) * STEPS.length) - 1)]!;
+  const step = (value: number) => heatStep(value, max);
 
   return (
     <div>
@@ -65,17 +81,7 @@ export function Heatmap({
           ))}
         </div>
       </div>
-      <div className="text-ink-3 mt-2 flex items-center justify-end gap-1.5 text-xs">
-        <span>Fewer</span>
-        {["bg-sunken", ...STEPS].map((swatch) => (
-          <span
-            key={swatch}
-            aria-hidden
-            className={cx("h-3 w-4 rounded-[3px]", swatch)}
-          />
-        ))}
-        <span>More</span>
-      </div>
+      <HeatLegend />
     </div>
   );
 }

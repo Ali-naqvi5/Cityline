@@ -1,8 +1,17 @@
 import {
+  DRIVER_BOOKINGS_CSV_COLUMNS,
+  DRIVER_RECORDS_CSV_COLUMNS,
+  DRIVER_SUMMARY_CSV_COLUMNS,
+  loadDriversReport,
+  parseDriversReportFilters,
+  TAKEN_OFF_CSV_COLUMNS,
+} from "@/admin/reports/drivers-data";
+import {
   loadJobsReport,
   JOBS_CSV_COLUMNS,
   parseJobsReportFilters,
 } from "@/admin/reports/jobs-data";
+import { londonDay } from "@/admin/format";
 import { resolvePeriod } from "@/admin/reports/period";
 import {
   staffCan,
@@ -53,6 +62,46 @@ const REPORTS: Record<
         filename: `cityline-jobs-${period.from}-to-${period.to}.csv`,
         csv: toCsv(rows, JOBS_CSV_COLUMNS),
       };
+    },
+  },
+  // Four downloads, chosen by `data`: every booking (the default), one row
+  // per driver, the drivers taken off bookings, and TfL's driver records —
+  // the last as of today, whatever the period.
+  drivers: {
+    capability: "reports.operational",
+    build: async ({ user, query, now }) => {
+      const payload = await payloadClient();
+      const period = resolvePeriod(query, now);
+      const { report, rows, records } = await loadDriversReport(
+        payload,
+        user,
+        period,
+        parseDriversReportFilters(query),
+        now,
+      );
+      const span = `${period.from}-to-${period.to}`;
+      switch (query.data) {
+        case "drivers":
+          return {
+            filename: `cityline-drivers-${span}.csv`,
+            csv: toCsv(report.drivers, DRIVER_SUMMARY_CSV_COLUMNS),
+          };
+        case "taken-off":
+          return {
+            filename: `cityline-drivers-taken-off-${span}.csv`,
+            csv: toCsv(report.takenOff, TAKEN_OFF_CSV_COLUMNS),
+          };
+        case "records":
+          return {
+            filename: `cityline-tfl-driver-records-${londonDay(now)}.csv`,
+            csv: toCsv(records, DRIVER_RECORDS_CSV_COLUMNS),
+          };
+        default:
+          return {
+            filename: `cityline-driver-bookings-${span}.csv`,
+            csv: toCsv(rows, DRIVER_BOOKINGS_CSV_COLUMNS),
+          };
+      }
     },
   },
 };

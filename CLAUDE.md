@@ -215,6 +215,19 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   against spreadsheet formulas. Charts are in `components/ops/charts/`: one
   series colour (`viz`), a hover read-out on every mark (`data-tip-value`)
   and the numbers as a table too.
+- **TfL driver records** (`domain/fleet/driver-record.ts`; regs. 13 and 16
+  and TfL's Operator Handbook): name, address, date of birth, National
+  Insurance number, copies of the DVLA and PHV licences, a photograph, and
+  the dates a driver became and stopped being available. Kept 12 months
+  after they stop, so drivers and their documents are never deleted; the
+  stop date is required on leaving. A driver stopped for their conduct
+  driving a PHV must be reported to TfL within 14 days (form PHV/105). The NI
+  number is for those who edit drivers only (field access), not Accounts.
+- **Taking a driver off a booking needs a written reason** — removing or
+  replacing them. The jobs hook requires it from staff (`takenOffReason`, a
+  virtual field never stored on the job) and writes it to the job's history
+  with the driver (`job-events.driverTakenOff`, `note`), which the Driver
+  Report counts.
 - WhatsApp is "click to send" (`wa.me` link with the message written) until
   the Business API is connected; the job records only what is known — that
   the message was opened — and the controller marks delivered or read.

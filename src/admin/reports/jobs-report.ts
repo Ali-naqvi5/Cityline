@@ -9,6 +9,14 @@ import { isFinal } from "@/domain/jobs/status";
 import { londonDateAndTime } from "@/lib/time";
 
 import { bucketOf, buckets, type Period } from "./period";
+import {
+  bucketLabel,
+  bump,
+  reasonLabel,
+  shares,
+  topWithOther,
+  type Share,
+} from "./shares";
 
 /**
  * The Jobs Report (approved by Cityline, 2 Oct 2026): how much work the
@@ -35,12 +43,7 @@ export interface ReportJob {
   cancelReason: string | null;
 }
 
-export interface Share {
-  label: string;
-  count: number;
-  /** 0–1 of the breakdown's total. */
-  share: number;
-}
+export type { Share };
 
 export interface SeriesPoint {
   key: string;
@@ -96,49 +99,6 @@ export interface JobsReport {
 const HOUR_MS = 3_600_000;
 const LATE_DISPATCH_HOURS = 2;
 
-const dayLabel = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "UTC",
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-});
-const weekLabel = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "UTC",
-  day: "numeric",
-  month: "short",
-});
-
-function shares(counts: Map<string, number>, order?: readonly string[]): Share[] {
-  const total = [...counts.values()].reduce((sum, count) => sum + count, 0);
-  const entries = [...counts.entries()];
-  if (order) entries.sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
-  else entries.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  return entries.map(([label, count]) => ({
-    label,
-    count,
-    share: total ? count / total : 0,
-  }));
-}
-
-/** The longest lists keep their top entries and fold the rest into "Other". */
-function topWithOther(list: Share[], keep: number): Share[] {
-  if (list.length <= keep + 1) return list;
-  const head = list.slice(0, keep);
-  const tail = list.slice(keep);
-  return [
-    ...head,
-    {
-      label: "Other",
-      count: tail.reduce((sum, item) => sum + item.count, 0),
-      share: tail.reduce((sum, item) => sum + item.share, 0),
-    },
-  ];
-}
-
-function bump(map: Map<string, number>, key: string) {
-  map.set(key, (map.get(key) ?? 0) + 1);
-}
-
 export function clientLabel(job: Pick<ReportJob, "source" | "supplierName">): string {
   if (job.supplierName) return job.supplierName;
   if (job.source === "supplier") return "Supplier (unknown)";
@@ -170,12 +130,6 @@ function leadBucket(hours: number): (typeof LEAD_BUCKETS)[number] {
   return "Over 30 days";
 }
 
-function reasonLabel(reason: string | null): string {
-  const text = (reason ?? "").trim().replace(/\s+/g, " ").replace(/[.]+$/, "");
-  if (!text) return "No reason given";
-  return text[0]!.toUpperCase() + text.slice(1);
-}
-
 export function buildJobsReport(
   jobs: readonly ReportJob[],
   previous: readonly Pick<ReportJob, "status">[],
@@ -196,10 +150,7 @@ export function buildJobsReport(
       key,
       {
         key,
-        label:
-          unit === "day"
-            ? dayLabel.format(new Date(`${key}T12:00:00Z`)).replace(",", "")
-            : `w/c ${weekLabel.format(new Date(`${key}T12:00:00Z`))}`,
+        label: bucketLabel(key, unit),
         total: 0,
         completed: 0,
         noShows: 0,

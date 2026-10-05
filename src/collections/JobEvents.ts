@@ -48,6 +48,15 @@ export const JobEvents: CollectionConfig = {
     { name: "oldValue", type: "text" },
     { name: "newValue", type: "text" },
     {
+      // The driver taken off the job, when a driver is removed or replaced.
+      name: "driverTakenOff",
+      type: "relationship",
+      relationTo: "drivers",
+      index: true,
+    },
+    // Why, as the member of staff wrote it.
+    { name: "note", type: "textarea" },
+    {
       name: "actorType",
       type: "select",
       required: true,

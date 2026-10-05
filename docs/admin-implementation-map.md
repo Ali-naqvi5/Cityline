@@ -111,24 +111,24 @@ collections enforce them for any write path, not just our screens.
 
 Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 
-| Area           | Screen                                                                        | Status                                                        |
-| -------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Shell          | Sidebar, top bar, mobile tab bar, role filtering                              | ✅ 1 Oct                                                      |
-| Dashboard      | Owner / Controller / Accounts / Editor                                        | ✅ 1 Oct; compliance and message alerts wait on those screens |
-| Operations     | Bookings dashboard: every source, filters, search, colour by status/client    | ✅ 2 Oct; replaced the jobs list (`/admin/jobs` redirects)    |
-|                | Job detail workspace + timeline                                               | ✅ 1 Oct; assign, status, WhatsApp, passenger email, history  |
-|                | Create job, return trip, duplicate checks                                     | ✅ 1 Oct; website jobs edit operational details only          |
-|                | Dispatch board, assign driver                                                 | ✅ 1 Oct                                                      |
-|                | Customers; quotes, website orders                                             | 🔧 customers ✅ 2 Oct; quotes listed as Soon                  |
-|                | Amend booking, refunds, payment links                                         | ⬜                                                            |
-| Fleet          | Drivers, vehicles, documents, compliance, suppliers                           | ✅ 1 Oct; supplier money waits on Finance                     |
-| Messaging      | Send on WhatsApp (prefilled), passenger details                               | ✅ 1 Oct; wa.me link, statuses marked by hand; email only     |
-| Alerts         | Notification centre                                                           | ⬜                                                            |
-| Finance        | Job finance, costs, driver pay, statements, supplier money, expenses, reports | 🔧 driver price per booking and profit ✅ 2 Oct; rest ⬜      |
-| Reports        | TfL register, run sheet, jobs/driver/vehicle/supplier reports                 | 🔧 Jobs Report ✅ 2 Oct; the rest one at a time, then Finance |
-| Administration | Staff + 2FA, audit log, booking rules, company details                        | 🔧 audit log ✅ 1 Oct; staff, 2FA, settings to build          |
-|                | Prices & catalogue                                                            | ⬜ (needs real price tables)                                  |
-|                | Media / content                                                               | ⬜                                                            |
+| Area           | Screen                                                                        | Status                                                                  |
+| -------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Shell          | Sidebar, top bar, mobile tab bar, role filtering                              | ✅ 1 Oct                                                                |
+| Dashboard      | Owner / Controller / Accounts / Editor                                        | ✅ 1 Oct; compliance and message alerts wait on those screens           |
+| Operations     | Bookings dashboard: every source, filters, search, colour by status/client    | ✅ 2 Oct; replaced the jobs list (`/admin/jobs` redirects)              |
+|                | Job detail workspace + timeline                                               | ✅ 1 Oct; assign, status, WhatsApp, passenger email, history            |
+|                | Create job, return trip, duplicate checks                                     | ✅ 1 Oct; website jobs edit operational details only                    |
+|                | Dispatch board, assign driver                                                 | ✅ 1 Oct                                                                |
+|                | Customers; quotes, website orders                                             | 🔧 customers ✅ 2 Oct; quotes listed as Soon                            |
+|                | Amend booking, refunds, payment links                                         | ⬜                                                                      |
+| Fleet          | Drivers, vehicles, documents, compliance, suppliers                           | ✅ 1 Oct; supplier money waits on Finance                               |
+| Messaging      | Send on WhatsApp (prefilled), passenger details                               | ✅ 1 Oct; wa.me link, statuses marked by hand; email only               |
+| Alerts         | Notification centre                                                           | ⬜                                                                      |
+| Finance        | Job finance, costs, driver pay, statements, supplier money, expenses, reports | 🔧 driver price per booking and profit ✅ 2 Oct; rest ⬜                |
+| Reports        | TfL register, run sheet, jobs/driver/vehicle/supplier reports                 | 🔧 Jobs ✅ 2 Oct, Driver ✅ 6 Oct; the rest one at a time, then Finance |
+| Administration | Staff + 2FA, audit log, booking rules, company details                        | 🔧 audit log ✅ 1 Oct; staff, 2FA, settings to build                    |
+|                | Prices & catalogue                                                            | ⬜ (needs real price tables)                                            |
+|                | Media / content                                                               | ⬜                                                                      |
 
 ## Server-side rules: status
 
@@ -140,10 +140,12 @@ Legend: ✅ exists · 🔧 exists, needs work · ⬜ to build
 | Status transitions valid, timestamped, attributed    | ✅ DOW/DAP/POB/PNS cycle (2 Oct): forward one stage, back any; jobs hook    |
 | Expired driver / vehicle / wrong class cannot assign | ✅ jobs hook on every write (`hooks/job-dispatch.ts`), API included         |
 | Supplier reference unique per supplier               | ✅ hook + partial unique index, per leg (a round trip shares one reference) |
+| Driver taken off a booking needs a written reason    | ✅ jobs hook (6 Oct); kept on the job's history (`driverTakenOff`, `note`)  |
+| TfL driver record (reg. 13): NI no., photo, dates    | ✅ 6 Oct; stop date required on leaving; never deleted; PHV/105 reminder    |
 | Refunds staff-only, audited                          | ⬜                                                                          |
 | Role permissions server-side                         | ✅ 1 Oct — matrix on every collection, view and action                      |
 | Bank details owner-only                              | ✅ field access + AES-256-GCM                                               |
-| Test bookings out of reports / TfL export            | ✅ `isTest`; left out of the Jobs Report and its CSV; ⬜ TfL export         |
+| Test bookings out of reports / TfL export            | ✅ `isTest`; left out of the Jobs and Driver Reports; ⬜ TfL export         |
 | Audit record for important mutations                 | ✅ `audit-log` on jobs, bookings, customers, fleet, suppliers, staff        |
 
 ## Build order

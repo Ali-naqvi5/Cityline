@@ -36,9 +36,13 @@ function driverForm(formData: FormData) {
     email: text(formData, "email"),
     address: text(formData, "address"),
     dateOfBirth: text(formData, "dateOfBirth"),
+    nationalInsuranceNumber: text(formData, "nationalInsuranceNumber"),
     status: text(formData, "status"),
     startDate: text(formData, "startDate"),
     endDate: text(formData, "endDate"),
+    leftReason: text(formData, "leftReason"),
+    leftForConduct: checked(formData, "leftForConduct"),
+    tflToldAt: text(formData, "tflToldAt"),
     whatsappConsent: checked(formData, "whatsappConsent"),
     notes: text(formData, "notes"),
   };
@@ -86,6 +90,54 @@ export async function saveDriverAction(
   }
 
   redirect(`/admin/drivers/${savedId}?notice=${id ? "saved" : "created"}`);
+}
+
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+/**
+ * The driver's photograph — part of TfL's driver record. A new photo is a new
+ * private file; the old one stays on record.
+ */
+export async function saveDriverPhotoAction(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { payload, user } = await staffForAction("drivers.edit");
+  const id = Number(text(formData, "id"));
+  if (!Number.isInteger(id) || id <= 0) return { errors: {}, message: "Unknown driver." };
+
+  const upload = formData.get("photo");
+  const file = upload instanceof File && upload.size > 0 ? upload : null;
+  if (!file) return { errors: { photo: "Choose a photo to upload." }, message: "" };
+  const problem = PHOTO_TYPES.includes(file.type)
+    ? fileProblem(file)
+    : "Upload a JPG, PNG or WebP photo.";
+  if (problem) return { errors: { photo: problem }, message: "" };
+
+  try {
+    const stored = await payload.create({
+      collection: "private-files",
+      data: { purpose: "driver_photo", uploadedBy: user.id },
+      file: {
+        data: Buffer.from(await file.arrayBuffer()),
+        mimetype: file.type,
+        name: file.name,
+        size: file.size,
+      },
+      user,
+      overrideAccess: false,
+    });
+    await payload.update({
+      collection: "drivers",
+      id,
+      data: { photo: stored.id },
+      user,
+      overrideAccess: false,
+    });
+  } catch (error) {
+    return payloadErrors(error, "saving a driver's photo");
+  }
+  redirect(`/admin/drivers/${id}?notice=photo-saved`);
 }
 
 /** Owner only (spec §22): sealed before it is stored, never shown in lists. */

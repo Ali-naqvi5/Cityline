@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { saveDriverAction } from "@/admin/actions/fleet";
 import { EMPTY_FORM } from "@/admin/form-state";
@@ -25,9 +25,13 @@ export interface DriverFormValues {
   email: string;
   address: string;
   dateOfBirth: string;
+  nationalInsuranceNumber: string;
   status: string;
   startDate: string;
   endDate: string;
+  leftReason: string;
+  leftForConduct: boolean;
+  tflToldAt: string;
   whatsappConsent: boolean;
   notes: string;
 }
@@ -40,6 +44,8 @@ export function DriverForm({
   cancelHref: string;
 }) {
   const [state, action, pending] = useActionState(saveDriverAction, EMPTY_FORM);
+  const [status, setStatus] = useState(values.status);
+  const [conduct, setConduct] = useState(values.leftForConduct);
   const e = state.errors;
 
   return (
@@ -106,6 +112,21 @@ export function DriverForm({
             {...invalid(e.dateOfBirth, "dateOfBirth")}
           />
         </FormField>
+        <FormField
+          id="nationalInsuranceNumber"
+          label="National Insurance number"
+          error={e.nationalInsuranceNumber}
+          hint="For example AB 12 34 56 C."
+        >
+          <input
+            id="nationalInsuranceNumber"
+            name="nationalInsuranceNumber"
+            defaultValue={values.nationalInsuranceNumber}
+            autoComplete="off"
+            className={inputClass("uppercase tabular-nums")}
+            {...invalid(e.nationalInsuranceNumber, "nationalInsuranceNumber")}
+          />
+        </FormField>
         <FormField id="address" label="Address" wide error={e.address}>
           <textarea
             id="address"
@@ -118,14 +139,15 @@ export function DriverForm({
       </FormSection>
 
       <FormSection
-        title="Status"
-        description="A suspended or departed driver cannot be given jobs."
+        title="With Cityline"
+        description="A suspended or departed driver cannot be given jobs. TfL's driver record needs the date they became available and, once they leave, the date they stopped."
       >
         <FormField id="status" label="Status" required error={e.status}>
           <select
             id="status"
             name="status"
             defaultValue={values.status}
+            onChange={(event) => setStatus(event.target.value)}
             className={inputClass()}
           >
             <option value="active">Active</option>
@@ -133,7 +155,7 @@ export function DriverForm({
             <option value="left">Left</option>
           </select>
         </FormField>
-        <FormField id="startDate" label="Start date" error={e.startDate}>
+        <FormField id="startDate" label="Available from" error={e.startDate}>
           <input
             id="startDate"
             name="startDate"
@@ -142,7 +164,13 @@ export function DriverForm({
             className={inputClass()}
           />
         </FormField>
-        <FormField id="endDate" label="End date" error={e.endDate}>
+        <FormField
+          id="endDate"
+          label="Stopped being available on"
+          required={status === "left"}
+          error={e.endDate}
+          hint={status === "left" ? undefined : "Only once they have left."}
+        >
           <input
             id="endDate"
             name="endDate"
@@ -152,6 +180,53 @@ export function DriverForm({
             {...invalid(e.endDate, "endDate")}
           />
         </FormField>
+        {status === "left" ? (
+          <>
+            <FormField id="leftReason" label="Why they left" wide error={e.leftReason}>
+              <textarea
+                id="leftReason"
+                name="leftReason"
+                rows={2}
+                defaultValue={values.leftReason}
+                className={TEXTAREA_CLASS}
+              />
+            </FormField>
+            <div className="sm:col-span-2">
+              <label
+                htmlFor="leftForConduct"
+                className="text-ink-2 flex min-h-10 cursor-pointer items-center gap-2 text-sm"
+              >
+                <input
+                  id="leftForConduct"
+                  name="leftForConduct"
+                  type="checkbox"
+                  defaultChecked={values.leftForConduct}
+                  onChange={(event) => setConduct(event.target.checked)}
+                  className="accent-accent h-4 w-4"
+                />
+                Cityline stopped using them because of their conduct while driving a PHV
+              </label>
+              {conduct ? (
+                <p className="text-warn mt-1 text-sm">
+                  TfL must be told in writing within 14 days of the date they stopped, on
+                  form PHV/105 (tphlicensingsupport@tfl.gov.uk).
+                </p>
+              ) : null}
+            </div>
+            {conduct ? (
+              <FormField id="tflToldAt" label="TfL told on" error={e.tflToldAt}>
+                <input
+                  id="tflToldAt"
+                  name="tflToldAt"
+                  type="date"
+                  defaultValue={values.tflToldAt}
+                  className={inputClass()}
+                  {...invalid(e.tflToldAt, "tflToldAt")}
+                />
+              </FormField>
+            ) : null}
+          </>
+        ) : null}
       </FormSection>
 
       <FormSection

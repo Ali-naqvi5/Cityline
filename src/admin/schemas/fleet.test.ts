@@ -17,9 +17,13 @@ const driver = {
   email: "",
   address: "",
   dateOfBirth: "1985-06-01",
+  nationalInsuranceNumber: "",
   status: "active",
   startDate: "",
   endDate: "",
+  leftReason: "",
+  leftForConduct: false,
+  tflToldAt: "",
   whatsappConsent: true,
   notes: "",
 };
@@ -47,6 +51,46 @@ describe("driverSchema", () => {
   it("refuses a phone number that cannot be dialled", () => {
     const result = driverSchema.safeParse({ ...driver, phone: "123" });
     expect(result.success).toBe(false);
+  });
+
+  it("stores a National Insurance number without spaces, and refuses a bad one", () => {
+    const data = driverData(
+      driverSchema.parse({ ...driver, nationalInsuranceNumber: "ab 12 34 56 c" }),
+    );
+    expect(data.nationalInsuranceNumber).toBe("AB123456C");
+    expect(
+      driverSchema.safeParse({ ...driver, nationalInsuranceNumber: "QQ123456C" }).success,
+    ).toBe(false);
+  });
+
+  it("needs the date a driver stopped being available once they have left", () => {
+    const result = driverSchema.safeParse({ ...driver, status: "left" });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(["endDate"]);
+  });
+
+  it("keeps why a driver left, and TfL's notice, only for a driver who has left", () => {
+    const left = driverData(
+      driverSchema.parse({
+        ...driver,
+        status: "left",
+        endDate: "2026-09-30",
+        leftReason: "Moved away",
+        leftForConduct: true,
+        tflToldAt: "2026-10-02",
+      }),
+    );
+    expect(left).toMatchObject({ leftReason: "Moved away", leftForConduct: true });
+    expect(left.tflToldAt).toBeTruthy();
+
+    const back = driverData(
+      driverSchema.parse({ ...driver, leftReason: "Moved away", leftForConduct: true }),
+    );
+    expect(back).toMatchObject({
+      leftReason: null,
+      leftForConduct: false,
+      tflToldAt: null,
+    });
   });
 });
 

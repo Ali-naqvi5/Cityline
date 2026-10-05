@@ -173,7 +173,10 @@ function timelineFor(job: Job, events: JobEvent[]): TimelineEntry[] {
       case "assigned":
         title = event.oldValue ? "Driver changed" : "Driver assigned";
         detail = event.oldValue ? (
-          <Change from={event.oldValue} to={event.newValue ?? ""} />
+          <>
+            <Change from={event.oldValue} to={event.newValue ?? ""} />
+            {event.note ? <TakenOffReason note={event.note} /> : null}
+          </>
         ) : (
           event.newValue
         );
@@ -181,7 +184,12 @@ function timelineFor(job: Job, events: JobEvent[]): TimelineEntry[] {
         break;
       case "unassigned":
         title = "Driver removed";
-        detail = event.oldValue;
+        detail = (
+          <>
+            {event.oldValue}
+            {event.note ? <TakenOffReason note={event.note} /> : null}
+          </>
+        );
         tone = "warn";
         break;
       case "message_sent":
@@ -203,6 +211,13 @@ function timelineFor(job: Job, events: JobEvent[]): TimelineEntry[] {
   }
 
   return entries;
+}
+
+/** Why a driver came off the booking, as the member of staff wrote it. */
+function TakenOffReason({ note }: { note: string }) {
+  return (
+    <span className="text-ink-2 mt-0.5 block whitespace-pre-line">Reason: {note}</span>
+  );
 }
 
 function extraName(slug: string): string {
@@ -742,6 +757,24 @@ export async function JobView(props: AdminViewServerProps) {
                             {job.reference} goes back to Unassigned and starts the cycle
                             again with the next driver. You will be offered a WhatsApp
                             message to tell {driver.firstName}.
+                          </p>
+                          <label
+                            htmlFor="taken-off-reason"
+                            className="text-ink-2 font-medium"
+                          >
+                            Why is {driver.firstName} coming off it?
+                          </label>
+                          <textarea
+                            id="taken-off-reason"
+                            name="reason"
+                            rows={2}
+                            maxLength={1000}
+                            required
+                            className={TEXTAREA_CLASS}
+                          />
+                          <p className="text-ink-3 text-xs">
+                            Kept on the booking&apos;s history and shown in the Driver
+                            Report.
                           </p>
                         </ConfirmDialog>
                       ) : null}

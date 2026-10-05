@@ -18,6 +18,7 @@ export function KpiTile({
   compareName,
   hint,
   tone,
+  unit = "count",
 }: {
   label: string;
   value: ReactNode;
@@ -28,6 +29,11 @@ export function KpiTile({
   compareName?: string;
   hint?: ReactNode;
   tone?: "warn" | "danger";
+  /**
+   * What the figure counts. A percentage changes by points ("+5 pts"), and
+   * minutes by minutes — never by a percentage of themselves.
+   */
+  unit?: "count" | "percent" | "minutes";
 }) {
   let delta: ReactNode = null;
   if (previous !== undefined && previous !== null && compareName) {
@@ -35,12 +41,23 @@ export function KpiTile({
     const good =
       better === "none" || change === 0 ? null : change > 0 === (better === "up");
     const Icon = change > 0 ? ArrowUpRight : change < 0 ? ArrowDownRight : Minus;
+    const sign = change > 0 ? "+" : "";
     const amount =
-      previous === 0
-        ? change === 0
-          ? "No change"
-          : `${change > 0 ? "+" : ""}${change}`
-        : `${change > 0 ? "+" : ""}${Math.round((change / previous) * 100)}%`;
+      change === 0 && (previous === 0 || unit !== "count")
+        ? "No change"
+        : unit === "percent"
+          ? `${sign}${change} pts`
+          : unit === "minutes"
+            ? `${sign}${change} min`
+            : previous === 0
+              ? `${sign}${change}`
+              : `${sign}${Math.round((change / previous) * 100)}%`;
+    const before =
+      unit === "percent"
+        ? `${previous}%`
+        : unit === "minutes"
+          ? `${previous} min`
+          : previous;
     delta = (
       <p
         className={cx(
@@ -52,7 +69,7 @@ export function KpiTile({
         <span>
           <span className="font-medium tabular-nums">{amount}</span>{" "}
           <span className="text-ink-3">
-            vs {compareName} ({previous})
+            vs {compareName} ({before})
           </span>
         </span>
       </p>

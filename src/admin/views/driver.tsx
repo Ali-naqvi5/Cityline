@@ -7,6 +7,7 @@ import { loadDrivers } from "@/admin/data/fleet";
 import { pickupLabel, stamp } from "@/admin/format";
 import { BankDetailsForm } from "@/admin/forms/bank-details-form";
 import { DocumentForm } from "@/admin/forms/document-form";
+import { DriverPhotoForm } from "@/admin/forms/driver-photo-form";
 import { param, requireStaff, segment } from "@/admin/guard";
 import {
   ComplianceBadge,
@@ -34,6 +35,14 @@ import {
   EXPIRING_TYPES,
   type DocumentType,
 } from "@/domain/compliance/documents";
+import {
+  conductNotice,
+  formatNiNumber,
+  keepRecordUntil,
+  missingParticulars,
+  PARTICULAR_LABELS,
+  type Particular,
+} from "@/domain/fleet/driver-record";
 import { DRIVER_STATUS_LABELS } from "@/domain/fleet/labels";
 import { OPEN_STATUSES } from "@/domain/jobs/labels";
 import { can } from "@/domain/staff/permissions";
@@ -48,7 +57,24 @@ const NOTICES: Record<string, string> = {
   "document-checked": "Document marked as checked.",
   "bank-saved": "Bank details saved.",
   "bank-removed": "Bank details removed.",
+  "photo-saved": "Photo saved.",
 };
+
+/** Where each missing particular of TfL's record is put right. */
+const FIX_IN: Record<Particular, string> = {
+  name: "Add it on Edit",
+  address: "Add it on Edit",
+  dateOfBirth: "Add it on Edit",
+  niNumber: "Add it on Edit",
+  drivingLicenceCopy: "Add the document with its file",
+  phvLicenceCopy: "Add the document with its file",
+  photo: "Upload it below",
+  availableFrom: "Add it on Edit",
+  stoppedOn: "Add it on Edit",
+};
+
+/** "2027-09-30" as "30 Sept 2027". */
+const dayText = (day: string) => formatDate(new Date(`${day}T12:00:00Z`));
 
 function fileOf(value: unknown): PrivateFile | null {
   return value && typeof value === "object" ? (value as PrivateFile) : null;
@@ -85,8 +111,12 @@ export async function DriverView(props: AdminViewServerProps) {
     );
   }
   const { driver, documents, required, worst } = record;
+  const photoId =
+    typeof driver.photo === "number" ? driver.photo : (driver.photo?.id ?? null);
+  // Accounts can see drivers but not vehicles: asking would be refused.
+  const seesVehicles = can(user.role, "vehicles.view");
 
-  const [upcoming, recent, vehicles] = await Promise.all([
+  const [upcoming, recent, vehicles, photo] = await Promise.all([
     payload.find({
       collection: "jobs",
       where: {
@@ -109,20 +139,35 @@ export async function DriverView(props: AdminViewServerProps) {
       user,
       overrideAccess: false,
     }),
-    payload.find({
-      collection: "vehicles",
-      where: { drivers: { in: [id] } },
-      depth: 0,
-      limit: 20,
-      user,
-      overrideAccess: false,
-    }),
+    seesVehicles
+      ? payload.find({
+          collection: "vehicles",
+          where: { drivers: { in: [id] } },
+          depth: 0,
+          limit: 20,
+          user,
+          overrideAccess: false,
+        })
+      : null,
+    photoId
+      ? payload.findByID({
+          collection: "private-files",
+          id: photoId,
+          depth: 0,
+          user,
+          overrideAccess: false,
+          disableErrors: true,
+        })
+      : null,
   ]);
 
   const canEdit = can(user.role, "drivers.edit");
   const canVerify = can(user.role, "compliance.verify");
   const seesBank = can(user.role, "drivers.bankDetails");
   const notice = NOTICES[param(props.searchParams, "notice")];
+  // TfL's record is kept by those who edit drivers; only they see the NI number.
+  const missing = canEdit ? missingParticulars({ ...driver, documents }) : [];
+  const owed = conductNotice(driver, now);
 
   return (
     <OpsShell user={user} active="drivers">
@@ -336,6 +381,70 @@ export async function DriverView(props: AdminViewServerProps) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
+          {canEdit ? (
+            <Panel
+              title="TfL driver record"
+              description="What TfL requires Cityline to keep for every driver, and to show an officer on request."
+            >
+              {owed ? (
+                <Notice tone={owed.overdue ? "danger" : "warn"}>
+                  {owed.overdue ? "Overdue: TfL was to be told by " : "Tell TfL by "}
+                  {dayText(owed.due)} that Cityline stopped using {driver.firstName}{" "}
+                  because of their conduct. Send form PHV/105 to
+                  tphlicensingsupport@tfl.gov.uk, then record the date on Edit.
+                </Notice>
+              ) : null}
+              {missing.length === 0 ? (
+                <p className="text-ok text-sm font-medium">
+                  Complete: every particular TfL asks for is on record.
+                </p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <p className="text-warn text-sm font-medium">
+                    {missing.length === 1
+                      ? "1 particular missing"
+                      : `${missing.length} particulars missing`}
+                  </p>
+                  <ul className="text-ink-2 flex flex-col gap-1 text-sm">
+                    {missing.map((item) => (
+                      <li key={item} className="flex flex-wrap justify-between gap-x-3">
+                        <span>{PARTICULAR_LABELS[item]}</span>
+                        <span className="text-ink-3 text-xs">{FIX_IN[item]}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {driver.status === "left" && driver.endDate ? (
+                <p className="text-ink-3 mt-3 text-xs">
+                  Keep this record until {dayText(keepRecordUntil(driver.endDate))}, 12
+                  months after they stopped being available.
+                </p>
+              ) : null}
+            </Panel>
+          ) : null}
+
+          <Panel title="Photograph">
+            <div className="flex flex-col gap-4">
+              {photo?.url ? (
+                // A private file, served only after Payload's access check.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={photo.url}
+                  alt={`Photo of ${driver.fullName}`}
+                  className="border-line h-40 w-32 rounded-md border object-cover"
+                />
+              ) : (
+                <p className="text-sm">
+                  <NotRecorded>No photograph on record</NotRecorded>
+                </p>
+              )}
+              {canEdit ? (
+                <DriverPhotoForm driverId={driver.id} hasPhoto={Boolean(photo)} />
+              ) : null}
+            </div>
+          </Panel>
+
           <Panel title="Details">
             <Fields className="sm:grid-cols-1">
               <Field label="Mobile (WhatsApp)">
@@ -363,21 +472,46 @@ export async function DriverView(props: AdminViewServerProps) {
                   <NotRecorded>Not recorded</NotRecorded>
                 )}
               </Field>
-              <Field label="With Cityline">
-                {!driver.startDate && !driver.endDate ? (
-                  <NotRecorded>Dates not recorded</NotRecorded>
-                ) : null}
+              {canEdit ? (
+                <Field label="National Insurance number">
+                  {driver.nationalInsuranceNumber ? (
+                    <span className="tabular-nums">
+                      {formatNiNumber(driver.nationalInsuranceNumber)}
+                    </span>
+                  ) : (
+                    <NotRecorded>Not recorded</NotRecorded>
+                  )}
+                </Field>
+              ) : null}
+              <Field label="Available from">
                 {driver.startDate ? (
-                  <span className="text-ink-3 block text-sm">
-                    Since {formatDate(new Date(driver.startDate))}
-                  </span>
-                ) : null}
-                {driver.endDate ? (
-                  <span className="text-ink-3 block text-sm">
-                    Until {formatDate(new Date(driver.endDate))}
-                  </span>
-                ) : null}
+                  formatDate(new Date(driver.startDate))
+                ) : (
+                  <NotRecorded>Not recorded</NotRecorded>
+                )}
               </Field>
+              {driver.endDate || driver.status === "left" ? (
+                <Field label="Stopped being available">
+                  {driver.endDate ? (
+                    formatDate(new Date(driver.endDate))
+                  ) : (
+                    <NotRecorded>Not recorded</NotRecorded>
+                  )}
+                  {driver.leftReason ? (
+                    <span className="text-ink-3 mt-0.5 block text-sm whitespace-pre-line">
+                      {driver.leftReason}
+                    </span>
+                  ) : null}
+                  {driver.leftForConduct ? (
+                    <span className="text-ink-3 mt-0.5 block text-sm">
+                      Because of their conduct.{" "}
+                      {driver.tflToldAt
+                        ? `TfL told ${formatDate(new Date(driver.tflToldAt))}.`
+                        : "TfL not yet told."}
+                    </span>
+                  ) : null}
+                </Field>
+              ) : null}
             </Fields>
           </Panel>
 
@@ -393,31 +527,33 @@ export async function DriverView(props: AdminViewServerProps) {
             </Fields>
           </Panel>
 
-          <Panel title="Vehicles" bodyClassName="p-0">
-            {vehicles.docs.length === 0 ? (
-              <p className="text-ink-3 px-4 py-3 text-sm">
-                No vehicle linked. Link one from the vehicle&apos;s page.
-              </p>
-            ) : (
-              <ul className="divide-line divide-y">
-                {vehicles.docs.map((vehicle) => (
-                  <li key={vehicle.id}>
-                    <Link
-                      href={`/admin/vehicles/${vehicle.id}`}
-                      className="hover:bg-sunken/60 block px-4 py-2.5"
-                    >
-                      <span className="text-ink block text-sm font-medium tabular-nums">
-                        {vehicle.registration}
-                      </span>
-                      <span className="text-ink-3 block text-xs">
-                        {vehicle.colour} {vehicle.make} {vehicle.model}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Panel>
+          {vehicles ? (
+            <Panel title="Vehicles" bodyClassName="p-0">
+              {vehicles.docs.length === 0 ? (
+                <p className="text-ink-3 px-4 py-3 text-sm">
+                  No vehicle linked. Link one from the vehicle&apos;s page.
+                </p>
+              ) : (
+                <ul className="divide-line divide-y">
+                  {vehicles.docs.map((vehicle) => (
+                    <li key={vehicle.id}>
+                      <Link
+                        href={`/admin/vehicles/${vehicle.id}`}
+                        className="hover:bg-sunken/60 block px-4 py-2.5"
+                      >
+                        <span className="text-ink block text-sm font-medium tabular-nums">
+                          {vehicle.registration}
+                        </span>
+                        <span className="text-ink-3 block text-xs">
+                          {vehicle.colour} {vehicle.make} {vehicle.model}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Panel>
+          ) : null}
 
           {seesBank ? (
             <Panel title="Bank details" description="Owner only. Stored encrypted.">

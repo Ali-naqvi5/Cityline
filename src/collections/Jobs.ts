@@ -231,6 +231,15 @@ export const Jobs: CollectionConfig = {
         { name: "driver", type: "relationship", relationTo: "drivers", index: true },
         { name: "vehicle", type: "relationship", relationTo: "vehicles", index: true },
         {
+          // Why the driver is coming off, sent with the change that removes or
+          // replaces them. Never stored on the job: the dispatch hook requires
+          // it from staff and writes it to the job's history.
+          name: "takenOffReason",
+          type: "textarea",
+          virtual: true,
+          admin: { hidden: true },
+        },
+        {
           name: "driverPhvNo",
           type: "text",
           admin: {

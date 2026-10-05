@@ -383,6 +383,7 @@ export interface Job {
     | 'cancelled';
   driver?: (number | null) | Driver;
   vehicle?: (number | null) | Vehicle;
+  takenOffReason?: string | null;
   /**
    * Copied onto the job at assignment, not looked up later (CMP-03). The register must show the number that applied on the day.
    */
@@ -496,10 +497,29 @@ export interface Driver {
   email?: string | null;
   address?: string | null;
   dateOfBirth?: string | null;
+  /**
+   * Part of TfL's driver record. Stored as AB123456C.
+   */
+  nationalInsuranceNumber?: string | null;
   photo?: (number | null) | PrivateFile;
   status: 'active' | 'suspended' | 'left';
+  /**
+   * When they became available to Cityline (TfL record).
+   */
   startDate?: string | null;
+  /**
+   * When they stopped being available (TfL record).
+   */
   endDate?: string | null;
+  leftReason?: string | null;
+  /**
+   * Stopped because of their conduct driving a PHV: TfL must be told within 14 days (form PHV/105).
+   */
+  leftForConduct?: boolean | null;
+  /**
+   * When TfL was told.
+   */
+  tflToldAt?: string | null;
   /**
    * When the driver agreed to receive jobs on WhatsApp (WA-05).
    */
@@ -601,6 +621,8 @@ export interface JobEvent {
   field?: string | null;
   oldValue?: string | null;
   newValue?: string | null;
+  driverTakenOff?: (number | null) | Driver;
+  note?: string | null;
   actorType: 'user' | 'system' | 'customer';
   actorUser?: (number | null) | User;
   updatedAt: string;
@@ -984,6 +1006,7 @@ export interface JobsSelect<T extends boolean = true> {
   status?: T;
   driver?: T;
   vehicle?: T;
+  takenOffReason?: T;
   driverPhvNo?: T;
   vehicleReg?: T;
   takenByUser?: T;
@@ -1026,6 +1049,8 @@ export interface JobEventsSelect<T extends boolean = true> {
   field?: T;
   oldValue?: T;
   newValue?: T;
+  driverTakenOff?: T;
+  note?: T;
   actorType?: T;
   actorUser?: T;
   updatedAt?: T;
@@ -1085,10 +1110,14 @@ export interface DriversSelect<T extends boolean = true> {
   email?: T;
   address?: T;
   dateOfBirth?: T;
+  nationalInsuranceNumber?: T;
   photo?: T;
   status?: T;
   startDate?: T;
   endDate?: T;
+  leftReason?: T;
+  leftForConduct?: T;
+  tflToldAt?: T;
   whatsappConsentAt?: T;
   bankDetailsSealed?: T;
   bankAccountLast4?: T;

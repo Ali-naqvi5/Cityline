@@ -8,6 +8,7 @@ import { requireStaff, segment } from "@/admin/guard";
 import { ButtonLink, PageHeader, Panel } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
+import { formatNiNumber } from "@/domain/fleet/driver-record";
 
 /** Adding a driver (`/drivers/new`) or editing one (`/drivers/:id/edit`). */
 
@@ -32,9 +33,13 @@ export async function DriverEditView(props: AdminViewServerProps) {
     email: "",
     address: "",
     dateOfBirth: "",
+    nationalInsuranceNumber: "",
     status: "active",
     startDate: "",
     endDate: "",
+    leftReason: "",
+    leftForConduct: false,
+    tflToldAt: "",
     whatsappConsent: false,
     notes: "",
   };
@@ -68,9 +73,15 @@ export async function DriverEditView(props: AdminViewServerProps) {
       email: driver.email ?? "",
       address: driver.address ?? "",
       dateOfBirth: day(driver.dateOfBirth),
+      nationalInsuranceNumber: driver.nationalInsuranceNumber
+        ? formatNiNumber(driver.nationalInsuranceNumber)
+        : "",
       status: driver.status,
       startDate: day(driver.startDate),
       endDate: day(driver.endDate),
+      leftReason: driver.leftReason ?? "",
+      leftForConduct: Boolean(driver.leftForConduct),
+      tflToldAt: day(driver.tflToldAt),
       whatsappConsent: Boolean(driver.whatsappConsentAt),
       notes: driver.notes ?? "",
     };

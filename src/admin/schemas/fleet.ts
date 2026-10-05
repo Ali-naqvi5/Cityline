@@ -1,5 +1,6 @@
 import { isValidDay } from "@/admin/format";
 import { normalisePhone } from "@/domain/booking/passenger";
+import { isValidNiNumber, normaliseNiNumber } from "@/domain/fleet/driver-record";
 import {
   DRIVER_DOCUMENT_TYPES,
   EXPIRING_TYPES,
@@ -54,9 +55,18 @@ export const driverSchema = z
     email: optionalEmail,
     address: z.string().max(500),
     dateOfBirth: optionalDay,
+    nationalInsuranceNumber: z
+      .string()
+      .refine(
+        (value) => value === "" || isValidNiNumber(value),
+        "Enter a valid National Insurance number, such as AB 12 34 56 C.",
+      ),
     status: z.enum(["active", "suspended", "left"]),
     startDate: optionalDay,
     endDate: optionalDay,
+    leftReason: z.string().max(1000),
+    leftForConduct: z.boolean(),
+    tflToldAt: optionalDay,
     whatsappConsent: z.boolean(),
     notes: z.string().max(2000),
   })
@@ -65,7 +75,15 @@ export const driverSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["endDate"],
-        message: "The end date is before the start date.",
+        message: "This is before the date they became available.",
+      });
+    }
+    if (driver.status === "left" && !driver.endDate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["endDate"],
+        message:
+          "Enter the date they stopped being available — TfL needs it on the driver's record.",
       });
     }
   });
@@ -73,6 +91,7 @@ export const driverSchema = z
 export type DriverInput = z.infer<typeof driverSchema>;
 
 export function driverData(input: DriverInput, previousConsentAt?: string | null) {
+  const left = input.status === "left";
   return {
     firstName: input.firstName,
     lastName: input.lastName,
@@ -80,9 +99,14 @@ export function driverData(input: DriverInput, previousConsentAt?: string | null
     email: input.email || null,
     address: input.address || null,
     dateOfBirth: dayToIso(input.dateOfBirth),
+    nationalInsuranceNumber: normaliseNiNumber(input.nationalInsuranceNumber) || null,
     status: input.status,
     startDate: dayToIso(input.startDate),
     endDate: dayToIso(input.endDate),
+    // Why they left, and TfL's notice, belong to a driver who has left.
+    leftReason: left ? input.leftReason || null : null,
+    leftForConduct: left && input.leftForConduct,
+    tflToldAt: left && input.leftForConduct ? dayToIso(input.tflToldAt) : null,
     // Keep the original consent date; record it when first given.
     whatsappConsentAt: input.whatsappConsent
       ? (previousConsentAt ?? new Date().toISOString())
