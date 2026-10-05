@@ -215,6 +215,11 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   against spreadsheet formulas. Charts are in `components/ops/charts/`: one
   series colour (`viz`), a hover read-out on every mark (`data-tip-value`)
   and the numbers as a table too.
+- **Daily Run Sheet** (`/admin/reports/run-sheet`, `runSheet` capability):
+  one London day, today by default, whole day or by driver; prints one
+  driver to a page. The passenger's phone is on it; prices are not — a
+  driver's price reaches them only in their day's WhatsApp message
+  (`driverDayMessage`, sharing `jobDetailLines` with the single-job one).
 - **TfL driver records** (`domain/fleet/driver-record.ts`; regs. 13 and 16
   and TfL's Operator Handbook): name, address, date of birth, National
   Insurance number, copies of the DVLA and PHV licences, a photograph, and

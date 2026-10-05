@@ -14,6 +14,11 @@ import {
 import { londonDay } from "@/admin/format";
 import { resolvePeriod } from "@/admin/reports/period";
 import {
+  loadRunSheet,
+  parseRunSheetParams,
+  runSheetCsvColumns,
+} from "@/admin/reports/run-sheet-data";
+import {
   staffCan,
   type Capability,
   type StaffIdentity,
@@ -102,6 +107,24 @@ const REPORTS: Record<
             csv: toCsv(rows, DRIVER_BOOKINGS_CSV_COLUMNS),
           };
       }
+    },
+  },
+  // One London day's bookings in pickup order — no prices; a driver's price
+  // goes to them only in their WhatsApp message.
+  "run-sheet": {
+    capability: "runSheet",
+    build: async ({ user, query, now }) => {
+      const payload = await payloadClient();
+      const { date } = parseRunSheetParams(query, now);
+      const { sheet } = await loadRunSheet(payload, user, date, now);
+      const names = new Map(sheet.days.map((day) => [day.driver.id, day.driver.name]));
+      return {
+        filename: `cityline-run-sheet-${date}.csv`,
+        csv: toCsv(
+          sheet.jobs,
+          runSheetCsvColumns((id) => (id ? (names.get(id) ?? "") : "")),
+        ),
+      };
     },
   },
 };

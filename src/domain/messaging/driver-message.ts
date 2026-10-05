@@ -85,15 +85,32 @@ export function driverMessage(
     ].join("\n");
   }
 
+  const lines = [
+    heading,
+    `*${when}*`,
+    "",
+    ...jobDetailLines(job),
+    "",
+    `Office: ${officePhone}`,
+    kind === "new"
+      ? "Please reply OK to confirm."
+      : "Please reply OK to confirm the changes.",
+  ];
+  return lines.join("\n");
+}
+
+/**
+ * What the driver needs to do one job, line by line: route, passenger, car,
+ * notes, cash to collect and their price. Shared by the single-job message
+ * and the driver's day from the Daily Run Sheet.
+ */
+export function jobDetailLines(job: DriverMessageJob): string[] {
   const bags = [
     `${job.largeBags} large`,
     ...(job.smallBags ? [`${job.smallBags} small`] : []),
   ].join(", ");
 
-  const lines = [
-    heading,
-    `*${when}*`,
-    "",
+  return [
     `Pickup: ${job.pickupAddress}`,
     ...(job.flightNumber ? [`Flight: ${job.flightNumber}`] : []),
     ...job.viaStops.map((stop, index) => `Stop ${index + 1}: ${stop}`),
@@ -119,12 +136,35 @@ export function driverMessage(
     ...(job.payPence !== null
       ? [`Your price: ${formatPence(job.payPence as Pence)}`]
       : []),
-    "",
-    `Office: ${officePhone}`,
-    kind === "new"
-      ? "Please reply OK to confirm."
-      : "Please reply OK to confirm the changes.",
   ];
+}
+
+/**
+ * A driver's whole day in one WhatsApp message, from the Daily Run Sheet:
+ * each job in pickup order with everything the single-job message carries,
+ * their price included.
+ */
+export function driverDayMessage(
+  firstName: string,
+  jobs: readonly DriverMessageJob[],
+  officePhone: string,
+): string {
+  const ordered = [...jobs].sort((a, b) => a.pickupAt.getTime() - b.pickupAt.getTime());
+  const date = ordered[0] ? day.format(ordered[0].pickupAt).replace(",", "") : "";
+  const lines = [
+    `*YOUR JOBS · ${date}*`,
+    ordered.length === 1
+      ? `${firstName}, here is your job.`
+      : `${firstName}, here are your ${ordered.length} jobs in pickup order.`,
+  ];
+  ordered.forEach((job, index) => {
+    lines.push(
+      "",
+      `*${index + 1}. ${formatTime(job.pickupAt)} · ${job.reference}*`,
+      ...jobDetailLines(job),
+    );
+  });
+  lines.push("", `Office: ${officePhone}`, "Please reply OK to confirm.");
   return lines.join("\n");
 }
 

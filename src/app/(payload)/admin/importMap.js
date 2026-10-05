@@ -13,6 +13,7 @@ import { CustomerEditView as CustomerEditView_ec9524a6de885bb7d51816505dff666f }
 import { CustomerView as CustomerView_7c5eead5882d2a37c0f10b73f50b9e60 } from "@/admin/views/customer";
 import { JobsReportView as JobsReportView_ab89c31887b8491089ae23dd04802bbc } from "@/admin/views/report-jobs";
 import { DriversReportView as DriversReportView_bb649636d28090d38f16549fc309e6ff } from "@/admin/views/report-drivers";
+import { RunSheetView as RunSheetView_51c29eb700373e4a02e2b100a852a89f } from "@/admin/views/report-run-sheet";
 import { DispatchView as DispatchView_759e910e4ca7fcbc505c8147263dddbf } from "@/admin/views/dispatch";
 import { DriversView as DriversView_5b3d267809e9c8ef7944527d000d51ca } from "@/admin/views/drivers";
 import { DriverEditView as DriverEditView_3ac60765cb47a383e9bd29ba945977f7 } from "@/admin/views/driver-edit";
@@ -52,6 +53,8 @@ export const importMap = {
     JobsReportView_ab89c31887b8491089ae23dd04802bbc,
   "@/admin/views/report-drivers#DriversReportView":
     DriversReportView_bb649636d28090d38f16549fc309e6ff,
+  "@/admin/views/report-run-sheet#RunSheetView":
+    RunSheetView_51c29eb700373e4a02e2b100a852a89f,
   "@/admin/views/dispatch#DispatchView": DispatchView_759e910e4ca7fcbc505c8147263dddbf,
   "@/admin/views/drivers#DriversView": DriversView_5b3d267809e9c8ef7944527d000d51ca,
   "@/admin/views/driver-edit#DriverEditView":

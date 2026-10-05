@@ -178,6 +178,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Driver Report" },
         },
+        opsRunSheet: {
+          Component: "@/admin/views/report-run-sheet#RunSheetView",
+          path: "/reports/run-sheet",
+          exact: true,
+          meta: { title: "Daily Run Sheet" },
+        },
         opsDispatch: {
           Component: "@/admin/views/dispatch#DispatchView",
           path: "/dispatch",

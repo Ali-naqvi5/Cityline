@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { driverMessage, whatsappLink, type DriverMessageJob } from "./driver-message";
+import {
+  driverDayMessage,
+  driverMessage,
+  whatsappLink,
+  type DriverMessageJob,
+} from "./driver-message";
 
 const job: DriverMessageJob = {
   reference: "J-000123",
@@ -67,6 +72,42 @@ describe("the driver's WhatsApp job message", () => {
   it("links to WhatsApp with the number's digits and the text encoded", () => {
     expect(whatsappLink("+447700900456", "Hi & bye")).toBe(
       "https://wa.me/447700900456?text=Hi%20%26%20bye",
+    );
+  });
+});
+
+describe("the driver's day on WhatsApp", () => {
+  const later: DriverMessageJob = {
+    ...job,
+    reference: "J-000124",
+    pickupAt: new Date("2026-10-05T15:30:00Z"), // 16:30 in London
+    pickupAddress: "10 Wren Avenue, Uxbridge",
+    dropoffAddress: "Gatwick North",
+    flightNumber: null,
+    viaStops: [],
+    payPence: 4000,
+  };
+  const text = driverDayMessage(
+    "Sam",
+    [later, { ...job, payPence: 3500 }],
+    "+44 7926 608888",
+  );
+
+  it("lists every job in pickup order, with the passenger's number and the price", () => {
+    expect(text.startsWith("*YOUR JOBS · Mon 5 Oct 2026*")).toBe(true);
+    expect(text).toContain("Sam, here are your 2 jobs in pickup order.");
+    expect(text.indexOf("*1. 11:00 · J-000123*")).toBeLessThan(
+      text.indexOf("*2. 16:30 · J-000124*"),
+    );
+    expect(text).toContain("Passenger: Jane Smith, +447700900123");
+    expect(text).toContain("Your price: £35.00");
+    expect(text).toContain("Your price: £40.00");
+    expect(text.trimEnd().endsWith("Please reply OK to confirm.")).toBe(true);
+  });
+
+  it("speaks of one job as one job", () => {
+    expect(driverDayMessage("Sam", [job], "+44 7926 608888")).toContain(
+      "Sam, here is your job.",
     );
   });
 });

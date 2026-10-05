@@ -293,7 +293,7 @@ export const NAV: NavSection[] = [
         href: "/admin/reports/run-sheet",
         icon: "runSheet",
         capability: "runSheet",
-        ready: false,
+        ready: true,
       },
     ],
   },
