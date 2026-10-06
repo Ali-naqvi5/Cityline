@@ -187,6 +187,13 @@ export async function SupplierView(props: AdminViewServerProps) {
                 )}
               </Field>
               <Field label="Phone">{supplier.phone || "—"}</Field>
+              <Field label="Billing address">
+                {supplier.billingAddress ? (
+                  <span className="whitespace-pre-line">{supplier.billingAddress}</span>
+                ) : (
+                  "—"
+                )}
+              </Field>
             </Fields>
           </Panel>
           {supplier.notes ? (

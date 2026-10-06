@@ -179,6 +179,7 @@ export const supplierSchema = z.object({
   contactName: z.string().max(80),
   email: optionalEmail,
   phone: z.string().max(30),
+  billingAddress: z.string().max(500),
   dashboardUrl: z
     .string()
     .max(300)
@@ -199,6 +200,7 @@ export function supplierData(input: SupplierInput) {
     contactName: input.contactName || null,
     email: input.email || null,
     phone: input.phone || null,
+    billingAddress: input.billingAddress || null,
     dashboardUrl: input.dashboardUrl || null,
     notes: input.notes || null,
     active: input.active,

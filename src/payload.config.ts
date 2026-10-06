@@ -19,6 +19,8 @@ import { Payments } from "@/collections/Payments";
 import { PrivateFiles } from "@/collections/PrivateFiles";
 import { Quotes } from "@/collections/Quotes";
 import { Refunds } from "@/collections/Refunds";
+import { SupplierInvoices } from "@/collections/SupplierInvoices";
+import { SupplierPayments } from "@/collections/SupplierPayments";
 import { Suppliers } from "@/collections/Suppliers";
 import { Users } from "@/collections/Users";
 import { VehicleDocuments } from "@/collections/VehicleDocuments";
@@ -191,6 +193,18 @@ export default buildConfig({
           exact: true,
           meta: { title: "Driver Pay" },
         },
+        opsSupplierMoney: {
+          Component: "@/admin/views/supplier-money#SupplierMoneyView",
+          path: "/supplier-money",
+          exact: true,
+          meta: { title: "Supplier Money" },
+        },
+        opsSupplierMoneyPartner: {
+          Component: "@/admin/views/supplier-money-partner#SupplierMoneyPartnerView",
+          path: "/supplier-money/:id",
+          exact: true,
+          meta: { title: "Supplier Money" },
+        },
         opsRunSheet: {
           Component: "@/admin/views/report-run-sheet#RunSheetView",
           path: "/reports/run-sheet",
@@ -316,6 +330,8 @@ export default buildConfig({
     PrivateFiles,
     // Finance.
     DriverPayments,
+    SupplierPayments,
+    SupplierInvoices,
     // Staff accounts for the admin itself, and what they change.
     Users,
     AuditLog,

@@ -13,7 +13,9 @@ import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 import type { ReactNode } from "react";
 
+import { FinanceRings } from "@/admin/components/finance-rings";
 import { loadDashboard, type DashboardData } from "@/admin/data/dashboard";
+import { loadFinanceOverview } from "@/admin/data/finance-overview";
 import {
   dayHeading,
   londonDay,
@@ -23,6 +25,7 @@ import {
   stamp,
 } from "@/admin/format";
 import { requireStaff } from "@/admin/guard";
+import { resolvePeriod } from "@/admin/reports/period";
 import { DataTable } from "@/components/ops/data-table";
 import { JobCard, JobStatusBadge, Route } from "@/components/ops/jobs";
 import {
@@ -38,7 +41,7 @@ import { OpsShell } from "@/components/ops/shell";
 import { EmptyState, NoAccess } from "@/components/ops/states";
 import { DOCUMENT_LABELS, type DocumentType } from "@/domain/compliance/documents";
 import { vehicleClassName } from "@/domain/jobs/labels";
-import type { Role } from "@/domain/staff/permissions";
+import { can, type Role } from "@/domain/staff/permissions";
 import type { Job } from "@/payload-types";
 
 /**
@@ -336,8 +339,7 @@ function MoneyPanel({ money: figures }: { money: NonNullable<DashboardData["mone
       </dl>
       <p className="border-line text-ink-3 mt-4 flex items-start gap-2 border-t pt-3 text-xs">
         <Info aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        Profit, driver pay owed and supplier money owed are tracked once driver pay and
-        supplier records are in the system.
+        Driver pay and partner money are under Finance; profit is in the rings above.
       </p>
     </Panel>
   );
@@ -355,6 +357,14 @@ export async function DashboardView(props: AdminViewServerProps) {
 
   const { user, payload } = context;
   const data = await loadDashboard(payload, user);
+  // The three rings, for those who see company money (Owner and Accounts).
+  const period = resolvePeriod(
+    props.searchParams as Record<string, string | string[] | undefined>,
+    data.now,
+  );
+  const overview = can(user.role, "reports.financial")
+    ? await loadFinanceOverview(payload, user, period)
+    : null;
   const firstName = (user.name || "").split(" ")[0];
 
   return (
@@ -436,6 +446,10 @@ export async function DashboardView(props: AdminViewServerProps) {
                 />
               ) : null}
             </div>
+          ) : null}
+
+          {overview ? (
+            <FinanceRings overview={overview} period={period} action="/admin/dashboard" />
           ) : null}
 
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">

@@ -253,6 +253,7 @@ export async function saveSupplierAction(
     contactName: text(formData, "contactName"),
     email: text(formData, "email"),
     phone: text(formData, "phone"),
+    billingAddress: text(formData, "billingAddress"),
     dashboardUrl: text(formData, "dashboardUrl"),
     notes: text(formData, "notes"),
     active: checked(formData, "active"),

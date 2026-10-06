@@ -227,6 +227,22 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   (`domain/finance/statement-link.ts`, `/api/statements/<token>`), sent with
   the WhatsApp note. Not an invoice or a payslip — drivers are independent.
   Refunds stay manual in Stripe (Cityline, 6 Oct 2026).
+- **Supplier Money** (`/admin/supplier-money`, Owner and Accounts): what each
+  partner owes — the booking price for completed, PNS, and cancelled
+  bookings the office marks "partner pays" (`jobs.cancellationCharge`; every
+  cancelled partner booking waits for that decision). Money received
+  (`supplier-payments`) and invoices (`supplier-invoices`) cover chosen
+  bookings; the collections work out lines and totals
+  (`collections/hooks/partner-lines.ts`), one receipt and one invoice per
+  booking at a time, voided never edited. Invoices are made only by hand and
+  never sent by the system (Cityline, 6 Oct 2026): PDF
+  (`domain/finance/invoice-pdf.ts`), full company name, no VAT (not
+  registered), due on the partner's terms; the office marks them sent.
+- **The three rings** on the Owner's and Accounts' dashboard
+  (`domain/finance/overview.ts`), for bookings picked up in the chosen dates:
+  paid to drivers of what they earned, got from partners of what they owe,
+  and profit = booking prices − driver prices − Stripe card fees (expenses
+  later), its ring the margin.
 - **Daily Run Sheet** (`/admin/reports/run-sheet`, `runSheet` capability):
   one London day, today by default, whole day or by driver; prints one
   driver to a page. The passenger's phone is on it; prices are not — a

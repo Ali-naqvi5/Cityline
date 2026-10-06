@@ -12,6 +12,7 @@ import {
   parseJobsReportFilters,
 } from "@/admin/reports/jobs-data";
 import { DRIVER_PAYMENTS_CSV_COLUMNS, loadPayments } from "@/admin/data/driver-pay";
+import { loadReceipts, PARTNER_RECEIPTS_CSV_COLUMNS } from "@/admin/data/supplier-money";
 import { londonDay } from "@/admin/format";
 import { resolvePeriod } from "@/admin/reports/period";
 import {
@@ -123,6 +124,22 @@ const REPORTS: Record<
       return {
         filename: `cityline-driver-payments-${period.from}-to-${period.to}.csv`,
         csv: toCsv(payments, DRIVER_PAYMENTS_CSV_COLUMNS),
+      };
+    },
+  },
+  // Money received from partners in the period (by the date received).
+  "partner-receipts": {
+    capability: "supplierMoney.view",
+    build: async ({ user, query, now }) => {
+      const payload = await payloadClient();
+      const period = resolvePeriod(query, now);
+      const receipts = await loadReceipts(payload, user, {
+        start: period.start,
+        end: period.end,
+      });
+      return {
+        filename: `cityline-partner-receipts-${period.from}-to-${period.to}.csv`,
+        csv: toCsv(receipts, PARTNER_RECEIPTS_CSV_COLUMNS),
       };
     },
   },

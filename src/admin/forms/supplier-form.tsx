@@ -25,6 +25,7 @@ export interface SupplierFormValues {
   email: string;
   phone: string;
   dashboardUrl: string;
+  billingAddress: string;
   notes: string;
   active: boolean;
 }
@@ -131,6 +132,26 @@ export function SupplierForm({
             Active — new jobs can be entered for this supplier
           </label>
         </div>
+      </FormSection>
+
+      <FormSection
+        title="Invoicing"
+        description="Invoices to this partner are addressed here (Supplier Money)."
+      >
+        <FormField
+          id="billingAddress"
+          label="Billing address"
+          wide
+          error={e.billingAddress}
+        >
+          <textarea
+            id="billingAddress"
+            name="billingAddress"
+            rows={3}
+            defaultValue={values.billingAddress}
+            className={TEXTAREA_CLASS}
+          />
+        </FormField>
       </FormSection>
 
       <FormSection title="Notes">

@@ -43,6 +43,11 @@ export const Suppliers: CollectionConfig = {
     { name: "contactName", type: "text" },
     { name: "email", type: "email" },
     { name: "phone", type: "text" },
+    {
+      name: "billingAddress",
+      type: "textarea",
+      admin: { description: "Where invoices are addressed (Supplier Money)." },
+    },
     { name: "dashboardUrl", type: "text" },
     { name: "notes", type: "textarea" },
     { name: "active", type: "checkbox", defaultValue: true, index: true },

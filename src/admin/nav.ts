@@ -223,7 +223,7 @@ export const NAV: NavSection[] = [
         href: "/admin/supplier-money",
         icon: "supplierMoney",
         capability: "supplierMoney.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "expenses",

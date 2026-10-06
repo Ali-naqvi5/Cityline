@@ -82,6 +82,8 @@ export interface Config {
     suppliers: Supplier;
     'private-files': PrivateFile;
     'driver-payments': DriverPayment;
+    'supplier-payments': SupplierPayment;
+    'supplier-invoices': SupplierInvoice;
     users: User;
     'audit-log': AuditLog;
     'payload-kv': PayloadKv;
@@ -106,6 +108,8 @@ export interface Config {
     suppliers: SuppliersSelect<false> | SuppliersSelect<true>;
     'private-files': PrivateFilesSelect<false> | PrivateFilesSelect<true>;
     'driver-payments': DriverPaymentsSelect<false> | DriverPaymentsSelect<true>;
+    'supplier-payments': SupplierPaymentsSelect<false> | SupplierPaymentsSelect<true>;
+    'supplier-invoices': SupplierInvoicesSelect<false> | SupplierInvoicesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -443,6 +447,12 @@ export interface Job {
    */
   paymentFeePence?: number | null;
   driverPayment?: (number | null) | DriverPayment;
+  supplierPayment?: (number | null) | SupplierPayment;
+  supplierInvoice?: (number | null) | SupplierInvoice;
+  /**
+   * For a cancelled partner booking: does the partner pay?
+   */
+  cancellationCharge?: ('charged' | 'not_charged') | null;
   /**
    * The driver price when it was paid, to notice a later change.
    */
@@ -479,6 +489,10 @@ export interface Supplier {
   contactName?: string | null;
   email?: string | null;
   phone?: string | null;
+  /**
+   * Where invoices are addressed (Supplier Money).
+   */
+  billingAddress?: string | null;
   dashboardUrl?: string | null;
   notes?: string | null;
   active?: boolean | null;
@@ -663,6 +677,78 @@ export interface DriverPayment {
    */
   amountPence?: number | null;
   recordedBy?: (number | null) | User;
+  voidedAt?: string | null;
+  voidReason?: string | null;
+  voidedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Money received from partners. Voided, never edited or deleted.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supplier-payments".
+ */
+export interface SupplierPayment {
+  id: number;
+  supplier: number | Supplier;
+  receivedAt: string;
+  method: 'bank_transfer' | 'card' | 'other';
+  /**
+   * The partner's reference.
+   */
+  reference?: string | null;
+  notes?: string | null;
+  lines?:
+    | {
+        job: number | Job;
+        jobReference?: string | null;
+        supplierReference?: string | null;
+        pickupAt?: string | null;
+        route?: string | null;
+        status?: string | null;
+        amountPence?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  amountPence?: number | null;
+  recordedBy?: (number | null) | User;
+  voidedAt?: string | null;
+  voidReason?: string | null;
+  voidedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Invoices to partners. Voided, never edited or deleted.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supplier-invoices".
+ */
+export interface SupplierInvoice {
+  id: number;
+  supplier: number | Supplier;
+  issuedAt: string;
+  dueAt?: string | null;
+  notes?: string | null;
+  lines?:
+    | {
+        job: number | Job;
+        jobReference?: string | null;
+        supplierReference?: string | null;
+        pickupAt?: string | null;
+        route?: string | null;
+        status?: string | null;
+        amountPence?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  totalPence?: number | null;
+  /**
+   * When the office sent it. Nothing is sent automatically.
+   */
+  sentAt?: string | null;
+  createdBy?: (number | null) | User;
   voidedAt?: string | null;
   voidReason?: string | null;
   voidedBy?: (number | null) | User;
@@ -908,6 +994,14 @@ export interface PayloadLockedDocument {
         value: number | DriverPayment;
       } | null)
     | ({
+        relationTo: 'supplier-payments';
+        value: number | SupplierPayment;
+      } | null)
+    | ({
+        relationTo: 'supplier-invoices';
+        value: number | SupplierInvoice;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -1096,6 +1190,9 @@ export interface JobsSelect<T extends boolean = true> {
   driverPricePence?: T;
   paymentFeePence?: T;
   driverPayment?: T;
+  supplierPayment?: T;
+  supplierInvoice?: T;
+  cancellationCharge?: T;
   driverPaidPricePence?: T;
   locked?: T;
   driverNotes?: T;
@@ -1254,6 +1351,7 @@ export interface SuppliersSelect<T extends boolean = true> {
   contactName?: T;
   email?: T;
   phone?: T;
+  billingAddress?: T;
   dashboardUrl?: T;
   notes?: T;
   active?: T;
@@ -1306,6 +1404,66 @@ export interface DriverPaymentsSelect<T extends boolean = true> {
   cashPence?: T;
   amountPence?: T;
   recordedBy?: T;
+  voidedAt?: T;
+  voidReason?: T;
+  voidedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supplier-payments_select".
+ */
+export interface SupplierPaymentsSelect<T extends boolean = true> {
+  supplier?: T;
+  receivedAt?: T;
+  method?: T;
+  reference?: T;
+  notes?: T;
+  lines?:
+    | T
+    | {
+        job?: T;
+        jobReference?: T;
+        supplierReference?: T;
+        pickupAt?: T;
+        route?: T;
+        status?: T;
+        amountPence?: T;
+        id?: T;
+      };
+  amountPence?: T;
+  recordedBy?: T;
+  voidedAt?: T;
+  voidReason?: T;
+  voidedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supplier-invoices_select".
+ */
+export interface SupplierInvoicesSelect<T extends boolean = true> {
+  supplier?: T;
+  issuedAt?: T;
+  dueAt?: T;
+  notes?: T;
+  lines?:
+    | T
+    | {
+        job?: T;
+        jobReference?: T;
+        supplierReference?: T;
+        pickupAt?: T;
+        route?: T;
+        status?: T;
+        amountPence?: T;
+        id?: T;
+      };
+  totalPence?: T;
+  sentAt?: T;
+  createdBy?: T;
   voidedAt?: T;
   voidReason?: T;
   voidedBy?: T;

@@ -122,6 +122,7 @@ describe("supplierSchema", () => {
         email: "",
         phone: "",
         dashboardUrl: "https://example.com",
+        billingAddress: "",
         notes: "",
         active: true,
       }),

@@ -363,6 +363,33 @@ export const Jobs: CollectionConfig = {
           admin: { readOnly: true },
         },
         {
+          // Supplier Money: the partner's payment and invoice that cover this
+          // booking, and — when cancelled — whether the partner still pays.
+          name: "supplierPayment",
+          type: "relationship",
+          relationTo: "supplier-payments",
+          index: true,
+          admin: { readOnly: true },
+        },
+        {
+          name: "supplierInvoice",
+          type: "relationship",
+          relationTo: "supplier-invoices",
+          index: true,
+          admin: { readOnly: true },
+        },
+        {
+          name: "cancellationCharge",
+          type: "select",
+          options: [
+            { label: "Partner pays (late cancellation)", value: "charged" },
+            { label: "No charge", value: "not_charged" },
+          ],
+          admin: {
+            description: "For a cancelled partner booking: does the partner pay?",
+          },
+        },
+        {
           name: "driverPaidPricePence",
           type: "number",
           admin: {

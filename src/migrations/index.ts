@@ -8,6 +8,7 @@ import * as migration_20261001_224224_staff_theme from "./20261001_224224_staff_
 import * as migration_20261001_224828_customers_section from "./20261001_224828_customers_section";
 import * as migration_20261005_143956_driver_records_and_taken_off from "./20261005_143956_driver_records_and_taken_off";
 import * as migration_20261005_231423_driver_payments from "./20261005_231423_driver_payments";
+import * as migration_20261006_000549_supplier_money from "./20261006_000549_supplier_money";
 
 export const migrations = [
   {
@@ -59,5 +60,10 @@ export const migrations = [
     up: migration_20261005_231423_driver_payments.up,
     down: migration_20261005_231423_driver_payments.down,
     name: "20261005_231423_driver_payments",
+  },
+  {
+    up: migration_20261006_000549_supplier_money.up,
+    down: migration_20261006_000549_supplier_money.down,
+    name: "20261006_000549_supplier_money",
   },
 ];

@@ -26,6 +26,7 @@ const GATE_EXEMPT_PREFIXES = [
   // Staff downloads; each request is checked against the signed-in person.
   "/api/reports",
   "/api/driver-pay",
+  "/api/supplier-money",
   // A driver's payment statement, opened from a signed, expiring link.
   "/api/statements",
   "/admin",

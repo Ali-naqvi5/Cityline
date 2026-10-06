@@ -3,6 +3,8 @@ import { PDFDocument, rgb, StandardFonts, type PDFFont, type PDFPage } from "pdf
 import { formatPence, type Pence } from "@/domain/money";
 import { formatDate, formatTime } from "@/lib/time";
 
+import { drawable, fit } from "./pdf-text";
+
 /**
  * A driver's payment statement as a PDF (Driver Pay, approved by Cityline,
  * 6 Oct 2026): who was paid, when and how, every booking it covers with its
@@ -49,25 +51,6 @@ const LINE = rgb(0.85, 0.87, 0.9);
 const ACCENT = rgb(0.11, 0.3, 0.85);
 
 const money = (pence: number) => formatPence(pence as Pence);
-
-/** Only what the font can draw: anything else becomes "?". */
-function drawable(font: PDFFont): (text: string) => string {
-  const allowed = new Set(font.getCharacterSet());
-  return (text) =>
-    [...text.replace(/[\r\n\t]+/g, " ")]
-      .map((char) => (allowed.has(char.codePointAt(0)!) ? char : "?"))
-      .join("");
-}
-
-/** Cut to fit a width, with an ellipsis. */
-function fit(text: string, font: PDFFont, size: number, width: number): string {
-  if (font.widthOfTextAtSize(text, size) <= width) return text;
-  let cut = text;
-  while (cut.length > 1 && font.widthOfTextAtSize(`${cut}…`, size) > width) {
-    cut = cut.slice(0, -1);
-  }
-  return `${cut.trimEnd()}…`;
-}
 
 export async function statementPdf(data: StatementData): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();

@@ -27,6 +27,7 @@ export async function SupplierEditView(props: AdminViewServerProps) {
     email: "",
     phone: "",
     dashboardUrl: "",
+    billingAddress: "",
     notes: "",
     active: true,
   };
@@ -62,6 +63,7 @@ export async function SupplierEditView(props: AdminViewServerProps) {
       email: supplier.email ?? "",
       phone: supplier.phone ?? "",
       dashboardUrl: supplier.dashboardUrl ?? "",
+      billingAddress: supplier.billingAddress ?? "",
       notes: supplier.notes ?? "",
       active: supplier.active ?? true,
     };
