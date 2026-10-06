@@ -7,6 +7,12 @@ import {
   TAKEN_OFF_CSV_COLUMNS,
 } from "@/admin/reports/drivers-data";
 import {
+  FINANCE_CSV_COLUMNS,
+  FINANCE_SOURCES_CSV_COLUMNS,
+  loadFinanceMovements,
+} from "@/admin/reports/finance-data";
+import { bySource } from "@/admin/reports/finance-report";
+import {
   loadJobsReport,
   JOBS_CSV_COLUMNS,
   parseJobsReportFilters,
@@ -148,6 +154,29 @@ const REPORTS: Record<
         filename: `cityline-partner-receipts-${period.from}-to-${period.to}.csv`,
         csv: toCsv(receipts, PARTNER_RECEIPTS_CSV_COLUMNS),
       };
+    },
+  },
+  // Financial Reports: every movement of money in the period, by the day it
+  // moved (the default), or one row per source with `data=sources`.
+  finance: {
+    capability: "reports.financial",
+    build: async ({ user, query, now }) => {
+      const payload = await payloadClient();
+      const period = resolvePeriod(query, now);
+      const { movements } = await loadFinanceMovements(payload, user, {
+        start: period.start,
+        end: period.end,
+      });
+      const span = `${period.from}-to-${period.to}`;
+      return query.data === "sources"
+        ? {
+            filename: `cityline-money-by-source-${span}.csv`,
+            csv: toCsv(bySource(movements), FINANCE_SOURCES_CSV_COLUMNS),
+          }
+        : {
+            filename: `cityline-money-${span}.csv`,
+            csv: toCsv(movements, FINANCE_CSV_COLUMNS),
+          };
     },
   },
   // Money in from customers in the period (by the date paid), voids marked.

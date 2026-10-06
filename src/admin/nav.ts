@@ -239,7 +239,7 @@ export const NAV: NavSection[] = [
         href: "/admin/reports/finance",
         icon: "financialReports",
         capability: "reports.financial",
-        ready: false,
+        ready: true,
       },
     ],
   },

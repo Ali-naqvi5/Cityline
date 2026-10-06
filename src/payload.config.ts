@@ -231,6 +231,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Expenses" },
         },
+        opsFinanceReport: {
+          Component: "@/admin/views/report-finance#FinanceReportView",
+          path: "/reports/finance",
+          exact: true,
+          meta: { title: "Financial Reports" },
+        },
         opsRunSheet: {
           Component: "@/admin/views/report-run-sheet#RunSheetView",
           path: "/reports/run-sheet",

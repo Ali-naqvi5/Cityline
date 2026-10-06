@@ -19,9 +19,9 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 | `pnpm typecheck`        | passing                                |
 | `pnpm lint`             | passing                                |
 | `pnpm format:check`     | passing                                |
-| `pnpm check:compliance` | passing — 406 files, wording + claims  |
+| `pnpm check:compliance` | passing — 411 files, wording + claims  |
 | `pnpm check:migrations` | passing — 13 migrations, additive only |
-| `pnpm test`             | passing — 559 tests across 60 files    |
+| `pnpm test`             | passing — 565 tests across 61 files    |
 | `pnpm build`            | passing                                |
 | `pnpm e2e`              | last run 29 Sep — 18 tests passing     |
 

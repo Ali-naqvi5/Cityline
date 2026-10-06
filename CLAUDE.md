@@ -260,6 +260,14 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   and profit = booking prices − refunds on them − driver prices − card fees
   − expenses, its ring the margin. A cancelled booking earns nothing, so
   refunding it does not move profit.
+- **Financial Reports** (`/admin/reports/finance`, `reports.financial`):
+  money by the day it moved (Cityline, 6 Oct 2026) — not by pickup date,
+  which is the rings' view. `admin/reports/finance-data.ts` turns every
+  record into movements: card payments, office payments, partner receipts and
+  cash on office bookings (counted when settled on the driver's payment) in;
+  refunds, card fees, drivers' prices paid and expenses out. Split by website,
+  office and each partner (`finance-report.ts`); the CSV is one row per
+  movement, `data=sources` one per source. Void records never count.
 - **Expenses** (`/admin/expenses`): Cityline's own costs only — fuel,
   repairs, insurance and licensing are the drivers' (Cityline is a middle man
   taking a commission, 6 Oct 2026). Free-form, entered one by one by the

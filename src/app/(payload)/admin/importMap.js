@@ -21,6 +21,7 @@ import { PaymentsView as PaymentsView_8eaef7950caeb1e0fa58e8ae15ad67c8 } from "@
 import { PaymentView as PaymentView_fb6bb04aeac9916fc22ff42fe7395e45 } from "@/admin/views/payment";
 import { RefundsView as RefundsView_9c5776f9fed9441c196cfcfd579f90b4 } from "@/admin/views/refunds";
 import { ExpensesView as ExpensesView_7ba59370a65bb919bf79277c8d723e9d } from "@/admin/views/expenses";
+import { FinanceReportView as FinanceReportView_4a1c8e63d94f74700ea09d3bc90a3481 } from "@/admin/views/report-finance";
 import { RunSheetView as RunSheetView_51c29eb700373e4a02e2b100a852a89f } from "@/admin/views/report-run-sheet";
 import { DispatchView as DispatchView_759e910e4ca7fcbc505c8147263dddbf } from "@/admin/views/dispatch";
 import { DriversView as DriversView_5b3d267809e9c8ef7944527d000d51ca } from "@/admin/views/drivers";
@@ -73,6 +74,8 @@ export const importMap = {
   "@/admin/views/payment#PaymentView": PaymentView_fb6bb04aeac9916fc22ff42fe7395e45,
   "@/admin/views/refunds#RefundsView": RefundsView_9c5776f9fed9441c196cfcfd579f90b4,
   "@/admin/views/expenses#ExpensesView": ExpensesView_7ba59370a65bb919bf79277c8d723e9d,
+  "@/admin/views/report-finance#FinanceReportView":
+    FinanceReportView_4a1c8e63d94f74700ea09d3bc90a3481,
   "@/admin/views/report-run-sheet#RunSheetView":
     RunSheetView_51c29eb700373e4a02e2b100a852a89f,
   "@/admin/views/dispatch#DispatchView": DispatchView_759e910e4ca7fcbc505c8147263dddbf,
