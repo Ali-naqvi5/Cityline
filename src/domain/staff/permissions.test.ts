@@ -7,14 +7,13 @@ describe("the permission matrix", () => {
     for (const capability of CAPABILITIES) expect(can("owner", capability)).toBe(true);
   });
 
-  it("keeps company finance and bank details away from controllers", () => {
+  it("keeps company finance (bar expenses) and bank details away from controllers", () => {
     for (const capability of [
       "finance.jobs",
       "payments.view",
       "refunds.issue",
       "driverPay.view",
       "supplierMoney.view",
-      "expenses.view",
       "reports.financial",
       "drivers.bankDetails",
       "staff.manage",
@@ -22,6 +21,8 @@ describe("the permission matrix", () => {
       expect(can("controller", capability)).toBe(false);
     }
     expect(can("controller", "jobs.dispatch")).toBe(true);
+    // Except entering Cityline's expenses, with Accounts.
+    expect(can("controller", "expenses.manage")).toBe(true);
     expect(can("controller", "tfl.register")).toBe(true);
   });
 

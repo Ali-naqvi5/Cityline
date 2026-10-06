@@ -17,6 +17,7 @@ import { DriverPayView as DriverPayView_5c48c7c71d1f3069ca85f98722f16ace } from 
 import { DriverPayDriverView as DriverPayDriverView_781b90ec7150c73fbcf866eaf1118997 } from "@/admin/views/driver-pay-driver";
 import { SupplierMoneyView as SupplierMoneyView_c3a0fad8d97eaf51d6da42984973d1d0 } from "@/admin/views/supplier-money";
 import { SupplierMoneyPartnerView as SupplierMoneyPartnerView_ab291516c3adbb3de37f40256c6f4a2c } from "@/admin/views/supplier-money-partner";
+import { ExpensesView as ExpensesView_7ba59370a65bb919bf79277c8d723e9d } from "@/admin/views/expenses";
 import { RunSheetView as RunSheetView_51c29eb700373e4a02e2b100a852a89f } from "@/admin/views/report-run-sheet";
 import { DispatchView as DispatchView_759e910e4ca7fcbc505c8147263dddbf } from "@/admin/views/dispatch";
 import { DriversView as DriversView_5b3d267809e9c8ef7944527d000d51ca } from "@/admin/views/drivers";
@@ -65,6 +66,7 @@ export const importMap = {
     SupplierMoneyView_c3a0fad8d97eaf51d6da42984973d1d0,
   "@/admin/views/supplier-money-partner#SupplierMoneyPartnerView":
     SupplierMoneyPartnerView_ab291516c3adbb3de37f40256c6f4a2c,
+  "@/admin/views/expenses#ExpensesView": ExpensesView_7ba59370a65bb919bf79277c8d723e9d,
   "@/admin/views/report-run-sheet#RunSheetView":
     RunSheetView_51c29eb700373e4a02e2b100a852a89f,
   "@/admin/views/dispatch#DispatchView": DispatchView_759e910e4ca7fcbc505c8147263dddbf,

@@ -12,6 +12,7 @@ import { Bookings } from "@/collections/Bookings";
 import { Customers } from "@/collections/Customers";
 import { DriverDocuments } from "@/collections/DriverDocuments";
 import { DriverPayments } from "@/collections/DriverPayments";
+import { Expenses } from "@/collections/Expenses";
 import { Drivers } from "@/collections/Drivers";
 import { JobEvents } from "@/collections/JobEvents";
 import { Jobs } from "@/collections/Jobs";
@@ -205,6 +206,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Supplier Money" },
         },
+        opsExpenses: {
+          Component: "@/admin/views/expenses#ExpensesView",
+          path: "/expenses",
+          exact: true,
+          meta: { title: "Expenses" },
+        },
         opsRunSheet: {
           Component: "@/admin/views/report-run-sheet#RunSheetView",
           path: "/reports/run-sheet",
@@ -332,6 +339,7 @@ export default buildConfig({
     DriverPayments,
     SupplierPayments,
     SupplierInvoices,
+    Expenses,
     // Staff accounts for the admin itself, and what they change.
     Users,
     AuditLog,

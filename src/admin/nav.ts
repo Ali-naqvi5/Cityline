@@ -231,7 +231,7 @@ export const NAV: NavSection[] = [
         href: "/admin/expenses",
         icon: "expenses",
         capability: "expenses.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "financial-reports",

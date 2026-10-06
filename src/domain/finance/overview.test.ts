@@ -54,8 +54,18 @@ describe("the accounts overview", () => {
       incomePence: 30000,
       driverPence: 8500,
       feesPence: 120,
+      expensesPence: 0,
       profitPence: 21380,
       margin: 21380 / 30000,
+    });
+  });
+
+  it("takes Cityline's own expenses off the profit too", () => {
+    const withExpenses = financeOverview([job({})], 1000);
+    expect(withExpenses.profit).toMatchObject({
+      incomePence: 6000,
+      expensesPence: 1000,
+      profitPence: 6000 - 3500 - 120 - 1000,
     });
   });
 

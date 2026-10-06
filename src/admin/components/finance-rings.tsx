@@ -65,13 +65,13 @@ export function FinanceRings({
           value={money(profit.profitPence)}
           share={profit.margin}
           tone={profit.profitPence < 0 ? "danger" : undefined}
-          caption={`${money(profit.incomePence)} in, less ${money(profit.driverPence)} drivers and ${money(profit.feesPence)} card fees`}
+          caption={`${money(profit.incomePence)} in, less ${money(profit.driverPence)} drivers, ${money(profit.feesPence)} card fees and ${money(profit.expensesPence)} expenses`}
           tip="Margin: profit as a share of what the bookings earned"
         />
       </TipLayer>
       <p className="text-ink-3 mt-4 text-xs">
-        Profit is booking prices less driver prices and Stripe&apos;s card fees; expenses
-        come off once they are recorded.
+        Profit is booking prices less driver prices, Stripe&apos;s card fees and
+        Cityline&apos;s own expenses in these dates.
       </p>
     </Panel>
   );

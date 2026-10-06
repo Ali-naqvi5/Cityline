@@ -13,6 +13,7 @@ import {
 } from "@/admin/reports/jobs-data";
 import { DRIVER_PAYMENTS_CSV_COLUMNS, loadPayments } from "@/admin/data/driver-pay";
 import { loadReceipts, PARTNER_RECEIPTS_CSV_COLUMNS } from "@/admin/data/supplier-money";
+import { EXPENSES_CSV_COLUMNS, loadExpenses } from "@/admin/data/expenses";
 import { londonDay } from "@/admin/format";
 import { resolvePeriod } from "@/admin/reports/period";
 import {
@@ -140,6 +141,22 @@ const REPORTS: Record<
       return {
         filename: `cityline-partner-receipts-${period.from}-to-${period.to}.csv`,
         csv: toCsv(receipts, PARTNER_RECEIPTS_CSV_COLUMNS),
+      };
+    },
+  },
+  // Cityline's own expenses in the period (by the date spent), voids marked.
+  expenses: {
+    capability: "expenses.view",
+    build: async ({ user, query, now }) => {
+      const payload = await payloadClient();
+      const period = resolvePeriod(query, now);
+      const expenses = await loadExpenses(payload, user, {
+        start: period.start,
+        end: period.end,
+      });
+      return {
+        filename: `cityline-expenses-${period.from}-to-${period.to}.csv`,
+        csv: toCsv(expenses, EXPENSES_CSV_COLUMNS),
       };
     },
   },

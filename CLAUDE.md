@@ -241,8 +241,14 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
 - **The three rings** on the Owner's and Accounts' dashboard
   (`domain/finance/overview.ts`), for bookings picked up in the chosen dates:
   paid to drivers of what they earned, got from partners of what they owe,
-  and profit = booking prices − driver prices − Stripe card fees (expenses
-  later), its ring the margin.
+  and profit = booking prices − driver prices − Stripe card fees − expenses,
+  its ring the margin.
+- **Expenses** (`/admin/expenses`): Cityline's own costs only — fuel,
+  repairs, insurance and licensing are the drivers' (Cityline is a middle man
+  taking a commission, 6 Oct 2026). Free-form, entered one by one by the
+  Controller and Accounts (`expenses.*`; the Controller's only finance
+  capability): date, what for, amount, paid to, how, optional receipt as a
+  private file. No categories, nothing recurring; voided, never edited.
 - **Daily Run Sheet** (`/admin/reports/run-sheet`, `runSheet` capability):
   one London day, today by default, whole day or by driver; prints one
   driver to a page. The passenger's phone is on it; prices are not — a

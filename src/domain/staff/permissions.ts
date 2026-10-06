@@ -11,7 +11,8 @@
  *   Owner       everything, including company finance and drivers' bank
  *               details.
  *   Controller  operations: jobs, dispatch, bookings, drivers, vehicles,
- *               compliance, suppliers, operational reports. No company
+ *               compliance, suppliers, operational reports — and entering
+ *               Cityline's expenses (Cityline, 6 Oct 2026). No other company
  *               finance, no bank details.
  *   Accounts    finance: payments, refunds, driver pay, supplier money,
  *               expenses, financial reports, and the money on each job —
@@ -92,6 +93,9 @@ const CONTROLLER: readonly Capability[] = [
   "reports.operational",
   "tfl.register",
   "runSheet",
+  // Cityline's own expenses, entered by hand (Cityline, 6 Oct 2026).
+  "expenses.view",
+  "expenses.manage",
 ];
 
 const ACCOUNTS: readonly Capability[] = [

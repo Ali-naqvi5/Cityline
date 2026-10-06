@@ -84,6 +84,7 @@ export interface Config {
     'driver-payments': DriverPayment;
     'supplier-payments': SupplierPayment;
     'supplier-invoices': SupplierInvoice;
+    expenses: Expense;
     users: User;
     'audit-log': AuditLog;
     'payload-kv': PayloadKv;
@@ -110,6 +111,7 @@ export interface Config {
     'driver-payments': DriverPaymentsSelect<false> | DriverPaymentsSelect<true>;
     'supplier-payments': SupplierPaymentsSelect<false> | SupplierPaymentsSelect<true>;
     'supplier-invoices': SupplierInvoicesSelect<false> | SupplierInvoicesSelect<true>;
+    expenses: ExpensesSelect<false> | ExpensesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -884,6 +886,28 @@ export interface VehicleDocument {
   createdAt: string;
 }
 /**
+ * Cityline's own expenses. Voided, never edited or deleted.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "expenses".
+ */
+export interface Expense {
+  id: number;
+  spentAt: string;
+  description: string;
+  amountPence: number;
+  paidTo?: string | null;
+  method?: ('card' | 'bank_transfer' | 'cash' | 'other') | null;
+  receipt?: (number | null) | PrivateFile;
+  notes?: string | null;
+  recordedBy?: (number | null) | User;
+  voidedAt?: string | null;
+  voidReason?: string | null;
+  voidedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Append-only. Written by the system on every staff change.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1000,6 +1024,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'supplier-invoices';
         value: number | SupplierInvoice;
+      } | null)
+    | ({
+        relationTo: 'expenses';
+        value: number | Expense;
       } | null)
     | ({
         relationTo: 'users';
@@ -1464,6 +1492,25 @@ export interface SupplierInvoicesSelect<T extends boolean = true> {
   totalPence?: T;
   sentAt?: T;
   createdBy?: T;
+  voidedAt?: T;
+  voidReason?: T;
+  voidedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "expenses_select".
+ */
+export interface ExpensesSelect<T extends boolean = true> {
+  spentAt?: T;
+  description?: T;
+  amountPence?: T;
+  paidTo?: T;
+  method?: T;
+  receipt?: T;
+  notes?: T;
+  recordedBy?: T;
   voidedAt?: T;
   voidReason?: T;
   voidedBy?: T;

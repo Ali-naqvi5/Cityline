@@ -9,8 +9,8 @@ import { isChargeable, type CancellationCharge } from "./supplier-money";
  *   - Paid to drivers — of the driver prices on work done, how much is paid.
  *   - Got from suppliers — of what partners owe for their bookings, how much
  *     has come in.
- *   - Profit — booking prices, less driver prices, less Stripe's card fees;
- *     the ring is the margin. Expenses come off once they are recorded.
+ *   - Profit — booking prices, less driver prices, less Stripe's card fees,
+ *     less Cityline's own expenses in the same dates; the ring is the margin.
  *
  * Work done is a completed booking or a PNS; a late cancellation a partner
  * pays for earns its price too. Test bookings are never counted.
@@ -34,6 +34,7 @@ export interface FinanceOverview {
     incomePence: number;
     driverPence: number;
     feesPence: number;
+    expensesPence: number;
     profitPence: number;
     /** Profit as a share of income; null with no income. */
     margin: number | null;
@@ -43,7 +44,10 @@ export interface FinanceOverview {
 const isDone = (job: OverviewJob) =>
   job.status === "completed" || job.status === "no_show";
 
-export function financeOverview(jobs: readonly OverviewJob[]): FinanceOverview {
+export function financeOverview(
+  jobs: readonly OverviewJob[],
+  expensesPence = 0,
+): FinanceOverview {
   const done = jobs.filter(isDone);
   const priced = done.filter((job) => job.driverPricePence !== null);
   const earnedPence = priced.reduce((sum, job) => sum + job.driverPricePence!, 0);
@@ -65,7 +69,7 @@ export function financeOverview(jobs: readonly OverviewJob[]): FinanceOverview {
     0,
   );
   const feesPence = earning.reduce((sum, job) => sum + (job.paymentFeePence ?? 0), 0);
-  const profitPence = incomePence - earnedPence - feesPence;
+  const profitPence = incomePence - earnedPence - feesPence - expensesPence;
 
   return {
     drivers: { earnedPence, paidPence, unpriced: done.length - priced.length },
@@ -74,6 +78,7 @@ export function financeOverview(jobs: readonly OverviewJob[]): FinanceOverview {
       incomePence,
       driverPence: earnedPence,
       feesPence,
+      expensesPence,
       profitPence,
       margin: incomePence > 0 ? profitPence / incomePence : null,
     },
