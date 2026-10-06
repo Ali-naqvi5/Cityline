@@ -4,6 +4,7 @@ import type { Payload } from "payload";
 
 import { addDays, londonDay, londonDayBounds, mondayOf } from "@/admin/format";
 import { loadComplianceItems, type ComplianceItem } from "@/admin/data/fleet";
+import { loadRefunds, loadTakings, periodTakings } from "@/admin/data/payments";
 import { OPEN_STATUSES } from "@/domain/jobs/labels";
 import { can, type Role } from "@/domain/staff/permissions";
 import type { Booking, Job, User } from "@/payload-types";
@@ -38,6 +39,8 @@ export interface DashboardData {
     revenuePence: number;
     refundsPence: number;
     feesPence: number;
+    /** Payments whose card fee Stripe has not given yet. */
+    feesUnknown: number;
     paymentsCount: number;
   };
 }
@@ -198,56 +201,32 @@ export async function loadDashboard(
       })()
     : null;
 
+  // This month's money in, as Payments counts it: website card payments and
+  // office ones marked paid, less refunds recorded and card fees.
   const money = can(user.role, "payments.view")
     ? await (async () => {
-        const monthStart = londonDayBounds(`${today.slice(0, 7)}-01`).start;
-        const [payments, refunds] = await Promise.all([
-          payload.find({
-            collection: "payments",
-            where: {
-              and: [
-                { status: { equals: "succeeded" } },
-                { createdAt: { greater_than_equal: monthStart.toISOString() } },
-                { "booking.isTest": { not_equals: true } },
-              ],
-            },
-            pagination: false,
-            depth: 0,
-            select: { amountPence: true, feePence: true },
-            ...as,
-          }),
+        const month = {
+          start: londonDayBounds(`${today.slice(0, 7)}-01`).start,
+          end: londonDayBounds(today).end,
+        };
+        const [rows, refunds] = await Promise.all([
+          loadTakings(payload, user, month),
           can(user.role, "refunds.view")
-            ? payload.find({
-                collection: "refunds",
-                where: {
-                  and: [
-                    { createdAt: { greater_than_equal: monthStart.toISOString() } },
-                    { "payment.booking.isTest": { not_equals: true } },
-                  ],
-                },
-                pagination: false,
-                depth: 0,
-                select: { amountPence: true },
-                ...as,
-              })
-            : Promise.resolve({ docs: [] as { amountPence: number }[] }),
+            ? loadRefunds(payload, user, month)
+            : Promise.resolve([]),
         ]);
+        const totals = periodTakings(rows, refunds);
         return {
           monthLabel: new Intl.DateTimeFormat("en-GB", {
             timeZone: "Europe/London",
             month: "long",
             year: "numeric",
           }).format(now),
-          revenuePence: payments.docs.reduce(
-            (sum, row) => sum + (row.amountPence ?? 0),
-            0,
-          ),
-          feesPence: payments.docs.reduce((sum, row) => sum + (row.feePence ?? 0), 0),
-          refundsPence: refunds.docs.reduce(
-            (sum, row) => sum + (row.amountPence ?? 0),
-            0,
-          ),
-          paymentsCount: payments.docs.length,
+          revenuePence: totals.takenPence,
+          feesPence: totals.feesPence,
+          feesUnknown: totals.feesUnknown,
+          refundsPence: totals.refundedPence,
+          paymentsCount: rows.filter((row) => !row.voided).length,
         };
       })()
     : null;

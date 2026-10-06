@@ -22,6 +22,7 @@ import {
 } from "@/admin/actions/dispatch";
 import { resendManageLinkAction } from "@/admin/actions/jobs";
 import { auditValue } from "@/admin/audit-format";
+import { loadJobPayment } from "@/admin/data/payments";
 import { money, pickupLabel, relative, stamp } from "@/admin/format";
 import { DriverPriceForm } from "@/admin/forms/driver-price-form";
 import { NextStageButtons, StageProgress } from "@/admin/forms/stage-controls";
@@ -437,9 +438,15 @@ export async function JobView(props: AdminViewServerProps) {
   const status = job.status;
   const changeable = beforeBoarding(status);
 
+  // Whether the customer has paid, and any refund (Payments).
+  const customerPaid =
+    seesFinance && can(user.role, "payments.view")
+      ? await loadJobPayment(payload, user, job)
+      : null;
   const feesKnown = (job.paymentFeePence ?? 0) > 0;
   const takings = bookingMoney({
     customerPricePence: job.customerPricePence,
+    refundedPence: customerPaid?.refundedPence ?? 0,
     paymentFeePence: job.paymentFeePence,
     driverPricePence: job.driverPricePence,
   });
@@ -1037,6 +1044,35 @@ export async function JobView(props: AdminViewServerProps) {
                     {money(job.customerPricePence)}
                   </dd>
                 </div>
+                {customerPaid ? (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-ink-3">Customer</dt>
+                    <dd className="text-right">
+                      {customerPaid.href ? (
+                        <Link
+                          href={customerPaid.href}
+                          className={
+                            customerPaid.waiting
+                              ? "text-warn hover:underline"
+                              : "text-accent hover:underline"
+                          }
+                        >
+                          {customerPaid.text}
+                        </Link>
+                      ) : (
+                        <span className="text-ink-3">{customerPaid.text}</span>
+                      )}
+                    </dd>
+                  </div>
+                ) : null}
+                {customerPaid?.refundedPence ? (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-ink-3">Refunded</dt>
+                    <dd className="tabular-nums">
+                      − {money(customerPaid.refundedPence)}
+                    </dd>
+                  </div>
+                ) : null}
                 <div className="flex justify-between gap-3">
                   <dt className="text-ink-3">Card fees</dt>
                   <dd className="tabular-nums">

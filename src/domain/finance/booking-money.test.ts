@@ -21,6 +21,17 @@ describe("what a booking makes", () => {
     ).toMatchObject({ netPence: 5890, profitPence: 2390 });
   });
 
+  it("takes a refund off what the booking made", () => {
+    expect(
+      bookingMoney({
+        customerPricePence: 6000,
+        refundedPence: 1000,
+        paymentFeePence: 110,
+        driverPricePence: 3500,
+      }),
+    ).toMatchObject({ netPence: 4890, profitPence: 1390 });
+  });
+
   it("does not guess the profit before the driver's price is written", () => {
     expect(bookingMoney({ customerPricePence: 6000 }).profitPence).toBeNull();
     expect(

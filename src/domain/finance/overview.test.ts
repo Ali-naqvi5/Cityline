@@ -52,6 +52,7 @@ describe("the accounts overview", () => {
   it("works out profit as prices less driver prices less card fees", () => {
     expect(overview.profit).toEqual({
       incomePence: 30000,
+      refundsPence: 0,
       driverPence: 8500,
       feesPence: 120,
       expensesPence: 0,
@@ -66,6 +67,20 @@ describe("the accounts overview", () => {
       incomePence: 6000,
       expensesPence: 1000,
       profitPence: 6000 - 3500 - 120 - 1000,
+    });
+  });
+
+  it("takes refunds off the work they were made on, and margin is on what was kept", () => {
+    const refunded = financeOverview([
+      job({ refundedPence: 1000 }),
+      // A cancelled booking earned nothing, so its refund changes nothing.
+      job({ status: "cancelled", refundedPence: 6000 }),
+    ]);
+    expect(refunded.profit).toMatchObject({
+      incomePence: 6000,
+      refundsPence: 1000,
+      profitPence: 6000 - 1000 - 3500 - 120,
+      margin: (6000 - 1000 - 3500 - 120) / 5000,
     });
   });
 

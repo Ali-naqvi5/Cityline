@@ -185,16 +185,21 @@ payments:
    the terms, cancellation and contact pages need to be reachable by then.
 2. **Create a restricted key** (`rk_live_…`) and use it as
    `STRIPE_SECRET_KEY`, keeping the full secret key off the server. Today the
-   code only creates and reads Checkout Sessions, so start from _Checkout
-   Sessions: write_; refunds will need _Refunds: write_ once they are built. Try
+   code creates and reads Checkout Sessions, and reads each payment's card
+   fee, so start from _Checkout Sessions: write_, _PaymentIntents: read_,
+   _Charges: read_ and _Balance: read_ (the fee is on the charge's balance
+   transaction). Refunds are made by hand in the Dashboard and only recorded in
+   the admin (Cityline, 6 Oct 2026), so the key needs no refund permission. Try
    the same permissions on a sandbox restricted key first — a `403` from Stripe
-   names the permission that is missing. Put `pk_live_…` in
+   names the permission that is missing, and Payments → "Get card fees from
+   Stripe" says when Stripe refuses. Put `pk_live_…` in
    `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — it is baked in at build time, so it
    must be present when the image is built.
 3. **Add the webhook endpoint** — Dashboard → Developers → Webhooks → Add
    endpoint: `https://citylineairporttransfers.com/api/webhooks/stripe`, events
    `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
-   `checkout.session.async_payment_failed`. Copy its signing secret (`whsec_…`)
+   `checkout.session.async_payment_failed` and `charge.updated` (Stripe's fee,
+   once worked out). Copy its signing secret (`whsec_…`)
    into `STRIPE_WEBHOOK_SECRET`. The launch gate already lets `/api/webhooks`
    through.
 4. **Register the domain for Apple Pay and Google Pay** — Dashboard → Settings →

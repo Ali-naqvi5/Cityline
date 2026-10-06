@@ -14,7 +14,9 @@
  *               compliance, suppliers, operational reports — and entering
  *               Cityline's expenses (Cityline, 6 Oct 2026). No other company
  *               finance, no bank details.
- *   Accounts    finance: payments, refunds, driver pay, supplier money,
+ *   Accounts    finance: payments (office ones marked paid by hand),
+ *               refunds (made in Stripe or by bank, recorded here by hand —
+ *               never issued from the admin), driver pay, supplier money,
  *               expenses, financial reports, and the money on each job —
  *               and drivers' bank details, to pay them (Cityline, 6 Oct
  *               2026). Jobs and bookings read-only, for context; no dispatch.
@@ -48,8 +50,9 @@ export const CAPABILITIES = [
   // Finance
   "finance.jobs",
   "payments.view",
+  "payments.record",
   "refunds.view",
-  "refunds.issue",
+  "refunds.record",
   "driverPay.view",
   "driverPay.manage",
   "supplierMoney.view",
@@ -109,8 +112,9 @@ const ACCOUNTS: readonly Capability[] = [
   // Finance.
   "finance.jobs",
   "payments.view",
+  "payments.record",
   "refunds.view",
-  "refunds.issue",
+  "refunds.record",
   "driverPay.view",
   "driverPay.manage",
   // Accounts pays the drivers, so needs where to send the money.

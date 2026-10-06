@@ -74,3 +74,30 @@ export function vatFromGross(gross: Pence, rateBp: BasisPoints): Pence {
   assertPence(rateBp, "VAT rate");
   return Math.round((gross * rateBp) / (10_000 + rateBp));
 }
+
+/**
+ * Share a whole amount out in proportion to some weights, to the penny: the
+ * shares always add back up to the amount, the leftover pennies going to the
+ * largest remainders (earliest first on a tie). A card fee split across a
+ * booking's journeys goes through here. With no weight at all, it is shared
+ * equally.
+ */
+export function splitPence(total: Pence, weights: readonly number[]): Pence[] {
+  assertPence(total);
+  if (weights.length === 0) return [];
+  const sum = weights.reduce((acc, weight) => acc + Math.max(0, weight), 0);
+  const parts = weights.map((weight) =>
+    sum > 0 ? (total * Math.max(0, weight)) / sum : total / weights.length,
+  );
+  const shares = parts.map((part) => Math.floor(part));
+  let left = total - shares.reduce((acc, share) => acc + share, 0);
+  const order = parts
+    .map((part, index) => ({ index, remainder: part - Math.floor(part) }))
+    .sort((a, b) => b.remainder - a.remainder || a.index - b.index);
+  for (const { index } of order) {
+    if (left <= 0) break;
+    shares[index]! += 1;
+    left -= 1;
+  }
+  return shares;
+}

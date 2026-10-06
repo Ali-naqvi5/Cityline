@@ -85,6 +85,7 @@ export interface Config {
     'supplier-payments': SupplierPayment;
     'supplier-invoices': SupplierInvoice;
     expenses: Expense;
+    'customer-payments': CustomerPayment;
     users: User;
     'audit-log': AuditLog;
     'payload-kv': PayloadKv;
@@ -112,6 +113,7 @@ export interface Config {
     'supplier-payments': SupplierPaymentsSelect<false> | SupplierPaymentsSelect<true>;
     'supplier-invoices': SupplierInvoicesSelect<false> | SupplierInvoicesSelect<true>;
     expenses: ExpensesSelect<false> | ExpensesSelect<true>;
+    'customer-payments': CustomerPaymentsSelect<false> | CustomerPaymentsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'audit-log': AuditLogSelect<false> | AuditLogSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -445,7 +447,7 @@ export interface Job {
    */
   driverPricePence?: number | null;
   /**
-   * Stripe's fee, from the webhook.
+   * Card fee: Stripe's, from Stripe, on a website booking; or entered with an office payment.
    */
   paymentFeePence?: number | null;
   driverPayment?: (number | null) | DriverPayment;
@@ -455,6 +457,11 @@ export interface Job {
    * For a cancelled partner booking: does the partner pay?
    */
   cancellationCharge?: ('charged' | 'not_charged') | null;
+  customerPayment?: (number | null) | CustomerPayment;
+  /**
+   * The price when the customer paid, to notice a later change.
+   */
+  customerPaidPricePence?: number | null;
   /**
    * The driver price when it was paid, to notice a later change.
    */
@@ -758,6 +765,48 @@ export interface SupplierInvoice {
   createdAt: string;
 }
 /**
+ * Customers' money for office bookings, recorded by hand. Voided, never edited or deleted.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customer-payments".
+ */
+export interface CustomerPayment {
+  id: number;
+  paidAt: string;
+  method: 'card_link' | 'bank_transfer' | 'card' | 'cash' | 'other';
+  /**
+   * The bank's or Stripe's reference, if any.
+   */
+  reference?: string | null;
+  /**
+   * Who paid, if not the customer — a company, say.
+   */
+  paidBy?: string | null;
+  /**
+   * What Stripe kept on a card payment link, if any.
+   */
+  feePence?: number | null;
+  notes?: string | null;
+  lines?:
+    | {
+        job: number | Job;
+        jobReference?: string | null;
+        customerName?: string | null;
+        pickupAt?: string | null;
+        route?: string | null;
+        amountPence?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  amountPence?: number | null;
+  recordedBy?: (number | null) | User;
+  voidedAt?: string | null;
+  voidReason?: string | null;
+  voidedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Append-only history. Rows are never edited or removed.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -791,6 +840,8 @@ export interface Payment {
    * Stripe's fee, needed for net revenue (§7).
    */
   feePence?: number | null;
+  feeRecordedAt?: string | null;
+  stripeChargeId?: string | null;
   status: string;
   kind: 'initial' | 'amendment' | 'post_trip' | 'payment_link';
   /**
@@ -809,16 +860,36 @@ export interface Payment {
   createdAt: string;
 }
 /**
+ * Refunds made by the office, recorded by hand. Voided, never edited.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "refunds".
  */
 export interface Refund {
   id: number;
-  payment: number | Payment;
-  stripeRefundId: string;
+  payment?: (number | null) | Payment;
+  customerPayment?: (number | null) | CustomerPayment;
+  refundedAt?: string | null;
+  method?: ('stripe' | 'bank_transfer' | 'cash' | 'other') | null;
+  /**
+   * Stripe's refund id (re_…), or the bank's reference.
+   */
+  reference?: string | null;
+  stripeRefundId?: string | null;
   amountPence: number;
   reason?: string | null;
+  lines?:
+    | {
+        job: number | Job;
+        jobReference?: string | null;
+        amountPence?: number | null;
+        id?: string | null;
+      }[]
+    | null;
   createdByUser?: (number | null) | User;
+  voidedAt?: string | null;
+  voidReason?: string | null;
+  voidedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1030,6 +1101,10 @@ export interface PayloadLockedDocument {
         value: number | Expense;
       } | null)
     | ({
+        relationTo: 'customer-payments';
+        value: number | CustomerPayment;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -1221,6 +1296,8 @@ export interface JobsSelect<T extends boolean = true> {
   supplierPayment?: T;
   supplierInvoice?: T;
   cancellationCharge?: T;
+  customerPayment?: T;
+  customerPaidPricePence?: T;
   driverPaidPricePence?: T;
   locked?: T;
   driverNotes?: T;
@@ -1258,6 +1335,8 @@ export interface PaymentsSelect<T extends boolean = true> {
   stripePaymentIntentId?: T;
   amountPence?: T;
   feePence?: T;
+  feeRecordedAt?: T;
+  stripeChargeId?: T;
   status?: T;
   kind?: T;
   raw?: T;
@@ -1270,10 +1349,25 @@ export interface PaymentsSelect<T extends boolean = true> {
  */
 export interface RefundsSelect<T extends boolean = true> {
   payment?: T;
+  customerPayment?: T;
+  refundedAt?: T;
+  method?: T;
+  reference?: T;
   stripeRefundId?: T;
   amountPence?: T;
   reason?: T;
+  lines?:
+    | T
+    | {
+        job?: T;
+        jobReference?: T;
+        amountPence?: T;
+        id?: T;
+      };
   createdByUser?: T;
+  voidedAt?: T;
+  voidReason?: T;
+  voidedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1510,6 +1604,36 @@ export interface ExpensesSelect<T extends boolean = true> {
   method?: T;
   receipt?: T;
   notes?: T;
+  recordedBy?: T;
+  voidedAt?: T;
+  voidReason?: T;
+  voidedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customer-payments_select".
+ */
+export interface CustomerPaymentsSelect<T extends boolean = true> {
+  paidAt?: T;
+  method?: T;
+  reference?: T;
+  paidBy?: T;
+  feePence?: T;
+  notes?: T;
+  lines?:
+    | T
+    | {
+        job?: T;
+        jobReference?: T;
+        customerName?: T;
+        pickupAt?: T;
+        route?: T;
+        amountPence?: T;
+        id?: T;
+      };
+  amountPence?: T;
   recordedBy?: T;
   voidedAt?: T;
   voidReason?: T;

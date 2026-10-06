@@ -26,13 +26,13 @@ import {
 } from "@/admin/format";
 import { requireStaff } from "@/admin/guard";
 import { resolvePeriod } from "@/admin/reports/period";
+import { counted } from "@/components/ops/charts/scale";
 import { DataTable } from "@/components/ops/data-table";
 import { JobCard, JobStatusBadge, Route } from "@/components/ops/jobs";
 import {
   ButtonLink,
   cx,
   MetricCard,
-  NotRecorded,
   PageHeader,
   Panel,
   type Tone,
@@ -307,7 +307,12 @@ function MoneyPanel({ money: figures }: { money: NonNullable<DashboardData["mone
   return (
     <Panel
       title={`Money · ${figures.monthLabel}`}
-      description="Website payments, test bookings excluded"
+      description="Money in from customers, test bookings excluded"
+      actions={
+        <Link href="/admin/payments" className="text-accent text-sm hover:underline">
+          Payments
+        </Link>
+      }
     >
       <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div>
@@ -315,7 +320,9 @@ function MoneyPanel({ money: figures }: { money: NonNullable<DashboardData["mone
           <dd className="text-ink text-xl font-semibold tabular-nums">
             {money(figures.revenuePence)}
           </dd>
-          <dd className="text-ink-3 text-xs">{figures.paymentsCount} payments</dd>
+          <dd className="text-ink-3 text-xs">
+            {counted(figures.paymentsCount, "payment")}
+          </dd>
         </div>
         <div>
           <dt className="text-ink-3 text-xs">Refunded</dt>
@@ -325,16 +332,18 @@ function MoneyPanel({ money: figures }: { money: NonNullable<DashboardData["mone
         </div>
         <div>
           <dt className="text-ink-3 text-xs">Card fees</dt>
-          <dd className="text-xl font-semibold tabular-nums">
-            {figures.feesPence > 0 ? money(figures.feesPence) : <NotRecorded />}
+          <dd className="text-ink text-xl font-semibold tabular-nums">
+            {money(figures.feesPence)}
           </dd>
+          {figures.feesUnknown ? (
+            <dd className="text-warn text-xs">
+              {counted(figures.feesUnknown, "payment")} with no fee from Stripe yet
+            </dd>
+          ) : null}
         </div>
         <div>
-          <dt className="text-ink-3 text-xs">Net revenue</dt>
+          <dt className="text-ink-3 text-xs">Kept</dt>
           <dd className="text-ink text-xl font-semibold tabular-nums">{money(net)}</dd>
-          {figures.feesPence === 0 ? (
-            <dd className="text-ink-3 text-xs">Before card fees</dd>
-          ) : null}
         </div>
       </dl>
       <p className="border-line text-ink-3 mt-4 flex items-start gap-2 border-t pt-3 text-xs">

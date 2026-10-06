@@ -7,13 +7,14 @@ import { relId } from "@/domain/dispatch/assignment";
 import { financeOverview, type FinanceOverview } from "@/domain/finance/overview";
 import type { CancellationCharge } from "@/domain/finance/supplier-money";
 import type { JobStatus } from "@/domain/jobs/labels";
-import type { Job, User } from "@/payload-types";
+import { staffCan } from "@/domain/staff/permissions";
+import type { Job, Refund, User } from "@/payload-types";
 
 /**
  * The accounts overview (the three rings): the bookings picked up in the
  * chosen dates, test bookings never, reduced to what was earned, paid and
- * received — and Cityline's own expenses in the same dates. Owner and
- * Accounts.
+ * received — less the refunds recorded on them, and Cityline's own expenses
+ * in the same dates. Owner and Accounts.
  */
 export async function loadFinanceOverview(
   payload: Payload,
@@ -63,8 +64,34 @@ export async function loadFinanceOverview(
       overrideAccess: false,
     }),
   ]);
+  // Refunds recorded against these bookings; void ones never count.
+  const jobs = found.docs as Job[];
+  const refunded = new Map<number, number>();
+  if (jobs.length && staffCan(user, "refunds.view")) {
+    const refunds = await payload.find({
+      collection: "refunds",
+      where: {
+        and: [
+          { voidedAt: { exists: false } },
+          { "lines.job": { in: jobs.map((job) => job.id) } },
+        ],
+      },
+      pagination: false,
+      depth: 0,
+      select: { lines: true },
+      user,
+      overrideAccess: false,
+    });
+    for (const refund of refunds.docs as Refund[]) {
+      for (const line of refund.lines ?? []) {
+        const jobId = relId(line.job);
+        if (jobId)
+          refunded.set(jobId, (refunded.get(jobId) ?? 0) + (line.amountPence ?? 0));
+      }
+    }
+  }
   return financeOverview(
-    (found.docs as Job[]).map((job) => ({
+    jobs.map((job) => ({
       status: job.status as JobStatus,
       source: job.source,
       customerPricePence: job.customerPricePence ?? null,
@@ -73,6 +100,7 @@ export async function loadFinanceOverview(
       cancellationCharge: (job.cancellationCharge ?? null) as CancellationCharge | null,
       driverPaymentId: relId(job.driverPayment),
       supplierPaymentId: relId(job.supplierPayment),
+      refundedPence: refunded.get(job.id) ?? 0,
     })),
     expenses.docs.reduce((sum, expense) => sum + (expense.amountPence ?? 0), 0),
   );

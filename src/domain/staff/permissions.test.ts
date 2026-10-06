@@ -11,7 +11,8 @@ describe("the permission matrix", () => {
     for (const capability of [
       "finance.jobs",
       "payments.view",
-      "refunds.issue",
+      "payments.record",
+      "refunds.record",
       "driverPay.view",
       "supplierMoney.view",
       "reports.financial",
@@ -27,7 +28,7 @@ describe("the permission matrix", () => {
   });
 
   it("gives accounts the money and bank details, but no dispatch or editing", () => {
-    expect(can("accounts", "refunds.issue")).toBe(true);
+    expect(can("accounts", "refunds.record")).toBe(true);
     expect(can("accounts", "finance.jobs")).toBe(true);
     expect(can("accounts", "jobs.view")).toBe(true);
     expect(can("accounts", "drivers.bankDetails")).toBe(true);

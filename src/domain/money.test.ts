@@ -4,6 +4,7 @@ import {
   formatPence,
   parsePounds,
   roundToNearestPound,
+  splitPence,
   sumPence,
   vatFromGross,
 } from "./money";
@@ -75,5 +76,24 @@ describe("vatFromGross", () => {
   it("extracts VAT contained in a gross price at 20%", () => {
     expect(vatFromGross(12_000, 2000)).toBe(2000); // £120.00 gross -> £20.00 VAT
     expect(vatFromGross(8500, 2000)).toBe(1417);
+  });
+});
+
+describe("splitPence", () => {
+  it("shares a fee in proportion and to the penny", () => {
+    expect(splitPence(448, [6800, 6800])).toEqual([224, 224]);
+    expect(splitPence(449, [6800, 6800])).toEqual([225, 224]);
+    expect(splitPence(100, [1, 2])).toEqual([33, 67]);
+  });
+
+  it("always adds back up to the whole", () => {
+    const shares = splitPence(1001, [3, 3, 3]);
+    expect(shares.reduce((a, b) => a + b, 0)).toBe(1001);
+    expect(shares).toEqual([334, 334, 333]);
+  });
+
+  it("shares equally when nothing has a weight, and nothing among none", () => {
+    expect(splitPence(10, [0, 0])).toEqual([5, 5]);
+    expect(splitPence(10, [])).toEqual([]);
   });
 });

@@ -10,6 +10,7 @@ import * as migration_20261005_143956_driver_records_and_taken_off from "./20261
 import * as migration_20261005_231423_driver_payments from "./20261005_231423_driver_payments";
 import * as migration_20261006_000549_supplier_money from "./20261006_000549_supplier_money";
 import * as migration_20261006_014359_expenses from "./20261006_014359_expenses";
+import * as migration_20261006_095524_payments_and_refunds from "./20261006_095524_payments_and_refunds";
 
 export const migrations = [
   {
@@ -71,5 +72,10 @@ export const migrations = [
     up: migration_20261006_014359_expenses.up,
     down: migration_20261006_014359_expenses.down,
     name: "20261006_014359_expenses",
+  },
+  {
+    up: migration_20261006_095524_payments_and_refunds.up,
+    down: migration_20261006_095524_payments_and_refunds.down,
+    name: "20261006_095524_payments_and_refunds",
   },
 ];

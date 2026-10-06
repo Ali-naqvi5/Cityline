@@ -1,6 +1,7 @@
 import type Stripe from "stripe";
 
 import { env } from "@/env";
+import { recordCardFee } from "@/domain/payments/card-fee";
 import { fulfilCheckoutSession } from "@/domain/payments/fulfil-checkout";
 import { payloadClient } from "@/lib/payload";
 import { stripe } from "@/lib/stripe";
@@ -26,6 +27,12 @@ import { stripe } from "@/lib/stripe";
  * signature — returns 400.
  */
 export const dynamic = "force-dynamic";
+
+/**
+ * Events that may carry Stripe's fee: a charge's balance transaction is made
+ * just after the payment, and `charge.updated` says when it is ready.
+ */
+const FEE_EVENTS = new Set<Stripe.Event.Type>(["charge.succeeded", "charge.updated"]);
 
 /** Events that mean money arrived for a Checkout Session. */
 const FULFIL_EVENTS = new Set<Stripe.Event.Type>([
@@ -99,6 +106,18 @@ export async function POST(request: Request): Promise<Response> {
         console.error(
           `[stripe-webhook] ${event.id}: session ${session.id} → ${result.state}`,
         );
+      }
+    } else if (FEE_EVENTS.has(event.type)) {
+      // Stripe's fee on a website payment. A charge that is not one — a
+      // payment link, say — is acknowledged and left alone. A failure to read
+      // it from Stripe throws, so Stripe tries again.
+      const charge = event.data.object as Stripe.Charge;
+      const paymentIntentId =
+        typeof charge.payment_intent === "string"
+          ? charge.payment_intent
+          : charge.payment_intent?.id;
+      if (paymentIntentId && charge.balance_transaction) {
+        await recordCardFee(paymentIntentId);
       }
     } else if (event.type === "checkout.session.async_payment_failed") {
       // Nothing was booked, so there is nothing to undo. Staff alerts (NOT-03)

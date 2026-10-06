@@ -351,7 +351,10 @@ export const Jobs: CollectionConfig = {
           name: "paymentFeePence",
           type: "number",
           defaultValue: 0,
-          admin: { description: "Stripe's fee, from the webhook." },
+          admin: {
+            description:
+              "Card fee: Stripe's, from Stripe, on a website booking; or entered with an office payment.",
+          },
         },
         {
           // Set by the payment to the driver that covers this booking (Driver
@@ -387,6 +390,23 @@ export const Jobs: CollectionConfig = {
           ],
           admin: {
             description: "For a cancelled partner booking: does the partner pay?",
+          },
+        },
+        {
+          // Payments: the customer's money for an office booking paid by card
+          // link, bank transfer or on account, and the price when it came in.
+          name: "customerPayment",
+          type: "relationship",
+          relationTo: "customer-payments",
+          index: true,
+          admin: { readOnly: true },
+        },
+        {
+          name: "customerPaidPricePence",
+          type: "number",
+          admin: {
+            readOnly: true,
+            description: "The price when the customer paid, to notice a later change.",
           },
         },
         {

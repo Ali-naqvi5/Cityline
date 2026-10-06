@@ -1,8 +1,8 @@
 import type { Pence } from "@/domain/money";
 
 /**
- * What a booking makes (spec §30): the price Cityline receives, less card
- * fees, less what the driver is paid.
+ * What a booking makes (spec §30): the price Cityline receives, less any
+ * refund on it, less card fees, less what the driver is paid.
  *
  * There is no supplier commission to take off: partners take their cut
  * before they send a job, so the price on a supplier job is already what
@@ -12,6 +12,8 @@ import type { Pence } from "@/domain/money";
 export interface BookingMoneyInput {
   customerPricePence: Pence;
   paymentFeePence?: Pence | null;
+  /** Refunds recorded on this booking. */
+  refundedPence?: Pence | null;
   driverPricePence?: Pence | null;
 }
 
@@ -22,7 +24,8 @@ export interface BookingMoney {
 }
 
 export function bookingMoney(input: BookingMoneyInput): BookingMoney {
-  const netPence = input.customerPricePence - (input.paymentFeePence ?? 0);
+  const netPence =
+    input.customerPricePence - (input.refundedPence ?? 0) - (input.paymentFeePence ?? 0);
   const driverPricePence = input.driverPricePence ?? null;
   return {
     netPence,

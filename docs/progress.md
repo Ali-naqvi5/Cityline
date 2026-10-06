@@ -14,16 +14,16 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 
 ## At a glance
 
-| Check                   | State                                 |
-| ----------------------- | ------------------------------------- |
-| `pnpm typecheck`        | passing                               |
-| `pnpm lint`             | passing                               |
-| `pnpm format:check`     | passing                               |
-| `pnpm check:compliance` | passing — 348 files, wording + claims |
-| `pnpm check:migrations` | passing — 9 migrations, additive only |
-| `pnpm test`             | passing — 511 tests across 52 files   |
-| `pnpm build`            | passing                               |
-| `pnpm e2e`              | last run 29 Sep — 18 tests passing    |
+| Check                   | State                                  |
+| ----------------------- | -------------------------------------- |
+| `pnpm typecheck`        | passing                                |
+| `pnpm lint`             | passing                                |
+| `pnpm format:check`     | passing                                |
+| `pnpm check:compliance` | passing — 406 files, wording + claims  |
+| `pnpm check:migrations` | passing — 13 migrations, additive only |
+| `pnpm test`             | passing — 559 tests across 60 files    |
+| `pnpm build`            | passing                                |
+| `pnpm e2e`              | last run 29 Sep — 18 tests passing     |
 
 History is on GitHub (`Ali-naqvi5/Cityline`, branch `main`). Pushing `main`
 deploys to production — there is no staging (see below).
@@ -180,6 +180,18 @@ Still to come from §14: drivers, vehicles, suppliers, finance (S8–S10).
 ---
 
 ## Seams a new session must understand
+
+**Stripe's card fee arrives after the payment.** Stripe makes the charge's
+balance transaction in the background, so the fee is often not there when the
+booking is made. `domain/payments/card-fee.ts` reads it three ways: right
+after fulfilment, on the `charge.updated` webhook, and from Payments → "Get
+card fees from Stripe". `payments.feeRecordedAt` empty means _not known yet_;
+never read a `feePence` of 0 as "no fee". Payments made before 6 Oct 2026
+have no fee until someone presses that button.
+
+**Refunds are recorded, never made.** The office refunds in Stripe or by bank
+and records it in the admin (Cityline, 6 Oct 2026). The webhook ignores
+refund events on purpose, so nothing records the same refund twice.
 
 **The journey schema is written but not wired.** `journeySchema`,
 `placeRefSchema` and `checkPickupTiming` are tested and imported by nothing.
@@ -537,19 +549,20 @@ and Controller).
 
 ## Waiting on Cityline
 
-| Needed for | Item                                                                                                        |
-| ---------- | ----------------------------------------------------------------------------------------------------------- |
-| S2         | **Launch price tables** — fixed fares per class, per-mile tariff, surcharges, extras. The main blocker      |
-| S3         | Google Maps keys (Places autocomplete, BK-02)                                                               |
-| Launch     | Stripe live activation, restricted live key, live webhook endpoint, Apple Pay domain — `runbook-vps.md` §10 |
-| Launch     | Fix the website on the Stripe profile: it reads `citylineariporttransfers.com`                              |
-| S4–S6      | Company number, VAT status (decides how prices display)                                                     |
-| S6         | Page copy for the phase-1 pages, meeting point text per terminal                                            |
-| Launch     | Verify `citylineairporttransfers.com` in Nuntly, or name another verified sending address                   |
-| Launch     | The late-cancellation refund percentage (`policies.lateCancellationRefundPercent`)                          |
-| S6         | Whether to show the operator licence number: hidden on request, but CMP-09 expects it (`/legal/licensing`)  |
-| S0 (VPS)   | IONOS VPS purchase — see `runbook-vps.md`                                                                   |
-| S9         | Meta Business + a new phone number for WhatsApp — long lead time                                            |
+| Needed for | Item                                                                                                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S2         | **Launch price tables** — fixed fares per class, per-mile tariff, surcharges, extras. The main blocker                                                                                            |
+| S3         | Google Maps keys (Places autocomplete, BK-02)                                                                                                                                                     |
+| Launch     | Stripe live activation, restricted live key, live webhook endpoint, Apple Pay domain — `runbook-vps.md` §10                                                                                       |
+| Now        | Add `charge.updated` to the Stripe webhook endpoint (and the key's read permissions) so card fees arrive by themselves — `runbook-vps.md` §10; until then, Payments → "Get card fees from Stripe" |
+| Launch     | Fix the website on the Stripe profile: it reads `citylineariporttransfers.com`                                                                                                                    |
+| S4–S6      | Company number, VAT status (decides how prices display)                                                                                                                                           |
+| S6         | Page copy for the phase-1 pages, meeting point text per terminal                                                                                                                                  |
+| Launch     | Verify `citylineairporttransfers.com` in Nuntly, or name another verified sending address                                                                                                         |
+| Launch     | The late-cancellation refund percentage (`policies.lateCancellationRefundPercent`)                                                                                                                |
+| S6         | Whether to show the operator licence number: hidden on request, but CMP-09 expects it (`/legal/licensing`)                                                                                        |
+| S0 (VPS)   | IONOS VPS purchase — see `runbook-vps.md`                                                                                                                                                         |
+| S9         | Meta Business + a new phone number for WhatsApp — long lead time                                                                                                                                  |
 
 Placeholders currently in the build are listed in `design-deviations.md` §11.
 

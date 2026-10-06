@@ -566,7 +566,9 @@ the way they do on the development PC.
    - URL: `https://citylineairporttransfers.com/api/webhooks/stripe`
    - Events: `checkout.session.completed`,
      `checkout.session.async_payment_succeeded`,
-     `checkout.session.async_payment_failed`
+     `checkout.session.async_payment_failed`, `charge.updated` (Stripe's
+     card fee, read for Payments; an endpoint made before 6 Oct 2026 needs it
+     added)
 2. Copy the endpoint's **signing secret** (`whsec_…`) into
    `STRIPE_WEBHOOK_SECRET` in `/srv/cityline/.env.production`.
 3. Apply it — an edited env file needs the containers recreated, not restarted:

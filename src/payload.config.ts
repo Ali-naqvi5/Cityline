@@ -9,6 +9,7 @@ import { migrations } from "@/migrations";
 
 import { AuditLog } from "@/collections/AuditLog";
 import { Bookings } from "@/collections/Bookings";
+import { CustomerPayments } from "@/collections/CustomerPayments";
 import { Customers } from "@/collections/Customers";
 import { DriverDocuments } from "@/collections/DriverDocuments";
 import { DriverPayments } from "@/collections/DriverPayments";
@@ -206,6 +207,24 @@ export default buildConfig({
           exact: true,
           meta: { title: "Supplier Money" },
         },
+        opsPayments: {
+          Component: "@/admin/views/payments#PaymentsView",
+          path: "/payments",
+          exact: true,
+          meta: { title: "Payments" },
+        },
+        opsPayment: {
+          Component: "@/admin/views/payment#PaymentView",
+          path: "/payments/:kind/:id",
+          exact: true,
+          meta: { title: "Payment" },
+        },
+        opsRefunds: {
+          Component: "@/admin/views/refunds#RefundsView",
+          path: "/refunds",
+          exact: true,
+          meta: { title: "Refunds" },
+        },
         opsExpenses: {
           Component: "@/admin/views/expenses#ExpensesView",
           path: "/expenses",
@@ -340,6 +359,7 @@ export default buildConfig({
     SupplierPayments,
     SupplierInvoices,
     Expenses,
+    CustomerPayments,
     // Staff accounts for the admin itself, and what they change.
     Users,
     AuditLog,

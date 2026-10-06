@@ -1,6 +1,7 @@
 import "server-only";
 
 import { confirmBooking } from "@/domain/booking/confirm";
+import { recordCardFee } from "@/domain/payments/card-fee";
 import { sendNewBookingNotifications } from "@/domain/notifications/send-booking-notifications";
 import { payloadClient } from "@/lib/payload";
 import { stripe } from "@/lib/stripe";
@@ -99,6 +100,14 @@ export async function fulfilCheckoutSession(sessionId: string): Promise<FulfilRe
         // Both callers get here for the same payment; the emails' idempotency
         // keys make the second call a no-op at Nuntly. Never throws.
         await sendNewBookingNotifications(result.reference);
+        // Stripe's fee, if Stripe has worked it out yet; `charge.updated` and
+        // the Payments screen catch it later if not. Never stops the booking.
+        await recordCardFee(paymentIntentId).catch((error: unknown) => {
+          console.error(
+            `[payments] card fee for ${paymentIntentId} not read yet.`,
+            error,
+          );
+        });
         return { state: "confirmed", reference: result.reference };
       }
       if (result.state === "amount_mismatch") return { state: "amount_mismatch" };

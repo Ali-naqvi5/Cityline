@@ -226,7 +226,6 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   fonts) and a signed, expiring link for the driver
   (`domain/finance/statement-link.ts`, `/api/statements/<token>`), sent with
   the WhatsApp note. Not an invoice or a payslip — drivers are independent.
-  Refunds stay manual in Stripe (Cityline, 6 Oct 2026).
 - **Supplier Money** (`/admin/supplier-money`, Owner and Accounts): what each
   partner owes — the booking price for completed, PNS, and cancelled
   bookings the office marks "partner pays" (`jobs.cancellationCharge`; every
@@ -238,11 +237,29 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   never sent by the system (Cityline, 6 Oct 2026): PDF
   (`domain/finance/invoice-pdf.ts`), full company name, no VAT (not
   registered), due on the partner's terms; the office marks them sent.
+- **Payments** (`/admin/payments`, Owner and Accounts): money in from
+  customers. Website card payments come from the Stripe webhook; Stripe's
+  fee is read from the charge's balance transaction
+  (`domain/payments/card-fee.ts`) straight after the booking, on
+  `charge.updated`, or by "Get card fees from Stripe" — `feeRecordedAt` empty
+  means not known yet, never £0 — and shared across the booking's journeys
+  (`splitPence`). Office bookings paid by card link, bank transfer or on
+  account are marked paid by hand (`customer-payments`, "CP-"; lines from the
+  bookings, one payment per booking, optional card fee shared onto
+  `jobs.paymentFeePence`); the unpaid ones are listed. Cash is Driver Pay's,
+  partners are Supplier Money's.
+- **Refunds** (`/admin/refunds`, Owner and Accounts): never issued from the
+  admin — the office refunds in Stripe or by bank, then records it ("RF-")
+  against the payment and per booking, never more than was paid for one; a
+  Stripe `re_…` id cannot be recorded twice. The webhook does not record
+  refunds (Cityline, 6 Oct 2026: by hand). Payments and refunds are voided,
+  never edited or deleted; a payment with live refunds cannot be voided.
 - **The three rings** on the Owner's and Accounts' dashboard
   (`domain/finance/overview.ts`), for bookings picked up in the chosen dates:
   paid to drivers of what they earned, got from partners of what they owe,
-  and profit = booking prices − driver prices − Stripe card fees − expenses,
-  its ring the margin.
+  and profit = booking prices − refunds on them − driver prices − card fees
+  − expenses, its ring the margin. A cancelled booking earns nothing, so
+  refunding it does not move profit.
 - **Expenses** (`/admin/expenses`): Cityline's own costs only — fuel,
   repairs, insurance and licensing are the drivers' (Cityline is a middle man
   taking a commission, 6 Oct 2026). Free-form, entered one by one by the

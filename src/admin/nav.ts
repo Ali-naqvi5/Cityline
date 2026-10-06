@@ -199,7 +199,7 @@ export const NAV: NavSection[] = [
         href: "/admin/payments",
         icon: "payments",
         capability: "payments.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "refunds",
@@ -207,7 +207,7 @@ export const NAV: NavSection[] = [
         href: "/admin/refunds",
         icon: "refunds",
         capability: "refunds.view",
-        ready: false,
+        ready: true,
       },
       {
         id: "driver-pay",

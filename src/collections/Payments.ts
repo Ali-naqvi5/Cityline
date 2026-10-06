@@ -42,6 +42,14 @@ export const Payments: CollectionConfig = {
       defaultValue: 0,
       admin: { description: "Stripe's fee, needed for net revenue (§7)." },
     },
+    {
+      // Stripe works its fee out just after the payment, so it is read then
+      // (`domain/payments/card-fee.ts`). Empty means not known yet — not £0.
+      name: "feeRecordedAt",
+      type: "date",
+      admin: { readOnly: true },
+    },
+    { name: "stripeChargeId", type: "text", admin: { readOnly: true } },
     { name: "status", type: "text", required: true, index: true },
     {
       name: "kind",
