@@ -4,11 +4,17 @@ import type { AdminViewServerProps } from "payload";
 
 import { londonDay } from "@/admin/format";
 import { DriverForm, type DriverFormValues } from "@/admin/forms/driver-form";
-import { requireStaff, segment } from "@/admin/guard";
+import { param, requireStaff, segment } from "@/admin/guard";
 import { ButtonLink, PageHeader, Panel } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
 import { formatNiNumber } from "@/domain/fleet/driver-record";
+import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
+
+const CLASSES = VEHICLE_CLASSES.map((vehicle) => ({
+  value: vehicle.slug,
+  label: vehicle.name,
+}));
 
 /** Adding a driver (`/drivers/new`) or editing one (`/drivers/:id/edit`). */
 
@@ -34,6 +40,11 @@ export async function DriverEditView(props: AdminViewServerProps) {
     address: "",
     dateOfBirth: "",
     nationalInsuranceNumber: "",
+    // "Add an outsourced driver" opens with that chosen.
+    engagement:
+      param(props.searchParams, "engagement") === "outsourced"
+        ? "outsourced"
+        : "registered",
     status: "active",
     startDate: "",
     endDate: "",
@@ -76,6 +87,7 @@ export async function DriverEditView(props: AdminViewServerProps) {
       nationalInsuranceNumber: driver.nationalInsuranceNumber
         ? formatNiNumber(driver.nationalInsuranceNumber)
         : "",
+      engagement: driver.engagement ?? "registered",
       status: driver.status,
       startDate: day(driver.startDate),
       endDate: day(driver.endDate),
@@ -103,12 +115,12 @@ export async function DriverEditView(props: AdminViewServerProps) {
         title={isNew ? "Add a driver" : "Edit driver"}
         description={
           isNew
-            ? "Documents are added on the driver's page once they are saved."
+            ? "A registered driver's documents are uploaded on their page once saved. An outsourced driver is added with their licences and car."
             : undefined
         }
       />
       <Panel bodyClassName="p-5">
-        <DriverForm values={values} cancelHref={back} />
+        <DriverForm values={values} cancelHref={back} classes={CLASSES} />
       </Panel>
     </OpsShell>
   );

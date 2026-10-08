@@ -3,7 +3,7 @@ import type { Payload } from "payload";
 import { isValidDay, londonDay, londonDayBounds } from "@/admin/format";
 import {
   DOCUMENT_LABELS,
-  REQUIRED_DRIVER_DOCUMENTS,
+  requiredDriverDocuments,
   REQUIRED_VEHICLE_DOCUMENTS,
   requirements,
   type DocumentType,
@@ -182,7 +182,7 @@ export async function loadRunSheet(
     }
     if (driverId) {
       for (const item of requirements(
-        REQUIRED_DRIVER_DOCUMENTS,
+        requiredDriverDocuments(driver?.engagement),
         driverDocs.get(driverId) ?? [],
         at,
       )) {

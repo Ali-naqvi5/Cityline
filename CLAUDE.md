@@ -279,6 +279,16 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   driver to a page. The passenger's phone is on it; prices are not — a
   driver's price reaches them only in their day's WhatsApp message
   (`driverDayMessage`, sharing `jobDetailLines` with the single-job one).
+- **Registered and outsourced drivers** (`drivers.engagement`, Cityline,
+  9 Oct 2026): a registered driver has every document and copy online. An
+  outsourced driver — found for a job the regulars cannot cover — is added in
+  one transaction with their PHV and driving licences, their car and its PHV
+  licence, MOT and insurance, all typed in as document records with no file
+  (copies kept offline; `saveDriverAction`). Dispatch asks an outsourced
+  driver only for the PHV and driving licences (`requiredDriverDocuments`):
+  TfL checks DBS and right to work before granting a PHV licence. TfL's
+  record treats their licence copies and photo as held offline
+  (`heldOffline`).
 - **TfL driver records** (`domain/fleet/driver-record.ts`; regs. 13 and 16
   and TfL's Operator Handbook): name, address, date of birth, National
   Insurance number, copies of the DVLA and PHV licences, a photograph, and

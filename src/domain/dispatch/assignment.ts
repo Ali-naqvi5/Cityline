@@ -102,7 +102,11 @@ export async function checkAssignment(
   const eligibility = checkEligibility({
     pickupAt: args.pickupAt,
     jobClass: args.jobClass,
-    driver: { status: driver.status, documents: driverDocuments.docs },
+    driver: {
+      status: driver.status,
+      engagement: driver.engagement,
+      documents: driverDocuments.docs,
+    },
     vehicle: {
       status: vehicle.status,
       vehicleClassSlug: vehicle.vehicleClassSlug,

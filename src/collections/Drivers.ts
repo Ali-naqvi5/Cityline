@@ -2,6 +2,7 @@ import { ValidationError, type CollectionConfig, type FieldAccess } from "payloa
 
 import { allow } from "@/access/staff";
 import { normalisePhone } from "@/domain/booking/passenger";
+import { DRIVER_ENGAGEMENTS } from "@/domain/compliance/documents";
 import { isValidNiNumber, normaliseNiNumber } from "@/domain/fleet/driver-record";
 import { staffCan, type StaffIdentity } from "@/domain/staff/permissions";
 
@@ -131,6 +132,19 @@ export const Drivers: CollectionConfig = {
       admin: { description: "Part of TfL's driver record. Stored as AB123456C." },
     },
     { name: "photo", type: "upload", relationTo: "private-files" },
+    {
+      // Registered: everything kept online. Outsourced: found for a job the
+      // regulars cannot cover; copies of their documents kept offline.
+      name: "engagement",
+      type: "select",
+      required: true,
+      defaultValue: "registered",
+      index: true,
+      options: Object.entries(DRIVER_ENGAGEMENTS).map(([value, label]) => ({
+        value,
+        label,
+      })),
+    },
     {
       name: "status",
       type: "select",

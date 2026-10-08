@@ -107,7 +107,7 @@ export async function loadAssignmentOptions(
       eligibility: checkEligibility({
         pickupAt,
         jobClass: job.vehicleClassSlug,
-        driver: { status: driver.status, documents },
+        driver: { status: driver.status, engagement: driver.engagement, documents },
         vehicle: {
           status: vehicle.status,
           vehicleClassSlug: vehicle.vehicleClassSlug,

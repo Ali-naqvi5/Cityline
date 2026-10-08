@@ -109,6 +109,8 @@ export interface DriverRecordRow {
   firstName: string;
   lastName: string;
   name: string;
+  /** "registered" or "outsourced": an outsourced driver's copies are kept offline. */
+  engagement: string;
   status: string;
   address: string | null;
   dateOfBirth: string | null;
@@ -376,6 +378,7 @@ export async function loadDriversReport(
       drivingLicence: latestOf(own, "dvla_licence"),
       phvLicence: latestOf(own, "phv_licence"),
       photo: Boolean(driver.photo),
+      engagement: driver.engagement ?? "registered",
       startDate: driver.startDate ?? null,
       endDate: driver.endDate ?? null,
       leftReason: driver.leftReason ?? null,
@@ -470,10 +473,18 @@ export const TAKEN_OFF_CSV_COLUMNS: CsvColumn<TakenOffEvent & { driverName: stri
   ];
 
 /** TfL's driver record, one row per driver Cityline must keep a record of. */
+/** "Yes", or for an outsourced driver without one here, "Kept offline". */
+const copyHeld = (row: DriverRecordRow, here: boolean) =>
+  here ? "Yes" : row.engagement === "outsourced" ? "Kept offline" : "No";
+
 export const DRIVER_RECORDS_CSV_COLUMNS: CsvColumn<DriverRecordRow>[] = [
   { header: "Surname", value: (row) => row.lastName },
   { header: "Forenames", value: (row) => row.firstName },
   { header: "Status", value: (row) => DRIVER_STATUS_LABELS[row.status] ?? row.status },
+  {
+    header: "Type",
+    value: (row) => (row.engagement === "outsourced" ? "Outsourced" : "Registered"),
+  },
   { header: "Address", value: (row) => row.address },
   { header: "Date of birth", value: (row) => day(row.dateOfBirth) },
   {
@@ -483,15 +494,15 @@ export const DRIVER_RECORDS_CSV_COLUMNS: CsvColumn<DriverRecordRow>[] = [
   { header: "Driving licence number", value: (row) => row.drivingLicence?.number },
   {
     header: "Driving licence copy on file",
-    value: (row) => yesNo(Boolean(row.drivingLicence?.copy)),
+    value: (row) => copyHeld(row, Boolean(row.drivingLicence?.copy)),
   },
   { header: "PHV driver's licence number", value: (row) => row.phvLicence?.number },
   { header: "PHV licence expires", value: (row) => day(row.phvLicence?.expiresAt) },
   {
     header: "PHV licence copy on file",
-    value: (row) => yesNo(Boolean(row.phvLicence?.copy)),
+    value: (row) => copyHeld(row, Boolean(row.phvLicence?.copy)),
   },
-  { header: "Photograph on file", value: (row) => yesNo(row.photo) },
+  { header: "Photograph on file", value: (row) => copyHeld(row, row.photo) },
   { header: "Available from", value: (row) => day(row.startDate) },
   { header: "Stopped being available", value: (row) => day(row.endDate) },
   { header: "Why they left", value: (row) => row.leftReason },

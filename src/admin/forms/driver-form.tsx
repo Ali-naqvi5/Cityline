@@ -15,7 +15,10 @@ import {
   submitWith,
   TEXTAREA_CLASS,
 } from "@/components/ops/form";
-import { buttonClass } from "@/components/ops/primitives";
+import { buttonClass, cx } from "@/components/ops/primitives";
+import { DRIVER_ENGAGEMENTS } from "@/domain/compliance/documents";
+
+import { CarFields, EMPTY_CAR } from "./car-fields";
 
 export interface DriverFormValues {
   id?: number;
@@ -26,6 +29,7 @@ export interface DriverFormValues {
   address: string;
   dateOfBirth: string;
   nationalInsuranceNumber: string;
+  engagement: string;
   status: string;
   startDate: string;
   endDate: string;
@@ -36,21 +40,70 @@ export interface DriverFormValues {
   notes: string;
 }
 
+const ENGAGEMENT_HINTS: Record<string, string> = {
+  registered: "A regular driver. Every document and copy is kept here, online.",
+  outsourced:
+    "Found for a job the regulars cannot cover. Type in their licences and car; keep copies of the documents offline.",
+};
+
 export function DriverForm({
   values,
   cancelHref,
+  classes = [],
 }: {
   values: DriverFormValues;
   cancelHref: string;
+  /** Vehicle classes, for the car a new driver is added with. */
+  classes?: { value: string; label: string }[];
 }) {
   const [state, action, pending] = useActionState(saveDriverAction, EMPTY_FORM);
+  const [engagement, setEngagement] = useState(values.engagement || "registered");
   const [status, setStatus] = useState(values.status);
   const [conduct, setConduct] = useState(values.leftForConduct);
   const e = state.errors;
+  // A new outsourced driver is added with their licences and car.
+  const outsourcing = !values.id && engagement === "outsourced";
 
   return (
     <form onSubmit={submitWith(action)} className="flex flex-col gap-6" noValidate>
       {values.id ? <input type="hidden" name="id" value={values.id} /> : null}
+
+      <FormSection
+        title="Registered or outsourced"
+        description="How this driver works with Cityline."
+      >
+        <fieldset className="min-w-0 sm:col-span-2">
+          <legend className="sr-only">Registered or outsourced</legend>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {Object.entries(DRIVER_ENGAGEMENTS).map(([value, label]) => (
+              <label
+                key={value}
+                htmlFor={`engagement-${value}`}
+                className={cx(
+                  "flex cursor-pointer gap-3 rounded-md border p-3 transition-colors",
+                  engagement === value
+                    ? "border-accent bg-accent-soft"
+                    : "border-line hover:bg-sunken",
+                )}
+              >
+                <input
+                  id={`engagement-${value}`}
+                  type="radio"
+                  name="engagement"
+                  value={value}
+                  checked={engagement === value}
+                  onChange={() => setEngagement(value)}
+                  className="accent-accent mt-0.5 h-4 w-4 shrink-0"
+                />
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-ink text-sm font-semibold">{label}</span>
+                  <span className="text-ink-3 text-xs">{ENGAGEMENT_HINTS[value]}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </FormSection>
 
       <FormSection
         title="Personal details"
@@ -137,6 +190,8 @@ export function DriverForm({
           />
         </FormField>
       </FormSection>
+
+      {outsourcing ? <OutsourcedSections classes={classes} errors={e} /> : null}
 
       <FormSection
         title="With Cityline"
@@ -265,12 +320,143 @@ export function DriverForm({
       <FormMessage state={state} />
       <div className="border-line flex flex-wrap items-center gap-2 border-t pt-5">
         <SubmitButton pending={pending}>
-          {values.id ? "Save changes" : "Add driver"}
+          {values.id ? "Save changes" : outsourcing ? "Add driver and car" : "Add driver"}
         </SubmitButton>
         <Link href={cancelHref} className={buttonClass("ghost", "md")}>
           Cancel
         </Link>
       </div>
     </form>
+  );
+}
+
+/** A date field for a licence or certificate's expiry. */
+function ExpiryField({
+  id,
+  label,
+  error,
+}: {
+  id: string;
+  label: string;
+  error?: string;
+}) {
+  return (
+    <FormField id={id} label={label} required error={error}>
+      <input
+        id={id}
+        name={id}
+        type="date"
+        className={inputClass()}
+        {...invalid(error, id)}
+      />
+    </FormField>
+  );
+}
+
+function NumberField({
+  id,
+  label,
+  error,
+}: {
+  id: string;
+  label: string;
+  error?: string;
+}) {
+  return (
+    <FormField id={id} label={label} required error={error}>
+      <input
+        id={id}
+        name={id}
+        autoComplete="off"
+        className={inputClass("uppercase tabular-nums")}
+        {...invalid(error, id)}
+      />
+    </FormField>
+  );
+}
+
+/**
+ * What an outsourced driver is added with: their licences and their car,
+ * typed in from documents the office has seen and keeps copies of offline.
+ */
+function OutsourcedSections({
+  classes,
+  errors: e,
+}: {
+  classes: { value: string; label: string }[];
+  errors: Record<string, string | undefined>;
+}) {
+  return (
+    <>
+      <FormSection
+        title="Licences"
+        description="From the documents you have seen. Keep the copies offline; these are what dispatch checks."
+      >
+        <NumberField
+          id="phvNumber"
+          label="PHV driver licence number"
+          error={e.phvNumber}
+        />
+        <ExpiryField
+          id="phvExpiry"
+          label="PHV driver licence expires"
+          error={e.phvExpiry}
+        />
+        <NumberField
+          id="dvlaNumber"
+          label="Driving licence number"
+          error={e.dvlaNumber}
+        />
+        <ExpiryField
+          id="dvlaExpiry"
+          label="Driving licence expires"
+          error={e.dvlaExpiry}
+        />
+      </FormSection>
+
+      <FormSection
+        title="Their car"
+        description="Added with the driver and linked to them, ready to assign."
+      >
+        <CarFields values={EMPTY_CAR} classes={classes} errors={e} />
+        <NumberField
+          id="vehicleLicenceNumber"
+          label="PHV vehicle licence number"
+          error={e.vehicleLicenceNumber}
+        />
+        <ExpiryField
+          id="vehicleLicenceExpiry"
+          label="PHV vehicle licence expires"
+          error={e.vehicleLicenceExpiry}
+        />
+        <ExpiryField id="motExpiry" label="MOT expires" error={e.motExpiry} />
+        <ExpiryField
+          id="insuranceExpiry"
+          label="Hire and reward insurance expires"
+          error={e.insuranceExpiry}
+        />
+        <div className="sm:col-span-2">
+          <label
+            htmlFor="seenOriginals"
+            className="text-ink-2 flex min-h-10 cursor-pointer items-start gap-2 text-sm"
+          >
+            <input
+              id="seenOriginals"
+              name="seenOriginals"
+              type="checkbox"
+              className="accent-accent mt-0.5 h-4 w-4 shrink-0"
+              {...invalid(e.seenOriginals, "seenOriginals")}
+            />
+            I have seen the original documents, and the office keeps copies of them
+            offline
+          </label>
+          {e.seenOriginals ? (
+            <p id="seenOriginals-error" className="text-danger mt-1 text-sm">
+              {e.seenOriginals}
+            </p>
+          ) : null}
+        </div>
+      </FormSection>
+    </>
   );
 }

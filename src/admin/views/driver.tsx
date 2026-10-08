@@ -39,6 +39,7 @@ import {
   conductNotice,
   formatNiNumber,
   keepRecordUntil,
+  heldOffline,
   missingParticulars,
   PARTICULAR_LABELS,
   type Particular,
@@ -50,6 +51,8 @@ import { formatDate } from "@/lib/time";
 import type { PrivateFile, User } from "@/payload-types";
 
 const NOTICES: Record<string, string> = {
+  "created-outsourced":
+    "Outsourced driver and their car added, with their licences. They can be given jobs now.",
   created:
     "Driver added. Now add their documents — they cannot be given jobs until the required ones are on record.",
   saved: "Changes saved.",
@@ -167,6 +170,9 @@ export async function DriverView(props: AdminViewServerProps) {
   const notice = NOTICES[param(props.searchParams, "notice")];
   // TfL's record is kept by those who edit drivers; only they see the NI number.
   const missing = canEdit ? missingParticulars({ ...driver, documents }) : [];
+  // An outsourced driver's copies and photograph are kept offline (9 Oct 2026).
+  const offline = heldOffline(driver);
+  const outsourced = driver.engagement === "outsourced";
   const owed = conductNotice(driver, now);
 
   return (
@@ -190,6 +196,7 @@ export async function DriverView(props: AdminViewServerProps) {
             <Badge tone={DRIVER_STATUS_TONE[driver.status]}>
               {DRIVER_STATUS_LABELS[driver.status]}
             </Badge>
+            {outsourced ? <Badge tone="special">Outsourced</Badge> : null}
             <ComplianceBadge worst={worst} />
           </>
         }
@@ -207,7 +214,11 @@ export async function DriverView(props: AdminViewServerProps) {
         <div className="flex min-w-0 flex-col gap-5">
           <Panel
             title="Compliance"
-            description="Missing or expired documents block assignment. Checked at each job's pickup time."
+            description={
+              outsourced
+                ? "An outsourced driver needs their PHV and driving licences in date; copies are kept offline. Checked at each job's pickup time."
+                : "Missing or expired documents block assignment. Checked at each job's pickup time."
+            }
             bodyClassName="p-0"
           >
             <ul className="divide-line divide-y">
@@ -231,6 +242,7 @@ export async function DriverView(props: AdminViewServerProps) {
                               ? `Expires ${formatDate(new Date(item.document.expiresAt))}`
                               : "No expiry"}
                             {checker ? ` · Checked by ${checker.name}` : " · Not checked"}
+                            {!file && outsourced ? " · Copy kept offline" : ""}
                           </>
                         ) : (
                           "Not on record"
@@ -415,6 +427,18 @@ export async function DriverView(props: AdminViewServerProps) {
                   </ul>
                 </div>
               )}
+              {offline.length ? (
+                <p className="text-ink-3 mt-3 text-xs">
+                  Kept offline by the office:{" "}
+                  {offline
+                    .map((item) => {
+                      const label = PARTICULAR_LABELS[item];
+                      return label.charAt(0).toLowerCase() + label.slice(1);
+                    })
+                    .join(", ")}
+                  .
+                </p>
+              ) : null}
               {driver.status === "left" && driver.endDate ? (
                 <p className="text-ink-3 mt-3 text-xs">
                   Keep this record until {dayText(keepRecordUntil(driver.endDate))}, 12
@@ -436,7 +460,11 @@ export async function DriverView(props: AdminViewServerProps) {
                 />
               ) : (
                 <p className="text-sm">
-                  <NotRecorded>No photograph on record</NotRecorded>
+                  <NotRecorded>
+                    {outsourced
+                      ? "Kept offline by the office"
+                      : "No photograph on record"}
+                  </NotRecorded>
                 </p>
               )}
               {canEdit ? (

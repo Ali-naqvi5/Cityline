@@ -1,7 +1,7 @@
 import {
   isBlocking,
-  REQUIRED_DRIVER_DOCUMENTS,
   REQUIRED_VEHICLE_DOCUMENTS,
+  requiredDriverDocuments,
   requirements,
   DOCUMENT_LABELS,
   type DocumentRecord,
@@ -13,7 +13,9 @@ import {
  *
  * Blocks — the assignment is refused:
  *   - the driver is not active;
- *   - a required driver document is missing, or expired at the pickup time;
+ *   - a required driver document is missing, or expired at the pickup time
+ *     (an outsourced driver's PHV and driving licences; every document for a
+ *     registered one — `requiredDriverDocuments`);
  *   - the vehicle is not active, or a required vehicle document is missing or
  *     expired at the pickup time;
  *   - the vehicle's class cannot do the job's class.
@@ -52,7 +54,12 @@ export function classFit(jobClass: string, vehicleClass: string): ClassFit {
 export interface EligibilityInput {
   pickupAt: Date;
   jobClass: string;
-  driver: { status: string; documents: readonly DocumentRecord[] };
+  driver: {
+    status: string;
+    /** "registered" or "outsourced"; registered when not given. */
+    engagement?: string | null;
+    documents: readonly DocumentRecord[];
+  };
   vehicle: {
     status: string;
     vehicleClassSlug: string;
@@ -85,11 +92,8 @@ export function checkEligibility(input: EligibilityInput): Eligibility {
   if (input.driver.status !== "active") {
     blocks.push(`The driver is ${input.driver.status}, not active.`);
   }
-  for (const result of requirements(
-    REQUIRED_DRIVER_DOCUMENTS,
-    input.driver.documents,
-    at,
-  )) {
+  const driverRequired = requiredDriverDocuments(input.driver.engagement);
+  for (const result of requirements(driverRequired, input.driver.documents, at)) {
     if (result.status === "missing")
       blocks.push(`Driver has no ${label(result.type)} on record.`);
     else if (result.status === "expired")
@@ -126,7 +130,7 @@ export function checkEligibility(input: EligibilityInput): Eligibility {
   // Documents that are fine at the pickup but run out soon after it.
   const soon = new Date(at.getTime() + WARN_DAYS * 86_400_000);
   for (const [who, required, documents] of [
-    ["Driver", REQUIRED_DRIVER_DOCUMENTS, input.driver.documents],
+    ["Driver", driverRequired, input.driver.documents],
     ["Vehicle", REQUIRED_VEHICLE_DOCUMENTS, input.vehicle.documents],
   ] as const) {
     for (const result of requirements(required, documents, at)) {

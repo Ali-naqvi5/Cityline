@@ -1,4 +1,4 @@
-import { Plus, Search, UserRound } from "lucide-react";
+import { Plus, Search, UserPlus, UserRound } from "lucide-react";
 import Link from "next/link";
 import type { AdminViewServerProps, Where } from "payload";
 
@@ -38,12 +38,16 @@ export async function DriversView(props: AdminViewServerProps) {
 
   const status = param(props.searchParams, "status") || "current";
   const compliance = param(props.searchParams, "compliance");
+  const type = param(props.searchParams, "type");
   const q = param(props.searchParams, "q").slice(0, 60);
 
   const and: Where[] = [];
   if (status === "current") and.push({ status: { not_equals: "left" } });
   else if (["active", "suspended", "left"].includes(status))
     and.push({ status: { equals: status } });
+  if (type === "registered" || type === "outsourced") {
+    and.push({ engagement: { equals: type } });
+  }
   if (q) {
     const digits = q.replace(/\D/g, "").replace(/^44/, "").replace(/^0+/, "");
     and.push({
@@ -66,10 +70,16 @@ export async function DriversView(props: AdminViewServerProps) {
         description="Who can work, and whether their documents let them."
         actions={
           canEdit ? (
-            <ButtonLink href="/admin/drivers/new" variant="primary">
-              <Plus aria-hidden className="h-4 w-4" />
-              Add driver
-            </ButtonLink>
+            <div className="flex flex-wrap gap-2">
+              <ButtonLink href="/admin/drivers/new?engagement=outsourced">
+                <UserPlus aria-hidden className="h-4 w-4" />
+                Add outsourced driver
+              </ButtonLink>
+              <ButtonLink href="/admin/drivers/new" variant="primary">
+                <Plus aria-hidden className="h-4 w-4" />
+                Add driver
+              </ButtonLink>
+            </div>
           ) : null
         }
       />
@@ -77,7 +87,7 @@ export async function DriversView(props: AdminViewServerProps) {
       <Panel bodyClassName="p-0">
         <FilterForm
           action="/admin/drivers"
-          className="border-line grid gap-3 border-b p-4 sm:grid-cols-[minmax(200px,2fr)_repeat(2,minmax(150px,1fr))]"
+          className="border-line grid gap-3 border-b p-4 sm:grid-cols-[minmax(200px,2fr)_repeat(3,minmax(150px,1fr))]"
         >
           <div>
             <Label htmlFor="drivers-q">Search</Label>
@@ -107,6 +117,14 @@ export async function DriversView(props: AdminViewServerProps) {
             </Select>
           </div>
           <div>
+            <Label htmlFor="drivers-type">Type</Label>
+            <Select id="drivers-type" name="type" defaultValue={type}>
+              <option value="">Registered and outsourced</option>
+              <option value="registered">Registered</option>
+              <option value="outsourced">Outsourced</option>
+            </Select>
+          </div>
+          <div>
             <Label htmlFor="drivers-compliance">Compliance</Label>
             <Select id="drivers-compliance" name="compliance" defaultValue={compliance}>
               <option value="">Any</option>
@@ -121,7 +139,7 @@ export async function DriversView(props: AdminViewServerProps) {
           <EmptyState
             icon={<UserRound aria-hidden className="h-5 w-5" />}
             title={
-              q || compliance || status !== "current"
+              q || compliance || type || status !== "current"
                 ? "No drivers currently match these filters"
                 : "No drivers yet"
             }
@@ -154,7 +172,14 @@ export async function DriversView(props: AdminViewServerProps) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-ink text-base font-medium">{driver.fullName}</p>
+                    <p className="text-ink text-base font-medium">
+                      {driver.fullName}
+                      {driver.engagement === "outsourced" ? (
+                        <Badge tone="special" className="ml-2 align-middle">
+                          Outsourced
+                        </Badge>
+                      ) : null}
+                    </p>
                     <Badge tone={DRIVER_STATUS_TONE[driver.status]}>
                       {DRIVER_STATUS_LABELS[driver.status]}
                     </Badge>
@@ -187,6 +212,9 @@ export async function DriversView(props: AdminViewServerProps) {
                       {initials(driver.fullName ?? "")}
                     </span>
                     <span className="text-ink font-medium">{driver.fullName}</span>
+                    {driver.engagement === "outsourced" ? (
+                      <Badge tone="special">Outsourced</Badge>
+                    ) : null}
                   </Link>
                 ),
               },

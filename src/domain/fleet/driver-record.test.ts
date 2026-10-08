@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   conductNotice,
   formatNiNumber,
+  heldOffline,
   isValidNiNumber,
   keepRecordUntil,
   missingParticulars,
@@ -62,6 +63,29 @@ describe("the TfL driver record", () => {
         ],
       }),
     ).toEqual(["address", "niNumber", "drivingLicenceCopy", "phvLicenceCopy", "photo"]);
+  });
+
+  it("keeps an outsourced driver's copies and photograph offline, not missing", () => {
+    const outsourced = {
+      ...complete,
+      engagement: "outsourced",
+      photo: null,
+      documents: [
+        { type: "phv_licence", file: null },
+        { type: "dvla_licence", file: null },
+      ],
+    };
+    expect(missingParticulars(outsourced)).toEqual([]);
+    expect(heldOffline(outsourced)).toEqual([
+      "drivingLicenceCopy",
+      "phvLicenceCopy",
+      "photo",
+    ]);
+    expect(heldOffline(complete)).toEqual([]);
+    // The rest of the record is still needed here.
+    expect(missingParticulars({ ...outsourced, dateOfBirth: null })).toEqual([
+      "dateOfBirth",
+    ]);
   });
 
   it("needs the date a driver stopped, once they have left", () => {

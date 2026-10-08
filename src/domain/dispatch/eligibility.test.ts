@@ -120,6 +120,37 @@ describe("checkEligibility", () => {
     expect(result.blocks.join(" ")).toMatch(/no Right to work on record/);
   });
 
+  it("asks an outsourced driver for their PHV and driving licences only", () => {
+    const licences = goodDriverDocs.filter(
+      (doc) => doc.type === "phv_licence" || doc.type === "dvla_licence",
+    );
+    const outsourced = checkEligibility(
+      input({
+        driver: { status: "active", engagement: "outsourced", documents: licences },
+      }),
+    );
+    expect(outsourced.eligible).toBe(true);
+    const registered = checkEligibility(
+      input({
+        driver: { status: "active", engagement: "registered", documents: licences },
+      }),
+    );
+    expect(registered.blocks.join(" ")).toMatch(/no DBS certificate on record/);
+    const lapsed = checkEligibility(
+      input({
+        driver: {
+          status: "active",
+          engagement: "outsourced",
+          documents: [
+            { type: "phv_licence", expiresAt: inDays(-1) },
+            { type: "dvla_licence", expiresAt: inDays(900) },
+          ],
+        },
+      }),
+    );
+    expect(lapsed.blocks.join(" ")).toMatch(/PHV driver licence has expired/);
+  });
+
   it("refuses an expired vehicle", () => {
     const documents = goodVehicleDocs.map((doc) =>
       doc.type === "insurance" ? { ...doc, expiresAt: inDays(-3) } : doc,

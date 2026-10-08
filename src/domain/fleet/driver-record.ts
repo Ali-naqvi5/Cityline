@@ -82,8 +82,27 @@ export interface DriverRecordInput {
   startDate?: string | null;
   endDate?: string | null;
   status: string;
+  /** "outsourced": copies and the photograph are kept offline by the office. */
+  engagement?: string | null;
   /** Every document on record for the driver; a copy is one with a file. */
   documents: readonly { type: string; file?: unknown }[];
+}
+
+/**
+ * The particulars an outsourced driver's record keeps on paper, not here:
+ * the office collects copies of their licences and a photograph when it
+ * takes them on (Cityline, 9 Oct 2026). TfL accepts records in any form, as
+ * long as they can be produced on request.
+ */
+export const OFFLINE_PARTICULARS: readonly Particular[] = [
+  "drivingLicenceCopy",
+  "phvLicenceCopy",
+  "photo",
+];
+
+/** Particulars of this driver's record held offline, not in the system. */
+export function heldOffline(driver: Pick<DriverRecordInput, "engagement">): Particular[] {
+  return driver.engagement === "outsourced" ? [...OFFLINE_PARTICULARS] : [];
 }
 
 const filled = (value: string | null | undefined) => Boolean(value && value.trim());
@@ -102,7 +121,8 @@ export function missingParticulars(driver: DriverRecordInput): Particular[] {
   if (!driver.photo) missing.push("photo");
   if (!driver.startDate) missing.push("availableFrom");
   if (driver.status === "left" && !driver.endDate) missing.push("stoppedOn");
-  return missing;
+  const offline = heldOffline(driver);
+  return missing.filter((particular) => !offline.includes(particular));
 }
 
 const londonDay = (instant: string | Date) => londonDateAndTime(new Date(instant)).date;

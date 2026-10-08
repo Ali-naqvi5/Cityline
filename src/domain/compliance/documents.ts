@@ -53,6 +53,39 @@ export const REQUIRED_DRIVER_DOCUMENTS: readonly DriverDocumentType[] = [
   "right_to_work",
 ];
 
+/**
+ * How a driver works with Cityline (Cityline, 9 Oct 2026):
+ *
+ *   registered  a regular driver, every document and copy kept online here.
+ *   outsourced  found for a job the regulars cannot cover — a large people
+ *               carrier, say. Their details are typed in; copies of their
+ *               documents are kept offline by the office.
+ */
+export const DRIVER_ENGAGEMENTS = {
+  registered: "Registered",
+  outsourced: "Outsourced",
+} as const;
+export type DriverEngagement = keyof typeof DRIVER_ENGAGEMENTS;
+
+/**
+ * An outsourced driver's PHV licence and driving licence, with numbers and
+ * expiry dates, are what is checked here. TfL checks a driver's DBS and right
+ * to work before it grants a PHV licence, so a valid PHV licence covers them.
+ */
+export const OUTSOURCED_DRIVER_DOCUMENTS: readonly DriverDocumentType[] = [
+  "phv_licence",
+  "dvla_licence",
+];
+
+/** The documents a driver must hold, in date, to be given a job. */
+export function requiredDriverDocuments(
+  engagement: string | null | undefined,
+): readonly DriverDocumentType[] {
+  return engagement === "outsourced"
+    ? OUTSOURCED_DRIVER_DOCUMENTS
+    : REQUIRED_DRIVER_DOCUMENTS;
+}
+
 /** Without these, in date, a vehicle cannot be given a job. */
 export const REQUIRED_VEHICLE_DOCUMENTS: readonly VehicleDocumentType[] = [
   "phv_vehicle_licence",

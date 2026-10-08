@@ -532,6 +532,7 @@ export interface Driver {
    */
   nationalInsuranceNumber?: string | null;
   photo?: (number | null) | PrivateFile;
+  engagement: 'registered' | 'outsourced';
   status: 'active' | 'suspended' | 'left';
   /**
    * When they became available to Cityline (TfL record).
@@ -1398,6 +1399,7 @@ export interface DriversSelect<T extends boolean = true> {
   dateOfBirth?: T;
   nationalInsuranceNumber?: T;
   photo?: T;
+  engagement?: T;
   status?: T;
   startDate?: T;
   endDate?: T;

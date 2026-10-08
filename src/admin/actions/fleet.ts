@@ -12,6 +12,8 @@ import {
   driverSchema,
   expiryToIso,
   fileProblem,
+  outsourcedDocuments,
+  outsourcedLicencesSchema,
   supplierData,
   supplierSchema,
   vehicleData,
@@ -37,6 +39,7 @@ function driverForm(formData: FormData) {
     address: text(formData, "address"),
     dateOfBirth: text(formData, "dateOfBirth"),
     nationalInsuranceNumber: text(formData, "nationalInsuranceNumber"),
+    engagement: text(formData, "engagement") || "registered",
     status: text(formData, "status"),
     startDate: text(formData, "startDate"),
     endDate: text(formData, "endDate"),
@@ -48,6 +51,21 @@ function driverForm(formData: FormData) {
   };
 }
 
+function carForm(formData: FormData, drivers: number[]) {
+  return {
+    registration: text(formData, "registration"),
+    make: text(formData, "make"),
+    model: text(formData, "model"),
+    colour: text(formData, "colour"),
+    vehicleClassSlug: text(formData, "vehicleClassSlug"),
+    seats: text(formData, "seats"),
+    ownership: "driver",
+    status: "active",
+    drivers,
+    notes: "",
+  };
+}
+
 export async function saveDriverAction(
   _previous: FormState,
   formData: FormData,
@@ -56,7 +74,31 @@ export async function saveDriverAction(
   const id = Number(text(formData, "id")) || null;
 
   const parsed = driverSchema.safeParse(driverForm(formData));
-  if (!parsed.success) return zodErrors(parsed.error);
+  // A new outsourced driver comes with their licences and their car, so they
+  // can be given a job straight away (Cityline, 9 Oct 2026).
+  const outsourcing = !id && text(formData, "engagement") === "outsourced";
+  const licences = outsourcing
+    ? outsourcedLicencesSchema.safeParse({
+        phvNumber: text(formData, "phvNumber"),
+        phvExpiry: text(formData, "phvExpiry"),
+        dvlaNumber: text(formData, "dvlaNumber"),
+        dvlaExpiry: text(formData, "dvlaExpiry"),
+        vehicleLicenceNumber: text(formData, "vehicleLicenceNumber"),
+        vehicleLicenceExpiry: text(formData, "vehicleLicenceExpiry"),
+        motExpiry: text(formData, "motExpiry"),
+        insuranceExpiry: text(formData, "insuranceExpiry"),
+        seenOriginals: checked(formData, "seenOriginals"),
+      })
+    : null;
+  const car = outsourcing ? vehicleSchema.safeParse(carForm(formData, [])) : null;
+  if (!parsed.success || (licences && !licences.success) || (car && !car.success)) {
+    const errors = {
+      ...(car && !car.success ? zodErrors(car.error).errors : {}),
+      ...(licences && !licences.success ? zodErrors(licences.error).errors : {}),
+      ...(!parsed.success ? zodErrors(parsed.error).errors : {}),
+    };
+    return { errors, message: "Please check the highlighted fields." };
+  }
 
   let savedId: number;
   try {
@@ -76,6 +118,12 @@ export async function saveDriverAction(
         overrideAccess: false,
       });
       savedId = saved.id;
+    } else if (licences?.success && car?.success) {
+      savedId = await createOutsourcedDriver(payload, user, {
+        driver: driverData(parsed.data),
+        car: vehicleData(car.data),
+        documents: outsourcedDocuments(licences.data),
+      });
     } else {
       const saved = await payload.create({
         collection: "drivers",
@@ -89,7 +137,61 @@ export async function saveDriverAction(
     return payloadErrors(error, "saving a driver");
   }
 
-  redirect(`/admin/drivers/${savedId}?notice=${id ? "saved" : "created"}`);
+  redirect(
+    `/admin/drivers/${savedId}?notice=${id ? "saved" : outsourcing ? "created-outsourced" : "created"}`,
+  );
+}
+
+/**
+ * One transaction: the driver, their licence records, their car and its
+ * licence records — all saved, or none. Each record is a typed-in copy of a
+ * document the office has seen; the copies themselves are kept offline.
+ */
+async function createOutsourcedDriver(
+  payload: Awaited<ReturnType<typeof staffForAction>>["payload"],
+  user: Awaited<ReturnType<typeof staffForAction>>["user"],
+  records: {
+    driver: ReturnType<typeof driverData>;
+    car: ReturnType<typeof vehicleData>;
+    documents: ReturnType<typeof outsourcedDocuments>;
+  },
+): Promise<number> {
+  const transactionID = await payload.db.beginTransaction();
+  const req =
+    transactionID === null || transactionID === undefined ? undefined : { transactionID };
+  const as = { user, overrideAccess: false as const, req };
+  const seen = { verifiedBy: user.id, verifiedAt: new Date().toISOString() };
+  try {
+    const driver = await payload.create({
+      collection: "drivers",
+      data: records.driver,
+      ...as,
+    });
+    for (const document of records.documents.driver) {
+      await payload.create({
+        collection: "driver-documents",
+        data: { ...document, ...seen, driver: driver.id },
+        ...as,
+      });
+    }
+    const vehicle = await payload.create({
+      collection: "vehicles",
+      data: { ...records.car, drivers: [driver.id] },
+      ...as,
+    });
+    for (const document of records.documents.vehicle) {
+      await payload.create({
+        collection: "vehicle-documents",
+        data: { ...document, ...seen, vehicle: vehicle.id },
+        ...as,
+      });
+    }
+    if (req) await payload.db.commitTransaction(req.transactionID);
+    return driver.id;
+  } catch (error) {
+    if (req) await payload.db.rollbackTransaction(req.transactionID);
+    throw error;
+  }
 }
 
 const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];

@@ -3,7 +3,7 @@ import "server-only";
 import type { Payload, Where } from "payload";
 
 import {
-  REQUIRED_DRIVER_DOCUMENTS,
+  requiredDriverDocuments,
   REQUIRED_VEHICLE_DOCUMENTS,
   requirements,
   worstStatus,
@@ -111,7 +111,7 @@ export async function loadDrivers(
 
   return drivers.docs.map((driver) => {
     const own = documentsByDriver.get(driver.id) ?? [];
-    const required = requirements(REQUIRED_DRIVER_DOCUMENTS, own, now);
+    const required = requirements(requiredDriverDocuments(driver.engagement), own, now);
     return {
       driver,
       documents: own,
