@@ -8,7 +8,14 @@ import {
   type DocumentRecord,
 } from "@/domain/compliance/documents";
 
-import { checkEligibility, classFit, type EligibilityInput } from "./eligibility";
+import {
+  carCheck,
+  checkEligibility,
+  classFit,
+  driverCheck,
+  fitWarnings,
+  type EligibilityInput,
+} from "./eligibility";
 
 const PICKUP = new Date("2026-12-14T10:00:00Z");
 const inDays = (days: number) =>
@@ -79,11 +86,11 @@ describe("daysUntil", () => {
 });
 
 describe("classFit", () => {
-  it("lets a bigger vehicle do a smaller job, but keeps executive exact", () => {
+  it("calls a bigger car an upgrade, and anything else different", () => {
     expect(classFit("saloon", "saloon")).toBe("exact");
     expect(classFit("saloon", "mpv-8")).toBe("upgrade");
-    expect(classFit("executive", "saloon")).toBe("incompatible");
-    expect(classFit("mpv-8", "saloon")).toBe("incompatible");
+    expect(classFit("executive", "saloon")).toBe("different");
+    expect(classFit("mpv-8", "saloon")).toBe("different");
   });
 });
 
@@ -162,8 +169,8 @@ describe("checkEligibility", () => {
     expect(result.blocks.join(" ")).toMatch(/insurance has expired/);
   });
 
-  it("refuses the wrong vehicle class, and warns on an upgrade", () => {
-    const wrong = checkEligibility(
+  it("lets any car do any job, warning when the class differs from the booking", () => {
+    const different = checkEligibility(
       input({
         jobClass: "executive",
         vehicle: {
@@ -173,7 +180,10 @@ describe("checkEligibility", () => {
         },
       }),
     );
-    expect(wrong.eligible).toBe(false);
+    expect(different.eligible).toBe(true);
+    expect(different.warnings).toContain(
+      "Booked as Executive saloon; this car is Saloon.",
+    );
 
     const upgrade = checkEligibility(
       input({
@@ -188,12 +198,10 @@ describe("checkEligibility", () => {
     expect(upgrade.warnings.join(" ")).toMatch(/upgrade/);
   });
 
-  it("warns, without refusing, when the vehicle is not one the driver uses", () => {
+  it("warns, without refusing, when the car is not one the driver uses", () => {
     const result = checkEligibility(input({ linked: false }));
     expect(result.eligible).toBe(true);
-    expect(result.warnings).toContain(
-      "This vehicle is not one the driver normally uses.",
-    );
+    expect(result.warnings).toContain("This car is not one the driver normally uses.");
     expect(checkEligibility(input({ linked: true })).warnings).toEqual([]);
   });
 
@@ -214,6 +222,40 @@ describe("checkEligibility", () => {
         }),
       ).blocks.join(" "),
     ).toMatch(/off road/);
+  });
+
+  it("warns, without refusing, when the car has fewer seats than passengers", () => {
+    const result = checkEligibility(
+      input({
+        passengers: 6,
+        vehicle: {
+          status: "active",
+          vehicleClassSlug: "saloon",
+          seats: 4,
+          documents: goodVehicleDocs,
+        },
+      }),
+    );
+    expect(result.eligible).toBe(true);
+    expect(result.warnings).toContain("4 passenger seats for 6 passengers.");
+  });
+
+  it("checks the driver and the car apart, so any pair can be put together", () => {
+    const driver = driverCheck({ status: "active", documents: goodDriverDocs }, PICKUP);
+    expect(driver).toEqual({ eligible: true, blocks: [], warnings: [] });
+    const car = carCheck(
+      { status: "active", vehicleClassSlug: "mpv-8", documents: [] },
+      PICKUP,
+    );
+    expect(car.eligible).toBe(false);
+    expect(car.blocks).toContain("Car has no PHV vehicle licence on record.");
+    expect(
+      fitWarnings(
+        { jobClass: "saloon", passengers: 2 },
+        { vehicleClassSlug: "saloon" },
+        true,
+      ),
+    ).toEqual([]);
   });
 
   it("warns, without refusing, about another job within 90 minutes", () => {

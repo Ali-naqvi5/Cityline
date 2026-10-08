@@ -2,9 +2,9 @@ import { ArrowLeft, Plane, UsersRound } from "lucide-react";
 import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
-import { loadAssignmentOptions } from "@/admin/data/dispatch";
+import { loadAssignmentBoard } from "@/admin/data/dispatch";
 import { pickupLabel, relative } from "@/admin/format";
-import { AssignForm, type AssignChoice } from "@/admin/forms/assign-form";
+import { AssignForm } from "@/admin/forms/assign-form";
 import { requireStaff, segment } from "@/admin/guard";
 import { JobStatusBadge, Route } from "@/components/ops/jobs";
 import { ButtonLink, PageHeader, Panel } from "@/components/ops/primitives";
@@ -16,8 +16,9 @@ import { beforeBoarding, isFinal } from "@/domain/jobs/status";
 import type { Job } from "@/payload-types";
 
 /**
- * Assigning a driver and vehicle to a job (`/jobs/:id/assign`, spec §19):
- * the eligible pairs first, then everyone who cannot take it, and why.
+ * Assigning a driver and car to a job (`/jobs/:id/assign`, spec §19): every
+ * driver and every car, one search for both, any driver with any car
+ * (Cityline, 9 Oct 2026). What cannot legally go is shown with the reason.
  */
 export async function JobAssignView(props: AdminViewServerProps) {
   const idSegment = segment(props, 1);
@@ -67,17 +68,7 @@ export async function JobAssignView(props: AdminViewServerProps) {
     );
   }
 
-  const { options, unavailable } = await loadAssignmentOptions(payload, user, job, now);
-  const choices: AssignChoice[] = options.map((option) => ({
-    pair: `${option.driver.id}:${option.vehicle.id}`,
-    driverName: option.driver.fullName ?? `Driver ${option.driver.id}`,
-    vehicle: `${option.vehicle.colour} ${option.vehicle.make} ${option.vehicle.model}`,
-    registration: option.vehicle.registration,
-    vehicleClass: vehicleClassName(option.vehicle.vehicleClassSlug),
-    upgrade: option.fit === "upgrade",
-    warnings: option.eligibility.warnings,
-    current: option.current,
-  }));
+  const { drivers, cars } = await loadAssignmentBoard(payload, user, job, now);
   const at = new Date(job.pickupAt);
   const currentDriverId = relId(job.driver);
   const currentDriver = currentDriverId
@@ -109,20 +100,23 @@ export async function JobAssignView(props: AdminViewServerProps) {
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <Panel
-          title="Eligible drivers"
-          description="Active, with every document valid at the pickup time, and a vehicle that can do the job."
+          title="Driver and car"
+          description="Any driver, with any car. A different class or too few seats is a warning; a licence, MOT or insurance out of date stops it."
         >
-          {choices.length ? (
+          {drivers.length || cars.length ? (
             <AssignForm
               jobId={job.id}
-              choices={choices}
+              job={{ jobClass: job.vehicleClassSlug, passengers: job.passengers ?? null }}
+              drivers={drivers}
+              cars={cars}
               notifyPassenger={job.notifyPassenger ?? true}
               canEmailPassenger={Boolean(job.leadEmail || job.bookerEmail)}
               driverPricePence={job.driverPricePence ?? null}
               current={
                 currentDriverId
                   ? {
-                      id: currentDriverId,
+                      driverId: currentDriverId,
+                      carId: relId(job.vehicle),
                       name: currentDriver?.fullName ?? "The current driver",
                     }
                   : null
@@ -131,8 +125,8 @@ export async function JobAssignView(props: AdminViewServerProps) {
             />
           ) : (
             <EmptyState
-              title="No driver can take this job"
-              description="Nobody has a valid set of documents and a suitable vehicle for this pickup. The reasons are listed beside each driver."
+              title="No drivers or cars yet"
+              description="Add a driver and their car under Fleet first."
             />
           )}
         </Panel>
@@ -163,36 +157,6 @@ export async function JobAssignView(props: AdminViewServerProps) {
               </p>
             </div>
           </Panel>
-
-          {unavailable.length ? (
-            <Panel
-              title="Not available"
-              description={`${unavailable.length} ${unavailable.length === 1 ? "driver" : "drivers"} cannot take this job`}
-            >
-              <details>
-                <summary className="text-accent cursor-pointer text-sm font-medium">
-                  Show who, and why
-                </summary>
-                <ul className="divide-line mt-3 flex flex-col divide-y">
-                  {unavailable.map(({ driver, reasons }) => (
-                    <li key={driver.id} className="py-2">
-                      <Link
-                        href={`/admin/drivers/${driver.id}`}
-                        className="text-ink text-sm font-medium hover:underline"
-                      >
-                        {driver.fullName}
-                      </Link>
-                      <ul className="text-ink-3 mt-0.5 text-sm">
-                        {reasons.map((reason) => (
-                          <li key={reason}>{reason}</li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            </Panel>
-          ) : null}
         </div>
       </div>
     </OpsShell>

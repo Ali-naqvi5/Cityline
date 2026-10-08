@@ -289,6 +289,15 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   TfL checks DBS and right to work before granting a PHV licence. TfL's
   record treats their licence copies and photo as held offline
   (`heldOffline`).
+- **Assigning** (`/admin/jobs/:id/assign`; Cityline, 9 Oct 2026): every
+  current driver and car, one search box for both (`domain/dispatch/search.ts`:
+  name, registration, make, model; closest first, forgiving typos), and any
+  driver may take any car (`SearchSelect` pickers). A different class, too
+  few seats, or a car the driver does not normally use only warns; the law
+  still blocks — a driver or car without a valid licence, MOT or insurance at
+  the pickup, a suspended driver, a car off the road (`driverCheck`,
+  `carCheck`, `fitWarnings` in `domain/dispatch/eligibility.ts`; the jobs
+  hook checks again on save).
 - **TfL driver records** (`domain/fleet/driver-record.ts`; regs. 13 and 16
   and TfL's Operator Handbook): name, address, date of birth, National
   Insurance number, copies of the DVLA and PHV licences, a photograph, and

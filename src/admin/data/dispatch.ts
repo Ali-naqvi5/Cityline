@@ -2,61 +2,67 @@ import "server-only";
 
 import type { Payload, Where } from "payload";
 
-import {
-  CLASH_MINUTES,
-  checkEligibility,
-  classFit,
-  type ClassFit,
-  type Eligibility,
-} from "@/domain/dispatch/eligibility";
+import { carCheck, CLASH_MINUTES, driverCheck } from "@/domain/dispatch/eligibility";
 import { relId } from "@/domain/dispatch/assignment";
 import { OPEN_STATUSES } from "@/domain/jobs/labels";
-import type { Driver, Job, User, Vehicle } from "@/payload-types";
+import type { Job, User } from "@/payload-types";
 
 import { loadDrivers, loadVehicles } from "./fleet";
 
 /**
- * Who can take a job (spec §19): every working driver paired with each
- * vehicle they use, checked against the job's pickup time and class. The
- * controller picks from the eligible pairs; the rest are listed with the
- * reason, so nobody wonders why a driver is missing. The jobs collection's
- * hook checks the chosen pair again when it is saved.
+ * Everyone who could take a job, and every car (spec §19; Cityline,
+ * 9 Oct 2026: any driver, any car). Each driver and each car is checked
+ * against the pickup time on its own — documents, status, other jobs — and
+ * the screen joins them with how the car suits the job, so the office can
+ * pair anyone with anything and still see what to look at. The jobs
+ * collection's hook checks the chosen pair again when it is saved.
  */
 
-export interface AssignmentOption {
-  driver: Driver;
-  vehicle: Vehicle;
-  eligibility: Eligibility;
-  fit: ClassFit;
-  current: boolean;
+export interface BoardDriver {
+  id: number;
+  name: string;
+  phone: string;
+  engagement: string;
+  status: string;
+  /** Cars that list this driver as one who normally uses them. */
+  carIds: number[];
+  blocks: string[];
+  warnings: string[];
 }
 
-export interface UnavailableDriver {
-  driver: Driver;
-  reasons: string[];
+export interface BoardCar {
+  id: number;
+  registration: string;
+  make: string;
+  model: string;
+  colour: string;
+  vehicleClassSlug: string;
+  seats: number | null;
+  status: string;
+  driverIds: number[];
+  blocks: string[];
+  warnings: string[];
 }
 
-const FIT_ORDER: Record<ClassFit, number> = { exact: 0, upgrade: 1, incompatible: 2 };
-
-export async function loadAssignmentOptions(
+export async function loadAssignmentBoard(
   payload: Payload,
   user: User,
   job: Job,
   now: Date,
-): Promise<{ options: AssignmentOption[]; unavailable: UnavailableDriver[] }> {
+): Promise<{ drivers: BoardDriver[]; cars: BoardCar[] }> {
   const pickupAt = new Date(job.pickupAt);
-  const [drivers, vehicles] = await Promise.all([
+  const [driverRecords, carRecords] = await Promise.all([
     loadDrivers(payload, user, now, { status: { not_equals: "left" } }),
     loadVehicles(payload, user, now, { status: { not_equals: "sold" } }),
   ]);
 
   const window = CLASH_MINUTES * 60_000;
-  const clashes = drivers.length
+  const clashes = driverRecords.length
     ? await payload.find({
         collection: "jobs",
         where: {
           and: [
-            { driver: { in: drivers.map(({ driver }) => driver.id) } },
+            { driver: { in: driverRecords.map(({ driver }) => driver.id) } },
             { status: { in: [...OPEN_STATUSES] } },
             {
               pickupAt: {
@@ -78,66 +84,58 @@ export async function loadAssignmentOptions(
       })
     : { docs: [] as Job[] };
 
-  const currentDriver = relId(job.driver);
-  const currentVehicle = relId(job.vehicle);
-  const options: AssignmentOption[] = [];
-  const unavailable: UnavailableDriver[] = [];
-
-  for (const { driver, documents } of drivers) {
-    const own = vehicles.filter(({ vehicle }) =>
-      (vehicle.drivers ?? []).some((linked) => relId(linked) === driver.id),
+  const cars: BoardCar[] = carRecords.map(({ vehicle, documents }) => {
+    const check = carCheck(
+      {
+        status: vehicle.status,
+        vehicleClassSlug: vehicle.vehicleClassSlug,
+        seats: vehicle.seats,
+        documents,
+      },
+      pickupAt,
     );
-    if (own.length === 0) {
-      unavailable.push({
-        driver,
-        reasons: ["No vehicle is linked to this driver. Link one on the vehicle's page."],
-      });
-      continue;
-    }
+    return {
+      id: vehicle.id,
+      registration: vehicle.registration,
+      make: vehicle.make,
+      model: vehicle.model,
+      colour: vehicle.colour,
+      vehicleClassSlug: vehicle.vehicleClassSlug,
+      seats: vehicle.seats ?? null,
+      status: vehicle.status,
+      driverIds: (vehicle.drivers ?? [])
+        .map((linked) => relId(linked))
+        .filter((id): id is number => id !== null),
+      blocks: check.blocks,
+      warnings: check.warnings,
+    };
+  });
 
-    const otherPickups = clashes.docs
-      .filter((other) => relId(other.driver) === driver.id)
-      .map((other) => new Date(other.pickupAt));
-
-    const pairs = own.map(({ vehicle, documents: vehicleDocuments }) => ({
-      driver,
-      vehicle,
-      fit: classFit(job.vehicleClassSlug, vehicle.vehicleClassSlug),
-      current: driver.id === currentDriver && vehicle.id === currentVehicle,
-      eligibility: checkEligibility({
+  const drivers: BoardDriver[] = driverRecords
+    .map(({ driver, documents }) => {
+      const check = driverCheck(
+        { status: driver.status, engagement: driver.engagement, documents },
         pickupAt,
-        jobClass: job.vehicleClassSlug,
-        driver: { status: driver.status, engagement: driver.engagement, documents },
-        vehicle: {
-          status: vehicle.status,
-          vehicleClassSlug: vehicle.vehicleClassSlug,
-          documents: vehicleDocuments,
-        },
-        otherPickups,
-        linked: true,
-      }),
-    }));
+        clashes.docs
+          .filter((other) => relId(other.driver) === driver.id)
+          .map((other) => new Date(other.pickupAt)),
+      );
+      return {
+        id: driver.id,
+        name: driver.fullName ?? `Driver ${driver.id}`,
+        phone: driver.phone,
+        engagement: driver.engagement ?? "registered",
+        status: driver.status,
+        carIds: cars
+          .filter((car) => car.driverIds.includes(driver.id))
+          .map((car) => car.id),
+        blocks: check.blocks,
+        warnings: check.warnings,
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-    const eligible = pairs.filter((pair) => pair.eligibility.eligible);
-    if (eligible.length) {
-      options.push(...eligible);
-    } else {
-      const reasons = [...new Set(pairs.flatMap((pair) => pair.eligibility.blocks))];
-      unavailable.push({ driver, reasons });
-    }
-  }
-
-  options.sort(
-    (a, b) =>
-      Number(b.current) - Number(a.current) ||
-      a.eligibility.warnings.length - b.eligibility.warnings.length ||
-      FIT_ORDER[a.fit] - FIT_ORDER[b.fit] ||
-      (a.driver.fullName ?? "").localeCompare(b.driver.fullName ?? ""),
-  );
-  unavailable.sort((a, b) =>
-    (a.driver.fullName ?? "").localeCompare(b.driver.fullName ?? ""),
-  );
-  return { options, unavailable };
+  return { drivers, cars };
 }
 
 /**

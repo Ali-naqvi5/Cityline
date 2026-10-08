@@ -81,6 +81,7 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
   let vehicle = relId(job.vehicle);
   const pickupAt = new Date(String(job.pickupAt ?? original.pickupAt));
   const jobClass = String(job.vehicleClassSlug ?? original.vehicleClassSlug ?? "");
+  const passengers = Number(job.passengers ?? original.passengers ?? 0) || null;
 
   if (staff && operation === "create") {
     job.takenByUser ??= req.user!.id;
@@ -161,6 +162,7 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
         vehicleId: vehicle,
         pickupAt,
         jobClass,
+        passengers,
         jobId: typeof original.id === "number" ? original.id : null,
       },
       req,
@@ -208,7 +210,14 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
     // The same driver, but a new time or class: still allowed to do it?
     const check = await checkAssignment(
       req.payload,
-      { driverId: driver, vehicleId: vehicle, pickupAt, jobClass, jobId: original.id },
+      {
+        driverId: driver,
+        vehicleId: vehicle,
+        pickupAt,
+        jobClass,
+        passengers,
+        jobId: original.id,
+      },
       req,
     );
     if (!("missing" in check) && !check.eligibility.eligible) {

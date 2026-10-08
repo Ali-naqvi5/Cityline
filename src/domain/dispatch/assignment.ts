@@ -40,6 +40,7 @@ export async function checkAssignment(
     vehicleId: number;
     pickupAt: Date;
     jobClass: string;
+    passengers?: number | null;
     /** The job itself, so it is not counted as its own clash. */
     jobId?: number | null;
   },
@@ -102,6 +103,7 @@ export async function checkAssignment(
   const eligibility = checkEligibility({
     pickupAt: args.pickupAt,
     jobClass: args.jobClass,
+    passengers: args.passengers,
     driver: {
       status: driver.status,
       engagement: driver.engagement,
@@ -110,6 +112,7 @@ export async function checkAssignment(
     vehicle: {
       status: vehicle.status,
       vehicleClassSlug: vehicle.vehicleClassSlug,
+      seats: vehicle.seats,
       documents: vehicleDocuments.docs,
     },
     otherPickups: others.docs.map((job) => new Date(job.pickupAt)),
