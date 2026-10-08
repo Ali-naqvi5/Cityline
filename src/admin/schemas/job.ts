@@ -21,6 +21,16 @@ const optionalEmail = z
     (value) => value === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
     "Enter a valid email address.",
   );
+/**
+ * Point to point, or hourly "as directed" (Cityline, 9 Oct 2026): the form
+ * asks for one or the other, never both at once.
+ */
+export const BOOKING_TYPES = {
+  transfer: "Point to point",
+  hourly: "Hourly",
+} as const;
+export type BookingType = keyof typeof BOOKING_TYPES;
+
 const count = (label: string, max: number) =>
   z
     .string()
@@ -41,6 +51,9 @@ export const jobSchema = z
         (value) => /^([01]\d|2[0-3]):[0-5]\d$/.test(value),
         "Enter the pickup time.",
       ),
+    bookingType: z.enum(["transfer", "hourly"], {
+      message: "Choose point to point or hourly.",
+    }),
     pickupAddress: z.string().min(3, "Enter the pickup address.").max(300),
     stops: z.array(z.string().max(300)).max(MAX_STOPS),
     dropoffAddress: z.string().max(300),
@@ -100,10 +113,13 @@ export const jobSchema = z
       if (!job.supplierReference.trim())
         issue("supplierReference", "Enter the supplier's booking reference.");
     }
-    if (!job.dropoffAddress.trim()) {
+    if (job.bookingType === "transfer" && !job.dropoffAddress.trim()) {
+      issue("dropoffAddress", "Enter the drop-off address.");
+    }
+    if (job.bookingType === "hourly") {
       const hours = Number(job.hours);
       if (!job.hours || !Number.isInteger(hours) || hours < 1 || hours > 24) {
-        issue("dropoffAddress", "Enter the drop-off, or the hours for an hourly hire.");
+        issue("hours", "Enter the hours, from 1 to 24.");
       }
     }
     const price = parsePounds(job.price);
@@ -141,6 +157,10 @@ export function jobForm(formData: FormData): Record<string, unknown> {
     supplierReference: text("supplierReference"),
     pickupDate: text("pickupDate"),
     pickupTime: text("pickupTime"),
+    // Older forms sent no type: a drop-off makes it point to point.
+    bookingType:
+      text("bookingType") ||
+      (text("dropoffAddress") || !text("hours") ? "transfer" : "hourly"),
     pickupAddress: text("pickupAddress"),
     stops: formData
       .getAll("stop")
@@ -185,9 +205,11 @@ export function jobData(form: JobForm) {
       : null,
     pickupAt: londonToUtc(form.pickupDate, form.pickupTime).toISOString(),
     pickupAddress: form.pickupAddress,
-    viaStops: form.stops.map((address) => ({ address })),
-    dropoffAddress: form.dropoffAddress || null,
-    hours: form.dropoffAddress ? null : Number(form.hours),
+    // Only the chosen type's fields are kept.
+    viaStops:
+      form.bookingType === "transfer" ? form.stops.map((address) => ({ address })) : [],
+    dropoffAddress: form.bookingType === "transfer" ? form.dropoffAddress : null,
+    hours: form.bookingType === "hourly" ? Number(form.hours) : null,
     flightNumber: flight || null,
     vehicleClassSlug: form.vehicleClassSlug,
     passengers: Number(form.passengers),

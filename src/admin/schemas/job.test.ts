@@ -94,11 +94,34 @@ describe("the staff job form", () => {
     expect(errors({ passengers: "6" }).passengers).toMatch(/Saloon takes up to 4/);
   });
 
-  it("takes an hourly hire instead of a drop-off", () => {
-    expect(errors({ dropoffAddress: "" }).dropoffAddress).toMatch(/hourly hire/);
-    const data = jobData(parse({ dropoffAddress: "", hours: "4" }).data!);
+  it("asks a point-to-point booking for its drop-off", () => {
+    expect(errors({ bookingType: "transfer", dropoffAddress: "" }).dropoffAddress).toBe(
+      "Enter the drop-off address.",
+    );
+  });
+
+  it("asks an hourly booking for its hours, and keeps no drop-off or stops", () => {
+    expect(errors({ bookingType: "hourly", hours: "" }).hours).toBe(
+      "Enter the hours, from 1 to 24.",
+    );
+    expect(errors({ bookingType: "hourly", hours: "30" }).hours).toBeDefined();
+    const data = jobData(
+      parse({ bookingType: "hourly", hours: "4", stop: ["Kensington"] }).data!,
+    );
     expect(data.dropoffAddress).toBeNull();
+    expect(data.viaStops).toEqual([]);
     expect(data.hours).toBe(4);
+  });
+
+  it("keeps only the chosen type's fields when both were typed", () => {
+    const transfer = jobData(parse({ bookingType: "transfer", hours: "4" }).data!);
+    expect(transfer.hours).toBeNull();
+    expect(transfer.dropoffAddress).toBe("10 Wren Avenue, Uxbridge");
+  });
+
+  it("reads an older form with no type from what was filled in", () => {
+    expect(jobData(parse({ dropoffAddress: "", hours: "3" }).data!).hours).toBe(3);
+    expect(parse().data?.bookingType).toBe("transfer");
   });
 
   it("refuses a missing or nonsense price", () => {

@@ -17,6 +17,7 @@ import {
   TEXTAREA_CLASS,
 } from "@/components/ops/form";
 import { buttonClass } from "@/components/ops/primitives";
+import { Segmented } from "@/components/ops/segmented";
 import {
   JOB_SOURCE_LABELS,
   MAX_STOPS,
@@ -35,6 +36,8 @@ export interface JobFormValues {
   supplierReference: string;
   pickupDate: string;
   pickupTime: string;
+  /** "transfer" (point to point) or "hourly". */
+  bookingType: string;
   pickupAddress: string;
   stops: string[];
   dropoffAddress: string;
@@ -125,6 +128,8 @@ export function JobForm({
     values.stops.map((address, index) => ({ key: index, address })),
   );
   const [nextKey, setNextKey] = useState(values.stops.length);
+  const [bookingType, setBookingType] = useState(values.bookingType || "transfer");
+  const hourly = bookingType === "hourly";
   const website = mode === "website";
   const supplierJob = source === "supplier";
 
@@ -208,6 +213,20 @@ export function JobForm({
       ) : null}
 
       <FormSection title="When and where">
+        {!website ? (
+          <div className="sm:col-span-2">
+            <Segmented
+              name="bookingType"
+              legend="Point to point or hourly"
+              options={[
+                { value: "transfer", label: "Point to point" },
+                { value: "hourly", label: "Hourly (as directed)" },
+              ]}
+              value={bookingType}
+              onChange={setBookingType}
+            />
+          </div>
+        ) : null}
         <FormField id="pickupDate" label="Pickup date" required error={e.pickupDate}>
           <input
             id="pickupDate"
@@ -252,67 +271,79 @@ export function JobForm({
                 {...invalid(e.pickupAddress, "pickupAddress")}
               />
             </FormField>
-            <div className="flex flex-col gap-2 sm:col-span-2">
-              {stops.map((stop, index) => (
-                <div key={stop.key} className="flex items-end gap-2">
-                  <FormField id={`stop-${stop.key}`} label={`Stop ${index + 1}`} wide>
-                    <input
-                      id={`stop-${stop.key}`}
-                      name="stop"
-                      defaultValue={stop.address}
-                      className={inputClass()}
-                    />
-                  </FormField>
+            {!hourly ? (
+              <div className="flex flex-col gap-2 sm:col-span-2">
+                {stops.map((stop, index) => (
+                  <div key={stop.key} className="flex items-end gap-2">
+                    <FormField id={`stop-${stop.key}`} label={`Stop ${index + 1}`} wide>
+                      <input
+                        id={`stop-${stop.key}`}
+                        name="stop"
+                        defaultValue={stop.address}
+                        className={inputClass()}
+                      />
+                    </FormField>
+                    <button
+                      type="button"
+                      aria-label={`Remove stop ${index + 1}`}
+                      className={buttonClass("ghost", "md", "px-2.5")}
+                      onClick={() =>
+                        setStops(stops.filter((item) => item.key !== stop.key))
+                      }
+                    >
+                      <Trash2 aria-hidden className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                {stops.length < MAX_STOPS ? (
                   <button
                     type="button"
-                    aria-label={`Remove stop ${index + 1}`}
-                    className={buttonClass("ghost", "md", "px-2.5")}
-                    onClick={() =>
-                      setStops(stops.filter((item) => item.key !== stop.key))
-                    }
+                    className={buttonClass("ghost", "sm", "self-start")}
+                    onClick={() => {
+                      setStops([...stops, { key: nextKey, address: "" }]);
+                      setNextKey(nextKey + 1);
+                    }}
                   >
-                    <Trash2 aria-hidden className="h-4 w-4" />
+                    <Plus aria-hidden className="h-4 w-4" />
+                    Add a stop
                   </button>
-                </div>
-              ))}
-              {stops.length < MAX_STOPS ? (
-                <button
-                  type="button"
-                  className={buttonClass("ghost", "sm", "self-start")}
-                  onClick={() => {
-                    setStops([...stops, { key: nextKey, address: "" }]);
-                    setNextKey(nextKey + 1);
-                  }}
-                >
-                  <Plus aria-hidden className="h-4 w-4" />
-                  Add a stop
-                </button>
-              ) : null}
-            </div>
-            <FormField
-              id="dropoffAddress"
-              label="Drop-off address"
-              wide
-              error={e.dropoffAddress}
-              hint="Leave empty for an hourly hire, and enter the hours."
-            >
-              <input
-                id="dropoffAddress"
-                name="dropoffAddress"
-                defaultValue={values.dropoffAddress}
-                className={inputClass()}
-                {...invalid(e.dropoffAddress, "dropoffAddress")}
-              />
-            </FormField>
-            <FormField id="hours" label="Hours (hourly hire)" error={e.hours}>
-              <input
+                ) : null}
+              </div>
+            ) : null}
+            {hourly ? (
+              <FormField
                 id="hours"
-                name="hours"
-                inputMode="numeric"
-                defaultValue={values.hours}
-                className={inputClass("tabular-nums")}
-              />
-            </FormField>
+                label="Hours"
+                required
+                error={e.hours}
+                hint="How long the car is booked for, 1 to 24."
+              >
+                <input
+                  id="hours"
+                  name="hours"
+                  inputMode="numeric"
+                  defaultValue={values.hours}
+                  className={inputClass("tabular-nums")}
+                  {...invalid(e.hours, "hours")}
+                />
+              </FormField>
+            ) : (
+              <FormField
+                id="dropoffAddress"
+                label="Drop-off address"
+                required
+                wide
+                error={e.dropoffAddress}
+              >
+                <input
+                  id="dropoffAddress"
+                  name="dropoffAddress"
+                  defaultValue={values.dropoffAddress}
+                  className={inputClass()}
+                  {...invalid(e.dropoffAddress, "dropoffAddress")}
+                />
+              </FormField>
+            )}
           </>
         ) : null}
         <FormField
