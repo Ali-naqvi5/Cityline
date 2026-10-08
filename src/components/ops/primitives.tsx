@@ -17,7 +17,7 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md";
 
 const BUTTON_BASE =
-  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md font-medium transition-colors select-none disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none";
+  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg font-medium transition-colors select-none disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none";
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary: "bg-accent text-on-solid shadow-xs hover:bg-accent-hover",
@@ -131,14 +131,14 @@ export function PageHeader({
   meta?: ReactNode;
 }) {
   return (
-    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="border-line bg-surface mb-5 flex flex-col gap-3 rounded-xl border px-5 py-4 shadow-xs sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
           <div className="text-ink-3 mb-1 flex flex-wrap items-center gap-2 text-sm">
             {eyebrow}
           </div>
         ) : null}
-        <h1 className="text-ink text-2xl font-semibold tracking-tight lg:text-3xl">
+        <h1 className="text-ink text-2xl font-bold tracking-tight lg:text-3xl">
           {title}
         </h1>
         {description ? (
@@ -178,10 +178,10 @@ export function Panel({
   return (
     <section
       id={id}
-      className={cx("border-line bg-surface rounded-lg border shadow-xs", className)}
+      className={cx("border-line bg-surface rounded-xl border shadow-xs", className)}
     >
       {title ? (
-        <header className="border-line flex items-start justify-between gap-3 border-b px-4 py-3">
+        <header className="flex items-start justify-between gap-3 px-5 pt-4 pb-3">
           <div className="flex min-w-0 items-start gap-3">
             {icon ? (
               <span
@@ -203,7 +203,9 @@ export function Panel({
           ) : null}
         </header>
       ) : null}
-      <div className={cx(bodyClassName ?? "p-4")}>{children}</div>
+      <div className={cx(bodyClassName ?? (title ? "px-5 pt-1 pb-5" : "p-5"))}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -241,7 +243,7 @@ export function MetricCard({
     </>
   );
   const className =
-    "block rounded-lg border border-line bg-surface p-4 shadow-xs transition-colors";
+    "block rounded-xl border border-line bg-surface p-4 shadow-xs transition-colors";
   return href ? (
     <Link
       href={href}
@@ -303,7 +305,7 @@ export function Notice({
     <div
       role="status"
       className={cx(
-        "mb-4 flex items-start gap-2 rounded-md border px-3 py-2.5 text-sm print:hidden",
+        "mb-4 flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm print:hidden",
         tone === "ok"
           ? "border-ok-line bg-ok-soft text-ok"
           : tone === "warn"

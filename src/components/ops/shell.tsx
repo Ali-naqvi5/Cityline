@@ -208,7 +208,7 @@ export function OpsShell({
                 type="search"
                 autoComplete="off"
                 placeholder="Search bookings: reference, passenger, phone, flight"
-                className="border-line-strong bg-surface placeholder:text-ink-4 h-9 w-full rounded-md border pr-3 pl-8 text-sm"
+                className="bg-field hover:border-line-strong focus:border-accent focus:bg-surface placeholder:text-ink-4 h-9 w-full rounded-lg border border-transparent pr-3 pl-8 text-sm"
               />
             </form>
           ) : (

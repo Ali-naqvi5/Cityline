@@ -45,7 +45,7 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="border-danger-line bg-danger-soft flex flex-col items-center justify-center rounded-lg border px-6 py-10 text-center"
+      className="border-danger-line bg-danger-soft flex flex-col items-center justify-center rounded-xl border px-6 py-10 text-center"
     >
       <AlertTriangle aria-hidden className="text-danger mb-2 h-6 w-6" />
       <p className="text-md text-danger font-semibold">{title}</p>
@@ -63,7 +63,7 @@ export function ErrorState({
 
 export function NoAccess({ reason }: { reason: "deactivated" | "role" }) {
   return (
-    <div className="border-line bg-surface mx-auto mt-10 max-w-md rounded-lg border p-8 text-center shadow-xs">
+    <div className="border-line bg-surface mx-auto mt-10 max-w-md rounded-xl border p-8 text-center shadow-xs">
       <Lock aria-hidden className="text-ink-3 mx-auto mb-3 h-6 w-6" />
       <h1 className="text-ink text-xl font-semibold">
         {reason === "deactivated"

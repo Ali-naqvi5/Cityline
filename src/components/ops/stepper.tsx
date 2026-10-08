@@ -32,12 +32,12 @@ export function Stepper({
 }) {
   const clamp = (next: number) => Math.min(max, Math.max(min, next));
   const button =
-    "text-ink-2 hover:bg-sunken hover:text-ink flex h-full w-9 shrink-0 items-center justify-center disabled:opacity-40 disabled:hover:bg-transparent";
+    "text-ink-2 hover:bg-accent-soft hover:text-accent flex h-full w-9 shrink-0 items-center justify-center disabled:opacity-40 disabled:hover:bg-transparent";
   return (
     <div
       className={cx(
-        "border-line-strong bg-surface flex h-10 items-stretch overflow-hidden rounded-md border shadow-xs lg:h-9",
-        invalid && "border-danger",
+        "bg-field focus-within:border-accent focus-within:bg-surface flex h-10 items-stretch overflow-hidden rounded-lg border transition-colors lg:h-9",
+        invalid ? "border-danger" : "hover:border-line-strong border-transparent",
       )}
     >
       <button

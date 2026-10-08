@@ -170,6 +170,14 @@ See `docs/admin-implementation-map.md`. Rules that are easy to break:
   in `ops.css`; never hard-code a colour, use `text-on-solid` on solid
   buttons, and do not use `light-dark()` — the CSS build rewrites it so it
   resolves once, at the page root, and every colour turns transparent.
+- **The admin's look** (Cityline's design, 9 Oct 2026): Cityline green, as on
+  the public site (`--color-accent`), on a soft green-grey page; text boxes
+  filled (`bg-field`), not outlined, white with a green edge in use; rounded
+  cards (`rounded-xl`); page headers in a card (`PageHeader`); form sections
+  as cards with an icon tile (`Panel icon`), a `Segmented` row for a few
+  choices and a `Stepper` for counts. Chart greens are validated with the
+  dataviz validator (`--color-viz` #1f7a4d light, #3aac73 dark). The left
+  menu's layout is Cityline's own choice: leave it as it is.
 - Styles: `src/app/(payload)/ops.css` — its own tokens (`text-ink-3`,
   `bg-accent-soft`, pixel sizes; Payload's root font is 13px) and no preflight.
   In ops components use `cx` from `components/ops/primitives`, **not** `cn`:

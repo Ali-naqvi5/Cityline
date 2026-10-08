@@ -89,7 +89,7 @@ export function FormMessage({ state }: { state: FormState }) {
   return (
     <div
       role="alert"
-      className="border-danger-line bg-danger-soft text-danger flex items-start gap-2 rounded-md border px-3 py-2.5 text-sm"
+      className="border-danger-line bg-danger-soft text-danger flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm"
     >
       <AlertCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
       {state.message}

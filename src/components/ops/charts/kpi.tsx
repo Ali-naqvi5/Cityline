@@ -83,7 +83,7 @@ export function KpiTile({
   }
 
   return (
-    <div className="border-line bg-surface rounded-lg border p-4 shadow-xs">
+    <div className="border-line bg-surface rounded-xl border p-4 shadow-xs">
       <p className="text-ink-3 text-sm">{label}</p>
       <p
         className={cx(

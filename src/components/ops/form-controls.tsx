@@ -5,7 +5,7 @@ import { cx } from "./primitives";
 /** Compact, consistent form controls for filter bars and forms (spec §7). */
 
 const CONTROL =
-  "h-10 w-full rounded-md border border-line-strong bg-surface px-3 text-base text-ink shadow-xs placeholder:text-ink-4 lg:h-9 lg:text-sm";
+  "h-10 w-full rounded-lg border border-transparent bg-field px-3 text-base text-ink placeholder:text-ink-4 transition-colors hover:border-line-strong focus:border-accent focus:bg-surface lg:h-9 lg:text-sm";
 
 export function Label({ htmlFor, children }: { htmlFor: string; children: ReactNode }) {
   return (
