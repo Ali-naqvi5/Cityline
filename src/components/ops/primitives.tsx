@@ -163,6 +163,7 @@ export function Panel({
   className,
   bodyClassName,
   id,
+  icon,
 }: {
   title?: ReactNode;
   description?: ReactNode;
@@ -171,6 +172,8 @@ export function Panel({
   className?: string;
   bodyClassName?: string;
   id?: string;
+  /** A small icon beside the title, in a soft tile. */
+  icon?: ReactNode;
 }) {
   return (
     <section
@@ -179,11 +182,21 @@ export function Panel({
     >
       {title ? (
         <header className="border-line flex items-start justify-between gap-3 border-b px-4 py-3">
-          <div className="min-w-0">
-            <h2 className="text-md text-ink font-semibold">{title}</h2>
-            {description ? (
-              <p className="text-ink-3 mt-0.5 text-sm">{description}</p>
+          <div className="flex min-w-0 items-start gap-3">
+            {icon ? (
+              <span
+                aria-hidden
+                className="bg-accent-soft text-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-lg [&>svg]:h-4 [&>svg]:w-4"
+              >
+                {icon}
+              </span>
             ) : null}
+            <div className={cx("min-w-0", icon && !description ? "self-center" : "")}>
+              <h2 className="text-md text-ink font-semibold">{title}</h2>
+              {description ? (
+                <p className="text-ink-3 mt-0.5 text-sm">{description}</p>
+              ) : null}
+            </div>
           </div>
           {actions ? (
             <div className="flex shrink-0 items-center gap-2">{actions}</div>

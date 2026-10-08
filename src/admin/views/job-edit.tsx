@@ -6,7 +6,6 @@ import { money } from "@/admin/format";
 import { JobForm, type JobFormValues, type SupplierChoice } from "@/admin/forms/job-form";
 import { param, requireStaff, segment } from "@/admin/guard";
 import {
-  Badge,
   ButtonLink,
   Field,
   Fields,
@@ -230,41 +229,34 @@ export async function JobEditView(props: AdminViewServerProps) {
               : undefined
         }
       />
-      <Panel>
-        <JobForm
-          values={values}
-          suppliers={supplierChoices}
-          cancelHref={back}
-          mode={mode}
-          locked={
-            website && job ? (
-              <div className="border-accent-line bg-accent-soft rounded-md border p-4">
-                <p className="mb-3 flex items-center gap-2 text-sm">
-                  <Badge tone="info" icon={<Lock aria-hidden className="h-3 w-3" />}>
-                    Website booking
-                  </Badge>
-                  <span className="text-ink-2">
-                    Price, customer and route are locked. Change them through Amend
-                    booking.
-                  </span>
-                </p>
-                <Fields>
-                  <Field label="Passenger">
-                    {job.leadName} · {job.leadPhone}
-                  </Field>
-                  <Field label="Price">{money(job.customerPricePence)}</Field>
-                  <Field label="Pickup" wide>
-                    {job.pickupAddress}
-                  </Field>
-                  <Field label="Drop-off" wide>
-                    {job.dropoffAddress || "Hourly hire"}
-                  </Field>
-                </Fields>
-              </div>
-            ) : null
-          }
-        />
-      </Panel>
+      <JobForm
+        values={values}
+        suppliers={supplierChoices}
+        cancelHref={back}
+        mode={mode}
+        locked={
+          website && job ? (
+            <Panel
+              icon={<Lock />}
+              title="Website booking"
+              description="Price, customer and route are locked. Change them through Amend booking."
+            >
+              <Fields>
+                <Field label="Passenger">
+                  {job.leadName} · {job.leadPhone}
+                </Field>
+                <Field label="Price">{money(job.customerPricePence)}</Field>
+                <Field label="Pickup" wide>
+                  {job.pickupAddress}
+                </Field>
+                <Field label="Drop-off" wide>
+                  {job.dropoffAddress || "Hourly hire"}
+                </Field>
+              </Fields>
+            </Panel>
+          ) : null
+        }
+      />
     </OpsShell>
   );
 }

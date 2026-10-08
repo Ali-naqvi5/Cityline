@@ -42,6 +42,7 @@ export function FormField({
   error,
   required,
   wide,
+  aside,
   children,
 }: {
   id: string;
@@ -50,14 +51,26 @@ export function FormField({
   error?: string;
   required?: boolean;
   wide?: boolean;
+  /** Beside the label, on the right: "London time", "Add a stop". */
+  aside?: ReactNode;
   children: ReactNode;
 }) {
+  const labelled = (
+    <label htmlFor={id} className="text-ink-2 block text-sm font-medium">
+      {label}
+      {required ? <span className="text-danger"> *</span> : null}
+    </label>
+  );
   return (
     <div className={cx("min-w-0", wide && "sm:col-span-2")}>
-      <label htmlFor={id} className="text-ink-2 mb-1 block text-sm font-medium">
-        {label}
-        {required ? <span className="text-danger"> *</span> : null}
-      </label>
+      {aside ? (
+        <div className="mb-1 flex items-baseline justify-between gap-2">
+          {labelled}
+          <span className="text-ink-3 shrink-0 text-xs">{aside}</span>
+        </div>
+      ) : (
+        <div className="mb-1">{labelled}</div>
+      )}
       {children}
       {error ? (
         <p id={`${id}-error`} className="text-danger mt-1 flex items-start gap-1 text-sm">
@@ -111,4 +124,9 @@ export function SubmitButton({
 export { submitWithoutReset as submitWith } from "@/lib/form-submit";
 
 // Class helpers live in a plain module so server components can use them too.
-export { inputClass, invalid, TEXTAREA_CLASS } from "./form-classes";
+export {
+  inputClass,
+  invalid,
+  TEXTAREA_CLASS,
+  TEXTAREA_COMPACT_CLASS,
+} from "./form-classes";
