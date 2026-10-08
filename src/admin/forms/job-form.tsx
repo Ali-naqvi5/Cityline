@@ -169,12 +169,15 @@ export function JobForm({
   cancelHref,
   mode,
   locked,
+  passengerEmails = false,
 }: {
   values: JobFormValues;
   suppliers: SupplierChoice[];
   cancelHref: string;
   mode: "new" | "edit" | "website";
   locked?: ReactNode;
+  /** Whether driver details are emailed to passengers at all. */
+  passengerEmails?: boolean;
 }) {
   const [state, action, pending] = useActionState<JobFormState, FormData>(
     saveJobAction,
@@ -842,12 +845,17 @@ export function JobForm({
                 />
               </FormField>
               <div className="flex flex-col gap-1">
-                <Tick
-                  name="notifyPassenger"
-                  label="Email the passenger their driver's details when a driver is assigned"
-                  defaultChecked={values.notifyPassenger}
-                  hint="Some partners contact their passengers themselves."
-                />
+                {passengerEmails ? (
+                  <Tick
+                    name="notifyPassenger"
+                    label="Email the passenger their driver's details when a driver is assigned"
+                    defaultChecked={values.notifyPassenger}
+                    hint="Some partners contact their passengers themselves."
+                  />
+                ) : values.notifyPassenger ? (
+                  // Switched off: the booking's own choice is kept for when it is on.
+                  <input type="hidden" name="notifyPassenger" value="on" />
+                ) : null}
                 {!website ? (
                   <Tick
                     name="isTest"

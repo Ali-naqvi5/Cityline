@@ -11,6 +11,7 @@ import { ButtonLink, PageHeader, Panel } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
 import { relId } from "@/domain/dispatch/assignment";
+import { driverDetailsEmailsOn } from "@/lib/features";
 import { vehicleClassName } from "@/domain/jobs/labels";
 import { beforeBoarding, isFinal } from "@/domain/jobs/status";
 import type { Job } from "@/payload-types";
@@ -111,6 +112,7 @@ export async function JobAssignView(props: AdminViewServerProps) {
               cars={cars}
               notifyPassenger={job.notifyPassenger ?? true}
               canEmailPassenger={Boolean(job.leadEmail || job.bookerEmail)}
+              passengerEmails={driverDetailsEmailsOn()}
               driverPricePence={job.driverPricePence ?? null}
               current={
                 currentDriverId

@@ -54,6 +54,7 @@ export function AssignForm({
   current,
   notifyPassenger,
   canEmailPassenger,
+  passengerEmails,
   cancelHref,
   driverPricePence,
 }: {
@@ -65,6 +66,8 @@ export function AssignForm({
   current: { driverId: number; carId: number | null; name: string } | null;
   notifyPassenger: boolean;
   canEmailPassenger: boolean;
+  /** Whether driver details are emailed to passengers at all. */
+  passengerEmails: boolean;
   cancelHref: string;
   driverPricePence: number | null;
 }) {
@@ -436,7 +439,12 @@ export function AssignForm({
             </p>
           )}
         </div>
-        {canEmailPassenger ? (
+        {!passengerEmails ? (
+          // Switched off: the booking's own choice is kept for when it is on.
+          notifyPassenger ? (
+            <input type="hidden" name="notifyPassenger" value="on" />
+          ) : null
+        ) : canEmailPassenger ? (
           <label
             htmlFor="notifyPassenger"
             className="text-ink-2 flex cursor-pointer items-center gap-2 text-sm"

@@ -289,6 +289,12 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   TfL checks DBS and right to work before granting a PHV licence. TfL's
   record treats their licence copies and photo as held offline
   (`heldOffline`).
+- **Driver details emails are off** (Cityline, 9 Oct 2026): the email that
+  tells a passenger their driver and car (NOT-02) is kept, but sends only
+  with `DRIVER_DETAILS_EMAILS=on` (`lib/features.ts`); until then the admin
+  does not offer it and each booking's `notifyPassenger` is kept as it was.
+  All other customer emails still follow `CUSTOMER_EMAILS` (staff-only:
+  redirected to the office).
 - **Drivers & cars** (Cityline, 9 Oct 2026): one Fleet entry, a tab each
   (`FleetTabs`; the Cars tab needs `vehicles.view`). A new driver is added
   with their car in the same form — a new car, one already on record, or

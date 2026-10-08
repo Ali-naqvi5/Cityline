@@ -5,6 +5,7 @@ import type { AdminViewServerProps } from "payload";
 import { money } from "@/admin/format";
 import { JobForm, type JobFormValues, type SupplierChoice } from "@/admin/forms/job-form";
 import { param, requireStaff, segment } from "@/admin/guard";
+import { driverDetailsEmailsOn } from "@/lib/features";
 import {
   ButtonLink,
   Field,
@@ -230,6 +231,7 @@ export async function JobEditView(props: AdminViewServerProps) {
         }
       />
       <JobForm
+        passengerEmails={driverDetailsEmailsOn()}
         values={values}
         suppliers={supplierChoices}
         cancelHref={back}

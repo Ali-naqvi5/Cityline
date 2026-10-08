@@ -40,6 +40,12 @@ const serverSchema = z.object({
    * to staff until launch).
    */
   CUSTOMER_EMAILS: z.enum(["live", "staff-only"]).default("staff-only"),
+  /**
+   * The driver's details emailed to the passenger (NOT-02). Built and kept,
+   * but off until `on` (Cityline, 9 Oct 2026): no passenger receives one, and
+   * the admin does not offer to send one.
+   */
+  DRIVER_DETAILS_EMAILS: z.enum(["on", "off"]).default("off"),
   TWILIO_SID: z.string().optional(),
   TWILIO_TOKEN: z.string().optional(),
   TWILIO_FROM: z.string().optional(),

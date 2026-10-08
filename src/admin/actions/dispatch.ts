@@ -24,6 +24,7 @@ import { parsePounds } from "@/domain/money";
 import type { DriverMessageKind } from "@/domain/messaging/driver-message";
 import { driverDetailsEmail } from "@/domain/notifications/booking-emails";
 import { sendEmail } from "@/lib/email";
+import { driverDetailsEmailsOn } from "@/lib/features";
 import type { Booking, Driver, Job, User, Vehicle } from "@/payload-types";
 
 /**
@@ -299,7 +300,7 @@ export async function assignDriverAction(
   }
 
   let emailed = "";
-  if (saved.notifyPassenger) {
+  if (saved.notifyPassenger && driverDetailsEmailsOn()) {
     emailed = (await emailDriverDetails(payload, user, saved.id, "assigned")) ? "1" : "0";
   }
 
@@ -535,6 +536,8 @@ async function emailDriverDetails(
   jobId: number,
   reason: "assigned" | "resend",
 ): Promise<boolean> {
+  // Switched off (Cityline, 9 Oct 2026): nothing is sent or recorded.
+  if (!driverDetailsEmailsOn()) return false;
   const job = (await payload.findByID({
     collection: "jobs",
     id: jobId,
@@ -603,6 +606,7 @@ export async function sendDriverDetailsAction(formData: FormData): Promise<void>
   const { payload, user } = await staffForAction("jobs.dispatch");
   const job = await jobFor(payload, user, Number(text(formData, "jobId")));
   if (!job) redirect("/admin/bookings");
+  if (!driverDetailsEmailsOn()) redirect(`/admin/jobs/${job.id}?notice=details-off`);
   const sent = await emailDriverDetails(payload, user, job.id, "resend");
   redirect(`/admin/jobs/${job.id}?notice=${sent ? "details-sent" : "details-failed"}`);
 }

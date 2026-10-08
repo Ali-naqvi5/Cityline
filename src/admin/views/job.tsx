@@ -78,6 +78,7 @@ import { EXTRAS } from "@/domain/pricing/extras";
 import { bookingMoney } from "@/domain/finance/booking-money";
 import { can } from "@/domain/staff/permissions";
 import { company } from "@/lib/company";
+import { driverDetailsEmailsOn } from "@/lib/features";
 import type {
   Booking,
   Customer,
@@ -251,7 +252,7 @@ function ContactButtons({ phone, who }: { phone: string; who: string }) {
   );
 }
 
-const NOTICES: Record<string, { tone: "ok" | "danger"; text: string }> = {
+const NOTICES: Record<string, { tone: "ok" | "warn" | "danger"; text: string }> = {
   "link-sent": { tone: "ok", text: "Manage booking link emailed to the customer." },
   "link-failed": {
     tone: "danger",
@@ -271,6 +272,10 @@ const NOTICES: Record<string, { tone: "ok" | "danger"; text: string }> = {
   },
   "status-cancelled": { tone: "ok", text: "Booking cancelled." },
   "details-sent": { tone: "ok", text: "Driver details emailed to the passenger." },
+  "details-off": {
+    tone: "warn",
+    text: "Emailing passengers their driver's details is switched off.",
+  },
   "driver-price": { tone: "ok", text: "Driver price saved." },
   "details-failed": {
     tone: "danger",
@@ -1000,7 +1005,7 @@ export async function JobView(props: AdminViewServerProps) {
             </Panel>
           ) : null}
 
-          {driver && dispatches && !closed ? (
+          {driver && dispatches && !closed && driverDetailsEmailsOn() ? (
             <Panel
               title="Driver details to the passenger"
               actions={<Badge tone={passengerStatus.tone}>{passengerStatus.label}</Badge>}

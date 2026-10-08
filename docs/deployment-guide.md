@@ -303,6 +303,8 @@ MAIL_FROM="Cityline Airport Transfers <bookings@citylineairporttransfers.com>"
 OFFICE_ALERT_EMAIL=msnos1438@gmail.com
 # staff-only = customer emails are redirected to the office. Keep until launch.
 CUSTOMER_EMAILS=staff-only
+# The driver's details emailed to passengers: off (Cityline, 9 Oct 2026).
+DRIVER_DETAILS_EMAILS=off
 
 # --- Backups ---
 BACKUP_ARCHIVE_PASSWORD=<openssl rand -hex 32>
