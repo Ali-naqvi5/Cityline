@@ -16,6 +16,7 @@ import {
   TEXTAREA_CLASS,
 } from "@/components/ops/form";
 import { buttonClass, cx } from "@/components/ops/primitives";
+import { SearchSelect, type SearchOption } from "@/components/ops/search-select";
 import { DRIVER_ENGAGEMENTS } from "@/domain/compliance/documents";
 
 import { CarFields, EMPTY_CAR } from "./car-fields";
@@ -50,11 +51,14 @@ export function DriverForm({
   values,
   cancelHref,
   classes = [],
+  cars = [],
 }: {
   values: DriverFormValues;
   cancelHref: string;
   /** Vehicle classes, for the car a new driver is added with. */
   classes?: { value: string; label: string }[];
+  /** Cars already on record, for a new driver who drives one of them. */
+  cars?: SearchOption[];
 }) {
   const [state, action, pending] = useActionState(saveDriverAction, EMPTY_FORM);
   const [engagement, setEngagement] = useState(values.engagement || "registered");
@@ -191,7 +195,10 @@ export function DriverForm({
         </FormField>
       </FormSection>
 
-      {outsourcing ? <OutsourcedSections classes={classes} errors={e} /> : null}
+      {outsourcing ? <LicencesSection errors={e} /> : null}
+      {!values.id ? (
+        <CarSection outsourced={outsourcing} classes={classes} cars={cars} errors={e} />
+      ) : null}
 
       <FormSection
         title="With Cityline"
@@ -375,88 +382,153 @@ function NumberField({
   );
 }
 
+/** An outsourced driver's licences, typed in from the documents seen. */
+function LicencesSection({ errors: e }: { errors: Record<string, string | undefined> }) {
+  return (
+    <FormSection
+      title="Licences"
+      description="From the documents you have seen. Keep the copies offline; these are what dispatch checks."
+    >
+      <NumberField id="phvNumber" label="PHV driver licence number" error={e.phvNumber} />
+      <ExpiryField
+        id="phvExpiry"
+        label="PHV driver licence expires"
+        error={e.phvExpiry}
+      />
+      <NumberField id="dvlaNumber" label="Driving licence number" error={e.dvlaNumber} />
+      <ExpiryField id="dvlaExpiry" label="Driving licence expires" error={e.dvlaExpiry} />
+    </FormSection>
+  );
+}
+
+const CAR_CHOICES = [
+  ["new", "A new car"],
+  ["existing", "A car already on record"],
+  ["none", "No car yet"],
+] as const;
+
 /**
- * What an outsourced driver is added with: their licences and their car,
- * typed in from documents the office has seen and keeps copies of offline.
+ * The driver's car, added in the same form (Cityline, 9 Oct 2026): a new
+ * car, one already on record, or none yet. An outsourced driver comes with
+ * a new car and its licences, typed in; a registered driver's car documents
+ * are uploaded on the car's page after saving.
  */
-function OutsourcedSections({
+function CarSection({
+  outsourced,
   classes,
+  cars,
   errors: e,
 }: {
+  outsourced: boolean;
   classes: { value: string; label: string }[];
+  cars: SearchOption[];
   errors: Record<string, string | undefined>;
 }) {
+  const [choice, setChoice] = useState<string>("new");
+  const [existing, setExisting] = useState("");
+  const making = outsourced || choice === "new";
   return (
-    <>
-      <FormSection
-        title="Licences"
-        description="From the documents you have seen. Keep the copies offline; these are what dispatch checks."
-      >
-        <NumberField
-          id="phvNumber"
-          label="PHV driver licence number"
-          error={e.phvNumber}
-        />
-        <ExpiryField
-          id="phvExpiry"
-          label="PHV driver licence expires"
-          error={e.phvExpiry}
-        />
-        <NumberField
-          id="dvlaNumber"
-          label="Driving licence number"
-          error={e.dvlaNumber}
-        />
-        <ExpiryField
-          id="dvlaExpiry"
-          label="Driving licence expires"
-          error={e.dvlaExpiry}
-        />
-      </FormSection>
-
-      <FormSection
-        title="Their car"
-        description="Added with the driver and linked to them, ready to assign."
-      >
-        <CarFields values={EMPTY_CAR} classes={classes} errors={e} />
-        <NumberField
-          id="vehicleLicenceNumber"
-          label="PHV vehicle licence number"
-          error={e.vehicleLicenceNumber}
-        />
-        <ExpiryField
-          id="vehicleLicenceExpiry"
-          label="PHV vehicle licence expires"
-          error={e.vehicleLicenceExpiry}
-        />
-        <ExpiryField id="motExpiry" label="MOT expires" error={e.motExpiry} />
-        <ExpiryField
-          id="insuranceExpiry"
-          label="Hire and reward insurance expires"
-          error={e.insuranceExpiry}
-        />
-        <div className="sm:col-span-2">
-          <label
-            htmlFor="seenOriginals"
-            className="text-ink-2 flex min-h-10 cursor-pointer items-start gap-2 text-sm"
-          >
-            <input
-              id="seenOriginals"
-              name="seenOriginals"
-              type="checkbox"
-              className="accent-accent mt-0.5 h-4 w-4 shrink-0"
-              {...invalid(e.seenOriginals, "seenOriginals")}
-            />
-            I have seen the original documents, and the office keeps copies of them
-            offline
-          </label>
-          {e.seenOriginals ? (
-            <p id="seenOriginals-error" className="text-danger mt-1 text-sm">
-              {e.seenOriginals}
-            </p>
-          ) : null}
-        </div>
-      </FormSection>
-    </>
+    <FormSection
+      title="Their car"
+      description={
+        outsourced
+          ? "Added with the driver and linked to them, ready to assign."
+          : "Linked to the driver, so dispatch offers it with them. Upload its documents on the car's page after saving."
+      }
+    >
+      {outsourced ? (
+        <input type="hidden" name="carChoice" value="new" />
+      ) : (
+        <fieldset className="min-w-0 sm:col-span-2">
+          <legend className="sr-only">Their car</legend>
+          <div className="flex flex-wrap gap-2">
+            {CAR_CHOICES.map(([value, label]) => (
+              <label
+                key={value}
+                htmlFor={`carChoice-${value}`}
+                className={cx(
+                  "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm",
+                  choice === value
+                    ? "border-accent bg-accent-soft text-ink font-medium"
+                    : "border-line text-ink-2 hover:bg-sunken",
+                )}
+              >
+                <input
+                  id={`carChoice-${value}`}
+                  type="radio"
+                  name="carChoice"
+                  value={value}
+                  checked={choice === value}
+                  onChange={() => setChoice(value)}
+                  className="accent-accent h-4 w-4"
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      {making ? <CarFields values={EMPTY_CAR} classes={classes} errors={e} /> : null}
+      {!outsourced && choice === "existing" ? (
+        <FormField id="existingCar" label="Car" required wide error={e.existingCar}>
+          <SearchSelect
+            id="existingCar"
+            name="existingCar"
+            options={cars}
+            value={existing}
+            onChange={(value) => setExisting(String(value))}
+            placeholder="Type a registration or model"
+            invalid={Boolean(e.existingCar)}
+            describedBy={e.existingCar ? "existingCar-error" : undefined}
+          />
+        </FormField>
+      ) : null}
+      {!outsourced && choice === "none" ? (
+        <p className="text-ink-3 text-sm sm:col-span-2">
+          Link a car later from the driver&apos;s page or the car&apos;s.
+        </p>
+      ) : null}
+      {outsourced ? (
+        <>
+          <NumberField
+            id="vehicleLicenceNumber"
+            label="PHV vehicle licence number"
+            error={e.vehicleLicenceNumber}
+          />
+          <ExpiryField
+            id="vehicleLicenceExpiry"
+            label="PHV vehicle licence expires"
+            error={e.vehicleLicenceExpiry}
+          />
+          <ExpiryField id="motExpiry" label="MOT expires" error={e.motExpiry} />
+          <ExpiryField
+            id="insuranceExpiry"
+            label="Hire and reward insurance expires"
+            error={e.insuranceExpiry}
+          />
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="seenOriginals"
+              className="text-ink-2 flex min-h-10 cursor-pointer items-start gap-2 text-sm"
+            >
+              <input
+                id="seenOriginals"
+                name="seenOriginals"
+                type="checkbox"
+                className="accent-accent mt-0.5 h-4 w-4 shrink-0"
+                {...invalid(e.seenOriginals, "seenOriginals")}
+              />
+              I have seen the original documents, and the office keeps copies of them
+              offline
+            </label>
+            {e.seenOriginals ? (
+              <p id="seenOriginals-error" className="text-danger mt-1 text-sm">
+                {e.seenOriginals}
+              </p>
+            ) : null}
+          </div>
+        </>
+      ) : null}
+    </FormSection>
   );
 }

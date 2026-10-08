@@ -289,6 +289,11 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   TfL checks DBS and right to work before granting a PHV licence. TfL's
   record treats their licence copies and photo as held offline
   (`heldOffline`).
+- **Drivers & cars** (Cityline, 9 Oct 2026): one Fleet entry, a tab each
+  (`FleetTabs`; the Cars tab needs `vehicles.view`). A new driver is added
+  with their car in the same form — a new car, one already on record, or
+  none yet (`createDriverWithCar`, one transaction). A car's drivers are
+  chosen with `SearchSelect` (search, chips), never a list of checkboxes.
 - **Assigning** (`/admin/jobs/:id/assign`; Cityline, 9 Oct 2026): every
   current driver and car, one search box for both (`domain/dispatch/search.ts`:
   name, registration, make, model; closest first, forgiving typos), and any

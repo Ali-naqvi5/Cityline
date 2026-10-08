@@ -2,6 +2,7 @@ import { Plus, Search, UserPlus, UserRound } from "lucide-react";
 import Link from "next/link";
 import type { AdminViewServerProps, Where } from "payload";
 
+import { FleetTabs } from "@/admin/components/fleet-tabs";
 import { loadDrivers, type DriverRecord } from "@/admin/data/fleet";
 import { pickupLabel } from "@/admin/format";
 import { param, requireStaff } from "@/admin/guard";
@@ -50,10 +51,35 @@ export async function DriversView(props: AdminViewServerProps) {
   }
   if (q) {
     const digits = q.replace(/\D/g, "").replace(/^44/, "").replace(/^0+/, "");
+    // Drivers of a car whose registration, make or model matches.
+    const byCar = can(user.role, "vehicles.view")
+      ? (
+          await payload.find({
+            collection: "vehicles",
+            where: {
+              or: [
+                { registration: { like: q.replace(/\s+/g, "").toUpperCase() } },
+                { make: { like: q } },
+                { model: { like: q } },
+              ],
+            },
+            pagination: false,
+            depth: 0,
+            select: { drivers: true },
+            user,
+            overrideAccess: false,
+          })
+        ).docs.flatMap((car) =>
+          (car.drivers ?? []).map((linked) =>
+            typeof linked === "object" ? linked.id : linked,
+          ),
+        )
+      : [];
     and.push({
       or: [
         { fullName: { like: q } },
         ...(digits.length >= 6 ? [{ phone: { like: digits } }] : []),
+        ...(byCar.length ? [{ id: { in: byCar } }] : []),
       ],
     });
   }
@@ -62,12 +88,39 @@ export async function DriversView(props: AdminViewServerProps) {
     await loadDrivers(payload, user, now, and.length ? { and } : undefined)
   ).filter((record) => complianceFilter(record, compliance));
   const canEdit = can(user.role, "drivers.edit");
+  const seesCars = can(user.role, "vehicles.view");
+  // Each driver's cars, for those who may see cars.
+  const carsOf = new Map<number, string[]>();
+  if (seesCars && records.length) {
+    const cars = await payload.find({
+      collection: "vehicles",
+      where: {
+        and: [
+          { status: { not_equals: "sold" } },
+          { drivers: { in: records.map(({ driver }) => driver.id) } },
+        ],
+      },
+      pagination: false,
+      depth: 0,
+      user,
+      overrideAccess: false,
+    });
+    for (const car of cars.docs) {
+      for (const linked of car.drivers ?? []) {
+        const id = typeof linked === "object" ? linked.id : linked;
+        carsOf.set(id, [
+          ...(carsOf.get(id) ?? []),
+          `${car.registration} · ${car.make} ${car.model}`,
+        ]);
+      }
+    }
+  }
 
   return (
     <OpsShell user={user} active="drivers">
       <PageHeader
-        title="Drivers"
-        description="Who can work, and whether their documents let them."
+        title="Drivers & cars"
+        description="Who can work, the cars they drive, and whether their documents let them."
         actions={
           canEdit ? (
             <div className="flex flex-wrap gap-2">
@@ -84,6 +137,7 @@ export async function DriversView(props: AdminViewServerProps) {
         }
       />
 
+      <FleetTabs active="drivers" showCars={seesCars} />
       <Panel bodyClassName="p-0">
         <FilterForm
           action="/admin/drivers"
@@ -101,7 +155,7 @@ export async function DriversView(props: AdminViewServerProps) {
                 name="q"
                 type="search"
                 defaultValue={q}
-                placeholder="Name or phone"
+                placeholder="Name, phone or car"
                 className="pl-8"
               />
             </div>
@@ -119,7 +173,7 @@ export async function DriversView(props: AdminViewServerProps) {
           <div>
             <Label htmlFor="drivers-type">Type</Label>
             <Select id="drivers-type" name="type" defaultValue={type}>
-              <option value="">Registered and outsourced</option>
+              <option value="">Any type</option>
               <option value="registered">Registered</option>
               <option value="outsourced">Outsourced</option>
             </Select>
@@ -227,6 +281,29 @@ export async function DriversView(props: AdminViewServerProps) {
                   </Badge>
                 ),
               },
+              ...(seesCars
+                ? [
+                    {
+                      key: "cars",
+                      header: "Car",
+                      cell: ({ driver }: DriverRecord) =>
+                        carsOf.get(driver.id)?.length ? (
+                          <span className="text-ink-2 text-sm">
+                            {carsOf.get(driver.id)!.map((car) => (
+                              <span
+                                key={car}
+                                className="block whitespace-nowrap tabular-nums"
+                              >
+                                {car}
+                              </span>
+                            ))}
+                          </span>
+                        ) : (
+                          <span className="text-ink-4">No car linked</span>
+                        ),
+                    },
+                  ]
+                : []),
               {
                 key: "phone",
                 header: "Phone",

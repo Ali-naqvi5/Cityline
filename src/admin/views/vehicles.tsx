@@ -2,6 +2,7 @@ import { Car, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import type { AdminViewServerProps, Where } from "payload";
 
+import { FleetTabs } from "@/admin/components/fleet-tabs";
 import { loadVehicles } from "@/admin/data/fleet";
 import { param, requireStaff } from "@/admin/guard";
 import { ComplianceBadge, VEHICLE_STATUS_TONE } from "@/components/ops/compliance";
@@ -64,20 +65,21 @@ export async function VehiclesView(props: AdminViewServerProps) {
   const canEdit = can(user.role, "vehicles.edit");
 
   return (
-    <OpsShell user={user} active="vehicles">
+    <OpsShell user={user} active="drivers">
       <PageHeader
-        title="Vehicles"
-        description="Every vehicle on the fleet, its class and its documents."
+        title="Drivers & cars"
+        description="Every car on the fleet, who drives it, its class and its documents."
         actions={
           canEdit ? (
             <ButtonLink href="/admin/vehicles/new" variant="primary">
               <Plus aria-hidden className="h-4 w-4" />
-              Add vehicle
+              Add car
             </ButtonLink>
           ) : null
         }
       />
 
+      <FleetTabs active="cars" showCars />
       <Panel bodyClassName="p-0">
         <FilterForm
           action="/admin/vehicles"
@@ -126,18 +128,18 @@ export async function VehiclesView(props: AdminViewServerProps) {
             icon={<Car aria-hidden className="h-5 w-5" />}
             title={
               q || compliance || status !== "current"
-                ? "No vehicles match these filters"
-                : "No vehicles yet"
+                ? "No cars match these filters"
+                : "No cars yet"
             }
             description={
               q || compliance
                 ? "Try a different search, or clear the filters."
-                : "Add each vehicle with its PHV licence, MOT and insurance."
+                : "Add each car with its PHV licence, MOT and insurance — or add it with its driver."
             }
             action={
               canEdit && !q && !compliance ? (
                 <ButtonLink href="/admin/vehicles/new" variant="primary" size="sm">
-                  Add vehicle
+                  Add car
                 </ButtonLink>
               ) : undefined
             }

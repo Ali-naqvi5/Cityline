@@ -156,19 +156,13 @@ export const NAV: NavSection[] = [
     label: "Fleet",
     items: [
       {
+        // Drivers and their cars, one entry with a tab each (Cityline,
+        // 9 Oct 2026). The cars list is /admin/vehicles.
         id: "drivers",
-        label: "Drivers",
+        label: "Drivers & cars",
         href: "/admin/drivers",
         icon: "drivers",
         capability: "drivers.view",
-        ready: true,
-      },
-      {
-        id: "vehicles",
-        label: "Vehicles",
-        href: "/admin/vehicles",
-        icon: "vehicles",
-        capability: "vehicles.view",
         ready: true,
       },
       {

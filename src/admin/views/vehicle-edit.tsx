@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
 import { VehicleForm, type VehicleFormValues } from "@/admin/forms/vehicle-form";
-import { requireStaff, segment } from "@/admin/guard";
+import { param, requireStaff, segment } from "@/admin/guard";
 import { ButtonLink, PageHeader, Panel } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
@@ -27,7 +27,7 @@ export async function VehicleEditView(props: AdminViewServerProps) {
     sort: "fullName",
     pagination: false,
     depth: 0,
-    select: { fullName: true },
+    select: { fullName: true, phone: true },
     user,
     overrideAccess: false,
   });
@@ -41,7 +41,11 @@ export async function VehicleEditView(props: AdminViewServerProps) {
     seats: "",
     ownership: "driver",
     status: "active",
-    drivers: [],
+    // "Add a car" from a driver's page comes with that driver chosen.
+    drivers:
+      Number(param(props.searchParams, "driver")) > 0
+        ? [Number(param(props.searchParams, "driver"))]
+        : [],
     notes: "",
   };
 
@@ -56,11 +60,11 @@ export async function VehicleEditView(props: AdminViewServerProps) {
     });
     if (!vehicle) {
       return (
-        <OpsShell user={user} active="vehicles">
+        <OpsShell user={user} active="drivers">
           <Panel>
             <EmptyState
-              title="No vehicle with that number"
-              action={<ButtonLink href="/admin/vehicles">Back to vehicles</ButtonLink>}
+              title="No car with that number"
+              action={<ButtonLink href="/admin/vehicles">Back to cars</ButtonLink>}
             />
           </Panel>
         </OpsShell>
@@ -85,21 +89,21 @@ export async function VehicleEditView(props: AdminViewServerProps) {
 
   const back = isNew ? "/admin/vehicles" : `/admin/vehicles/${idSegment}`;
   return (
-    <OpsShell user={user} active="vehicles">
+    <OpsShell user={user} active="drivers">
       <div className="mb-3">
         <Link
           href={back}
           className="text-ink-3 hover:text-ink inline-flex items-center gap-1 text-sm"
         >
           <ArrowLeft aria-hidden className="h-4 w-4" />
-          {isNew ? "Vehicles" : values.registration}
+          {isNew ? "Cars" : values.registration}
         </Link>
       </div>
       <PageHeader
-        title={isNew ? "Add a vehicle" : "Edit vehicle"}
+        title={isNew ? "Add a car" : "Edit car"}
         description={
           isNew
-            ? "Documents are added on the vehicle's page once it is saved."
+            ? "Documents are added on the car's page once it is saved. A new driver's car can also be added with the driver."
             : undefined
         }
       />
@@ -113,6 +117,7 @@ export async function VehicleEditView(props: AdminViewServerProps) {
           drivers={drivers.docs.map((driver) => ({
             id: driver.id,
             name: driver.fullName ?? `Driver ${driver.id}`,
+            phone: driver.phone,
           }))}
           cancelHref={back}
         />

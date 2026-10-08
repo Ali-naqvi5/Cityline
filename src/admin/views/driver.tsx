@@ -556,10 +556,23 @@ export async function DriverView(props: AdminViewServerProps) {
           </Panel>
 
           {vehicles ? (
-            <Panel title="Vehicles" bodyClassName="p-0">
+            <Panel
+              title="Cars"
+              bodyClassName="p-0"
+              actions={
+                can(user.role, "vehicles.edit") ? (
+                  <Link
+                    href={`/admin/vehicles/new?driver=${driver.id}`}
+                    className="text-accent text-sm hover:underline"
+                  >
+                    Add a car
+                  </Link>
+                ) : null
+              }
+            >
               {vehicles.docs.length === 0 ? (
                 <p className="text-ink-3 px-4 py-3 text-sm">
-                  No vehicle linked. Link one from the vehicle&apos;s page.
+                  No car linked. Add one, or link one from the car&apos;s page.
                 </p>
               ) : (
                 <ul className="divide-line divide-y">

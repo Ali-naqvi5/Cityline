@@ -67,11 +67,11 @@ export async function VehicleView(props: AdminViewServerProps) {
     : [];
   if (!record) {
     return (
-      <OpsShell user={user} active="vehicles">
+      <OpsShell user={user} active="drivers">
         <Panel>
           <EmptyState
             title="No vehicle with that number"
-            action={<ButtonLink href="/admin/vehicles">Back to vehicles</ButtonLink>}
+            action={<ButtonLink href="/admin/vehicles">Back to cars</ButtonLink>}
           />
         </Panel>
       </OpsShell>
@@ -97,14 +97,14 @@ export async function VehicleView(props: AdminViewServerProps) {
   );
 
   return (
-    <OpsShell user={user} active="vehicles">
+    <OpsShell user={user} active="drivers">
       <div className="mb-3">
         <Link
           href="/admin/vehicles"
           className="text-ink-3 hover:text-ink inline-flex items-center gap-1 text-sm"
         >
           <ArrowLeft aria-hidden className="h-4 w-4" />
-          Vehicles
+          Cars
         </Link>
       </div>
       {notice ? <Notice tone="ok">{notice}</Notice> : null}

@@ -9,6 +9,8 @@ import { ButtonLink, PageHeader, Panel } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
 import { formatNiNumber } from "@/domain/fleet/driver-record";
+import { vehicleClassName } from "@/domain/jobs/labels";
+import { can } from "@/domain/staff/permissions";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 
 const CLASSES = VEHICLE_CLASSES.map((vehicle) => ({
@@ -99,6 +101,27 @@ export async function DriverEditView(props: AdminViewServerProps) {
     };
   }
 
+  // Cars already on record, for a new driver who drives one of them.
+  const cars =
+    isNew && can(user.role, "vehicles.view")
+      ? (
+          await payload.find({
+            collection: "vehicles",
+            where: { status: { not_equals: "sold" } },
+            sort: "registration",
+            pagination: false,
+            depth: 0,
+            user,
+            overrideAccess: false,
+          })
+        ).docs.map((car) => ({
+          value: String(car.id),
+          label: car.registration,
+          detail: `${car.colour} ${car.make} ${car.model} · ${vehicleClassName(car.vehicleClassSlug)}`,
+          keywords: [car.make, car.model],
+        }))
+      : [];
+
   const back = isNew ? "/admin/drivers" : `/admin/drivers/${idSegment}`;
   return (
     <OpsShell user={user} active="drivers">
@@ -115,12 +138,12 @@ export async function DriverEditView(props: AdminViewServerProps) {
         title={isNew ? "Add a driver" : "Edit driver"}
         description={
           isNew
-            ? "A registered driver's documents are uploaded on their page once saved. An outsourced driver is added with their licences and car."
+            ? "Added with their car. A registered driver's documents are uploaded on their page once saved; an outsourced driver's licences are typed in here."
             : undefined
         }
       />
       <Panel bodyClassName="p-5">
-        <DriverForm values={values} cancelHref={back} classes={CLASSES} />
+        <DriverForm values={values} cancelHref={back} classes={CLASSES} cars={cars} />
       </Panel>
     </OpsShell>
   );

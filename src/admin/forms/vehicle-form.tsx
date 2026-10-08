@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { saveVehicleAction } from "@/admin/actions/fleet";
 import { EMPTY_FORM } from "@/admin/form-state";
@@ -16,6 +16,7 @@ import {
   TEXTAREA_CLASS,
 } from "@/components/ops/form";
 import { buttonClass } from "@/components/ops/primitives";
+import { SearchSelect } from "@/components/ops/search-select";
 
 export interface VehicleFormValues {
   id?: number;
@@ -39,10 +40,11 @@ export function VehicleForm({
 }: {
   values: VehicleFormValues;
   classes: { value: string; label: string }[];
-  drivers: { id: number; name: string }[];
+  drivers: { id: number; name: string; phone?: string }[];
   cancelHref: string;
 }) {
   const [state, action, pending] = useActionState(saveVehicleAction, EMPTY_FORM);
+  const [linked, setLinked] = useState<string[]>(values.drivers.map(String));
   const e = state.errors;
 
   return (
@@ -50,8 +52,8 @@ export function VehicleForm({
       {values.id ? <input type="hidden" name="id" value={values.id} /> : null}
 
       <FormSection
-        title="Vehicle"
-        description="The registration and class are what dispatch checks against each job."
+        title="Car"
+        description="The registration and class are what dispatch shows against each job."
       >
         <FormField id="registration" label="Registration" required error={e.registration}>
           <input
@@ -133,7 +135,7 @@ export function VehicleForm({
 
       <FormSection
         title="Status and ownership"
-        description="A vehicle off the road cannot be given jobs."
+        description="A car off the road cannot be given jobs."
       >
         <FormField id="status" label="Status" required error={e.status}>
           <select
@@ -163,32 +165,33 @@ export function VehicleForm({
 
       <FormSection
         title="Drivers"
-        description="Who normally drives this vehicle. Dispatch suggests it for them."
+        description="Who normally drives this car. Dispatch lists it with them; any driver can still be given it."
       >
         {drivers.length === 0 ? (
           <p className="text-ink-3 text-sm sm:col-span-2">
             No drivers yet. Add drivers first, then link them here.
           </p>
         ) : (
-          <div className="grid gap-1 sm:col-span-2 sm:grid-cols-2">
-            {drivers.map((driver) => (
-              <label
-                key={driver.id}
-                htmlFor={`driver-${driver.id}`}
-                className="text-ink-2 flex min-h-9 cursor-pointer items-center gap-2 text-sm"
-              >
-                <input
-                  id={`driver-${driver.id}`}
-                  type="checkbox"
-                  name="drivers"
-                  value={driver.id}
-                  defaultChecked={values.drivers.includes(driver.id)}
-                  className="accent-accent h-4 w-4"
-                />
-                {driver.name}
-              </label>
-            ))}
-          </div>
+          <FormField
+            id="drivers"
+            label="Drivers"
+            wide
+            hint="Type a name or phone number."
+          >
+            <SearchSelect
+              id="drivers"
+              name="drivers"
+              multiple
+              options={drivers.map((driver) => ({
+                value: String(driver.id),
+                label: driver.name,
+                detail: driver.phone,
+              }))}
+              value={linked}
+              onChange={(value) => setLinked(value as string[])}
+              placeholder="Add a driver"
+            />
+          </FormField>
         )}
       </FormSection>
 
@@ -207,7 +210,7 @@ export function VehicleForm({
       <FormMessage state={state} />
       <div className="border-line flex flex-wrap items-center gap-2 border-t pt-5">
         <SubmitButton pending={pending}>
-          {values.id ? "Save changes" : "Add vehicle"}
+          {values.id ? "Save changes" : "Add car"}
         </SubmitButton>
         <Link href={cancelHref} className={buttonClass("ghost", "md")}>
           Cancel
