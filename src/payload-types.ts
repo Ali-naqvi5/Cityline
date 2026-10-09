@@ -632,7 +632,7 @@ export interface Vehicle {
   ownership: 'company' | 'driver' | 'hired';
   status: 'active' | 'off_road' | 'sold';
   /**
-   * Drivers who normally use this vehicle.
+   * The driver whose car this is.
    */
   drivers?: (number | Driver)[] | null;
   notes?: string | null;

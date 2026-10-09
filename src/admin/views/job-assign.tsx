@@ -17,9 +17,9 @@ import { beforeBoarding, isFinal } from "@/domain/jobs/status";
 import type { Job } from "@/payload-types";
 
 /**
- * Assigning a driver and car to a job (`/jobs/:id/assign`, spec §19): every
- * driver and every car, one search for both, any driver with any car
- * (Cityline, 9 Oct 2026). What cannot legally go is shown with the reason.
+ * Assigning a driver to a job (`/jobs/:id/assign`, spec §19): every driver,
+ * each with their own car, which goes with them (Cityline, 9 Oct 2026). What
+ * cannot legally go is shown with the reason.
  */
 export async function JobAssignView(props: AdminViewServerProps) {
   const idSegment = segment(props, 1);
@@ -39,11 +39,11 @@ export async function JobAssignView(props: AdminViewServerProps) {
 
   if (!job) {
     return (
-      <OpsShell user={user} active="dispatch">
+      <OpsShell user={user} active="bookings">
         <Panel>
           <EmptyState
             title="No job with that number"
-            action={<ButtonLink href="/admin/dispatch">Back to dispatch</ButtonLink>}
+            action={<ButtonLink href="/admin/bookings">Back to bookings</ButtonLink>}
           />
         </Panel>
       </OpsShell>
@@ -53,7 +53,7 @@ export async function JobAssignView(props: AdminViewServerProps) {
   const back = `/admin/jobs/${job.id}`;
   if (!beforeBoarding(job.status)) {
     return (
-      <OpsShell user={user} active="dispatch">
+      <OpsShell user={user} active="bookings">
         <Panel>
           <EmptyState
             title={
@@ -69,7 +69,7 @@ export async function JobAssignView(props: AdminViewServerProps) {
     );
   }
 
-  const { drivers, cars } = await loadAssignmentBoard(payload, user, job, now);
+  const drivers = await loadAssignmentBoard(payload, user, job, now);
   const at = new Date(job.pickupAt);
   const currentDriverId = relId(job.driver);
   const currentDriver = currentDriverId
@@ -84,7 +84,7 @@ export async function JobAssignView(props: AdminViewServerProps) {
     : null;
 
   return (
-    <OpsShell user={user} active="dispatch">
+    <OpsShell user={user} active="bookings">
       <div className="mb-3">
         <Link
           href={back}
@@ -101,15 +101,14 @@ export async function JobAssignView(props: AdminViewServerProps) {
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <Panel
-          title="Driver and car"
-          description="Any driver, with any car. A different class or too few seats is a warning; a licence, MOT or insurance out of date stops it."
+          title="Driver"
+          description="Each driver comes with their own car. A different class or too few seats is a warning; a licence, MOT or insurance out of date stops it."
         >
-          {drivers.length || cars.length ? (
+          {drivers.length ? (
             <AssignForm
               jobId={job.id}
               job={{ jobClass: job.vehicleClassSlug, passengers: job.passengers ?? null }}
               drivers={drivers}
-              cars={cars}
               notifyPassenger={job.notifyPassenger ?? true}
               canEmailPassenger={Boolean(job.leadEmail || job.bookerEmail)}
               passengerEmails={driverDetailsEmailsOn()}
@@ -118,7 +117,6 @@ export async function JobAssignView(props: AdminViewServerProps) {
                 currentDriverId
                   ? {
                       driverId: currentDriverId,
-                      carId: relId(job.vehicle),
                       name: currentDriver?.fullName ?? "The current driver",
                     }
                   : null
@@ -127,7 +125,7 @@ export async function JobAssignView(props: AdminViewServerProps) {
             />
           ) : (
             <EmptyState
-              title="No drivers or cars yet"
+              title="No drivers yet"
               description="Add a driver and their car under Fleet first."
             />
           )}

@@ -44,7 +44,7 @@ import {
   PARTICULAR_LABELS,
   type Particular,
 } from "@/domain/fleet/driver-record";
-import { DRIVER_STATUS_LABELS } from "@/domain/fleet/labels";
+import { DRIVER_STATUS_LABELS, VEHICLE_STATUS_LABELS } from "@/domain/fleet/labels";
 import { OPEN_STATUSES } from "@/domain/jobs/labels";
 import { can } from "@/domain/staff/permissions";
 import { formatDate } from "@/lib/time";
@@ -146,6 +146,8 @@ export async function DriverView(props: AdminViewServerProps) {
       ? payload.find({
           collection: "vehicles",
           where: { drivers: { in: [id] } },
+          // Their car in use first, then the ones they no longer use.
+          sort: "-updatedAt",
           depth: 0,
           limit: 20,
           user,
@@ -557,7 +559,8 @@ export async function DriverView(props: AdminViewServerProps) {
 
           {vehicles ? (
             <Panel
-              title="Cars"
+              title="Car"
+              description="Their own car. A new one replaces it."
               bodyClassName="p-0"
               actions={
                 can(user.role, "vehicles.edit") ? (
@@ -565,32 +568,43 @@ export async function DriverView(props: AdminViewServerProps) {
                     href={`/admin/vehicles/new?driver=${driver.id}`}
                     className="text-accent text-sm hover:underline"
                   >
-                    Add a car
+                    {vehicles.docs.some((vehicle) => vehicle.status !== "sold")
+                      ? "Replace their car"
+                      : "Add their car"}
                   </Link>
                 ) : null
               }
             >
               {vehicles.docs.length === 0 ? (
-                <p className="text-ink-3 px-4 py-3 text-sm">
-                  No car linked. Add one, or link one from the car&apos;s page.
-                </p>
+                <p className="text-ink-3 px-4 py-3 text-sm">No car on record yet.</p>
               ) : (
                 <ul className="divide-line divide-y">
-                  {vehicles.docs.map((vehicle) => (
-                    <li key={vehicle.id}>
-                      <Link
-                        href={`/admin/vehicles/${vehicle.id}`}
-                        className="hover:bg-sunken/60 block px-4 py-2.5"
-                      >
-                        <span className="text-ink block text-sm font-medium tabular-nums">
-                          {vehicle.registration}
-                        </span>
-                        <span className="text-ink-3 block text-xs">
-                          {vehicle.colour} {vehicle.make} {vehicle.model}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
+                  {[...vehicles.docs]
+                    .sort(
+                      (a, b) => Number(a.status === "sold") - Number(b.status === "sold"),
+                    )
+                    .map((vehicle) => (
+                      <li key={vehicle.id}>
+                        <Link
+                          href={`/admin/vehicles/${vehicle.id}`}
+                          className="hover:bg-sunken/60 block px-4 py-2.5"
+                        >
+                          <span className="text-ink flex items-center gap-2 text-sm font-medium tabular-nums">
+                            {vehicle.registration}
+                            {vehicle.status !== "active" ? (
+                              <Badge
+                                tone={vehicle.status === "sold" ? "neutral" : "warn"}
+                              >
+                                {VEHICLE_STATUS_LABELS[vehicle.status] ?? vehicle.status}
+                              </Badge>
+                            ) : null}
+                          </span>
+                          <span className="text-ink-3 block text-xs">
+                            {vehicle.colour} {vehicle.make} {vehicle.model}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
                 </ul>
               )}
             </Panel>

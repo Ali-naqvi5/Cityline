@@ -6,8 +6,9 @@ import { DeniedPage } from "@/components/ops/states";
 
 /**
  * `/admin/jobs` was the register before the bookings dashboard replaced it
- * (2 Oct 2026). Old links and bookmarks land on the dashboard with their
- * filters carried over. Single jobs keep their `/admin/jobs/:id` addresses.
+ * (2 Oct 2026), and `/admin/dispatch` the board Bookings took over (9 Oct
+ * 2026). Old links and bookmarks land on Bookings with their filters carried
+ * over. Single jobs keep their `/admin/jobs/:id` addresses.
  */
 export function JobsRedirect(props: AdminViewServerProps) {
   const context = requireStaff(props, "jobs.view", "/admin/bookings");

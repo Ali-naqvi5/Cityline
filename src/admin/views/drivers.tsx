@@ -120,7 +120,7 @@ export async function DriversView(props: AdminViewServerProps) {
     <OpsShell user={user} active="drivers">
       <PageHeader
         title="Drivers & cars"
-        description="Who can work, the cars they drive, and whether their documents let them."
+        description="Independent drivers, each with their own car, and whether their documents let them work."
         actions={
           canEdit ? (
             <div className="flex flex-wrap gap-2">

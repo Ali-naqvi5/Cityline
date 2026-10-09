@@ -16,16 +16,9 @@ import {
   TEXTAREA_CLASS,
 } from "@/components/ops/form";
 import { Badge, buttonClass, cx } from "@/components/ops/primitives";
-import { SearchSelect } from "@/components/ops/search-select";
 import { fitWarnings } from "@/domain/dispatch/eligibility";
 import { rankMatches } from "@/domain/dispatch/search";
 import { vehicleClassName } from "@/domain/jobs/labels";
-
-interface Row {
-  key: string;
-  driver: BoardDriver | null;
-  car: BoardCar | null;
-}
 
 interface Verdict {
   blocks: string[];
@@ -35,13 +28,16 @@ interface Verdict {
 const carText = (car: BoardCar) =>
   `${car.colour} ${car.make} ${car.model} · ${vehicleClassName(car.vehicleClassSlug)}${car.seats ? ` · ${car.seats} seats` : ""}`;
 
+const NO_CAR = "No car on record — add their car on the driver's page.";
+
 /**
- * Choosing who does a job (spec §19; Cityline, 9 Oct 2026): every driver and
- * every car, found with one search — a name, a registration, a model — and
- * any driver may take any car. What only warns is shown; what the law
- * forbids (a licence, MOT or insurance missing or out of date; a suspended
- * driver; a car off the road) stops the assignment, and the server checks
- * again when it saves.
+ * Choosing who does a job (spec §19; Cityline, 9 Oct 2026): every driver,
+ * each with their own car — drivers are self-employed and bring it, so the
+ * car comes with the driver. One search finds either: a name, a
+ * registration, a model. What only warns is shown; what the law forbids (a
+ * licence, MOT or insurance missing or out of date; a suspended driver; a
+ * car off the road; no car at all) stops the assignment, and the server
+ * checks again when it saves.
  *
  * Giving the job to someone else takes the current driver off it, so the
  * reason is asked for — it goes on the job's history and the Driver Report.
@@ -50,7 +46,6 @@ export function AssignForm({
   jobId,
   job,
   drivers,
-  cars,
   current,
   notifyPassenger,
   canEmailPassenger,
@@ -61,9 +56,8 @@ export function AssignForm({
   jobId: number;
   job: { jobClass: string; passengers: number | null };
   drivers: BoardDriver[];
-  cars: BoardCar[];
-  /** The driver and car on the job now, if any. */
-  current: { driverId: number; carId: number | null; name: string } | null;
+  /** The driver on the job now, if any. */
+  current: { driverId: number; name: string } | null;
   notifyPassenger: boolean;
   canEmailPassenger: boolean;
   /** Whether driver details are emailed to passengers at all. */
@@ -74,49 +68,18 @@ export function AssignForm({
   const [state, action, pending] = useActionState(assignDriverAction, EMPTY_FORM);
   const [query, setQuery] = useState("");
   const [driverId, setDriverId] = useState(current ? String(current.driverId) : "");
-  const [carId, setCarId] = useState(current?.carId ? String(current.carId) : "");
 
-  const driverById = useMemo(
-    () => new Map(drivers.map((d) => [String(d.id), d])),
-    [drivers],
-  );
-  const carById = useMemo(() => new Map(cars.map((c) => [String(c.id), c])), [cars]);
-
-  const verdict = (driver: BoardDriver | null, car: BoardCar | null): Verdict => ({
-    blocks: [...(driver?.blocks ?? []), ...(car?.blocks ?? [])],
-    warnings: [
-      ...(car
-        ? fitWarnings(job, car, driver ? car.driverIds.includes(driver.id) : undefined)
-        : []),
-      ...(driver?.warnings ?? []),
-      ...(car?.warnings ?? []),
-    ],
+  const verdict = (driver: BoardDriver): Verdict => ({
+    blocks: [...driver.blocks, ...(driver.car ? driver.car.blocks : [NO_CAR])],
+    warnings: driver.car
+      ? [...fitWarnings(job, driver.car), ...driver.warnings, ...driver.car.warnings]
+      : driver.warnings,
   });
 
-  // Every driver with each car they use; a driver with none; a car nobody uses.
-  const rows = useMemo<Row[]>(() => {
-    const listed = new Set<number>();
-    const out: Row[] = [];
-    for (const driver of drivers) {
-      const own = driver.carIds
-        .map((id) => carById.get(String(id)))
-        .filter((car): car is BoardCar => Boolean(car));
-      if (own.length === 0) out.push({ key: `${driver.id}:`, driver, car: null });
-      for (const car of own) {
-        listed.add(car.id);
-        out.push({ key: `${driver.id}:${car.id}`, driver, car });
-      }
-    }
-    for (const car of cars) {
-      if (!listed.has(car.id)) out.push({ key: `:${car.id}`, driver: null, car });
-    }
-    return out;
-  }, [drivers, cars, carById]);
-
   const shown = useMemo(() => {
-    const ranked = rankMatches(rows, query, (row) => [
-      row.driver?.name ?? "",
-      row.driver?.phone ?? "",
+    const ranked = rankMatches(drivers, query, (row) => [
+      row.name,
+      row.phone,
       row.car?.registration ?? "",
       row.car?.make ?? "",
       row.car?.model ?? "",
@@ -125,36 +88,26 @@ export function AssignForm({
       row.car ? vehicleClassName(row.car.vehicleClassSlug) : "",
     ]);
     if (query.trim()) return ranked;
-    // With nothing typed: the current pair, then who can go, fewest warnings first.
-    const isCurrent = (row: Row) =>
-      current !== null &&
-      row.driver?.id === current.driverId &&
-      row.car?.id === current.carId;
+    // With nothing typed: the current driver, then who can go, fewest warnings first.
+    const isCurrent = (row: BoardDriver) => row.id === current?.driverId;
     return ranked
-      .map((row) => ({ row, v: verdict(row.driver, row.car) }))
+      .map((row) => ({ row, v: verdict(row) }))
       .sort(
         (a, b) =>
           Number(isCurrent(b.row)) - Number(isCurrent(a.row)) ||
-          Number(a.v.blocks.length > 0 || !a.row.driver || !a.row.car) -
-            Number(b.v.blocks.length > 0 || !b.row.driver || !b.row.car) ||
+          Number(a.v.blocks.length > 0) - Number(b.v.blocks.length > 0) ||
           a.v.warnings.length - b.v.warnings.length,
       )
       .map(({ row }) => row);
     // `verdict` reads only props, which these dependencies cover.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows, query, current]);
+  }, [drivers, query, current]);
 
-  const driver = driverById.get(driverId) ?? null;
-  const car = carById.get(carId) ?? null;
-  const chosen = verdict(driver, car);
+  const driver = drivers.find((row) => String(row.id) === driverId) ?? null;
+  const car = driver?.car ?? null;
+  const chosen = driver ? verdict(driver) : { blocks: [], warnings: [] };
   const ready = driver !== null && car !== null && chosen.blocks.length === 0;
   const replacing = current !== null && driver !== null && driver.id !== current.driverId;
-
-  const choose = (row: Row) => {
-    if (row.driver) setDriverId(String(row.driver.id));
-    if (row.car) setCarId(String(row.car.id));
-    else if (row.driver) setCarId("");
-  };
 
   return (
     <form onSubmit={submitWith(action)} className="flex flex-col gap-4">
@@ -167,7 +120,7 @@ export function AssignForm({
 
       <div>
         <label htmlFor="assign-search" className="sr-only">
-          Search drivers and cars
+          Search drivers
         </label>
         <div className="relative">
           <Search
@@ -187,7 +140,7 @@ export function AssignForm({
         <p className="text-ink-3 mt-1 text-xs">
           {query.trim()
             ? `${shown.length} ${shown.length === 1 ? "match" : "matches"}, closest first`
-            : `${drivers.length} drivers and ${cars.length} cars`}
+            : `${drivers.length} ${drivers.length === 1 ? "driver" : "drivers"}, each with their own car`}
         </p>
       </div>
 
@@ -198,23 +151,17 @@ export function AssignForm({
       ) : (
         <ul
           className="flex max-h-[28rem] flex-col gap-2 overflow-y-auto pr-1"
-          aria-label="Drivers and cars"
+          aria-label="Drivers"
         >
           {shown.map((row) => {
-            const v = verdict(row.driver, row.car);
-            const active =
-              row.driver !== null &&
-              String(row.driver.id) === driverId &&
-              (row.car === null ? !carId : String(row.car.id) === carId);
-            const isCurrent =
-              current !== null &&
-              row.driver?.id === current.driverId &&
-              row.car?.id === current.carId;
+            const v = verdict(row);
+            const active = String(row.id) === driverId;
+            const isCurrent = row.id === current?.driverId;
             return (
-              <li key={row.key}>
+              <li key={row.id}>
                 <button
                   type="button"
-                  onClick={() => choose(row)}
+                  onClick={() => setDriverId(String(row.id))}
                   aria-pressed={active}
                   className={cx(
                     "flex w-full gap-3 rounded-md border p-3 text-left transition-colors",
@@ -226,10 +173,8 @@ export function AssignForm({
                 >
                   <span className="flex min-w-0 flex-1 flex-col gap-1">
                     <span className="flex flex-wrap items-center gap-2">
-                      <span className="text-ink text-base font-semibold">
-                        {row.driver?.name ?? "No driver linked"}
-                      </span>
-                      {row.driver?.engagement === "outsourced" ? (
+                      <span className="text-ink text-base font-semibold">{row.name}</span>
+                      {row.engagement === "outsourced" ? (
                         <Badge tone="special">Outsourced</Badge>
                       ) : null}
                       {isCurrent ? <Badge tone="info">Assigned now</Badge> : null}
@@ -240,7 +185,7 @@ export function AssignForm({
                         >
                           Cannot go
                         </Badge>
-                      ) : !row.driver || !row.car ? null : v.warnings.length ? (
+                      ) : v.warnings.length ? (
                         <Badge
                           tone="warn"
                           icon={<AlertTriangle aria-hidden className="h-3 w-3" />}
@@ -258,20 +203,14 @@ export function AssignForm({
                         </Badge>
                       )}
                     </span>
-                    <span className="text-ink-2 text-sm">
-                      {row.car ? (
-                        <>
-                          <span className="font-medium tabular-nums">
-                            {row.car.registration}
-                          </span>{" "}
-                          · {carText(row.car)}
-                        </>
-                      ) : (
-                        <span className="text-ink-3">
-                          No car linked — choose one below
-                        </span>
-                      )}
-                    </span>
+                    {row.car ? (
+                      <span className="text-ink-2 text-sm">
+                        <span className="font-medium tabular-nums">
+                          {row.car.registration}
+                        </span>{" "}
+                        · {carText(row.car)}
+                      </span>
+                    ) : null}
                     {v.blocks.length ? (
                       <span className="text-danger text-sm">{v.blocks.join(" ")}</span>
                     ) : null}
@@ -284,76 +223,18 @@ export function AssignForm({
       )}
 
       <div className="border-line bg-surface sticky bottom-0 -mx-4 flex flex-col gap-3 border-t px-4 pt-4 pb-4">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="min-w-0">
-            <label
-              htmlFor="assign-driver"
-              className="text-ink-2 mb-1 block text-sm font-medium"
-            >
-              Driver
-            </label>
-            <SearchSelect
-              id="assign-driver"
-              options={drivers.map((option) => ({
-                value: String(option.id),
-                label: option.name,
-                detail: [
-                  option.phone,
-                  ...option.carIds.map(
-                    (id) => carById.get(String(id))?.registration ?? "",
-                  ),
-                ]
-                  .filter(Boolean)
-                  .join(" · "),
-                badge:
-                  option.engagement === "outsourced" ? (
-                    <Badge tone="special">Outsourced</Badge>
-                  ) : option.blocks.length ? (
-                    <Badge tone="danger">Cannot go</Badge>
-                  ) : undefined,
-              }))}
-              value={driverId}
-              onChange={(value) => {
-                const next = driverById.get(String(value));
-                setDriverId(String(value));
-                // Their own car, unless one of theirs is already chosen.
-                if (next && !next.carIds.includes(Number(carId)) && next.carIds[0]) {
-                  setCarId(String(next.carIds[0]));
-                }
-              }}
-              placeholder="Type a name"
-            />
-          </div>
-          <div className="min-w-0">
-            <label
-              htmlFor="assign-car"
-              className="text-ink-2 mb-1 block text-sm font-medium"
-            >
-              Car
-            </label>
-            <SearchSelect
-              id="assign-car"
-              options={cars.map((option) => ({
-                value: String(option.id),
-                label: option.registration,
-                detail: carText(option),
-                keywords: [option.make, option.model, `${option.make} ${option.model}`],
-                badge: option.blocks.length ? (
-                  <Badge tone="danger">Cannot go</Badge>
-                ) : undefined,
-              }))}
-              value={carId}
-              onChange={(value) => setCarId(String(value))}
-              placeholder="Type a registration or model"
-            />
-          </div>
-        </div>
-
-        {driver && car ? (
+        {driver ? (
           <div className="flex flex-col gap-1 text-sm">
             <p className="text-ink">
-              Assign <strong>{driver.name}</strong> with{" "}
-              <strong className="tabular-nums">{car.registration}</strong>.
+              Assign <strong>{driver.name}</strong>
+              {car ? (
+                <>
+                  {" "}
+                  with their car{" "}
+                  <strong className="tabular-nums">{car.registration}</strong>
+                </>
+              ) : null}
+              .
             </p>
             {chosen.blocks.length ? (
               <ul className="text-danger flex flex-col gap-0.5">
@@ -376,7 +257,7 @@ export function AssignForm({
             ) : null}
           </div>
         ) : (
-          <p className="text-ink-3 text-sm">Choose a driver and a car.</p>
+          <p className="text-ink-3 text-sm">Choose a driver from the list.</p>
         )}
 
         {replacing ? (
@@ -479,10 +360,10 @@ export function AssignForm({
             Cancel
           </Link>
         </div>
-        {!ready && driver && car ? (
+        {!ready && driver ? (
           <p className="text-ink-3 text-xs">
-            This pair cannot be assigned until the above is put right — or choose another
-            driver or car.
+            This driver cannot be assigned until the above is put right — or choose
+            another driver.
           </p>
         ) : null}
       </div>

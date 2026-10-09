@@ -198,10 +198,10 @@ describe("checkEligibility", () => {
     expect(upgrade.warnings.join(" ")).toMatch(/upgrade/);
   });
 
-  it("warns, without refusing, when the car is not one the driver uses", () => {
+  it("refuses a car that is not the driver's own", () => {
     const result = checkEligibility(input({ linked: false }));
-    expect(result.eligible).toBe(true);
-    expect(result.warnings).toContain("This car is not one the driver normally uses.");
+    expect(result.eligible).toBe(false);
+    expect(result.blocks).toContain("That car is not this driver's own.");
     expect(checkEligibility(input({ linked: true })).warnings).toEqual([]);
   });
 
@@ -250,11 +250,7 @@ describe("checkEligibility", () => {
     expect(car.eligible).toBe(false);
     expect(car.blocks).toContain("Car has no PHV vehicle licence on record.");
     expect(
-      fitWarnings(
-        { jobClass: "saloon", passengers: 2 },
-        { vehicleClassSlug: "saloon" },
-        true,
-      ),
+      fitWarnings({ jobClass: "saloon", passengers: 2 }, { vehicleClassSlug: "saloon" }),
     ).toEqual([]);
   });
 

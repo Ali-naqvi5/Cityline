@@ -81,6 +81,8 @@ export interface DriverRow {
   onTime: number;
   medianConfirmMinutes: number | null;
   daysWorked: number;
+  /** The pickup time of their last job done (completed or PNS) in the period. */
+  lastJobAt: string | null;
 }
 
 export interface DayGridData {
@@ -107,7 +109,14 @@ export interface DriversReport {
 
 const MINUTE_MS = 60_000;
 
-const isDriven = (status: JobStatus) => status === "completed" || status === "no_show";
+/** The statuses that count as a job done: completed, or PNS. */
+export const DONE_STATUSES = [
+  "completed",
+  "no_show",
+] as const satisfies readonly JobStatus[];
+
+const isDriven = (status: JobStatus) =>
+  (DONE_STATUSES as readonly JobStatus[]).includes(status);
 
 /** Minutes after the booked pickup time the driver was marked at the pickup. */
 export function minutesLate(
@@ -224,6 +233,7 @@ export function buildDriversReport({
         onTime: 0,
         medianConfirmMinutes: null,
         daysWorked: 0,
+        lastJobAt: null,
         confirms: [],
         days: new Set(),
       };
@@ -241,6 +251,11 @@ export function buildDriversReport({
   const { unit, keys } = buckets(period);
   const column = new Map(keys.map((key, index) => [key, index]));
   const cells = new Map<number, number[]>();
+
+  // Every driver still working is listed, with or without jobs in the period.
+  for (const driver of drivers) {
+    if (driver.status !== "left") row(driver.id);
+  }
 
   for (const job of withDriver) {
     const entry = row(job.driverId);
@@ -269,6 +284,8 @@ export function buildDriversReport({
     }
     if (!isDriven(job.status)) continue;
     entry.driven += 1;
+    if (!entry.lastJobAt || job.pickupAt > entry.lastJobAt)
+      entry.lastJobAt = job.pickupAt;
     if (job.status === "completed") entry.completed += 1;
     else entry.noShows += 1;
     entry.days.add(day);
@@ -318,5 +335,37 @@ export function buildDriversReport({
       .sort((a, b) => b.at.localeCompare(a.at))
       .map((event) => ({ ...event, driverName: nameOf(event.driverId) })),
     takenOffReasons: topWithOther(shares(reasons), 5),
+  };
+}
+
+/** A job a driver did, on their page in the Driver Report. */
+export interface DriverJobLine {
+  status: JobStatus;
+  pickupAt: string;
+  /** What the job was offered to them for; null when not written. */
+  driverPricePence: number | null;
+}
+
+/**
+ * One driver's jobs done in the period (Cityline, 9 Oct 2026): how many, the
+ * last, and what they were offered for them in all. Whether the driver has
+ * been paid is Finance's, never shown here.
+ */
+export function driverJobTotals(jobs: readonly DriverJobLine[]) {
+  let offeredPence = 0;
+  let unpriced = 0;
+  let lastJobAt: string | null = null;
+  for (const job of jobs) {
+    if (job.driverPricePence === null) unpriced += 1;
+    else offeredPence += job.driverPricePence;
+    if (!lastJobAt || job.pickupAt > lastJobAt) lastJobAt = job.pickupAt;
+  }
+  return {
+    jobs: jobs.length,
+    completed: jobs.filter((job) => job.status === "completed").length,
+    noShows: jobs.filter((job) => job.status === "no_show").length,
+    offeredPence,
+    unpriced,
+    lastJobAt,
   };
 }

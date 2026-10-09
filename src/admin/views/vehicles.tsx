@@ -13,7 +13,7 @@ import { Badge, ButtonLink, PageHeader, Panel } from "@/components/ops/primitive
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
 import { isBlocking } from "@/domain/compliance/documents";
-import { OWNERSHIP_LABELS, VEHICLE_STATUS_LABELS } from "@/domain/fleet/labels";
+import { VEHICLE_STATUS_LABELS } from "@/domain/fleet/labels";
 import { vehicleClassName } from "@/domain/jobs/labels";
 import { can } from "@/domain/staff/permissions";
 import type { Driver } from "@/payload-types";
@@ -108,7 +108,7 @@ export async function VehiclesView(props: AdminViewServerProps) {
               <option value="current">Active and off the road</option>
               <option value="active">Active</option>
               <option value="off_road">Off the road</option>
-              <option value="sold">Sold or returned</option>
+              <option value="sold">No longer used</option>
               <option value="all">Every vehicle</option>
             </Select>
           </div>
@@ -206,16 +206,6 @@ export async function VehiclesView(props: AdminViewServerProps) {
                         {vehicle.seats} seats
                       </span>
                     ) : null}
-                  </span>
-                ),
-              },
-              {
-                key: "ownership",
-                header: "Ownership",
-                hideBelow: "xl",
-                cell: ({ vehicle }) => (
-                  <span className="text-ink-2">
-                    {OWNERSHIP_LABELS[vehicle.ownership]}
                   </span>
                 ),
               },

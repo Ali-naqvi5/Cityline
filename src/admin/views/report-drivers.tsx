@@ -42,8 +42,12 @@ import { formatDate } from "@/lib/time";
  * Cityline to keep for each driver, and what is missing.
  *
  * An analytical dashboard over the raw rows, which download as CSV. Counted
- * by pickup date; no money (pay is Finance's); test bookings never counted.
- * Owner and Controller.
+ * by pickup date; test bookings never counted. Owner and Controller.
+ *
+ * First under the totals, every driver still working with their jobs done
+ * and their last job (Cityline, 9 Oct 2026); each opens the driver's own page
+ * (`report-driver.tsx`), the one place here with money: what each job was
+ * offered to them for. Whether they were paid stays in Finance.
  */
 
 const PAGE_SIZE = 50;
@@ -96,12 +100,15 @@ export async function DriversReportView(props: AdminViewServerProps) {
 
   // The query that reproduces this view: for pages and the CSV downloads.
   const query = driversFilterQuery(filters);
+  // The period alone, carried to a driver's own page.
+  const periodQuery = new URLSearchParams();
   if (period.key === "custom") {
-    query.set("from", period.from);
-    query.set("to", period.to);
+    periodQuery.set("from", period.from);
+    periodQuery.set("to", period.to);
   } else if (period.key !== "this_month") {
-    query.set("period", period.key);
+    periodQuery.set("period", period.key);
   }
+  for (const [key, value] of periodQuery) query.set(key, value);
   const href = (change: Record<string, string>) => {
     const next = new URLSearchParams(query);
     for (const [key, value] of Object.entries(change)) {
@@ -270,6 +277,87 @@ export async function DriversReportView(props: AdminViewServerProps) {
           />
         </div>
 
+        {report.drivers.length ? (
+          <Panel
+            title="Drivers and their jobs"
+            description="Jobs done — completed or PNS — in the period. Open a driver to see each job and what it was offered to them for."
+            actions={<DownloadCsv href={csv("drivers")} />}
+            bodyClassName="p-0"
+          >
+            <div className="relative overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-sunken text-ink-3 text-xs">
+                  <tr>
+                    <th scope="col" className={TH}>
+                      Driver
+                    </th>
+                    <th scope="col" className={TH_NUM}>
+                      Jobs done
+                    </th>
+                    <th scope="col" className={TH}>
+                      Last job
+                    </th>
+                    <th scope="col" className={TH_NUM}>
+                      Completed
+                    </th>
+                    <th scope="col" className={TH_NUM}>
+                      PNS
+                    </th>
+                    <th scope="col" className={TH_NUM}>
+                      Taken off
+                    </th>
+                    <th scope="col" className={TH_NUM}>
+                      On time
+                    </th>
+                    <th scope="col" className={TH_NUM}>
+                      Typical confirm
+                    </th>
+                    <th scope="col" className={TH_NUM}>
+                      Days worked
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.drivers.map((row) => (
+                    <tr key={row.driverId} className="border-line border-t">
+                      <td className={TD}>
+                        <Link
+                          href={`/admin/reports/drivers/${row.driverId}${periodQuery.size ? `?${periodQuery}` : ""}`}
+                          className="text-accent font-medium hover:underline"
+                        >
+                          {row.name}
+                        </Link>
+                        {row.status !== "active" ? (
+                          <Badge
+                            tone={DRIVER_STATUS_TONE[row.status]}
+                            className="ml-2 align-middle"
+                          >
+                            {DRIVER_STATUS_LABELS[row.status]}
+                          </Badge>
+                        ) : null}
+                      </td>
+                      <td className={`${TD_NUM} text-ink font-semibold`}>{row.driven}</td>
+                      <td className={`${TD} tabular-nums`}>
+                        {row.lastJobAt ? formatDate(new Date(row.lastJobAt)) : "—"}
+                      </td>
+                      <td className={TD_NUM}>{row.completed}</td>
+                      <td className={TD_NUM}>{row.noShows}</td>
+                      <td className={TD_NUM}>{row.takenOff}</td>
+                      <td className={TD_NUM}>
+                        {row.arrivals
+                          ? `${percent(row.onTime / row.arrivals)} of ${row.arrivals}`
+                          : "—"}
+                      </td>
+                      <td className={TD_NUM}>{minutesText(row.medianConfirmMinutes)}</td>
+                      <td className={TD_NUM}>{row.daysWorked}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Panel>
+        ) : null}
+
         {rows.length === 0 && report.takenOff.length === 0 ? (
           <Panel>
             <EmptyState
@@ -352,82 +440,6 @@ export async function DriversReportView(props: AdminViewServerProps) {
           </>
         )}
       </TipLayer>
-
-      {report.drivers.length ? (
-        <Panel
-          className="mt-5"
-          title="Drivers"
-          description="One row per driver in the period"
-          actions={<DownloadCsv href={csv("drivers")} />}
-          bodyClassName="p-0"
-        >
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="bg-sunken text-ink-3">
-                <tr>
-                  <th scope="col" className={TH}>
-                    Driver
-                  </th>
-                  <th scope="col" className={TH_NUM}>
-                    Bookings
-                  </th>
-                  <th scope="col" className={TH_NUM}>
-                    Completed
-                  </th>
-                  <th scope="col" className={TH_NUM}>
-                    PNS
-                  </th>
-                  <th scope="col" className={TH_NUM}>
-                    Taken off
-                  </th>
-                  <th scope="col" className={TH_NUM}>
-                    On time
-                  </th>
-                  <th scope="col" className={TH_NUM}>
-                    Typical confirm
-                  </th>
-                  <th scope="col" className={TH_NUM}>
-                    Days worked
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.drivers.map((row) => (
-                  <tr key={row.driverId} className="border-line border-t">
-                    <td className={TD}>
-                      <Link
-                        href={`/admin/drivers/${row.driverId}`}
-                        className="text-ink font-medium hover:underline"
-                      >
-                        {row.name}
-                      </Link>
-                      {row.status !== "active" ? (
-                        <Badge
-                          tone={DRIVER_STATUS_TONE[row.status]}
-                          className="ml-2 align-middle"
-                        >
-                          {DRIVER_STATUS_LABELS[row.status]}
-                        </Badge>
-                      ) : null}
-                    </td>
-                    <td className={TD_NUM}>{row.bookings}</td>
-                    <td className={TD_NUM}>{row.completed}</td>
-                    <td className={TD_NUM}>{row.noShows}</td>
-                    <td className={TD_NUM}>{row.takenOff}</td>
-                    <td className={TD_NUM}>
-                      {row.arrivals
-                        ? `${percent(row.onTime / row.arrivals)} of ${row.arrivals}`
-                        : "—"}
-                    </td>
-                    <td className={TD_NUM}>{minutesText(row.medianConfirmMinutes)}</td>
-                    <td className={TD_NUM}>{row.daysWorked}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Panel>
-      ) : null}
 
       {report.takenOff.length ? (
         <Panel

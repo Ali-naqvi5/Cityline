@@ -873,9 +873,6 @@ export async function BookingsView(props: AdminViewServerProps) {
         description="Every booking from every source — the register TfL inspects. Click a booking to open it and write the driver's price."
         actions={
           <>
-            {dispatches ? (
-              <ButtonLink href="/admin/dispatch">Dispatch board</ButtonLink>
-            ) : null}
             {edits ? (
               <ButtonLink href="/admin/jobs/new" variant="primary">
                 <Plus aria-hidden className="h-4 w-4" />
@@ -901,7 +898,7 @@ export async function BookingsView(props: AdminViewServerProps) {
               <AlertTriangle aria-hidden className="text-danger h-4 w-4" />
             ) : undefined
           }
-          href={dispatches ? "/admin/dispatch?unassigned=1" : undefined}
+          href={bookingsHref(parseBookingFilters({}), { status: "unassigned" })}
         />
         <MetricCard
           label="Driver price not written"

@@ -17,8 +17,8 @@ import type { Job } from "@/payload-types";
  * passenger no-show asks for confirmation, with the driver's price beside it
  * so it can be cut in the same step.
  *
- * Used on the booking page and, compact, on the dispatch board and the
- * bookings dashboard, where `returnTo` keeps the operator on that screen.
+ * Used on the booking page and, compact, on the bookings dashboard, where
+ * `returnTo` keeps the operator on that screen.
  */
 
 const ICON = "h-4 w-4";

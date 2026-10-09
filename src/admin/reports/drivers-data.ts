@@ -20,10 +20,12 @@ import type { Driver, DriverDocument, Job, User } from "@/payload-types";
 
 import {
   buildDriversReport,
+  DONE_STATUSES,
   minutesLate,
   minutesToConfirm,
   ON_TIME_GRACE_MINUTES,
   type DriverJob,
+  type DriverJobLine,
   type DriverRow,
   type DriversReport,
   type TakenOffEvent,
@@ -36,7 +38,8 @@ import type { Period } from "./period";
  * the drivers taken off them with the reasons written, the comparison
  * period's, and — not tied to the period — the TfL record of every driver
  * TfL expects Cityline to keep. The screen and the CSV downloads both use
- * this, so they always agree. No money is loaded.
+ * this, so they always agree. No money is loaded, except on one driver's
+ * page: what each job was offered to them for (never whether it was paid).
  */
 
 export const DRIVER_STATUSES = ["active", "suspended", "left"] as const;
@@ -396,6 +399,65 @@ export async function loadDriversReport(
   return { report, rows, records };
 }
 
+// --- One driver's jobs -------------------------------------------------------------
+
+export interface DriverJobRow extends DriverJobLine {
+  id: number;
+  reference: string;
+  pickupAddress: string;
+  dropoff: string;
+  vehicleReg: string | null;
+}
+
+/**
+ * One driver's jobs done in the period — completed or PNS, newest first —
+ * with what each was offered to them for. Test bookings never.
+ */
+export async function loadDriverJobs(
+  payload: Payload,
+  user: User,
+  driverId: number,
+  period: Pick<Period, "start" | "end">,
+): Promise<DriverJobRow[]> {
+  const jobs = await payload.find({
+    collection: "jobs",
+    where: {
+      and: [
+        { driver: { equals: driverId } },
+        { status: { in: [...DONE_STATUSES] } },
+        { isTest: { not_equals: true } },
+        { pickupAt: { greater_than_equal: period.start.toISOString() } },
+        { pickupAt: { less_than: period.end.toISOString() } },
+      ],
+    },
+    sort: "-pickupAt",
+    pagination: false,
+    depth: 0,
+    select: {
+      reference: true,
+      status: true,
+      pickupAt: true,
+      pickupAddress: true,
+      dropoffAddress: true,
+      hours: true,
+      vehicleReg: true,
+      driverPricePence: true,
+    },
+    user,
+    overrideAccess: false,
+  });
+  return jobs.docs.map((job) => ({
+    id: job.id,
+    reference: job.reference,
+    status: job.status as JobStatus,
+    pickupAt: job.pickupAt,
+    pickupAddress: job.pickupAddress,
+    dropoff: job.dropoffAddress ?? (job.hours ? `Hourly hire, ${job.hours} hours` : ""),
+    vehicleReg: job.vehicleReg ?? null,
+    driverPricePence: job.driverPricePence ?? null,
+  }));
+}
+
 // --- CSV ------------------------------------------------------------------------
 
 const day = (iso: string | null | undefined) =>
@@ -442,8 +504,9 @@ export const DRIVER_BOOKINGS_CSV_COLUMNS: CsvColumn<DriverBookingRow>[] = [
 export const DRIVER_SUMMARY_CSV_COLUMNS: CsvColumn<DriverRow>[] = [
   { header: "Driver", value: (row) => row.name },
   { header: "Status", value: (row) => DRIVER_STATUS_LABELS[row.status] ?? row.status },
+  { header: "Jobs done", value: (row) => row.driven },
+  { header: "Last job", value: (row) => day(row.lastJobAt) },
   { header: "Bookings", value: (row) => row.bookings },
-  { header: "Driven", value: (row) => row.driven },
   { header: "Completed", value: (row) => row.completed },
   { header: "PNS", value: (row) => row.noShows },
   { header: "Taken off", value: (row) => row.takenOff },
@@ -515,5 +578,21 @@ export const DRIVER_RECORDS_CSV_COLUMNS: CsvColumn<DriverRecordRow>[] = [
   {
     header: "Missing particulars",
     value: (row) => row.missing.map((item) => PARTICULAR_LABELS[item]).join("; "),
+  },
+];
+
+/** One driver's jobs done: what the driver's page in the report lists. */
+export const DRIVER_JOBS_CSV_COLUMNS: CsvColumn<DriverJobRow>[] = [
+  { header: "Pickup date", value: (row) => day(row.pickupAt) },
+  { header: "Pickup time", value: (row) => stamp(row.pickupAt).slice(11) },
+  { header: "Booking", value: (row) => row.reference },
+  { header: "Pickup", value: (row) => row.pickupAddress },
+  { header: "Drop-off", value: (row) => row.dropoff },
+  { header: "Status", value: (row) => stageName(row.status) },
+  { header: "Vehicle", value: (row) => row.vehicleReg },
+  {
+    header: "Driver price (£)",
+    value: (row) =>
+      row.driverPricePence === null ? "" : (row.driverPricePence / 100).toFixed(2),
   },
 ];

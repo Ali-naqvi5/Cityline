@@ -187,7 +187,8 @@ const VEHICLE_CLASS_SLUGS = VEHICLE_CLASSES.map((vehicle) => vehicle.slug) as [
   ...string[],
 ];
 
-export const vehicleSchema = z.object({
+/** A car's own details — for a car added on its own or with its driver. */
+export const carSchema = z.object({
   registration: z
     .string()
     .min(2, "Enter the registration.")
@@ -205,9 +206,19 @@ export const vehicleSchema = z.object({
         (Number.isInteger(Number(value)) && Number(value) >= 1 && Number(value) <= 20),
       "Enter a number of seats from 1 to 20.",
     ),
-  ownership: z.enum(["company", "driver", "hired"]),
+});
+
+export type CarInput = z.infer<typeof carSchema>;
+
+/**
+ * A car and the one driver it belongs to (Cityline, 9 Oct 2026): drivers are
+ * self-employed and every car is their own, never Cityline's.
+ */
+export const vehicleSchema = carSchema.extend({
   status: z.enum(["active", "off_road", "sold"]),
-  drivers: z.array(z.number().int().positive()),
+  drivers: z
+    .array(z.number().int().positive())
+    .length(1, "Choose the driver whose car this is."),
   notes: z.string().max(2000),
 });
 
@@ -222,7 +233,8 @@ export function vehicleData(input: VehicleInput) {
     // The schema has already limited this to the known classes.
     vehicleClassSlug: input.vehicleClassSlug as Vehicle["vehicleClassSlug"],
     seats: input.seats ? Number(input.seats) : null,
-    ownership: input.ownership,
+    // Every car is its driver's own.
+    ownership: "driver" as const,
     status: input.status,
     drivers: input.drivers,
     notes: input.notes || null,

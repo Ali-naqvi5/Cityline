@@ -16,6 +16,7 @@ import {
   outsourcedLicencesSchema,
   supplierData,
   supplierSchema,
+  carSchema,
   vehicleData,
   vehicleSchema,
 } from "@/admin/schemas/fleet";
@@ -51,7 +52,7 @@ function driverForm(formData: FormData) {
   };
 }
 
-function carForm(formData: FormData, drivers: number[]) {
+function carForm(formData: FormData) {
   return {
     registration: text(formData, "registration"),
     make: text(formData, "make"),
@@ -59,10 +60,6 @@ function carForm(formData: FormData, drivers: number[]) {
     colour: text(formData, "colour"),
     vehicleClassSlug: text(formData, "vehicleClassSlug"),
     seats: text(formData, "seats"),
-    ownership: "driver",
-    status: "active",
-    drivers,
-    notes: "",
   };
 }
 
@@ -74,17 +71,15 @@ export async function saveDriverAction(
   const id = Number(text(formData, "id")) || null;
 
   const parsed = driverSchema.safeParse(driverForm(formData));
-  // A new driver is added with their car (Cityline, 9 Oct 2026): a new one,
-  // one already on record, or none yet. A new outsourced driver always comes
-  // with their licences and a new car, so they can be given a job at once.
+  // A new driver is added with their own car, or none yet (Cityline, 9 Oct
+  // 2026). A new outsourced driver always comes with their licences and car,
+  // so they can be given a job at once.
   const outsourcing = !id && text(formData, "engagement") === "outsourced";
   const carChoice = id
     ? "none"
     : outsourcing
       ? "new"
       : text(formData, "carChoice") || "none";
-  const existingCarId =
-    carChoice === "existing" ? Number(text(formData, "existingCar")) || null : null;
   const licences = outsourcing
     ? outsourcedLicencesSchema.safeParse({
         phvNumber: text(formData, "phvNumber"),
@@ -98,19 +93,12 @@ export async function saveDriverAction(
         seenOriginals: checked(formData, "seenOriginals"),
       })
     : null;
-  const car = carChoice === "new" ? vehicleSchema.safeParse(carForm(formData, [])) : null;
-  const noCar = carChoice === "existing" && !existingCarId;
-  if (
-    !parsed.success ||
-    (licences && !licences.success) ||
-    (car && !car.success) ||
-    noCar
-  ) {
+  const car = carChoice === "new" ? carSchema.safeParse(carForm(formData)) : null;
+  if (!parsed.success || (licences && !licences.success) || (car && !car.success)) {
     const errors = {
       ...(car && !car.success ? zodErrors(car.error).errors : {}),
       ...(licences && !licences.success ? zodErrors(licences.error).errors : {}),
       ...(!parsed.success ? zodErrors(parsed.error).errors : {}),
-      ...(noCar ? { existingCar: "Choose the car, or pick another option." } : {}),
     };
     return { errors, message: "Please check the highlighted fields." };
   }
@@ -136,8 +124,9 @@ export async function saveDriverAction(
     } else {
       savedId = await createDriverWithCar(payload, user, {
         driver: driverData(parsed.data),
-        car: car?.success ? vehicleData(car.data) : null,
-        existingCarId,
+        car: car?.success
+          ? vehicleData({ ...car.data, status: "active", drivers: [], notes: "" })
+          : null,
         documents: licences?.success ? outsourcedDocuments(licences.data) : null,
       });
     }
@@ -151,10 +140,10 @@ export async function saveDriverAction(
 }
 
 /**
- * One transaction: the driver, their car — new, or one already on record —
- * and, for an outsourced driver, the licence records of both. All saved, or
- * none. An outsourced driver's records are typed-in copies of documents the
- * office has seen; the copies themselves are kept offline.
+ * One transaction: the driver, their car, and for an outsourced driver the
+ * licence records of both — all saved, or none. An outsourced driver's
+ * records are typed-in copies of documents the office has seen; the copies
+ * themselves are kept offline.
  */
 async function createDriverWithCar(
   payload: Awaited<ReturnType<typeof staffForAction>>["payload"],
@@ -162,7 +151,6 @@ async function createDriverWithCar(
   records: {
     driver: ReturnType<typeof driverData>;
     car: ReturnType<typeof vehicleData> | null;
-    existingCarId: number | null;
     documents: ReturnType<typeof outsourcedDocuments> | null;
   },
 ): Promise<number> {
@@ -197,23 +185,6 @@ async function createDriverWithCar(
           ...as,
         });
       }
-    } else if (records.existingCarId) {
-      // Add them to the car's drivers, keeping whoever already drives it.
-      const vehicle = await payload.findByID({
-        collection: "vehicles",
-        id: records.existingCarId,
-        depth: 0,
-        ...as,
-      });
-      const drivers = (vehicle.drivers ?? []).map((linked) =>
-        typeof linked === "object" ? linked.id : linked,
-      );
-      await payload.update({
-        collection: "vehicles",
-        id: vehicle.id,
-        data: { drivers: [...drivers, driver.id] },
-        ...as,
-      });
     }
     if (req) await payload.db.commitTransaction(req.transactionID);
     return driver.id;
@@ -336,7 +307,6 @@ export async function saveVehicleAction(
     colour: text(formData, "colour"),
     vehicleClassSlug: text(formData, "vehicleClassSlug"),
     seats: text(formData, "seats"),
-    ownership: text(formData, "ownership"),
     status: text(formData, "status"),
     drivers: formData
       .getAll("drivers")

@@ -16,7 +16,6 @@ import {
   TEXTAREA_CLASS,
 } from "@/components/ops/form";
 import { buttonClass, cx } from "@/components/ops/primitives";
-import { SearchSelect, type SearchOption } from "@/components/ops/search-select";
 import { DRIVER_ENGAGEMENTS } from "@/domain/compliance/documents";
 
 import { CarFields, EMPTY_CAR } from "./car-fields";
@@ -51,14 +50,11 @@ export function DriverForm({
   values,
   cancelHref,
   classes = [],
-  cars = [],
 }: {
   values: DriverFormValues;
   cancelHref: string;
   /** Vehicle classes, for the car a new driver is added with. */
   classes?: { value: string; label: string }[];
-  /** Cars already on record, for a new driver who drives one of them. */
-  cars?: SearchOption[];
 }) {
   const [state, action, pending] = useActionState(saveDriverAction, EMPTY_FORM);
   const [engagement, setEngagement] = useState(values.engagement || "registered");
@@ -197,7 +193,7 @@ export function DriverForm({
 
       {outsourcing ? <LicencesSection errors={e} /> : null}
       {!values.id ? (
-        <CarSection outsourced={outsourcing} classes={classes} cars={cars} errors={e} />
+        <CarSection outsourced={outsourcing} classes={classes} errors={e} />
       ) : null}
 
       <FormSection
@@ -402,38 +398,34 @@ function LicencesSection({ errors: e }: { errors: Record<string, string | undefi
 }
 
 const CAR_CHOICES = [
-  ["new", "A new car"],
-  ["existing", "A car already on record"],
+  ["new", "Add their car"],
   ["none", "No car yet"],
 ] as const;
 
 /**
- * The driver's car, added in the same form (Cityline, 9 Oct 2026): a new
- * car, one already on record, or none yet. An outsourced driver comes with
- * a new car and its licences, typed in; a registered driver's car documents
- * are uploaded on the car's page after saving.
+ * The driver's own car, added in the same form (Cityline, 9 Oct 2026). Every
+ * car is its driver's — Cityline owns none, and no two drivers share one. An
+ * outsourced driver comes with their car and its licences, typed in; a
+ * registered driver's car documents are uploaded on the car's page.
  */
 function CarSection({
   outsourced,
   classes,
-  cars,
   errors: e,
 }: {
   outsourced: boolean;
   classes: { value: string; label: string }[];
-  cars: SearchOption[];
   errors: Record<string, string | undefined>;
 }) {
   const [choice, setChoice] = useState<string>("new");
-  const [existing, setExisting] = useState("");
   const making = outsourced || choice === "new";
   return (
     <FormSection
       title="Their car"
       description={
         outsourced
-          ? "Added with the driver and linked to them, ready to assign."
-          : "Linked to the driver, so dispatch offers it with them. Upload its documents on the car's page after saving."
+          ? "Added with the driver, ready to assign."
+          : "The driver's own car: it goes with them on every booking. Upload its documents on the car's page after saving."
       }
     >
       {outsourced ? (
@@ -469,23 +461,9 @@ function CarSection({
         </fieldset>
       )}
       {making ? <CarFields values={EMPTY_CAR} classes={classes} errors={e} /> : null}
-      {!outsourced && choice === "existing" ? (
-        <FormField id="existingCar" label="Car" required wide error={e.existingCar}>
-          <SearchSelect
-            id="existingCar"
-            name="existingCar"
-            options={cars}
-            value={existing}
-            onChange={(value) => setExisting(String(value))}
-            placeholder="Type a registration or model"
-            invalid={Boolean(e.existingCar)}
-            describedBy={e.existingCar ? "existingCar-error" : undefined}
-          />
-        </FormField>
-      ) : null}
       {!outsourced && choice === "none" ? (
         <p className="text-ink-3 text-sm sm:col-span-2">
-          Link a car later from the driver&apos;s page or the car&apos;s.
+          Add their car later from the driver&apos;s page.
         </p>
       ) : null}
       {outsourced ? (

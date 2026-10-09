@@ -183,6 +183,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Driver Report" },
         },
+        opsDriverJobsReport: {
+          Component: "@/admin/views/report-driver#DriverJobsReportView",
+          path: "/reports/drivers/:id",
+          exact: true,
+          meta: { title: "Driver Report" },
+        },
         opsDriverPay: {
           Component: "@/admin/views/driver-pay#DriverPayView",
           path: "/driver-pay",
@@ -243,11 +249,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Daily Run Sheet" },
         },
+        // The Dispatch board went into Bookings (Cityline, 9 Oct 2026).
         opsDispatch: {
-          Component: "@/admin/views/dispatch#DispatchView",
+          Component: "@/admin/views/jobs-redirect#JobsRedirect",
           path: "/dispatch",
           exact: true,
-          meta: { title: "Dispatch" },
+          meta: { title: "Bookings" },
         },
         opsDrivers: {
           Component: "@/admin/views/drivers#DriversView",

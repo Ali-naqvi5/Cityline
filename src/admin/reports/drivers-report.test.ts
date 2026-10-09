@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildDriversReport,
+  driverJobTotals,
   minutesLate,
   minutesToConfirm,
   type DriverJob,
@@ -27,6 +28,8 @@ function job(overrides: Partial<DriverJob>): DriverJob {
 const drivers = [
   { id: 1, name: "Sam Taylor", status: "active" },
   { id: 2, name: "Priya Shah", status: "active" },
+  { id: 3, name: "Dev Patel", status: "active" },
+  { id: 4, name: "Old Hand", status: "left" },
 ];
 
 const takenOff: TakenOffEvent[] = [
@@ -119,7 +122,7 @@ describe("the Driver Report", () => {
     expect(report.arrivalNotRecorded).toBe(0);
   });
 
-  it("has a row per driver, busiest first", () => {
+  it("has a row per driver still working, busiest first, with their last job", () => {
     expect(report.drivers).toEqual([
       expect.objectContaining({
         driverId: 1,
@@ -133,6 +136,7 @@ describe("the Driver Report", () => {
         onTime: 2,
         medianConfirmMinutes: 10,
         daysWorked: 1,
+        lastJobAt: "2026-10-01T09:00:00.000Z",
       }),
       expect.objectContaining({
         driverId: 2,
@@ -140,7 +144,11 @@ describe("the Driver Report", () => {
         driven: 1,
         takenOff: 1,
         medianConfirmMinutes: 5,
+        // The assigned job still to come is not a job done.
+        lastJobAt: "2026-10-02T09:00:00.000Z",
       }),
+      // No jobs in the period, still listed; a driver who has left is not.
+      expect.objectContaining({ driverId: 3, driven: 0, lastJobAt: null }),
     ]);
   });
 
@@ -177,5 +185,41 @@ describe("the Driver Report", () => {
     });
     expect(missing.arrivalNotRecorded).toBe(1);
     expect(missing.totals.onTimeShare).toBe(null);
+  });
+});
+
+describe("a driver's jobs", () => {
+  it("counts the jobs done, the last, and the driver pay offered", () => {
+    expect(
+      driverJobTotals([
+        {
+          status: "completed",
+          pickupAt: "2026-10-01T09:00:00.000Z",
+          driverPricePence: 4500,
+        },
+        {
+          status: "no_show",
+          pickupAt: "2026-10-05T09:00:00.000Z",
+          driverPricePence: 2000,
+        },
+        {
+          status: "completed",
+          pickupAt: "2026-10-03T09:00:00.000Z",
+          driverPricePence: null,
+        },
+      ]),
+    ).toEqual({
+      jobs: 3,
+      completed: 2,
+      noShows: 1,
+      offeredPence: 6500,
+      unpriced: 1,
+      lastJobAt: "2026-10-05T09:00:00.000Z",
+    });
+    expect(driverJobTotals([])).toMatchObject({
+      jobs: 0,
+      offeredPence: 0,
+      lastJobAt: null,
+    });
   });
 });

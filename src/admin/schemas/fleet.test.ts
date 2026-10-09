@@ -98,6 +98,26 @@ describe("driverSchema", () => {
 });
 
 describe("vehicleSchema", () => {
+  it("needs exactly one driver: the car is theirs", () => {
+    const car = {
+      registration: "AB12 CDE",
+      make: "Toyota",
+      model: "Prius",
+      colour: "Black",
+      vehicleClassSlug: "saloon",
+      seats: "4",
+      status: "active",
+      notes: "",
+    };
+    expect(vehicleSchema.safeParse({ ...car, drivers: [4] }).success).toBe(true);
+    for (const drivers of [[], [4, 5]]) {
+      const result = vehicleSchema.safeParse({ ...car, drivers });
+      expect(result.error?.issues[0]?.message).toBe(
+        "Choose the driver whose car this is.",
+      );
+    }
+  });
+
   it("refuses a class that does not exist", () => {
     const result = vehicleSchema.safeParse({
       registration: "AB12 CDE",
@@ -106,9 +126,8 @@ describe("vehicleSchema", () => {
       colour: "Black",
       vehicleClassSlug: "tank",
       seats: "4",
-      ownership: "driver",
       status: "active",
-      drivers: [],
+      drivers: [1],
       notes: "",
     });
     expect(result.success).toBe(false);

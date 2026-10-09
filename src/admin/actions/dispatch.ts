@@ -394,8 +394,8 @@ function safeReturn(value: string): string | null {
  *
  * The no-show dialog can carry a new driver price in the same step — a driver
  * who waited for a passenger who never came is often paid less. A form on
- * the dispatch board or the bookings dashboard says where to return to, so
- * an operator moving jobs on stays where they are.
+ * the bookings dashboard says where to return to, so an operator moving jobs
+ * on stays where they are.
  */
 export async function setStatusAction(
   _previous: FormState,

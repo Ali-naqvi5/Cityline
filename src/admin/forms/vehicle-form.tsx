@@ -10,13 +10,14 @@ import {
   FormMessage,
   FormSection,
   inputClass,
-  invalid,
   SubmitButton,
   submitWith,
   TEXTAREA_CLASS,
 } from "@/components/ops/form";
 import { buttonClass } from "@/components/ops/primitives";
 import { SearchSelect } from "@/components/ops/search-select";
+
+import { CarFields } from "./car-fields";
 
 export interface VehicleFormValues {
   id?: number;
@@ -26,12 +27,25 @@ export interface VehicleFormValues {
   colour: string;
   vehicleClassSlug: string;
   seats: string;
-  ownership: string;
   status: string;
-  drivers: number[];
+  /** The one driver whose car this is. */
+  driver: number | null;
   notes: string;
 }
 
+export interface DriverChoice {
+  id: number;
+  name: string;
+  phone?: string;
+  /** The car they use now, if any — replaced when this one is saved. */
+  currentCar?: { id: number; registration: string } | null;
+}
+
+/**
+ * A car and its driver (Cityline, 9 Oct 2026): every car is one driver's
+ * own — Cityline owns none, and no two drivers share one. Saving a car for a
+ * driver who already has one marks the old car "no longer used".
+ */
 export function VehicleForm({
   values,
   classes,
@@ -40,103 +54,66 @@ export function VehicleForm({
 }: {
   values: VehicleFormValues;
   classes: { value: string; label: string }[];
-  drivers: { id: number; name: string; phone?: string }[];
+  drivers: DriverChoice[];
   cancelHref: string;
 }) {
   const [state, action, pending] = useActionState(saveVehicleAction, EMPTY_FORM);
-  const [linked, setLinked] = useState<string[]>(values.drivers.map(String));
+  const [driverId, setDriverId] = useState(values.driver ? String(values.driver) : "");
   const e = state.errors;
+  const chosen = drivers.find((driver) => String(driver.id) === driverId);
+  const replaces =
+    chosen?.currentCar && chosen.currentCar.id !== values.id ? chosen.currentCar : null;
 
   return (
     <form onSubmit={submitWith(action)} className="flex flex-col gap-6" noValidate>
       {values.id ? <input type="hidden" name="id" value={values.id} /> : null}
 
-      <FormSection
-        title="Car"
-        description="The registration and class are what dispatch shows against each job."
-      >
-        <FormField id="registration" label="Registration" required error={e.registration}>
-          <input
-            id="registration"
-            name="registration"
-            defaultValue={values.registration}
-            autoComplete="off"
-            className={inputClass("uppercase tabular-nums")}
-            {...invalid(e.registration, "registration")}
-          />
-        </FormField>
-        <FormField
-          id="vehicleClassSlug"
-          label="Class"
-          required
-          error={e.vehicleClassSlug}
-        >
-          <select
-            id="vehicleClassSlug"
-            name="vehicleClassSlug"
-            defaultValue={values.vehicleClassSlug}
-            className={inputClass()}
-            {...invalid(e.vehicleClassSlug, "vehicleClassSlug")}
+      <FormSection title="Driver" description="The driver whose car this is.">
+        {drivers.length === 0 ? (
+          <p className="text-ink-3 text-sm sm:col-span-2">
+            No drivers yet. Add the driver first — their car can be added with them.
+          </p>
+        ) : (
+          <FormField
+            id="drivers"
+            label="Driver"
+            required
+            wide
+            error={e.drivers}
+            hint={
+              replaces
+                ? `Saving marks ${chosen?.name}'s car ${replaces.registration} as no longer used.`
+                : "Type a name or phone number."
+            }
           >
-            <option value="" disabled>
-              Choose…
-            </option>
-            {classes.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </FormField>
-        <FormField id="make" label="Make" required error={e.make}>
-          <input
-            id="make"
-            name="make"
-            defaultValue={values.make}
-            className={inputClass()}
-            {...invalid(e.make, "make")}
-          />
-        </FormField>
-        <FormField id="model" label="Model" required error={e.model}>
-          <input
-            id="model"
-            name="model"
-            defaultValue={values.model}
-            className={inputClass()}
-            {...invalid(e.model, "model")}
-          />
-        </FormField>
-        <FormField
-          id="colour"
-          label="Colour"
-          required
-          error={e.colour}
-          hint="Passengers are told the colour when a driver is assigned."
-        >
-          <input
-            id="colour"
-            name="colour"
-            defaultValue={values.colour}
-            className={inputClass()}
-            {...invalid(e.colour, "colour")}
-          />
-        </FormField>
-        <FormField id="seats" label="Passenger seats" error={e.seats}>
-          <input
-            id="seats"
-            name="seats"
-            inputMode="numeric"
-            defaultValue={values.seats}
-            className={inputClass("tabular-nums")}
-            {...invalid(e.seats, "seats")}
-          />
-        </FormField>
+            <SearchSelect
+              id="drivers"
+              name="drivers"
+              options={drivers.map((driver) => ({
+                value: String(driver.id),
+                label: driver.name,
+                detail: [driver.phone, driver.currentCar?.registration]
+                  .filter(Boolean)
+                  .join(" · "),
+              }))}
+              value={driverId}
+              onChange={(value) => setDriverId(String(value))}
+              placeholder="Type a name"
+              invalid={Boolean(e.drivers)}
+              describedBy={e.drivers ? "drivers-error" : undefined}
+            />
+          </FormField>
+        )}
       </FormSection>
 
       <FormSection
-        title="Status and ownership"
-        description="A car off the road cannot be given jobs."
+        title="Car"
+        description="The registration and class show on each booking it does."
       >
+        <CarFields values={values} classes={classes} errors={e} />
+      </FormSection>
+
+      <FormSection title="Status" description="A car off the road cannot be given jobs.">
         <FormField id="status" label="Status" required error={e.status}>
           <select
             id="status"
@@ -146,53 +123,9 @@ export function VehicleForm({
           >
             <option value="active">Active</option>
             <option value="off_road">Off the road</option>
-            <option value="sold">Sold or returned</option>
+            <option value="sold">No longer used</option>
           </select>
         </FormField>
-        <FormField id="ownership" label="Ownership" required error={e.ownership}>
-          <select
-            id="ownership"
-            name="ownership"
-            defaultValue={values.ownership}
-            className={inputClass()}
-          >
-            <option value="driver">Driver-owned</option>
-            <option value="company">Company-owned</option>
-            <option value="hired">Hired</option>
-          </select>
-        </FormField>
-      </FormSection>
-
-      <FormSection
-        title="Drivers"
-        description="Who normally drives this car. Dispatch lists it with them; any driver can still be given it."
-      >
-        {drivers.length === 0 ? (
-          <p className="text-ink-3 text-sm sm:col-span-2">
-            No drivers yet. Add drivers first, then link them here.
-          </p>
-        ) : (
-          <FormField
-            id="drivers"
-            label="Drivers"
-            wide
-            hint="Type a name or phone number."
-          >
-            <SearchSelect
-              id="drivers"
-              name="drivers"
-              multiple
-              options={drivers.map((driver) => ({
-                value: String(driver.id),
-                label: driver.name,
-                detail: driver.phone,
-              }))}
-              value={linked}
-              onChange={(value) => setLinked(value as string[])}
-              placeholder="Add a driver"
-            />
-          </FormField>
-        )}
       </FormSection>
 
       <FormSection title="Notes">

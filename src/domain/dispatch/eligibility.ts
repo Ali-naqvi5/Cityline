@@ -12,8 +12,9 @@ import { vehicleClassName } from "@/domain/jobs/labels";
 /**
  * Who may be given a job (JOB-05, CMP-10).
  *
- * Any driver may be given any car for any job (Cityline, 9 Oct 2026) — the
- * office knows the job and the car; dispatch only says what to look at.
+ * A job goes to a driver and their own car (Cityline, 9 Oct 2026): drivers
+ * are self-employed and Cityline owns no cars. Any class of car may do any
+ * job — the office knows the job; the screen only says what to look at.
  *
  * Blocks — the law, not preference, so the assignment is refused:
  *   - the driver is not active;
@@ -23,18 +24,18 @@ import { vehicleClassName } from "@/domain/jobs/labels";
  *   - the car is not active, or a required car document — PHV vehicle
  *     licence, MOT, hire and reward insurance — is missing or expired at the
  *     pickup time.
+ *   - the car is not the driver's own (Cityline, 9 Oct 2026: every car
+ *     belongs to one driver; it goes with them on every booking).
  *
  * Warnings — shown before the controller confirms, never in the way:
  *   - the car is a different class from the booking;
  *   - the car has fewer passenger seats than the booking has passengers;
- *   - the car is not one the driver normally uses;
  *   - a document runs out within 30 days of the pickup;
  *   - the driver has another job within 90 minutes.
  *
  * The driver's side and the car's side are checked apart (`driverCheck`,
  * `carCheck`) and joined with how the car suits the job (`fitWarnings`), so
- * the assignment screen can pair any driver with any car without checking
- * every pair on the server.
+ * the assignment screen shows every driver with their car from one load.
  */
 
 /**
@@ -82,7 +83,7 @@ export interface EligibilityInput {
   vehicle: CarSide;
   /** Pickup times of the driver's other open jobs. */
   otherPickups: readonly Date[];
-  /** Whether the car lists this driver as one who normally uses it. */
+  /** Whether the car is this driver's own. */
   linked?: boolean;
 }
 
@@ -160,7 +161,9 @@ export function driverCheck(
 /** The car's side: status and documents at the pickup. */
 export function carCheck(car: CarSide, at: Date): Eligibility {
   const blocks: string[] = [];
-  if (car.status !== "active") {
+  if (car.status === "sold") {
+    blocks.push("The driver no longer uses this car.");
+  } else if (car.status !== "active") {
     blocks.push(`The car is ${car.status.replace("_", " ")}, not active.`);
   }
   for (const item of requirements(REQUIRED_VEHICLE_DOCUMENTS, car.documents, at)) {
@@ -175,11 +178,10 @@ export function carCheck(car: CarSide, at: Date): Eligibility {
   );
 }
 
-/** How a car suits a job and its driver: warnings only, never a block. */
+/** How a car suits a job: warnings only, never a block. */
 export function fitWarnings(
   job: { jobClass: string; passengers?: number | null },
   car: Pick<CarSide, "vehicleClassSlug" | "seats">,
-  linked?: boolean,
 ): string[] {
   const warnings: string[] = [];
   const fit = classFit(job.jobClass, car.vehicleClassSlug);
@@ -195,9 +197,6 @@ export function fitWarnings(
   if (car.seats && job.passengers && job.passengers > car.seats) {
     warnings.push(`${car.seats} passenger seats for ${job.passengers} passengers.`);
   }
-  if (linked === false) {
-    warnings.push("This car is not one the driver normally uses.");
-  }
   return warnings;
 }
 
@@ -206,12 +205,15 @@ export function checkEligibility(input: EligibilityInput): Eligibility {
   const driver = driverCheck(input.driver, input.pickupAt, input.otherPickups);
   const car = carCheck(input.vehicle, input.pickupAt);
   return result(
-    [...driver.blocks, ...car.blocks],
+    [
+      ...driver.blocks,
+      ...(input.linked === false ? ["That car is not this driver's own."] : []),
+      ...car.blocks,
+    ],
     [
       ...fitWarnings(
         { jobClass: input.jobClass, passengers: input.passengers },
         input.vehicle,
-        input.linked,
       ),
       ...driver.warnings,
       ...car.warnings,

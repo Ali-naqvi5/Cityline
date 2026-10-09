@@ -218,8 +218,10 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   same capability as the screen; add new reports to its `REPORTS` table).
   The screen and the CSV load through one function, so they always agree.
   Test bookings are never counted. **No money outside Finance** — operational
-  reports load no prices. Periods come from `reports/period.ts`, each
-  compared with the one before; CSVs go through `lib/csv.ts`, which guards
+  reports load no prices, with one exception: a driver's own page in the
+  Driver Report shows what each job was offered to them for (the driver
+  price), never whether it was paid (Cityline, 9 Oct 2026). Periods come
+  from `reports/period.ts`, each compared with the one before; CSVs go through `lib/csv.ts`, which guards
   against spreadsheet formulas. Charts are in `components/ops/charts/`: one
   series colour (`viz`), a hover read-out on every mark (`data-tip-value`)
   and the numbers as a table too.
@@ -292,7 +294,7 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   outsourced driver — found for a job the regulars cannot cover — is added in
   one transaction with their PHV and driving licences, their car and its PHV
   licence, MOT and insurance, all typed in as document records with no file
-  (copies kept offline; `saveDriverAction`). Dispatch asks an outsourced
+  (copies kept offline; `saveDriverAction`). Assignment asks an outsourced
   driver only for the PHV and driving licences (`requiredDriverDocuments`):
   TfL checks DBS and right to work before granting a PHV licence. TfL's
   record treats their licence copies and photo as held offline
@@ -304,19 +306,34 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   All other customer emails still follow `CUSTOMER_EMAILS` (staff-only:
   redirected to the office).
 - **Drivers & cars** (Cityline, 9 Oct 2026): one Fleet entry, a tab each
-  (`FleetTabs`; the Cars tab needs `vehicles.view`). A new driver is added
-  with their car in the same form — a new car, one already on record, or
-  none yet (`createDriverWithCar`, one transaction). A car's drivers are
-  chosen with `SearchSelect` (search, chips), never a list of checkboxes.
+  (`FleetTabs`; the Cars tab needs `vehicles.view`). **Every car is one
+  driver's own**: drivers are self-employed, Cityline is a middle man and
+  owns no cars, and no two drivers share one. The vehicles collection refuses
+  a car with no driver or two, and saving a driver's new car marks their old
+  one "No longer used" (status value `sold`, kept on record). `ownership` is
+  a hidden column kept for old rows, always saved as "driver" — never show
+  company-owned or hired. A new driver is added with their car in the same
+  form, or none yet (`createDriverWithCar`, one transaction); a car's driver
+  is chosen with one `SearchSelect`, never a list of checkboxes.
 - **Assigning** (`/admin/jobs/:id/assign`; Cityline, 9 Oct 2026): every
-  current driver and car, one search box for both (`domain/dispatch/search.ts`:
-  name, registration, make, model; closest first, forgiving typos), and any
-  driver may take any car (`SearchSelect` pickers). A different class, too
-  few seats, or a car the driver does not normally use only warns; the law
-  still blocks — a driver or car without a valid licence, MOT or insurance at
-  the pickup, a suspended driver, a car off the road (`driverCheck`,
-  `carCheck`, `fitWarnings` in `domain/dispatch/eligibility.ts`; the jobs
-  hook checks again on save).
+  current driver, each with their own car, which comes with them — no car
+  picker. One search box (`domain/dispatch/search.ts`: name, phone,
+  registration, make, model; closest first, forgiving typos). A different
+  class or too few seats only warns; the law still blocks — a driver or car
+  without a valid licence, MOT or insurance at the pickup, a suspended
+  driver, a car off the road or no longer used, no car on record, or a car
+  that is not the driver's own (`driverCheck`, `carCheck`, `fitWarnings` in
+  `domain/dispatch/eligibility.ts`; the jobs hook checks again on save).
+- **No Dispatch screen** (Cityline, 9 Oct 2026): Bookings does what the
+  board did — the unassigned filter, "Need a driver", stage buttons, assign.
+  `/admin/dispatch` redirects to Bookings (`jobs-redirect.tsx`), its
+  `?unassigned=1` kept as the unassigned filter.
+- **Driver Report's drivers** (Cityline, 9 Oct 2026): under the totals,
+  every driver still working with their jobs done (completed or PNS) and
+  last job in the period; each opens `/admin/reports/drivers/:id`
+  (`report-driver.tsx`) — their jobs done in chosen dates with the driver
+  price of each and the total offered, as a CSV too (`driver-jobs`). Paid or
+  unpaid never shows there; that is Driver Pay's.
 - **TfL driver records** (`domain/fleet/driver-record.ts`; regs. 13 and 16
   and TfL's Operator Handbook): name, address, date of birth, National
   Insurance number, copies of the DVLA and PHV licences, a photograph, and

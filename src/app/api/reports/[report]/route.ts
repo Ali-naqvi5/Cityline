@@ -1,7 +1,9 @@
 import {
   DRIVER_BOOKINGS_CSV_COLUMNS,
+  DRIVER_JOBS_CSV_COLUMNS,
   DRIVER_RECORDS_CSV_COLUMNS,
   DRIVER_SUMMARY_CSV_COLUMNS,
+  loadDriverJobs,
   loadDriversReport,
   parseDriversReportFilters,
   TAKEN_OFF_CSV_COLUMNS,
@@ -49,7 +51,8 @@ import type { User } from "@/payload-types";
  *
  * Staff only: the signed-in person is checked against the report's
  * capability on every request, as the page itself does. Test bookings are
- * never in it, and no money is — that belongs to the Finance reports.
+ * never in it, and no money is — that belongs to the Finance reports — but
+ * for one driver's jobs, which carry what each was offered to them for.
  */
 export const dynamic = "force-dynamic";
 
@@ -122,6 +125,23 @@ const REPORTS: Record<
             csv: toCsv(rows, DRIVER_BOOKINGS_CSV_COLUMNS),
           };
       }
+    },
+  },
+  // One driver's jobs done in the period, with the driver price of each.
+  "driver-jobs": {
+    capability: "reports.operational",
+    build: async ({ user, query, now }) => {
+      const payload = await payloadClient();
+      const period = resolvePeriod(query, now);
+      const driverId = Number(query.driver);
+      const jobs =
+        Number.isInteger(driverId) && driverId > 0
+          ? await loadDriverJobs(payload, user, driverId, period)
+          : [];
+      return {
+        filename: `cityline-driver-${driverId || "none"}-jobs-${period.from}-to-${period.to}.csv`,
+        csv: toCsv(jobs, DRIVER_JOBS_CSV_COLUMNS),
+      };
     },
   },
   // Payments to drivers made in the period (by the date paid), voids marked.

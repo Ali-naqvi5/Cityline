@@ -32,7 +32,7 @@ import {
   VEHICLE_DOCUMENT_TYPES,
   type DocumentType,
 } from "@/domain/compliance/documents";
-import { OWNERSHIP_LABELS, VEHICLE_STATUS_LABELS } from "@/domain/fleet/labels";
+import { VEHICLE_STATUS_LABELS } from "@/domain/fleet/labels";
 import { vehicleClassName } from "@/domain/jobs/labels";
 import { can } from "@/domain/staff/permissions";
 import { formatDate } from "@/lib/time";
@@ -108,6 +108,12 @@ export async function VehicleView(props: AdminViewServerProps) {
         </Link>
       </div>
       {notice ? <Notice tone="ok">{notice}</Notice> : null}
+      {drivers.length > 1 ? (
+        <Notice tone="warn">
+          This car is linked to more than one driver. A car is one driver&apos;s own: edit
+          it and choose whose it is.
+        </Notice>
+      ) : null}
 
       <PageHeader
         eyebrow={`${vehicle.colour} ${vehicle.make} ${vehicle.model}`}
@@ -311,10 +317,9 @@ export async function VehicleView(props: AdminViewServerProps) {
             <Fields className="sm:grid-cols-1">
               <Field label="Class">{vehicleClassName(vehicle.vehicleClassSlug)}</Field>
               <Field label="Passenger seats">{vehicle.seats ?? "—"}</Field>
-              <Field label="Ownership">{OWNERSHIP_LABELS[vehicle.ownership]}</Field>
             </Fields>
           </Panel>
-          <Panel title="Drivers" bodyClassName="p-0">
+          <Panel title="Driver" bodyClassName="p-0">
             {drivers.length === 0 ? (
               <p className="text-ink-3 px-4 py-3 text-sm">No driver linked.</p>
             ) : (

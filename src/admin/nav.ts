@@ -18,7 +18,6 @@ import {
   MoreHorizontal,
   Receipt,
   RotateCcw,
-  Route,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -49,7 +48,6 @@ import { can, type Capability, type Role } from "@/domain/staff/permissions";
 export const NAV_ICONS = {
   dashboard: LayoutDashboard,
   jobs: ListChecks,
-  dispatch: Route,
   customers: Users,
   quotes: FileText,
   bookings: BookOpenCheck,
@@ -123,14 +121,6 @@ export const NAV: NavSection[] = [
         href: "/admin/bookings",
         icon: "jobs",
         capability: "jobs.view",
-        ready: true,
-      },
-      {
-        id: "dispatch",
-        label: "Dispatch",
-        href: "/admin/dispatch",
-        icon: "dispatch",
-        capability: "jobs.dispatch",
         ready: true,
       },
       {
@@ -394,11 +384,11 @@ export const MOBILE_TABS: MobileTab[] = [
     ready: true,
   },
   {
-    id: "dispatch",
-    label: "Dispatch",
-    href: "/admin/dispatch",
-    icon: "dispatch",
-    capability: "jobs.dispatch",
+    id: "drivers",
+    label: "Drivers",
+    href: "/admin/drivers",
+    icon: "drivers",
+    capability: "drivers.view",
     ready: true,
   },
   {

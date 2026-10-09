@@ -65,7 +65,7 @@ const BEFORE_BOARDING: readonly JobStatus[] = [
   "at_pickup",
 ];
 
-/** Closed jobs: off the dispatch board, and their driver no longer changes. */
+/** Closed jobs: their driver no longer changes. */
 export const FINAL_STATUSES: readonly JobStatus[] = ["completed", "no_show", "cancelled"];
 
 export function isFinal(status: JobStatus): boolean {

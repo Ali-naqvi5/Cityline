@@ -9,7 +9,10 @@ import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 
-/** Adding a vehicle (`/vehicles/new`) or editing one (`/vehicles/:id/edit`). */
+/**
+ * Adding a car (`/vehicles/new`) or editing one (`/vehicles/:id/edit`): every
+ * car is one driver's own, so the form asks whose.
+ */
 export async function VehicleEditView(props: AdminViewServerProps) {
   const idSegment = segment(props, 1);
   const isNew = idSegment === "new";
@@ -31,6 +34,23 @@ export async function VehicleEditView(props: AdminViewServerProps) {
     user,
     overrideAccess: false,
   });
+  // The car each driver uses now, to say which one a new car replaces.
+  const inUse = await payload.find({
+    collection: "vehicles",
+    where: { status: { not_equals: "sold" } },
+    pagination: false,
+    depth: 0,
+    select: { registration: true, drivers: true },
+    user,
+    overrideAccess: false,
+  });
+  const currentCar = new Map<number, { id: number; registration: string }>();
+  for (const car of inUse.docs) {
+    for (const linked of car.drivers ?? []) {
+      const id = typeof linked === "object" ? linked.id : linked;
+      currentCar.set(id, { id: car.id, registration: car.registration });
+    }
+  }
 
   let values: VehicleFormValues = {
     registration: "",
@@ -39,13 +59,9 @@ export async function VehicleEditView(props: AdminViewServerProps) {
     colour: "",
     vehicleClassSlug: "",
     seats: "",
-    ownership: "driver",
     status: "active",
     // "Add a car" from a driver's page comes with that driver chosen.
-    drivers:
-      Number(param(props.searchParams, "driver")) > 0
-        ? [Number(param(props.searchParams, "driver"))]
-        : [],
+    driver: Number(param(props.searchParams, "driver")) || null,
     notes: "",
   };
 
@@ -78,11 +94,11 @@ export async function VehicleEditView(props: AdminViewServerProps) {
       colour: vehicle.colour,
       vehicleClassSlug: vehicle.vehicleClassSlug,
       seats: vehicle.seats ? String(vehicle.seats) : "",
-      ownership: vehicle.ownership,
       status: vehicle.status,
-      drivers: (vehicle.drivers ?? []).map((driver) =>
-        typeof driver === "object" ? driver.id : driver,
-      ),
+      driver: (() => {
+        const linked = (vehicle.drivers ?? [])[0];
+        return linked ? (typeof linked === "object" ? linked.id : linked) : null;
+      })(),
       notes: vehicle.notes ?? "",
     };
   }
@@ -118,6 +134,7 @@ export async function VehicleEditView(props: AdminViewServerProps) {
             id: driver.id,
             name: driver.fullName ?? `Driver ${driver.id}`,
             phone: driver.phone,
+            currentCar: currentCar.get(driver.id) ?? null,
           }))}
           cancelHref={back}
         />
