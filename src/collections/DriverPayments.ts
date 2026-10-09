@@ -1,6 +1,6 @@
 import { ValidationError, type CollectionConfig, type PayloadRequest } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 import { relId } from "@/domain/dispatch/assignment";
 import {
   cashHeldPence,
@@ -48,6 +48,7 @@ const VOID_FIELDS = new Set(["voidedAt", "voidReason", "voidedBy", "updatedAt"])
 export const DriverPayments: CollectionConfig = {
   slug: "driver-payments",
   admin: {
+    hidden: hiddenUnlessOwner,
     defaultColumns: ["driver", "paidAt", "amountPence", "method"],
     description:
       "Payments to drivers for their bookings. Voided, never edited or deleted.",

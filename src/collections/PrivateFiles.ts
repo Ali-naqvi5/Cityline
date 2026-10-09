@@ -2,7 +2,7 @@ import path from "node:path";
 
 import type { CollectionConfig } from "payload";
 
-import { allowAny } from "@/access/staff";
+import { allowAny, hiddenUnlessOwner } from "@/access/staff";
 
 /**
  * Uploaded files that are not for the public: driver and vehicle documents,
@@ -17,6 +17,7 @@ import { allowAny } from "@/access/staff";
 export const PrivateFiles: CollectionConfig = {
   slug: "private-files",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "filename",
     defaultColumns: ["filename", "purpose", "createdAt"],
     description: "Private uploads. Never public.",

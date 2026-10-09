@@ -44,10 +44,13 @@ import { vehicleClassName } from "@/domain/jobs/labels";
  */
 export const COMPATIBLE_CLASSES: Record<string, readonly string[]> = {
   saloon: ["saloon", "estate", "executive", "mpv-5", "mpv-8"],
+  // Hybrid or electric: anything else is a different car, said so.
+  green: ["green"],
   estate: ["estate", "mpv-5", "mpv-8"],
   executive: ["executive"],
   "mpv-5": ["mpv-5", "mpv-8"],
-  "mpv-8": ["mpv-8", "minibus-16"],
+  "mpv-8": ["mpv-8"],
+  // Retired 10 Oct 2026; kept so older bookings still compare.
   "minibus-16": ["minibus-16"],
 };
 

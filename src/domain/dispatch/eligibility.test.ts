@@ -91,6 +91,9 @@ describe("classFit", () => {
     expect(classFit("saloon", "mpv-8")).toBe("upgrade");
     expect(classFit("executive", "saloon")).toBe("different");
     expect(classFit("mpv-8", "saloon")).toBe("different");
+    // Green Class is booked for the car itself: anything else is different.
+    expect(classFit("green", "saloon")).toBe("different");
+    expect(classFit("green", "green")).toBe("exact");
   });
 });
 
@@ -182,7 +185,7 @@ describe("checkEligibility", () => {
     );
     expect(different.eligible).toBe(true);
     expect(different.warnings).toContain(
-      "Booked as Executive saloon; this car is Saloon.",
+      "Booked as Executive Saloon; this car is Saloon.",
     );
 
     const upgrade = checkEligibility(

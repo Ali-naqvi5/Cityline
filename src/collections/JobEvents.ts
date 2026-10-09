@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 
 /**
  * The change log on a job (§14 `job_events`, JOB-08).
@@ -13,6 +13,7 @@ import { allow } from "@/access/staff";
 export const JobEvents: CollectionConfig = {
   slug: "job-events",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "type",
     defaultColumns: ["job", "type", "field", "createdAt"],
     description: "Append-only history. Rows are never edited or removed.",

@@ -16,11 +16,11 @@ describe("vehicleOptionsFor", () => {
   it("offers everything that fits a small party", () => {
     expect(suitableSlugs(2, 2)).toEqual([
       "saloon",
-      "estate",
+      "green",
       "executive",
+      "estate",
       "mpv-5",
       "mpv-8",
-      "minibus-16",
     ]);
   });
 
@@ -51,8 +51,13 @@ describe("vehicleOptionsFor", () => {
     expect(vehicleOptionsFor({ passengers: 16, largeBags: 14 })).toHaveLength(6);
   });
 
-  it("leaves only the minibus for a very large party", () => {
-    expect(suitableSlugs(12, 10)).toEqual(["minibus-16"]);
+  it("leaves only the Large People Carrier for a party of eight", () => {
+    expect(suitableSlugs(8, 5)).toEqual(["mpv-8"]);
+  });
+
+  it("offers nothing for a group bigger than any class", () => {
+    expect(suitableSlugs(12, 10)).toEqual([]);
+    expect(hasAnySuitableVehicle({ passengers: 12, largeBags: 10 })).toBe(false);
   });
 });
 

@@ -5,7 +5,6 @@ import { VEHICLE_CLASSES } from "./vehicle-classes";
 import { chargeableHours, quoteFor } from "./quote";
 
 const saloon = VEHICLE_CLASSES.find((v) => v.slug === "saloon")!;
-const minibus = VEHICLE_CLASSES.find((v) => v.slug === "minibus-16")!;
 
 function journey(overrides: Record<string, string> = {}): FunnelParams {
   return parseFunnelParams({
@@ -65,11 +64,11 @@ describe("quoteFor — hourly", () => {
 
   it("never charges below the class minimum", () => {
     // Someone arriving with ?hours=1 must not get an hour's hire at an hour's
-    // price when the minibus takes four.
-    expect(chargeableHours(journey({ hours: "1" }), minibus)).toBe(minibus.minHours);
+    // price when the class takes three.
+    expect(chargeableHours(journey({ hours: "1" }), saloon)).toBe(saloon.minHours);
 
-    const quote = quoteFor(journey({ service: "hourly", hours: "1" }), minibus);
-    expect(quote.totalPence).toBe(minibus.hourlyRatePence * minibus.minHours);
+    const quote = quoteFor(journey({ service: "hourly", hours: "1" }), saloon);
+    expect(quote.totalPence).toBe(saloon.hourlyRatePence * saloon.minHours);
   });
 
   it("does not use the route fare", () => {

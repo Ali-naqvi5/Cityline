@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 
 import { auditChanges } from "./hooks/audit";
 
@@ -23,7 +23,11 @@ import { auditChanges } from "./hooks/audit";
  */
 export const Customers: CollectionConfig = {
   slug: "customers",
-  admin: { useAsTitle: "name", defaultColumns: ["name", "phone", "email"] },
+  admin: {
+    hidden: hiddenUnlessOwner,
+    useAsTitle: "name",
+    defaultColumns: ["name", "phone", "email"],
+  },
   access: {
     read: allow("customers.view"),
     create: allow("customers.edit"),

@@ -1,8 +1,8 @@
 import { ValidationError, type CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 import { relId } from "@/domain/dispatch/assignment";
-import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
+import { vehicleClassLabel } from "@/domain/pricing/vehicle-classes";
 
 import { auditChanges } from "./hooks/audit";
 
@@ -28,6 +28,7 @@ interface VehicleDoc {
 export const Vehicles: CollectionConfig = {
   slug: "vehicles",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "registration",
     defaultColumns: ["registration", "make", "model", "vehicleClassSlug", "status"],
   },
@@ -115,10 +116,18 @@ export const Vehicles: CollectionConfig = {
       type: "select",
       required: true,
       index: true,
-      options: VEHICLE_CLASSES.map((vehicle) => ({
-        value: vehicle.slug,
-        label: vehicle.name,
-      })),
+      // In the database's order, Green Class last, so adding it is one new
+      // value; the retired 16 seat minibus stays for older cars (Cityline,
+      // 10 Oct 2026). Forms offer only the current classes.
+      options: [
+        "saloon",
+        "estate",
+        "executive",
+        "mpv-5",
+        "mpv-8",
+        "minibus-16",
+        "green",
+      ].map((slug) => ({ value: slug, label: vehicleClassLabel(slug) })),
     },
     { name: "seats", type: "number", min: 1, max: 20 },
     {

@@ -25,3 +25,14 @@ export function allowAny(...capabilities: Capability[]): Access {
       staffCan(req.user as StaffIdentity | null, capability),
     );
 }
+
+/**
+ * Payload's built-in record screens (`/admin/collections/*`) are the
+ * Owner's alone (Cityline, 10 Oct 2026). Everyone else works through the
+ * operations screens; for them a collection's built-in list and edit pages
+ * are "not found". Only the screens are hidden: the operations screens and
+ * the API keep each collection's own access rules.
+ */
+export function hiddenUnlessOwner({ user }: { user: unknown }): boolean {
+  return !staffCan(user as StaffIdentity | null, "system.view");
+}

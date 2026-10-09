@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 
 import { auditChanges } from "./hooks/audit";
 
@@ -24,6 +24,7 @@ import { auditChanges } from "./hooks/audit";
 export const Bookings: CollectionConfig = {
   slug: "bookings",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "reference",
     defaultColumns: ["reference", "status", "totalPence", "createdAt"],
     description: "Website orders. Created by checkout only.",

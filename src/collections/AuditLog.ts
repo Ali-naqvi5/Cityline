@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 
 /**
  * Every change staff make to operational, compliance, finance and settings
@@ -10,6 +10,7 @@ import { allow } from "@/access/staff";
 export const AuditLog: CollectionConfig = {
   slug: "audit-log",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "docLabel",
     defaultColumns: ["createdAt", "entity", "docLabel", "action", "user"],
     description: "Append-only. Written by the system on every staff change.",

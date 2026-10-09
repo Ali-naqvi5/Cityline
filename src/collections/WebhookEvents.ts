@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 
 /**
  * Every webhook we have already processed (§14 `webhook_events`).
@@ -13,6 +13,7 @@ import { allow } from "@/access/staff";
 export const WebhookEvents: CollectionConfig = {
   slug: "webhook-events",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "eventId",
     defaultColumns: ["provider", "type", "eventId", "processedAt"],
     description: "Idempotency ledger. One row per event we have handled.",

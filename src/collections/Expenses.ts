@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 
 import { auditChanges } from "./hooks/audit";
 import { failOn, onlyChange } from "./hooks/partner-lines";
@@ -32,6 +32,7 @@ export function expenseReference(id: number): string {
 export const Expenses: CollectionConfig = {
   slug: "expenses",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "description",
     defaultColumns: ["spentAt", "description", "amountPence"],
     description: "Cityline's own expenses. Voided, never edited or deleted.",

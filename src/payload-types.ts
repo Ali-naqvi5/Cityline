@@ -627,7 +627,7 @@ export interface Vehicle {
   make: string;
   model: string;
   colour: string;
-  vehicleClassSlug: 'saloon' | 'estate' | 'executive' | 'mpv-5' | 'mpv-8' | 'minibus-16';
+  vehicleClassSlug: 'saloon' | 'estate' | 'executive' | 'mpv-5' | 'mpv-8' | 'minibus-16' | 'green';
   seats?: number | null;
   ownership: 'company' | 'driver' | 'hired';
   status: 'active' | 'off_road' | 'sold';

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allowAny } from "@/access/staff";
+import { allowAny, hiddenUnlessOwner } from "@/access/staff";
 import {
   DOCUMENT_LABELS,
   DRIVER_DOCUMENT_TYPES,
@@ -24,6 +24,7 @@ interface DocumentDoc {
 export const DriverDocuments: CollectionConfig = {
   slug: "driver-documents",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "type",
     defaultColumns: ["driver", "type", "expiresAt", "verifiedAt"],
   },

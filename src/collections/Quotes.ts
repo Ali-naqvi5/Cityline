@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 import { bookingRules } from "@/domain/booking/rules";
 
 /**
@@ -28,6 +28,7 @@ import { bookingRules } from "@/domain/booking/rules";
 export const Quotes: CollectionConfig = {
   slug: "quotes",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "token",
     defaultColumns: ["token", "status", "totalPence", "expiresAt"],
     description: "Priced journeys awaiting checkout. Expire after 30 minutes.",

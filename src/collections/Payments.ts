@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 
 /**
  * Money taken (§14 `payments`, PAY-01).
@@ -16,6 +16,7 @@ import { allow } from "@/access/staff";
 export const Payments: CollectionConfig = {
   slug: "payments",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "stripePaymentIntentId",
     defaultColumns: ["booking", "amountPence", "status", "kind", "createdAt"],
   },

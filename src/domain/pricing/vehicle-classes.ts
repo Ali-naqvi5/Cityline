@@ -10,8 +10,7 @@ import type { Pence } from "@/domain/money";
  *
  * Note for S2: the designs are inconsistent with themselves. The fleet page
  * shows Saloon at 4 passengers from £48; booking step 2 shows Saloon at
- * 3 passengers at £58. The fleet page is used here because it covers all six
- * classes.
+ * 3 passengers at £58. The fleet page is used here.
  */
 export interface VehicleClass {
   slug: string;
@@ -35,6 +34,14 @@ export interface VehicleClass {
   sort: number;
 }
 
+/**
+ * Cityline's six classes, in the order the office lists them (Cityline,
+ * 10 Oct 2026): Saloon, Green Class, Executive Saloon, Estate, People
+ * Carrier, Large People Carrier. One list for the website and the admin, so
+ * the two stay connected. The slugs `mpv-5` and `mpv-8` are kept for People
+ * Carrier and Large People Carrier, so earlier bookings and cars keep their
+ * class.
+ */
 export const VEHICLE_CLASSES: readonly VehicleClass[] = [
   {
     slug: "saloon",
@@ -52,23 +59,24 @@ export const VEHICLE_CLASSES: readonly VehicleClass[] = [
     sort: 1,
   },
   {
-    slug: "estate",
-    name: "Estate",
-    tier: "Extra luggage",
+    slug: "green",
+    name: "Green Class",
+    tier: "Hybrid or electric",
     maxPassengers: 4,
-    maxLargeBags: 3,
+    maxLargeBags: 2,
     maxHandLuggage: 2,
-    exampleModels: "Škoda Superb Estate, Volkswagen Passat Estate or similar",
-    note: "Fold-flat split rear seats",
-    image: "/images/fleet/estate.png",
-    fromPence: 5600,
-    hourlyRatePence: 5000,
+    exampleModels: "Toyota Prius, Tesla Model 3 or similar",
+    // TODO(Cityline): a Green Class photo; the saloon's stands in until then.
+    image: "/images/fleet/saloon.png",
+    // TODO(Cityline): Green Class fares. The saloon's placeholders for now.
+    fromPence: 4800,
+    hourlyRatePence: 4500,
     minHours: 3,
     sort: 2,
   },
   {
     slug: "executive",
-    name: "Executive saloon",
+    name: "Executive Saloon",
     tier: "Chauffeur",
     maxPassengers: 3,
     maxLargeBags: 2,
@@ -81,8 +89,23 @@ export const VEHICLE_CLASSES: readonly VehicleClass[] = [
     sort: 3,
   },
   {
+    slug: "estate",
+    name: "Estate",
+    tier: "Extra luggage",
+    maxPassengers: 4,
+    maxLargeBags: 3,
+    maxHandLuggage: 2,
+    exampleModels: "Škoda Superb Estate, Volkswagen Passat Estate or similar",
+    note: "Fold-flat split rear seats",
+    image: "/images/fleet/estate.png",
+    fromPence: 5600,
+    hourlyRatePence: 5000,
+    minHours: 3,
+    sort: 4,
+  },
+  {
     slug: "mpv-5",
-    name: "MPV 5",
+    name: "People Carrier",
     tier: "Small group",
     maxPassengers: 5,
     maxLargeBags: 4,
@@ -92,11 +115,11 @@ export const VEHICLE_CLASSES: readonly VehicleClass[] = [
     fromPence: 6500,
     hourlyRatePence: 5800,
     minHours: 3,
-    sort: 4,
+    sort: 5,
   },
   {
     slug: "mpv-8",
-    name: "MPV 8",
+    name: "Large People Carrier",
     tier: "Group",
     maxPassengers: 8,
     maxLargeBags: 5,
@@ -106,23 +129,28 @@ export const VEHICLE_CLASSES: readonly VehicleClass[] = [
     fromPence: 7800,
     hourlyRatePence: 7000,
     minHours: 3,
-    sort: 5,
-  },
-  {
-    slug: "minibus-16",
-    name: "16 seat minibus",
-    tier: "Large group",
-    maxPassengers: 16,
-    maxLargeBags: 14,
-    maxHandLuggage: 10,
-    exampleModels: "Mercedes-Benz Sprinter or similar",
-    image: "/images/fleet/minibus-16.png",
-    fromPence: 14_500,
-    hourlyRatePence: 11000,
-    minHours: 4,
     sort: 6,
   },
-] as const;
+];
+
+/**
+ * Classes no longer offered, by slug, so older bookings and cars still read
+ * properly. The 16 seat minibus was withdrawn on 10 Oct 2026; its value stays
+ * in the database, which is never shrunk.
+ */
+export const RETIRED_VEHICLE_CLASSES: Readonly<Record<string, string>> = {
+  "minibus-16": "16 seat minibus",
+};
+
+/** A class's name, including retired ones; the slug itself when unknown. */
+export function vehicleClassLabel(slug: string | null | undefined): string {
+  if (!slug) return "—";
+  return (
+    VEHICLE_CLASSES.find((vehicle) => vehicle.slug === slug)?.name ??
+    RETIRED_VEHICLE_CLASSES[slug] ??
+    slug
+  );
+}
 
 export function cheapestFromPence(): Pence {
   return Math.min(...VEHICLE_CLASSES.map((v) => v.fromPence));

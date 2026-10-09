@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 import { relId } from "@/domain/dispatch/assignment";
 import { invoiceNumber } from "@/domain/finance/supplier-money";
 import type { Supplier } from "@/payload-types";
@@ -22,6 +22,7 @@ const DAY_MS = 86_400_000;
 export const SupplierInvoices: CollectionConfig = {
   slug: "supplier-invoices",
   admin: {
+    hidden: hiddenUnlessOwner,
     defaultColumns: ["supplier", "issuedAt", "totalPence", "sentAt"],
     description: "Invoices to partners. Voided, never edited or deleted.",
   },

@@ -1,6 +1,6 @@
 import { ValidationError, type CollectionConfig, type FieldAccess } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 import { normalisePhone } from "@/domain/booking/passenger";
 import { DRIVER_ENGAGEMENTS } from "@/domain/compliance/documents";
 import { isValidNiNumber, normaliseNiNumber } from "@/domain/fleet/driver-record";
@@ -42,6 +42,7 @@ interface DriverDoc {
 export const Drivers: CollectionConfig = {
   slug: "drivers",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "fullName",
     defaultColumns: ["fullName", "status", "phone"],
   },

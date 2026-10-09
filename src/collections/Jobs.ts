@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 
 import { auditChanges } from "./hooks/audit";
 import { applyDispatchRules, recordJobHistory } from "./hooks/job-dispatch";
@@ -37,6 +37,7 @@ import { enforceJobRules } from "./hooks/jobs";
 export const Jobs: CollectionConfig = {
   slug: "jobs",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "reference",
     defaultColumns: ["reference", "source", "status", "pickupAt", "leadName"],
     description: "Every job, every source. The TfL booking register (CMP-03).",

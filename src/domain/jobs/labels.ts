@@ -1,4 +1,4 @@
-import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
+import { vehicleClassLabel } from "@/domain/pricing/vehicle-classes";
 
 /**
  * How jobs are described to staff. The values match the `jobs` collection's
@@ -99,9 +99,9 @@ export const OPEN_STATUSES: readonly JobStatus[] = [
   "on_board",
 ];
 
+/** A class's name; retired classes, such as the 16 seat minibus, still read. */
 export function vehicleClassName(slug: string | null | undefined): string {
-  if (!slug) return "—";
-  return VEHICLE_CLASSES.find((vehicle) => vehicle.slug === slug)?.name ?? slug;
+  return vehicleClassLabel(slug);
 }
 
 /** Sources staff may enter a job from — never "website" (§2). */

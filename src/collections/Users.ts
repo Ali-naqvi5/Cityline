@@ -1,6 +1,6 @@
 import { APIError, type CollectionConfig, type FieldAccess } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 
 import { auditChanges } from "./hooks/audit";
 import { staffCan, type StaffIdentity } from "@/domain/staff/permissions";
@@ -29,7 +29,11 @@ export const Users: CollectionConfig = {
     maxLoginAttempts: 5,
     lockTime: 10 * 60 * 1000,
   },
-  admin: { useAsTitle: "name", defaultColumns: ["name", "email", "role", "active"] },
+  admin: {
+    hidden: hiddenUnlessOwner,
+    useAsTitle: "name",
+    defaultColumns: ["name", "email", "role", "active"],
+  },
   access: {
     read: allow("dashboard"),
     create: allow("staff.manage"),

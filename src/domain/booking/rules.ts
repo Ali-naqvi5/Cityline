@@ -1,3 +1,5 @@
+import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
+
 /**
  * Booking rules (BK-05, ADM-01).
  *
@@ -33,8 +35,10 @@ const DEFAULTS: BookingRules = {
   minNoticeMinutes: 180,
   maxAdvanceDays: 365,
   quoteTtlMinutes: 30,
-  maxPassengers: 16,
-  maxLargeBags: 16,
+  // The biggest class decides (Large People Carrier since 10 Oct 2026); a
+  // bigger group is asked to contact the office.
+  maxPassengers: Math.max(...VEHICLE_CLASSES.map((vehicle) => vehicle.maxPassengers)),
+  maxLargeBags: Math.max(...VEHICLE_CLASSES.map((vehicle) => vehicle.maxLargeBags)),
   maxSmallBags: 16,
   maxViaStops: 3,
   blackoutDates: [],

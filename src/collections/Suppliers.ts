@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow, allowAny } from "@/access/staff";
+import { allow, allowAny, hiddenUnlessOwner } from "@/access/staff";
 
 import { auditChanges } from "./hooks/audit";
 
@@ -19,6 +19,7 @@ interface SupplierDoc {
 export const Suppliers: CollectionConfig = {
   slug: "suppliers",
   admin: {
+    hidden: hiddenUnlessOwner,
     useAsTitle: "name",
     defaultColumns: ["name", "paymentTermsDays", "active"],
   },

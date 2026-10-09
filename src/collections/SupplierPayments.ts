@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 import { relId } from "@/domain/dispatch/assignment";
 import { RECEIPT_METHODS, receiptReference } from "@/domain/finance/supplier-money";
 
@@ -28,6 +28,7 @@ const LINE_FIELDS: Field[] = [
 export const SupplierPayments: CollectionConfig = {
   slug: "supplier-payments",
   admin: {
+    hidden: hiddenUnlessOwner,
     defaultColumns: ["supplier", "receivedAt", "amountPence"],
     description: "Money received from partners. Voided, never edited or deleted.",
   },

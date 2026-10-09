@@ -324,6 +324,17 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   driver, a car off the road or no longer used, no car on record, or a car
   that is not the driver's own (`driverCheck`, `carCheck`, `fitWarnings` in
   `domain/dispatch/eligibility.ts`; the jobs hook checks again on save).
+- **Car classes** (Cityline, 10 Oct 2026): one list for the website and the
+  admin (`domain/pricing/vehicle-classes.ts`), in this order: Saloon, Green
+  Class (`green`), Executive Saloon, Estate, People Carrier (`mpv-5`), Large
+  People Carrier (`mpv-8`). The 16 seat minibus is retired: still in the
+  database and named by `vehicleClassLabel`, never offered. The website's
+  party limit is the biggest class (`domain/booking/rules.ts`). Green Class
+  has the saloon's placeholder fares and photo until Cityline supplies its own.
+- **Payload's built-in record screens are the Owner's** (Cityline, 10 Oct
+  2026): every collection sets `admin.hidden: hiddenUnlessOwner`, so
+  `/admin/collections/*` is "not found" for everyone else. The API and the
+  operations screens keep each collection's own access rules.
 - **No Dispatch screen** (Cityline, 9 Oct 2026): Bookings does what the
   board did — the unassigned filter, "Need a driver", stage buttons, assign.
   `/admin/dispatch` redirects to Bookings (`jobs-redirect.tsx`), its

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 import { relId } from "@/domain/dispatch/assignment";
 import {
   isStripeRefundId,
@@ -29,6 +29,7 @@ import { failOn, onlyChange } from "./hooks/partner-lines";
 export const Refunds: CollectionConfig = {
   slug: "refunds",
   admin: {
+    hidden: hiddenUnlessOwner,
     defaultColumns: ["refundedAt", "amountPence", "method", "reason"],
     description: "Refunds made by the office, recorded by hand. Voided, never edited.",
   },

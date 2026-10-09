@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useRef, useTransition, type ReactNode } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useRef, useState, useTransition, type ReactNode } from "react";
 
 import { cx } from "./primitives";
 
@@ -10,6 +10,11 @@ import { cx } from "./primitives";
  * change, the search box after a short pause. It only builds the URL — the
  * filtering happens on the server, so the browser never holds more than one
  * page of records. Without JavaScript it is still a plain GET form.
+ *
+ * Its fields show what the address says. When a link changes the address —
+ * the run sheet's arrows, a card on Bookings — the bar is drawn again from the
+ * new values; when the bar changed it itself, it is left alone, so typing in
+ * the search box is never interrupted.
  */
 export function FilterForm({
   action,
@@ -23,6 +28,14 @@ export function FilterForm({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const current = useSearchParams().toString();
+  const [seen, setSeen] = useState(current);
+  const [pushed, setPushed] = useState(current);
+  const [version, setVersion] = useState(0);
+  if (current !== seen) {
+    setSeen(current);
+    if (current !== pushed) setVersion(version + 1);
+  }
 
   function navigate(form: HTMLFormElement) {
     const query = new URLSearchParams();
@@ -30,11 +43,13 @@ export function FilterForm({
       if (typeof value === "string" && value.trim() !== "") query.set(key, value.trim());
     }
     const search = query.toString();
+    setPushed(search);
     startTransition(() => router.push(`${action}${search ? `?${search}` : ""}`));
   }
 
   return (
     <form
+      key={version}
       action={action}
       method="get"
       aria-busy={pending}

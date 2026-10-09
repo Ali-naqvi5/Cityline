@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { allow } from "@/access/staff";
+import { allow, hiddenUnlessOwner } from "@/access/staff";
 import { relId } from "@/domain/dispatch/assignment";
 import {
   CUSTOMER_PAYMENT_METHODS,
@@ -41,6 +41,7 @@ const routeOf = (job: Job) =>
 export const CustomerPayments: CollectionConfig = {
   slug: "customer-payments",
   admin: {
+    hidden: hiddenUnlessOwner,
     defaultColumns: ["paidAt", "amountPence", "method"],
     description:
       "Customers' money for office bookings, recorded by hand. Voided, never edited or deleted.",
