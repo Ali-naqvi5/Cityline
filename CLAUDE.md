@@ -289,16 +289,32 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   driver to a page. The passenger's phone is on it; prices are not — a
   driver's price reaches them only in their day's WhatsApp message
   (`driverDayMessage`, sharing `jobDetailLines` with the single-job one).
-- **Registered and outsourced drivers** (`drivers.engagement`, Cityline,
-  9 Oct 2026): a registered driver has every document and copy online. An
-  outsourced driver — found for a job the regulars cannot cover — is added in
-  one transaction with their PHV and driving licences, their car and its PHV
-  licence, MOT and insurance, all typed in as document records with no file
-  (copies kept offline; `saveDriverAction`). Assignment asks an outsourced
-  driver only for the PHV and driving licences (`requiredDriverDocuments`):
-  TfL checks DBS and right to work before granting a PHV licence. TfL's
-  record treats their licence copies and photo as held offline
-  (`heldOffline`).
+- **Registered and outsourced drivers** (`drivers.engagement`): a registered
+  driver has every document and copy online, and they and their car are
+  checked. An outsourced driver — found for a job the regulars cannot cover —
+  is added with their personal details and their car only, in one
+  transaction (`saveDriverAction`). Their records are kept offline (Cityline,
+  10 Oct 2026): no licence, certificate or insurance is asked for, and
+  neither they nor their car is ever blocked or listed by compliance
+  (`requiredDriverDocuments` and `requiredVehicleDocuments` return nothing
+  for them). Status still applies: a suspended driver or a car off the road
+  cannot go. TfL's driver record treats their licence copies and photo as held
+  offline (`heldOffline`); their bookings carry no PHV number.
+- **Payment links on a booking are the system's** (Cityline, 10 Oct 2026): a
+  job's links to its driver payment, partner payment, invoice and office
+  payment, the paid-price snapshots, the card fee and the website lock carry
+  field access that refuses staff and the API (`hookOnly` in `Jobs.ts`). The
+  finance hooks and checkout write them with access overridden. A website
+  booking's payment method is locked with its price (`LOCKED_FIELDS`).
+- **Cancel booking for website bookings** (Cityline, 10 Oct 2026): the Owner
+  and Controllers (`bookings.amend`) cancel the order and every journey still
+  to come together, with a reason (`cancelWebsiteBookingAction`). No money
+  moves and the customer is not emailed. The booking then waits under Refunds.
+  The jobs hook refuses cancelling one website leg on its own unless
+  `context.cancellingOrder` is set.
+- **Admin browser checks** live in `e2e/admin/` (`pnpm e2e:admin`; see its
+  README): local database and a dev server with emails off only, and the
+  password comes from `ADMIN_TEST_PASSWORD` in `.env.local`.
 - **Driver details emails are off** (Cityline, 9 Oct 2026): the email that
   tells a passenger their driver and car (NOT-02) is kept, but sends only
   with `DRIVER_DETAILS_EMAILS=on` (`lib/features.ts`); until then the admin

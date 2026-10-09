@@ -43,7 +43,7 @@ export interface DriverFormValues {
 const ENGAGEMENT_HINTS: Record<string, string> = {
   registered: "A regular driver. Every document and copy is kept here, online.",
   outsourced:
-    "Found for a job the regulars cannot cover. Type in their licences and car; keep copies of the documents offline.",
+    "Found for a job the regulars cannot cover. Only their details and car are kept here; their records are kept offline and never checked.",
 };
 
 export function DriverForm({
@@ -61,7 +61,7 @@ export function DriverForm({
   const [status, setStatus] = useState(values.status);
   const [conduct, setConduct] = useState(values.leftForConduct);
   const e = state.errors;
-  // A new outsourced driver is added with their licences and car.
+  // A new outsourced driver is added with their car, ready to assign.
   const outsourcing = !values.id && engagement === "outsourced";
 
   return (
@@ -191,7 +191,6 @@ export function DriverForm({
         </FormField>
       </FormSection>
 
-      {outsourcing ? <LicencesSection errors={e} /> : null}
       {!values.id ? (
         <CarSection outsourced={outsourcing} classes={classes} errors={e} />
       ) : null}
@@ -333,70 +332,6 @@ export function DriverForm({
   );
 }
 
-/** A date field for a licence or certificate's expiry. */
-function ExpiryField({
-  id,
-  label,
-  error,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-}) {
-  return (
-    <FormField id={id} label={label} required error={error}>
-      <input
-        id={id}
-        name={id}
-        type="date"
-        className={inputClass()}
-        {...invalid(error, id)}
-      />
-    </FormField>
-  );
-}
-
-function NumberField({
-  id,
-  label,
-  error,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-}) {
-  return (
-    <FormField id={id} label={label} required error={error}>
-      <input
-        id={id}
-        name={id}
-        autoComplete="off"
-        className={inputClass("uppercase tabular-nums")}
-        {...invalid(error, id)}
-      />
-    </FormField>
-  );
-}
-
-/** An outsourced driver's licences, typed in from the documents seen. */
-function LicencesSection({ errors: e }: { errors: Record<string, string | undefined> }) {
-  return (
-    <FormSection
-      title="Licences"
-      description="From the documents you have seen. Keep the copies offline; these are what dispatch checks."
-    >
-      <NumberField id="phvNumber" label="PHV driver licence number" error={e.phvNumber} />
-      <ExpiryField
-        id="phvExpiry"
-        label="PHV driver licence expires"
-        error={e.phvExpiry}
-      />
-      <NumberField id="dvlaNumber" label="Driving licence number" error={e.dvlaNumber} />
-      <ExpiryField id="dvlaExpiry" label="Driving licence expires" error={e.dvlaExpiry} />
-    </FormSection>
-  );
-}
-
 const CAR_CHOICES = [
   ["new", "Add their car"],
   ["none", "No car yet"],
@@ -405,8 +340,9 @@ const CAR_CHOICES = [
 /**
  * The driver's own car, added in the same form (Cityline, 9 Oct 2026). Every
  * car is its driver's — Cityline owns none, and no two drivers share one. An
- * outsourced driver comes with their car and its licences, typed in; a
- * registered driver's car documents are uploaded on the car's page.
+ * outsourced driver always comes with their car, and nothing more: their
+ * records are kept offline (Cityline, 10 Oct 2026). A registered driver's car
+ * documents are uploaded on the car's page.
  */
 function CarSection({
   outsourced,
@@ -424,7 +360,7 @@ function CarSection({
       title="Their car"
       description={
         outsourced
-          ? "Added with the driver, ready to assign."
+          ? "Added with the driver, ready to assign. No documents are asked for: the office keeps their records offline."
           : "The driver's own car: it goes with them on every booking. Upload its documents on the car's page after saving."
       }
     >
@@ -465,47 +401,6 @@ function CarSection({
         <p className="text-ink-3 text-sm sm:col-span-2">
           Add their car later from the driver&apos;s page.
         </p>
-      ) : null}
-      {outsourced ? (
-        <>
-          <NumberField
-            id="vehicleLicenceNumber"
-            label="PHV vehicle licence number"
-            error={e.vehicleLicenceNumber}
-          />
-          <ExpiryField
-            id="vehicleLicenceExpiry"
-            label="PHV vehicle licence expires"
-            error={e.vehicleLicenceExpiry}
-          />
-          <ExpiryField id="motExpiry" label="MOT expires" error={e.motExpiry} />
-          <ExpiryField
-            id="insuranceExpiry"
-            label="Hire and reward insurance expires"
-            error={e.insuranceExpiry}
-          />
-          <div className="sm:col-span-2">
-            <label
-              htmlFor="seenOriginals"
-              className="text-ink-2 flex min-h-10 cursor-pointer items-start gap-2 text-sm"
-            >
-              <input
-                id="seenOriginals"
-                name="seenOriginals"
-                type="checkbox"
-                className="accent-accent mt-0.5 h-4 w-4 shrink-0"
-                {...invalid(e.seenOriginals, "seenOriginals")}
-              />
-              I have seen the original documents, and the office keeps copies of them
-              offline
-            </label>
-            {e.seenOriginals ? (
-              <p id="seenOriginals-error" className="text-danger mt-1 text-sm">
-                {e.seenOriginals}
-              </p>
-            ) : null}
-          </div>
-        </>
       ) : null}
     </FormSection>
   );

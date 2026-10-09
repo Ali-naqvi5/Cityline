@@ -114,6 +114,7 @@ export async function checkAssignment(
       vehicleClassSlug: vehicle.vehicleClassSlug,
       seats: vehicle.seats,
       documents: vehicleDocuments.docs,
+      ownerEngagement: driver.engagement,
     },
     otherPickups: others.docs.map((job) => new Date(job.pickupAt)),
     linked: (vehicle.drivers ?? []).some((linked) => relId(linked) === driver.id),

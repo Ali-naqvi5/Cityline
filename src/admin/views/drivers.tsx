@@ -240,7 +240,11 @@ export async function DriversView(props: AdminViewServerProps) {
                   </div>
                   <p className="text-ink-3 text-sm tabular-nums">{driver.phone}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <ComplianceBadge worst={worst} />
+                    {driver.engagement === "outsourced" ? (
+                      <Badge tone="neutral">Kept offline</Badge>
+                    ) : (
+                      <ComplianceBadge worst={worst} />
+                    )}
                     <span className="text-ink-3 text-xs">
                       {nextJob
                         ? `Next: ${pickupLabel(new Date(nextJob.pickupAt))}`
@@ -327,7 +331,13 @@ export async function DriversView(props: AdminViewServerProps) {
               {
                 key: "compliance",
                 header: "Compliance",
-                cell: ({ worst }) => <ComplianceBadge worst={worst} />,
+                // An outsourced driver is never checked: records kept offline.
+                cell: ({ driver, worst }) =>
+                  driver.engagement === "outsourced" ? (
+                    <Badge tone="neutral">Kept offline</Badge>
+                  ) : (
+                    <ComplianceBadge worst={worst} />
+                  ),
               },
               {
                 key: "next",

@@ -12,8 +12,6 @@ import {
   driverSchema,
   expiryToIso,
   fileProblem,
-  outsourcedDocuments,
-  outsourcedLicencesSchema,
   supplierData,
   supplierSchema,
   carSchema,
@@ -72,32 +70,18 @@ export async function saveDriverAction(
 
   const parsed = driverSchema.safeParse(driverForm(formData));
   // A new driver is added with their own car, or none yet (Cityline, 9 Oct
-  // 2026). A new outsourced driver always comes with their licences and car,
-  // so they can be given a job at once.
+  // 2026). A new outsourced driver always comes with their car, so they can
+  // be given a job at once; their records are kept offline (10 Oct 2026).
   const outsourcing = !id && text(formData, "engagement") === "outsourced";
   const carChoice = id
     ? "none"
     : outsourcing
       ? "new"
       : text(formData, "carChoice") || "none";
-  const licences = outsourcing
-    ? outsourcedLicencesSchema.safeParse({
-        phvNumber: text(formData, "phvNumber"),
-        phvExpiry: text(formData, "phvExpiry"),
-        dvlaNumber: text(formData, "dvlaNumber"),
-        dvlaExpiry: text(formData, "dvlaExpiry"),
-        vehicleLicenceNumber: text(formData, "vehicleLicenceNumber"),
-        vehicleLicenceExpiry: text(formData, "vehicleLicenceExpiry"),
-        motExpiry: text(formData, "motExpiry"),
-        insuranceExpiry: text(formData, "insuranceExpiry"),
-        seenOriginals: checked(formData, "seenOriginals"),
-      })
-    : null;
   const car = carChoice === "new" ? carSchema.safeParse(carForm(formData)) : null;
-  if (!parsed.success || (licences && !licences.success) || (car && !car.success)) {
+  if (!parsed.success || (car && !car.success)) {
     const errors = {
       ...(car && !car.success ? zodErrors(car.error).errors : {}),
-      ...(licences && !licences.success ? zodErrors(licences.error).errors : {}),
       ...(!parsed.success ? zodErrors(parsed.error).errors : {}),
     };
     return { errors, message: "Please check the highlighted fields." };
@@ -127,7 +111,6 @@ export async function saveDriverAction(
         car: car?.success
           ? vehicleData({ ...car.data, status: "active", drivers: [], notes: "" })
           : null,
-        documents: licences?.success ? outsourcedDocuments(licences.data) : null,
       });
     }
   } catch (error) {
@@ -139,52 +122,31 @@ export async function saveDriverAction(
   );
 }
 
-/**
- * One transaction: the driver, their car, and for an outsourced driver the
- * licence records of both — all saved, or none. An outsourced driver's
- * records are typed-in copies of documents the office has seen; the copies
- * themselves are kept offline.
- */
+/** One transaction: the driver and their car — both saved, or neither. */
 async function createDriverWithCar(
   payload: Awaited<ReturnType<typeof staffForAction>>["payload"],
   user: Awaited<ReturnType<typeof staffForAction>>["user"],
   records: {
     driver: ReturnType<typeof driverData>;
     car: ReturnType<typeof vehicleData> | null;
-    documents: ReturnType<typeof outsourcedDocuments> | null;
   },
 ): Promise<number> {
   const transactionID = await payload.db.beginTransaction();
   const req =
     transactionID === null || transactionID === undefined ? undefined : { transactionID };
   const as = { user, overrideAccess: false as const, req };
-  const seen = { verifiedBy: user.id, verifiedAt: new Date().toISOString() };
   try {
     const driver = await payload.create({
       collection: "drivers",
       data: records.driver,
       ...as,
     });
-    for (const document of records.documents?.driver ?? []) {
-      await payload.create({
-        collection: "driver-documents",
-        data: { ...document, ...seen, driver: driver.id },
-        ...as,
-      });
-    }
     if (records.car) {
-      const vehicle = await payload.create({
+      await payload.create({
         collection: "vehicles",
         data: { ...records.car, drivers: [driver.id] },
         ...as,
       });
-      for (const document of records.documents?.vehicle ?? []) {
-        await payload.create({
-          collection: "vehicle-documents",
-          data: { ...document, ...seen, vehicle: vehicle.id },
-          ...as,
-        });
-      }
     }
     if (req) await payload.db.commitTransaction(req.transactionID);
     return driver.id;

@@ -1,6 +1,7 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, FieldAccess } from "payload";
 
 import { allow, hiddenUnlessOwner } from "@/access/staff";
+import { staffCan, type StaffIdentity } from "@/domain/staff/permissions";
 
 import { auditChanges } from "./hooks/audit";
 import { applyDispatchRules, recordJobHistory } from "./hooks/job-dispatch";
@@ -34,6 +35,19 @@ import { enforceJobRules } from "./hooks/jobs";
  * by hooks (`hooks/job-dispatch.ts`) on every write, not only by the screens:
  * an expired driver cannot be given a job through the API either.
  */
+/**
+ * Fields only the system writes (Cityline, 10 Oct 2026; audit AUD-02): the
+ * links from a booking to the money records that cover it, the prices when
+ * they were paid, the card fee and the website lock. The finance hooks and
+ * checkout write them with access overridden; staff and the API never can,
+ * so a paid booking cannot be made to look unpaid.
+ */
+const hookOnly: FieldAccess = () => false;
+
+/** Whether a cancelled partner booking is charged: Supplier Money's decision. */
+const partnerMoney: FieldAccess = ({ req }) =>
+  staffCan(req.user as StaffIdentity | null, "supplierMoney.manage");
+
 export const Jobs: CollectionConfig = {
   slug: "jobs",
   admin: {
@@ -351,6 +365,8 @@ export const Jobs: CollectionConfig = {
         {
           name: "paymentFeePence",
           type: "number",
+          // Set from Stripe, or with an office payment; never typed in here.
+          access: { update: hookOnly },
           defaultValue: 0,
           admin: {
             description:
@@ -361,6 +377,7 @@ export const Jobs: CollectionConfig = {
           // Set by the payment to the driver that covers this booking (Driver
           // Pay); cleared if that payment is voided.
           name: "driverPayment",
+          access: { create: hookOnly, update: hookOnly },
           type: "relationship",
           relationTo: "driver-payments",
           index: true,
@@ -370,6 +387,7 @@ export const Jobs: CollectionConfig = {
           // Supplier Money: the partner's payment and invoice that cover this
           // booking, and — when cancelled — whether the partner still pays.
           name: "supplierPayment",
+          access: { create: hookOnly, update: hookOnly },
           type: "relationship",
           relationTo: "supplier-payments",
           index: true,
@@ -377,6 +395,7 @@ export const Jobs: CollectionConfig = {
         },
         {
           name: "supplierInvoice",
+          access: { create: hookOnly, update: hookOnly },
           type: "relationship",
           relationTo: "supplier-invoices",
           index: true,
@@ -385,6 +404,7 @@ export const Jobs: CollectionConfig = {
         {
           name: "cancellationCharge",
           type: "select",
+          access: { update: partnerMoney },
           options: [
             { label: "Partner pays (late cancellation)", value: "charged" },
             { label: "No charge", value: "not_charged" },
@@ -397,6 +417,7 @@ export const Jobs: CollectionConfig = {
           // Payments: the customer's money for an office booking paid by card
           // link, bank transfer or on account, and the price when it came in.
           name: "customerPayment",
+          access: { create: hookOnly, update: hookOnly },
           type: "relationship",
           relationTo: "customer-payments",
           index: true,
@@ -405,6 +426,7 @@ export const Jobs: CollectionConfig = {
         {
           name: "customerPaidPricePence",
           type: "number",
+          access: { create: hookOnly, update: hookOnly },
           admin: {
             readOnly: true,
             description: "The price when the customer paid, to notice a later change.",
@@ -413,6 +435,7 @@ export const Jobs: CollectionConfig = {
         {
           name: "driverPaidPricePence",
           type: "number",
+          access: { create: hookOnly, update: hookOnly },
           admin: {
             readOnly: true,
             description: "The driver price when it was paid, to notice a later change.",
@@ -421,6 +444,8 @@ export const Jobs: CollectionConfig = {
         {
           name: "locked",
           type: "checkbox",
+          // Set by checkout; staff can never unlock a website booking.
+          access: { update: hookOnly },
           defaultValue: false,
           admin: {
             description:

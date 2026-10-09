@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { AdminViewServerProps, Where } from "payload";
 
 import { FleetTabs } from "@/admin/components/fleet-tabs";
-import { loadVehicles } from "@/admin/data/fleet";
+import { loadVehicles, ownerEngagement } from "@/admin/data/fleet";
 import { param, requireStaff } from "@/admin/guard";
 import { ComplianceBadge, VEHICLE_STATUS_TONE } from "@/components/ops/compliance";
 import { DataTable } from "@/components/ops/data-table";
@@ -165,7 +165,11 @@ export async function VehiclesView(props: AdminViewServerProps) {
                   {vehicleClassName(vehicle.vehicleClassSlug)}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
-                  <ComplianceBadge worst={worst} />
+                  {ownerEngagement(vehicle) === "outsourced" ? (
+                    <Badge tone="neutral">Kept offline</Badge>
+                  ) : (
+                    <ComplianceBadge worst={worst} />
+                  )}
                   <span className="text-ink-3 text-xs">
                     {driverNames(vehicle.drivers) || "No driver linked"}
                   </span>
@@ -233,7 +237,13 @@ export async function VehiclesView(props: AdminViewServerProps) {
               {
                 key: "compliance",
                 header: "Compliance",
-                cell: ({ worst }) => <ComplianceBadge worst={worst} />,
+                // An outsourced driver's car is never checked: records kept offline.
+                cell: ({ vehicle, worst }) =>
+                  ownerEngagement(vehicle) === "outsourced" ? (
+                    <Badge tone="neutral">Kept offline</Badge>
+                  ) : (
+                    <ComplianceBadge worst={worst} />
+                  ),
               },
             ]}
           />

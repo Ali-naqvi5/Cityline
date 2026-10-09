@@ -5,8 +5,6 @@ import {
   driverData,
   driverSchema,
   expiryToIso,
-  outsourcedDocuments,
-  outsourcedLicencesSchema,
   supplierData,
   supplierSchema,
   vehicleSchema,
@@ -205,49 +203,5 @@ describe("expiryToIso", () => {
   it("keeps a document valid to the end of its expiry day, London time", () => {
     expect(expiryToIso("2026-12-14")).toBe("2026-12-14T23:59:00.000Z");
     expect(expiryToIso("2026-07-14")).toBe("2026-07-14T22:59:00.000Z");
-  });
-});
-
-describe("an outsourced driver's licences", () => {
-  const licences = {
-    phvNumber: "123456",
-    phvExpiry: "2027-11-30",
-    dvlaNumber: "TAYLO801052SA9AB",
-    dvlaExpiry: "2030-01-31",
-    vehicleLicenceNumber: "V12345",
-    vehicleLicenceExpiry: "2027-06-30",
-    motExpiry: "2027-03-31",
-    insuranceExpiry: "2027-01-31",
-    seenOriginals: true,
-  };
-
-  it("needs every number and expiry, and the originals seen", () => {
-    expect(outsourcedLicencesSchema.safeParse(licences).success).toBe(true);
-    const unseen = outsourcedLicencesSchema.safeParse({
-      ...licences,
-      seenOriginals: false,
-    });
-    expect(unseen.success).toBe(false);
-    const noMot = outsourcedLicencesSchema.safeParse({ ...licences, motExpiry: "" });
-    expect(noMot.error?.issues[0]?.message).toBe("Enter the MOT expiry date.");
-  });
-
-  it("become document records with no file, valid to the end of the expiry day", () => {
-    const documents = outsourcedDocuments(outsourcedLicencesSchema.parse(licences));
-    expect(documents.driver.map((document) => document.type)).toEqual([
-      "phv_licence",
-      "dvla_licence",
-    ]);
-    expect(documents.vehicle.map((document) => document.type)).toEqual([
-      "phv_vehicle_licence",
-      "mot",
-      "insurance",
-    ]);
-    expect(documents.driver[0]).toMatchObject({
-      number: "123456",
-      expiresAt: expiryToIso("2027-11-30"),
-      notes: "Copy kept offline by the office.",
-    });
-    expect("file" in documents.driver[0]!).toBe(false);
   });
 });

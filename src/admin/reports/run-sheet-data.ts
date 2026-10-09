@@ -4,7 +4,7 @@ import { isValidDay, londonDay, londonDayBounds } from "@/admin/format";
 import {
   DOCUMENT_LABELS,
   requiredDriverDocuments,
-  REQUIRED_VEHICLE_DOCUMENTS,
+  requiredVehicleDocuments,
   requirements,
   type DocumentType,
 } from "@/domain/compliance/documents";
@@ -193,7 +193,7 @@ export async function loadRunSheet(
     }
     if (vehicleId) {
       for (const item of requirements(
-        REQUIRED_VEHICLE_DOCUMENTS,
+        requiredVehicleDocuments(driver?.engagement),
         vehicleDocs.get(vehicleId) ?? [],
         at,
       )) {

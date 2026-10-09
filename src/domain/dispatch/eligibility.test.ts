@@ -130,35 +130,38 @@ describe("checkEligibility", () => {
     expect(result.blocks.join(" ")).toMatch(/no Right to work on record/);
   });
 
-  it("asks an outsourced driver for their PHV and driving licences only", () => {
-    const licences = goodDriverDocs.filter(
-      (doc) => doc.type === "phv_licence" || doc.type === "dvla_licence",
-    );
+  it("never blocks an outsourced driver or their car on documents: kept offline", () => {
     const outsourced = checkEligibility(
       input({
-        driver: { status: "active", engagement: "outsourced", documents: licences },
-      }),
-    );
-    expect(outsourced.eligible).toBe(true);
-    const registered = checkEligibility(
-      input({
-        driver: { status: "active", engagement: "registered", documents: licences },
-      }),
-    );
-    expect(registered.blocks.join(" ")).toMatch(/no DBS certificate on record/);
-    const lapsed = checkEligibility(
-      input({
-        driver: {
+        driver: { status: "active", engagement: "outsourced", documents: [] },
+        vehicle: {
           status: "active",
-          engagement: "outsourced",
-          documents: [
-            { type: "phv_licence", expiresAt: inDays(-1) },
-            { type: "dvla_licence", expiresAt: inDays(900) },
-          ],
+          vehicleClassSlug: "saloon",
+          documents: [{ type: "mot", expiresAt: inDays(-30) }],
+          ownerEngagement: "outsourced",
         },
       }),
     );
-    expect(lapsed.blocks.join(" ")).toMatch(/PHV driver licence has expired/);
+    expect(outsourced).toEqual({ eligible: true, blocks: [], warnings: [] });
+
+    // A registered driver and their car are still checked in full.
+    const licences = goodDriverDocs.filter(
+      (doc) => doc.type === "phv_licence" || doc.type === "dvla_licence",
+    );
+    const registered = checkEligibility(
+      input({
+        driver: { status: "active", engagement: "registered", documents: licences },
+        vehicle: { status: "active", vehicleClassSlug: "saloon", documents: [] },
+      }),
+    );
+    expect(registered.blocks.join(" ")).toMatch(/no DBS certificate on record/);
+    expect(registered.blocks.join(" ")).toMatch(/Car has no PHV vehicle licence/);
+
+    // Status is not a document: a suspended outsourced driver still cannot go.
+    const suspended = checkEligibility(
+      input({ driver: { status: "suspended", engagement: "outsourced", documents: [] } }),
+    );
+    expect(suspended.eligible).toBe(false);
   });
 
   it("refuses an expired vehicle", () => {

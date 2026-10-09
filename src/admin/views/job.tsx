@@ -20,7 +20,7 @@ import {
   setDriverMessageStatusAction,
   setStatusAction,
 } from "@/admin/actions/dispatch";
-import { resendManageLinkAction } from "@/admin/actions/jobs";
+import { cancelWebsiteBookingAction, resendManageLinkAction } from "@/admin/actions/jobs";
 import { auditValue } from "@/admin/audit-format";
 import { loadJobPayment } from "@/admin/data/payments";
 import { money, pickupLabel, relative, stamp } from "@/admin/format";
@@ -271,6 +271,10 @@ const NOTICES: Record<string, { tone: "ok" | "warn" | "danger"; text: string }> 
     text: "Passenger no-show recorded. If the driver's price changes, correct it below.",
   },
   "status-cancelled": { tone: "ok", text: "Booking cancelled." },
+  "order-cancelled": {
+    tone: "ok",
+    text: "Website booking cancelled, with every journey still to come. The customer has not been emailed. Any refund is made in Stripe, then recorded on the payment; until then it waits under Refunds.",
+  },
   "details-sent": { tone: "ok", text: "Driver details emailed to the passenger." },
   "details-off": {
     tone: "warn",
@@ -442,6 +446,22 @@ export async function JobView(props: AdminViewServerProps) {
   const edits = can(user.role, "jobs.edit");
   const status = job.status;
   const changeable = beforeBoarding(status);
+  // A website booking is cancelled whole, by those who amend bookings.
+  const cancelsOrder =
+    website && booking?.status === "confirmed" && can(user.role, "bookings.amend");
+  const orderLegs = cancelsOrder
+    ? ((
+        await payload.find({
+          collection: "jobs",
+          where: { booking: { equals: booking!.id } },
+          sort: "pickupAt",
+          pagination: false,
+          depth: 0,
+          user,
+          overrideAccess: false,
+        })
+      ).docs as Job[])
+    : [];
 
   // Whether the customer has paid, and any refund (Payments).
   const customerPaid =
@@ -751,7 +771,7 @@ export async function JobView(props: AdminViewServerProps) {
                       label: stageName(stage),
                     }))}
                   />
-                  {changeable && (driver || !website) ? (
+                  {changeable && (driver || !website || cancelsOrder) ? (
                     <div className="border-line flex flex-wrap gap-2 border-t pt-3 print:hidden">
                       {driver ? (
                         <ConfirmDialog
@@ -832,13 +852,63 @@ export async function JobView(props: AdminViewServerProps) {
                           />
                         </ConfirmDialog>
                       ) : null}
+                      {cancelsOrder ? (
+                        <ConfirmDialog
+                          label="Cancel booking"
+                          icon={<Ban aria-hidden className="h-4 w-4" />}
+                          variant="ghost"
+                          size="sm"
+                          title={`Cancel website booking ${booking!.reference}?`}
+                          confirmLabel="Cancel booking"
+                          confirmVariant="danger"
+                          pendingLabel="Cancelling…"
+                          action={cancelWebsiteBookingAction}
+                          fields={{ jobId: job.id }}
+                        >
+                          <p>
+                            The whole booking is cancelled, with every journey still to
+                            come:
+                          </p>
+                          <ul className="flex flex-col gap-1">
+                            {orderLegs.map((leg) => (
+                              <li key={leg.id} className="text-sm">
+                                <span className="font-medium tabular-nums">
+                                  {leg.reference}
+                                </span>{" "}
+                                · {pickupLabel(new Date(leg.pickupAt))} · from{" "}
+                                {leg.pickupAddress}
+                                {isFinal(leg.status) ? (
+                                  <span className="text-ink-3">
+                                    {" "}
+                                    · {stageName(leg.status)}, stays as it is
+                                  </span>
+                                ) : null}
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="text-ink-3 text-sm">
+                            No money moves here. Make any refund in Stripe, then record it
+                            on the payment. The customer is not emailed.
+                            {orderLegs.some((leg) => !isFinal(leg.status) && leg.driver)
+                              ? " You will be offered a WhatsApp message for each driver."
+                              : ""}
+                          </p>
+                          <label
+                            htmlFor="cancel-order-reason"
+                            className="text-ink-2 font-medium"
+                          >
+                            Why is it cancelled?
+                          </label>
+                          <textarea
+                            id="cancel-order-reason"
+                            name="reason"
+                            rows={2}
+                            required
+                            className={TEXTAREA_CLASS}
+                          />
+                        </ConfirmDialog>
+                      ) : null}
                     </div>
-                  ) : null}
-                  {website && changeable ? (
-                    <p className="text-ink-3 text-xs">
-                      A website booking is cancelled from the booking, so its payment is
-                      settled with it.
-                    </p>
                   ) : null}
                 </>
               ) : null}

@@ -30,6 +30,15 @@ describe("lockedFieldViolations", () => {
     ]);
   });
 
+  it("refuses changing how a website job was paid", () => {
+    expect(
+      lockedFieldViolations(
+        { ...websiteJob, paymentMethod: "web_prepaid" },
+        { paymentMethod: "cash" },
+      ),
+    ).toEqual(["paymentMethod"]);
+  });
+
   it("allows operational fields and unchanged values", () => {
     expect(
       lockedFieldViolations(websiteJob, { driverNotes: "Gate 4", status: "assigned" }),

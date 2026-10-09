@@ -68,14 +68,12 @@ export const DRIVER_ENGAGEMENTS = {
 export type DriverEngagement = keyof typeof DRIVER_ENGAGEMENTS;
 
 /**
- * An outsourced driver's PHV licence and driving licence, with numbers and
- * expiry dates, are what is checked here. TfL checks a driver's DBS and right
- * to work before it grants a PHV licence, so a valid PHV licence covers them.
+ * An outsourced driver's records are kept offline by the office (Cityline,
+ * 10 Oct 2026): no licence, certificate or insurance is asked for or checked
+ * here, for them or for their car, so compliance never blocks them. Only
+ * registered drivers and their cars are checked.
  */
-export const OUTSOURCED_DRIVER_DOCUMENTS: readonly DriverDocumentType[] = [
-  "phv_licence",
-  "dvla_licence",
-];
+export const OUTSOURCED_DRIVER_DOCUMENTS: readonly DriverDocumentType[] = [];
 
 /** The documents a driver must hold, in date, to be given a job. */
 export function requiredDriverDocuments(
@@ -86,12 +84,24 @@ export function requiredDriverDocuments(
     : REQUIRED_DRIVER_DOCUMENTS;
 }
 
-/** Without these, in date, a vehicle cannot be given a job. */
+/** Without these, in date, a registered driver's car cannot be given a job. */
 export const REQUIRED_VEHICLE_DOCUMENTS: readonly VehicleDocumentType[] = [
   "phv_vehicle_licence",
   "mot",
   "insurance",
 ];
+
+/** The documents a car must hold, by its driver: none for an outsourced one. */
+export function requiredVehicleDocuments(
+  ownerEngagement: string | null | undefined,
+): readonly VehicleDocumentType[] {
+  return ownerEngagement === "outsourced" ? [] : REQUIRED_VEHICLE_DOCUMENTS;
+}
+
+/** Whether a driver's records are kept offline and never checked here. */
+export function isOutsourced(engagement: string | null | undefined): boolean {
+  return engagement === "outsourced";
+}
 
 /**
  * Types that must carry an expiry date. Right to work may not expire (a

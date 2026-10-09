@@ -95,6 +95,8 @@ export async function VehicleView(props: AdminViewServerProps) {
   const drivers = (Array.isArray(vehicle.drivers) ? vehicle.drivers : []).filter(
     (driver): driver is Driver => Boolean(driver) && typeof driver === "object",
   );
+  // An outsourced driver's car is never checked: records kept offline.
+  const outsourced = drivers.some((driver) => driver.engagement === "outsourced");
 
   return (
     <OpsShell user={user} active="drivers">
@@ -123,7 +125,7 @@ export async function VehicleView(props: AdminViewServerProps) {
             <Badge tone={VEHICLE_STATUS_TONE[vehicle.status]}>
               {VEHICLE_STATUS_LABELS[vehicle.status]}
             </Badge>
-            <ComplianceBadge worst={worst} />
+            {outsourced ? null : <ComplianceBadge worst={worst} />}
           </>
         }
         actions={
@@ -138,79 +140,90 @@ export async function VehicleView(props: AdminViewServerProps) {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="flex min-w-0 flex-col gap-5">
-          <Panel
-            title="Compliance"
-            description="Missing or expired documents block assignment."
-            bodyClassName="p-0"
-          >
-            <ul className="divide-line divide-y">
-              {required.map((item) => {
-                const file = fileOf(item.document?.file);
-                const checker = checkerOf(item.document?.verifiedBy);
-                return (
-                  <li
-                    key={item.type}
-                    className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-ink text-sm font-medium">
-                        {DOCUMENT_LABELS[item.type as DocumentType]}
-                      </p>
-                      <p className="text-ink-3 text-xs">
-                        {item.document ? (
-                          <>
-                            {item.document.expiresAt
-                              ? `Expires ${formatDate(new Date(item.document.expiresAt))}`
-                              : "No expiry"}
-                            {checker ? ` · Checked by ${checker.name}` : " · Not checked"}
-                          </>
-                        ) : (
-                          "Not on record"
-                        )}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <DocumentStatusBadge
-                        status={item.status}
-                        expiresAt={item.document?.expiresAt}
-                        now={now}
-                      />
-                      {file?.url ? (
-                        <a
-                          href={file.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={buttonClass("ghost", "sm")}
-                        >
-                          <FileText aria-hidden className="h-4 w-4" />
-                          View
-                        </a>
-                      ) : null}
-                      {item.document && !checker && canVerify ? (
-                        <form action={verifyDocumentAction}>
-                          <input type="hidden" name="kind" value="vehicle" />
-                          <input
-                            type="hidden"
-                            name="documentId"
-                            value={item.document.id}
-                          />
-                          <input type="hidden" name="ownerId" value={vehicle.id} />
-                          <button
-                            type="submit"
-                            className={buttonClass("secondary", "sm")}
+          {outsourced ? (
+            <Panel title="Compliance">
+              <p className="text-ink-2 text-sm">
+                An outsourced driver&apos;s car: the office keeps its records offline.
+                Nothing is checked here, so documents never stop it being used.
+              </p>
+            </Panel>
+          ) : (
+            <Panel
+              title="Compliance"
+              description="Missing or expired documents block assignment."
+              bodyClassName="p-0"
+            >
+              <ul className="divide-line divide-y">
+                {required.map((item) => {
+                  const file = fileOf(item.document?.file);
+                  const checker = checkerOf(item.document?.verifiedBy);
+                  return (
+                    <li
+                      key={item.type}
+                      className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-ink text-sm font-medium">
+                          {DOCUMENT_LABELS[item.type as DocumentType]}
+                        </p>
+                        <p className="text-ink-3 text-xs">
+                          {item.document ? (
+                            <>
+                              {item.document.expiresAt
+                                ? `Expires ${formatDate(new Date(item.document.expiresAt))}`
+                                : "No expiry"}
+                              {checker
+                                ? ` · Checked by ${checker.name}`
+                                : " · Not checked"}
+                            </>
+                          ) : (
+                            "Not on record"
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <DocumentStatusBadge
+                          status={item.status}
+                          expiresAt={item.document?.expiresAt}
+                          now={now}
+                        />
+                        {file?.url ? (
+                          <a
+                            href={file.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={buttonClass("ghost", "sm")}
                           >
-                            Mark checked
-                          </button>
-                        </form>
-                      ) : null}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </Panel>
+                            <FileText aria-hidden className="h-4 w-4" />
+                            View
+                          </a>
+                        ) : null}
+                        {item.document && !checker && canVerify ? (
+                          <form action={verifyDocumentAction}>
+                            <input type="hidden" name="kind" value="vehicle" />
+                            <input
+                              type="hidden"
+                              name="documentId"
+                              value={item.document.id}
+                            />
+                            <input type="hidden" name="ownerId" value={vehicle.id} />
+                            <button
+                              type="submit"
+                              className={buttonClass("secondary", "sm")}
+                            >
+                              Mark checked
+                            </button>
+                          </form>
+                        ) : null}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Panel>
+          )}
 
-          {canVerify ? (
+          {canVerify && !outsourced ? (
             <Panel
               title="Add a document"
               description="A renewal is added as a new document; the latest one counts."
@@ -227,59 +240,61 @@ export async function VehicleView(props: AdminViewServerProps) {
             </Panel>
           ) : null}
 
-          <Panel
-            title="All documents"
-            description={`${documents.length} on record`}
-            bodyClassName="p-0"
-          >
-            {documents.length === 0 ? (
-              <EmptyState
-                title="No documents yet"
-                description="Add the PHV vehicle licence, MOT and hire-and-reward insurance."
-              />
-            ) : (
-              <ul className="divide-line divide-y">
-                {documents.map((document) => {
-                  const file = fileOf(document.file);
-                  return (
-                    <li
-                      key={document.id}
-                      className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-ink text-sm">
-                          {DOCUMENT_LABELS[document.type as DocumentType]}
-                        </p>
-                        <p className="text-ink-3 text-xs">
-                          Added {stamp(new Date(document.createdAt))}
-                          {document.expiresAt
-                            ? ` · expires ${formatDate(new Date(document.expiresAt))}`
-                            : ""}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <DocumentStatusBadge
-                          status={documentStatus(document, now)}
-                          expiresAt={document.expiresAt}
-                          now={now}
-                        />
-                        {file?.url ? (
-                          <a
-                            href={file.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-accent text-sm hover:underline"
-                          >
-                            View
-                          </a>
-                        ) : null}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </Panel>
+          {!outsourced || documents.length ? (
+            <Panel
+              title="All documents"
+              description={`${documents.length} on record`}
+              bodyClassName="p-0"
+            >
+              {documents.length === 0 ? (
+                <EmptyState
+                  title="No documents yet"
+                  description="Add the PHV vehicle licence, MOT and hire-and-reward insurance."
+                />
+              ) : (
+                <ul className="divide-line divide-y">
+                  {documents.map((document) => {
+                    const file = fileOf(document.file);
+                    return (
+                      <li
+                        key={document.id}
+                        className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-ink text-sm">
+                            {DOCUMENT_LABELS[document.type as DocumentType]}
+                          </p>
+                          <p className="text-ink-3 text-xs">
+                            Added {stamp(new Date(document.createdAt))}
+                            {document.expiresAt
+                              ? ` · expires ${formatDate(new Date(document.expiresAt))}`
+                              : ""}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <DocumentStatusBadge
+                            status={documentStatus(document, now)}
+                            expiresAt={document.expiresAt}
+                            now={now}
+                          />
+                          {file?.url ? (
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-accent text-sm hover:underline"
+                            >
+                              View
+                            </a>
+                          ) : null}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Panel>
+          ) : null}
 
           <Panel title="Jobs" bodyClassName="p-0">
             {jobs.docs.length === 0 ? (

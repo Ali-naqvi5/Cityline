@@ -16,7 +16,8 @@ import {
  * booking has its own rules (`domain/booking/manage-rules.ts`).
  *
  * The amend flow passes `context.allowLockedEdit`, because it is the one
- * sanctioned way for staff to change a website job's price or route.
+ * sanctioned way for staff to change a website job's price or route. Cancel
+ * booking passes `context.cancellingOrder` to cancel a website order's legs.
  */
 export const enforceJobRules: CollectionBeforeChangeHook = async ({
   data,
@@ -42,6 +43,23 @@ export const enforceJobRules: CollectionBeforeChangeHook = async ({
     if ("source" in data && data.source !== originalDoc.source) {
       fail([
         { path: "source", message: "A job's source cannot change after it is created." },
+      ]);
+    }
+    // A website booking is cancelled as a whole, order and journeys together
+    // (Cancel booking, Cityline 10 Oct 2026): one leg on its own would leave
+    // the order confirmed and its payment unsettled.
+    if (
+      staff &&
+      originalDoc.source === "website" &&
+      data.status === "cancelled" &&
+      originalDoc.status !== "cancelled" &&
+      !context?.cancellingOrder
+    ) {
+      fail([
+        {
+          path: "status",
+          message: "A website booking is cancelled as a whole: use Cancel booking.",
+        },
       ]);
     }
     if (staff && !context?.allowLockedEdit) {

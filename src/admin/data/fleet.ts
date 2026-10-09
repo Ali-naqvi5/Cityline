@@ -4,7 +4,7 @@ import type { Payload, Where } from "payload";
 
 import {
   requiredDriverDocuments,
-  REQUIRED_VEHICLE_DOCUMENTS,
+  requiredVehicleDocuments,
   requirements,
   worstStatus,
   type DocumentStatus,
@@ -122,6 +122,14 @@ export async function loadDrivers(
   });
 }
 
+/** The engagement of the driver whose car this is (loaded with depth 1). */
+export function ownerEngagement(vehicle: Vehicle): string | null {
+  const owner = (vehicle.drivers ?? []).find(
+    (driver): driver is Driver => typeof driver === "object" && driver !== null,
+  );
+  return owner?.engagement ?? null;
+}
+
 export async function loadVehicles(
   payload: Payload,
   user: User,
@@ -152,7 +160,11 @@ export async function loadVehicles(
 
   return vehicles.docs.map((vehicle) => {
     const own = documentsByVehicle.get(vehicle.id) ?? [];
-    const required = requirements(REQUIRED_VEHICLE_DOCUMENTS, own, now);
+    const required = requirements(
+      requiredVehicleDocuments(ownerEngagement(vehicle)),
+      own,
+      now,
+    );
     return {
       vehicle,
       documents: own,

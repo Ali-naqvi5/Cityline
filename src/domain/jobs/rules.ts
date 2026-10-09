@@ -5,12 +5,14 @@
  */
 
 /**
- * The fields a website booking locks: its price, its customer and its route.
+ * The fields a website booking locks: its price and how it was paid, its
+ * customer and its route.
  * They come from what the customer agreed and paid for, so staff change them
  * through "Amend booking", which reprices and settles the difference.
  */
 export const LOCKED_FIELDS = [
   "customerPricePence",
+  "paymentMethod",
   "leadName",
   "leadPhone",
   "leadEmail",
@@ -21,6 +23,7 @@ export const LOCKED_FIELDS = [
 
 export const LOCKED_FIELD_LABELS: Record<(typeof LOCKED_FIELDS)[number], string> = {
   customerPricePence: "price",
+  paymentMethod: "payment method",
   leadName: "passenger name",
   leadPhone: "passenger phone",
   leadEmail: "passenger email",

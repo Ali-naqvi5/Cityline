@@ -7,7 +7,7 @@ import { relId } from "@/domain/dispatch/assignment";
 import { OPEN_STATUSES } from "@/domain/jobs/labels";
 import type { Job, User } from "@/payload-types";
 
-import { loadDrivers, loadVehicles } from "./fleet";
+import { loadDrivers, loadVehicles, ownerEngagement } from "./fleet";
 
 /**
  * Everyone who could take a job, each with their own car (spec §19;
@@ -99,6 +99,7 @@ export async function loadAssignmentBoard(
         vehicleClassSlug: vehicle.vehicleClassSlug,
         seats: vehicle.seats,
         documents,
+        ownerEngagement: ownerEngagement(vehicle),
       },
       pickupAt,
     );

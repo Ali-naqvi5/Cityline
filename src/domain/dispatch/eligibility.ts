@@ -1,7 +1,7 @@
 import {
   isBlocking,
-  REQUIRED_VEHICLE_DOCUMENTS,
   requiredDriverDocuments,
+  requiredVehicleDocuments,
   requirements,
   DOCUMENT_LABELS,
   type DocumentRecord,
@@ -18,12 +18,13 @@ import { vehicleClassName } from "@/domain/jobs/labels";
  *
  * Blocks — the law, not preference, so the assignment is refused:
  *   - the driver is not active;
- *   - a required driver document is missing, or expired at the pickup time
- *     (an outsourced driver's PHV and driving licences; every document for a
- *     registered one — `requiredDriverDocuments`);
- *   - the car is not active, or a required car document — PHV vehicle
- *     licence, MOT, hire and reward insurance — is missing or expired at the
- *     pickup time.
+ *   - a registered driver's document is missing, or expired at the pickup
+ *     time (`requiredDriverDocuments`);
+ *   - the car is not active, or — for a registered driver's car — a required
+ *     car document (PHV vehicle licence, MOT, hire and reward insurance) is
+ *     missing or expired at the pickup time.
+ *   An outsourced driver and their car are never blocked on documents: their
+ *   records are kept offline (Cityline, 10 Oct 2026).
  *   - the car is not the driver's own (Cityline, 9 Oct 2026: every car
  *     belongs to one driver; it goes with them on every booking).
  *
@@ -75,6 +76,8 @@ export interface CarSide {
   vehicleClassSlug: string;
   seats?: number | null;
   documents: readonly DocumentRecord[];
+  /** The car's driver's engagement: an outsourced driver's car is not checked. */
+  ownerEngagement?: string | null;
 }
 
 export interface EligibilityInput {
@@ -169,16 +172,14 @@ export function carCheck(car: CarSide, at: Date): Eligibility {
   } else if (car.status !== "active") {
     blocks.push(`The car is ${car.status.replace("_", " ")}, not active.`);
   }
-  for (const item of requirements(REQUIRED_VEHICLE_DOCUMENTS, car.documents, at)) {
+  const required = requiredVehicleDocuments(car.ownerEngagement);
+  for (const item of requirements(required, car.documents, at)) {
     if (item.status === "missing")
       blocks.push(`Car has no ${label(item.type)} on record.`);
     else if (item.status === "expired")
       blocks.push(`Car's ${label(item.type)} has expired by the pickup.`);
   }
-  return result(
-    blocks,
-    expiringSoon("Car", REQUIRED_VEHICLE_DOCUMENTS, car.documents, at),
-  );
+  return result(blocks, expiringSoon("Car", required, car.documents, at));
 }
 
 /** How a car suits a job: warnings only, never a block. */

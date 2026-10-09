@@ -91,69 +91,6 @@ export const driverSchema = z
 
 export type DriverInput = z.infer<typeof driverSchema>;
 
-const requiredExpiry = (what: string) =>
-  z
-    .string()
-    .min(1, `Enter the ${what} expiry date.`)
-    .refine((value) => isValidDay(value), "Enter a real date.");
-const licenceNumber = (what: string) =>
-  z.string().min(1, `Enter the ${what} number.`).max(60);
-
-/**
- * An outsourced driver's licences (Cityline, 9 Oct 2026): numbers and expiry
- * dates typed in, from the documents the office has seen; copies are kept
- * offline. Saved as document records without a file.
- */
-export const outsourcedLicencesSchema = z.object({
-  phvNumber: licenceNumber("PHV licence"),
-  phvExpiry: requiredExpiry("PHV licence"),
-  dvlaNumber: licenceNumber("driving licence"),
-  dvlaExpiry: requiredExpiry("driving licence"),
-  vehicleLicenceNumber: licenceNumber("PHV vehicle licence"),
-  vehicleLicenceExpiry: requiredExpiry("PHV vehicle licence"),
-  motExpiry: requiredExpiry("MOT"),
-  insuranceExpiry: requiredExpiry("insurance"),
-  seenOriginals: z.literal(true, "Confirm you have seen the originals and kept copies."),
-});
-
-export type OutsourcedLicencesInput = z.infer<typeof outsourcedLicencesSchema>;
-
-/** The licence records an outsourced driver and their car start with. */
-export function outsourcedDocuments(input: OutsourcedLicencesInput) {
-  const offline = "Copy kept offline by the office.";
-  return {
-    driver: [
-      {
-        type: "phv_licence" as const,
-        number: input.phvNumber,
-        expiresAt: input.phvExpiry,
-      },
-      {
-        type: "dvla_licence" as const,
-        number: input.dvlaNumber,
-        expiresAt: input.dvlaExpiry,
-      },
-    ].map((document) => ({
-      ...document,
-      expiresAt: expiryToIso(document.expiresAt),
-      notes: offline,
-    })),
-    vehicle: [
-      {
-        type: "phv_vehicle_licence" as const,
-        number: input.vehicleLicenceNumber,
-        expiresAt: input.vehicleLicenceExpiry,
-      },
-      { type: "mot" as const, number: null, expiresAt: input.motExpiry },
-      { type: "insurance" as const, number: null, expiresAt: input.insuranceExpiry },
-    ].map((document) => ({
-      ...document,
-      expiresAt: expiryToIso(document.expiresAt),
-      notes: offline,
-    })),
-  };
-}
-
 export function driverData(input: DriverInput, previousConsentAt?: string | null) {
   const left = input.status === "left";
   return {

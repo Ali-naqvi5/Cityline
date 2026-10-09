@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "e2e:admin": "node e2e/admin/run-all.mjs",
     "worker": "node --env-file=.env.local --import tsx src/worker/run.ts --once",
     "db:up": "docker compose -f compose.local.yaml up -d",
     "db:down": "docker compose -f compose.local.yaml stop",
