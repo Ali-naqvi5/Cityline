@@ -124,6 +124,11 @@ export async function checkAssignment(
     driver,
     vehicle,
     eligibility,
-    phvNumber: currentDocument(driverDocuments.docs, "phv_licence")?.number ?? null,
+    // From the PHV licence on record; an outsourced driver's typed-in number
+    // otherwise (Cityline, 10 Oct 2026).
+    phvNumber:
+      currentDocument(driverDocuments.docs, "phv_licence")?.number ??
+      driver.phvLicenceNumber ??
+      null,
   };
 }

@@ -120,6 +120,8 @@ export interface DriverRecordRow {
   niNumber: string | null;
   drivingLicence: LatestDocument | null;
   phvLicence: LatestDocument | null;
+  /** An outsourced driver's typed-in PHV licence number, if any. */
+  phvLicenceNumber: string | null;
   photo: boolean;
   startDate: string | null;
   endDate: string | null;
@@ -380,6 +382,7 @@ export async function loadDriversReport(
       niNumber: driver.nationalInsuranceNumber ?? null,
       drivingLicence: latestOf(own, "dvla_licence"),
       phvLicence: latestOf(own, "phv_licence"),
+      phvLicenceNumber: driver.phvLicenceNumber ?? null,
       photo: Boolean(driver.photo),
       engagement: driver.engagement ?? "registered",
       startDate: driver.startDate ?? null,
@@ -559,7 +562,10 @@ export const DRIVER_RECORDS_CSV_COLUMNS: CsvColumn<DriverRecordRow>[] = [
     header: "Driving licence copy on file",
     value: (row) => copyHeld(row, Boolean(row.drivingLicence?.copy)),
   },
-  { header: "PHV driver's licence number", value: (row) => row.phvLicence?.number },
+  {
+    header: "PHV driver's licence number",
+    value: (row) => row.phvLicence?.number ?? row.phvLicenceNumber,
+  },
   { header: "PHV licence expires", value: (row) => day(row.phvLicence?.expiresAt) },
   {
     header: "PHV licence copy on file",

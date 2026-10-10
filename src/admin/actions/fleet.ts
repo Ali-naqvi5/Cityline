@@ -39,6 +39,7 @@ function driverForm(formData: FormData) {
     dateOfBirth: text(formData, "dateOfBirth"),
     nationalInsuranceNumber: text(formData, "nationalInsuranceNumber"),
     engagement: text(formData, "engagement") || "registered",
+    phvLicenceNumber: text(formData, "phvLicenceNumber"),
     status: text(formData, "status"),
     startDate: text(formData, "startDate"),
     endDate: text(formData, "endDate"),

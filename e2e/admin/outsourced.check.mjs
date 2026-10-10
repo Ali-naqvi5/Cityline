@@ -81,7 +81,12 @@ try {
       (await page.locator("#registration").count()) === 1,
   );
   check(
-    "no licence, certificate or insurance is asked for",
+    "only the PHV licence number is offered, and it is optional",
+    (await page.locator("#phvLicenceNumber").count()) === 1 &&
+      !(await page.locator("#phvLicenceNumber").getAttribute("required")),
+  );
+  check(
+    "no licence dates, certificate or insurance is asked for",
     (await page
       .locator(
         "#phvNumber, #phvExpiry, #dvlaNumber, #dvlaExpiry, #vehicleLicenceNumber, #vehicleLicenceExpiry, #motExpiry, #insuranceExpiry, #seenOriginals",
@@ -100,6 +105,7 @@ try {
   await page.fill("#dateOfBirth", "1980-05-04");
   await page.fill("#nationalInsuranceNumber", "AB 12 34 56 C");
   await page.fill("#startDate", ahead(0));
+  await page.fill("#phvLicenceNumber", `phv ${suffix}`);
   await page.fill("#registration", PLATE);
   await page.selectOption("#vehicleClassSlug", "mpv-8");
   await page.fill("#make", "Mercedes");
@@ -111,8 +117,10 @@ try {
   const driverId = Number(page.url().match(/drivers\/(\d+)/)[1]);
 
   check(
-    "the driver is saved as outsourced, with no documents",
-    sql(`select engagement from drivers where id = ${driverId}`) === "outsourced" &&
+    "the driver is saved as outsourced, with their PHV number and no documents",
+    sql(
+      `select engagement || ':' || phv_licence_number from drivers where id = ${driverId}`,
+    ) === `outsourced:PHV${suffix}` &&
       sql(`select count(*) from driver_documents where driver_id = ${driverId}`) === "0",
   );
   const carId = Number(sql(`select id from vehicles where registration = '${PLATE}'`));

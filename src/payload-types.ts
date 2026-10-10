@@ -533,6 +533,10 @@ export interface Driver {
   nationalInsuranceNumber?: string | null;
   photo?: (number | null) | PrivateFile;
   engagement: 'registered' | 'outsourced';
+  /**
+   * Outsourced drivers only, optional. Copied onto their bookings.
+   */
+  phvLicenceNumber?: string | null;
   status: 'active' | 'suspended' | 'left';
   /**
    * When they became available to Cityline (TfL record).
@@ -1400,6 +1404,7 @@ export interface DriversSelect<T extends boolean = true> {
   nationalInsuranceNumber?: T;
   photo?: T;
   engagement?: T;
+  phvLicenceNumber?: T;
   status?: T;
   startDate?: T;
   endDate?: T;

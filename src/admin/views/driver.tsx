@@ -505,6 +505,15 @@ export async function DriverView(props: AdminViewServerProps) {
                   <NotRecorded>Not recorded</NotRecorded>
                 )}
               </Field>
+              {outsourced ? (
+                <Field label="PHV licence number">
+                  {driver.phvLicenceNumber ? (
+                    <span className="tabular-nums">{driver.phvLicenceNumber}</span>
+                  ) : (
+                    <NotRecorded>Not given</NotRecorded>
+                  )}
+                </Field>
+              ) : null}
               <Field label="Address">
                 {driver.address ? (
                   <span className="whitespace-pre-line">{driver.address}</span>

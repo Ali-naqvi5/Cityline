@@ -30,6 +30,25 @@ const driver = {
 };
 
 describe("driverSchema", () => {
+  it("keeps an outsourced driver's optional PHV number, tidied, and nobody else's", () => {
+    const outsourced = driverData(
+      driverSchema.parse({
+        ...driver,
+        engagement: "outsourced",
+        phvLicenceNumber: " ab 12345 ",
+      }),
+    );
+    expect(outsourced.phvLicenceNumber).toBe("AB12345");
+    expect(
+      driverData(driverSchema.parse({ ...driver, engagement: "outsourced" }))
+        .phvLicenceNumber,
+    ).toBeNull();
+    expect(
+      driverData(driverSchema.parse({ ...driver, phvLicenceNumber: "AB12345" }))
+        .phvLicenceNumber,
+    ).toBeNull();
+  });
+
   it("accepts a valid driver and stores the phone as +44", () => {
     const parsed = driverSchema.parse(driver);
     const data = driverData(parsed);

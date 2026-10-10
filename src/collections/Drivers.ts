@@ -147,6 +147,17 @@ export const Drivers: CollectionConfig = {
       })),
     },
     {
+      // An outsourced driver's PHV licence number, when the office has it
+      // (Cityline, 10 Oct 2026): optional, never checked, and copied onto
+      // their bookings for TfL's record. A registered driver's number comes
+      // from their PHV licence document.
+      name: "phvLicenceNumber",
+      type: "text",
+      admin: {
+        description: "Outsourced drivers only, optional. Copied onto their bookings.",
+      },
+    },
+    {
       name: "status",
       type: "select",
       required: true,

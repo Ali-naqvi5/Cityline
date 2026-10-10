@@ -29,6 +29,7 @@ export interface DriverFormValues {
   address: string;
   dateOfBirth: string;
   nationalInsuranceNumber: string;
+  phvLicenceNumber: string;
   engagement: string;
   status: string;
   startDate: string;
@@ -180,6 +181,23 @@ export function DriverForm({
             {...invalid(e.nationalInsuranceNumber, "nationalInsuranceNumber")}
           />
         </FormField>
+        {engagement === "outsourced" ? (
+          <FormField
+            id="phvLicenceNumber"
+            label="PHV driver licence number"
+            error={e.phvLicenceNumber}
+            hint="Optional. Copied onto their bookings for TfL's record; never checked."
+          >
+            <input
+              id="phvLicenceNumber"
+              name="phvLicenceNumber"
+              defaultValue={values.phvLicenceNumber}
+              autoComplete="off"
+              className={inputClass("uppercase tabular-nums")}
+              {...invalid(e.phvLicenceNumber, "phvLicenceNumber")}
+            />
+          </FormField>
+        ) : null}
         <FormField id="address" label="Address" wide error={e.address}>
           <textarea
             id="address"

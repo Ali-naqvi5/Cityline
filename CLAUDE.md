@@ -299,7 +299,9 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   (`requiredDriverDocuments` and `requiredVehicleDocuments` return nothing
   for them). Status still applies: a suspended driver or a car off the road
   cannot go. TfL's driver record treats their licence copies and photo as held
-  offline (`heldOffline`); their bookings carry no PHV number.
+  offline (`heldOffline`). Their PHV licence number is an optional field
+  (`drivers.phvLicenceNumber`), never checked, copied onto their bookings
+  when given.
 - **Payment links on a booking are the system's** (Cityline, 10 Oct 2026): a
   job's links to its driver payment, partner payment, invoice and office
   payment, the paid-price snapshots, the card fee and the website lock carry

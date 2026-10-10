@@ -62,6 +62,11 @@ export const driverSchema = z
         "Enter a valid National Insurance number, such as AB 12 34 56 C.",
       ),
     engagement: z.enum(["registered", "outsourced"], "Choose registered or outsourced."),
+    // Optional, outsourced drivers only; never checked.
+    phvLicenceNumber: z
+      .string()
+      .max(60, "That is too long for a PHV licence number.")
+      .default(""),
     status: z.enum(["active", "suspended", "left"]),
     startDate: optionalDay,
     endDate: optionalDay,
@@ -102,6 +107,12 @@ export function driverData(input: DriverInput, previousConsentAt?: string | null
     dateOfBirth: dayToIso(input.dateOfBirth),
     nationalInsuranceNumber: normaliseNiNumber(input.nationalInsuranceNumber) || null,
     engagement: input.engagement,
+    // Kept for an outsourced driver only; a registered one's is on their
+    // PHV licence document.
+    phvLicenceNumber:
+      input.engagement === "outsourced"
+        ? input.phvLicenceNumber.replace(/\s+/g, "").toUpperCase() || null
+        : null,
     status: input.status,
     startDate: dayToIso(input.startDate),
     endDate: dayToIso(input.endDate),

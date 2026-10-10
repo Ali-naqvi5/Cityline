@@ -40,6 +40,7 @@ export async function DriverEditView(props: AdminViewServerProps) {
     address: "",
     dateOfBirth: "",
     nationalInsuranceNumber: "",
+    phvLicenceNumber: "",
     // "Add an outsourced driver" opens with that chosen.
     engagement:
       param(props.searchParams, "engagement") === "outsourced"
@@ -88,6 +89,7 @@ export async function DriverEditView(props: AdminViewServerProps) {
         ? formatNiNumber(driver.nationalInsuranceNumber)
         : "",
       engagement: driver.engagement ?? "registered",
+      phvLicenceNumber: driver.phvLicenceNumber ?? "",
       status: driver.status,
       startDate: day(driver.startDate),
       endDate: day(driver.endDate),
