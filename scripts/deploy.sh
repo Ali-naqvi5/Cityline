@@ -55,8 +55,17 @@ log "pulling image"
 APP_TAG="$APP_TAG" docker compose pull app worker
 
 log "dumping database before migrating (PRD-05)"
-docker compose exec -T db pg_dump -U "${POSTGRES_USER:-cityline}" \
-  | gzip > "${APP_DIR}/pre-deploy-$(date +%Y%m%d-%H%M%S).sql.gz"
+DUMP="${APP_DIR}/pre-deploy-$(date +%Y%m%d-%H%M%S).sql.gz"
+docker compose exec -T db pg_dump -U "${POSTGRES_USER:-cityline}" | gzip > "$DUMP"
+# Never migrate without a complete copy to go back to: the file must be a valid
+# gzip and end with pg_dump's own completion line.
+DUMP_TAIL="$(zcat "$DUMP" 2>/dev/null | tail -n 20 || true)"
+if ! gzip -t "$DUMP" || ! grep -q "PostgreSQL database dump complete" <<<"$DUMP_TAIL"; then
+  log "PRE-DEPLOY DUMP INCOMPLETE (${DUMP}) — not migrating. Nothing has changed;"
+  log "the old containers are still serving."
+  exit 1
+fi
+log "dump complete: ${DUMP} ($(du -h "$DUMP" | cut -f1))"
 # Keep the last 10 pre-deploy dumps; the nightly encrypted backups are the real archive.
 ls -1t "${APP_DIR}"/pre-deploy-*.sql.gz | tail -n +11 | xargs -r rm -f
 

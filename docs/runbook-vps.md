@@ -70,6 +70,18 @@ and redeploy):
 - `docker/pg-backup/`
 - `scripts/deploy.sh` → `/srv/cityline/deploy.sh`, `chmod +x`
 
+A deploy updates only the app and worker images. **It does not copy these
+files**, so when one of them changes in git, copy it again by hand. From the
+repository on your PC, replacing `cityline@<vps>` with the server login:
+
+```bash
+scp scripts/deploy.sh cityline@<vps>:/srv/cityline/deploy.sh
+scp -r docker/pg-backup cityline@<vps>:/srv/cityline/docker/
+ssh cityline@<vps> "cd /srv/cityline && chmod +x deploy.sh && docker compose build backup && docker compose up -d backup"
+```
+
+Rebuilding and restarting `backup` never touches the database or its volume.
+
 Create `/srv/cityline/.env.production` from `.env.example`, with real values.
 **It never goes in git.** `chmod 600 .env.production`. Set
 `GHCR_OWNER=ali-naqvi5` (image names are lowercase) and leave `APP_TAG` out —

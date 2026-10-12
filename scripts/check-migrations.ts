@@ -22,6 +22,14 @@ const DESTRUCTIVE = [
   { pattern: /\bDROP\s+DATABASE\b/i, what: "DROP DATABASE" },
   // Renaming loses the old name just as surely as dropping it.
   { pattern: /\bRENAME\s+COLUMN\b/i, what: "RENAME COLUMN" },
+  // Dropping a list type takes its columns with it under CASCADE, and is what
+  // Payload writes when an option is removed from a select field.
+  { pattern: /\bDROP\s+TYPE\b/i, what: "DROP TYPE" },
+  // The job reference numbers come from a sequence; dropping it restarts them.
+  { pattern: /\bDROP\s+SEQUENCE\b/i, what: "DROP SEQUENCE" },
+  { pattern: /\bDROP\s+VIEW\b/i, what: "DROP VIEW" },
+  // Any DROP … CASCADE removes whatever depends on the thing dropped.
+  { pattern: /\bDROP\b[^;]*\bCASCADE\b/i, what: "DROP … CASCADE" },
 ];
 
 const MIGRATION_DIR = "src/migrations";

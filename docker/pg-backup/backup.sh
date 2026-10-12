@@ -54,11 +54,16 @@ for remote in hidrive b2; do
   fi
 
   echo "[backup] syncing dumps to ${remote}"
-  rclone sync /backups "$path" --transfers 2 --retries 3
+  # A sync mirrors deletions. A normal night prunes at most three dumps; if
+  # /backups were ever lost or emptied, this cap stops the run from wiping
+  # the off-server copies too. It fails loudly instead.
+  rclone sync /backups "$path" --transfers 2 --retries 3 --max-delete 10
 
   if [[ -d /srv/storage ]]; then
     echo "[backup] syncing uploaded files to ${remote} (DATA-08)"
-    rclone sync /srv/storage "${path}-storage" --transfers 4 --retries 3
+    # Uploaded files are never deleted by the app, so a mass delete here means
+    # the local copy is gone: stop instead of mirroring it.
+    rclone sync /srv/storage "${path}-storage" --transfers 4 --retries 3 --max-delete 10
   fi
 done
 
