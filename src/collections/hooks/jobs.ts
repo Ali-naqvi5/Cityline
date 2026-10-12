@@ -1,6 +1,9 @@
 import { ValidationError, type CollectionBeforeChangeHook } from "payload";
 
+import { isDone } from "@/domain/jobs/status";
+import { staffCan, type StaffIdentity } from "@/domain/staff/permissions";
 import {
+  changedDetails,
   LOCKED_FIELD_LABELS,
   lockedFieldViolations,
   normaliseSupplierReference,
@@ -44,6 +47,24 @@ export const enforceJobRules: CollectionBeforeChangeHook = async ({
       fail([
         { path: "source", message: "A job's source cannot change after it is created." },
       ]);
+    }
+    // A completed or PNS booking is the Owner's to change, its details and its
+    // stage (Cityline, 13 Oct 2026). The driver's price and messages stay open.
+    if (
+      staff &&
+      isDone(String(originalDoc.status)) &&
+      !staffCan(req.user as StaffIdentity, "jobs.editClosed")
+    ) {
+      const changed = changedDetails(originalDoc, data);
+      if (data.status !== originalDoc.status) changed.unshift("status");
+      if (changed.length) {
+        fail(
+          changed.map((path) => ({
+            path,
+            message: "Only the Owner can change a completed booking.",
+          })),
+        );
+      }
     }
     // A website booking is cancelled as a whole, order and journeys together
     // (Cancel booking, Cityline 10 Oct 2026): one leg on its own would leave

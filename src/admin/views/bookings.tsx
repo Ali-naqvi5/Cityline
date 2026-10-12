@@ -32,7 +32,7 @@ import {
   shortDay,
 } from "@/admin/format";
 import { NextStageButtons } from "@/admin/forms/stage-controls";
-import { requireStaff } from "@/admin/guard";
+import { param, requireStaff } from "@/admin/guard";
 import { ClickableRow } from "@/components/ops/clickable-row";
 import { NumberedPagination } from "@/components/ops/data-table";
 import { FilterForm } from "@/components/ops/filter-form";
@@ -43,6 +43,7 @@ import {
   ButtonLink,
   cx,
   MetricCard,
+  Notice,
   PageHeader,
   Panel,
 } from "@/components/ops/primitives";
@@ -779,7 +780,10 @@ export async function BookingsView(props: AdminViewServerProps) {
   const now = new Date();
   const filters = parseBookingFilters(props.searchParams);
   const as = { user, overrideAccess: false } as const;
-  const notTest: Where = { isTest: { not_equals: true } };
+  // Neither a test booking nor a deleted one.
+  const notTest: Where = {
+    and: [{ isTest: { not_equals: true } }, { archivedAt: { exists: false } }],
+  };
   const today = londonDayBounds(londonDay(now));
 
   let result: { docs: Job[]; totalDocs: number; totalPages: number } | null = null;
@@ -868,6 +872,12 @@ export async function BookingsView(props: AdminViewServerProps) {
 
   return (
     <OpsShell user={user} active="bookings" wide>
+      {param(props.searchParams, "notice") === "booking-deleted" ? (
+        <Notice tone="ok">
+          Website booking deleted. It is kept on record for TfL and the accounts, and its
+          payment stays under Payments.
+        </Notice>
+      ) : null}
       <PageHeader
         title="Bookings"
         description="Every booking from every source — the register TfL inspects. Click a booking to open it and write the driver's price."

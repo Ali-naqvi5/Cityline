@@ -16,6 +16,8 @@ import {
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
 import { relId } from "@/domain/dispatch/assignment";
+import { isDone } from "@/domain/jobs/status";
+import { can } from "@/domain/staff/permissions";
 import { londonDateAndTime } from "@/lib/time";
 import type { Job, Supplier } from "@/payload-types";
 
@@ -150,6 +152,24 @@ export async function JobEditView(props: AdminViewServerProps) {
           <EmptyState
             title="No booking with that number"
             action={<ButtonLink href="/admin/bookings">Back to bookings</ButtonLink>}
+          />
+        </Panel>
+      </OpsShell>
+    );
+  }
+
+  // A completed or PNS booking is the Owner's to change (Cityline, 13 Oct 2026);
+  // the jobs collection refuses anyone else's change too.
+  if (!isNew && job && isDone(job.status) && !can(user.role, "jobs.editClosed")) {
+    return (
+      <OpsShell user={user} active="bookings">
+        <Panel>
+          <EmptyState
+            title={`${job.reference} is completed`}
+            description="Only the Owner can change a booking once it is completed or PNS."
+            action={
+              <ButtonLink href={`/admin/jobs/${job.id}`}>Back to the booking</ButtonLink>
+            }
           />
         </Panel>
       </OpsShell>

@@ -81,7 +81,7 @@ export async function VehicleView(props: AdminViewServerProps) {
 
   const jobs = await payload.find({
     collection: "jobs",
-    where: { vehicle: { equals: id } },
+    where: { and: [{ vehicle: { equals: id } }, { archivedAt: { exists: false } }] },
     sort: "-pickupAt",
     limit: 15,
     depth: 0,

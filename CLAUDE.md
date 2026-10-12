@@ -236,6 +236,12 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   fonts) and a signed, expiring link for the driver
   (`domain/finance/statement-link.ts`, `/api/statements/<token>`), sent with
   the WhatsApp note. Not an invoice or a payslip — drivers are independent.
+  The statement follows the Owner's mock-up (13 Oct 2026): A4 landscape,
+  the logo, an info band, one row per booking with pickup, drop-off and a
+  Completed/PNS pill, totals ending in "Net payment to driver", and the
+  driver's bank details masked (bank transfers only). The logo is drawn from
+  `domain/finance/cityline-logo.ts`, generated from `public/brand/cityline-logo.svg` by
+  `scripts/build-statement-logo.mjs` — rerun it if the logo changes.
 - **Supplier Money** (`/admin/supplier-money`, Owner and Accounts): what each
   partner owes — the booking price for completed, PNS, and cancelled
   bookings the office marks "partner pays" (`jobs.cancellationCharge`; every
@@ -314,6 +320,22 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   moves and the customer is not emailed. The booking then waits under Refunds.
   The jobs hook refuses cancelling one website leg on its own unless
   `context.cancellingOrder` is set.
+- **A completed or PNS booking is the Owner's to change** (Cityline, 13 Oct
+  2026): without `jobs.editClosed` (Owner only), the jobs hook refuses any
+  status change or change to the booking's details (`DETAIL_FIELDS`,
+  `changedDetails` in `domain/jobs/rules.ts`) once a job is done
+  (`isDone`). The driver price can still be written, for Driver Pay.
+- **Delete booking, website bookings only, Owner only** (`bookings.delete`,
+  13 Oct 2026): only before any journey is done or on board; after that there
+  is no deletion or cancellation. Deleting never erases
+  (`deleteWebsiteBookingAction`): in one transaction every journey and the
+  order are cancelled with "Deleted: reason" and given `archivedAt`, with a
+  history line per journey. Its payment stays under Payments and any refund
+  under Refunds. Operational screens and reports filter out archived jobs
+  (`NOT_DELETED` in `admin/data/booking-filters.ts`, and the same filter on
+  the dashboard, customer, driver, car and report queries); the job's own
+  page still opens with a "deleted" banner. New job queries in operations
+  must exclude `archivedAt` too.
 - **Admin browser checks** live in `e2e/admin/` (`pnpm e2e:admin`; see its
   README): local database and a dev server with emails off only, and the
   password comes from `ADMIN_TEST_PASSWORD` in `.env.local`.

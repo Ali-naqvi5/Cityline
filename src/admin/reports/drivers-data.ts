@@ -142,6 +142,7 @@ export interface DriversReportData {
 function where(filters: DriversReportFilters, start: Date, end: Date): Where {
   const and: Where[] = [
     { isTest: { not_equals: true } },
+    { archivedAt: { exists: false } },
     { pickupAt: { greater_than_equal: start.toISOString() } },
     { pickupAt: { less_than: end.toISOString() } },
   ];
@@ -429,6 +430,7 @@ export async function loadDriverJobs(
         { driver: { equals: driverId } },
         { status: { in: [...DONE_STATUSES] } },
         { isTest: { not_equals: true } },
+        { archivedAt: { exists: false } },
         { pickupAt: { greater_than_equal: period.start.toISOString() } },
         { pickupAt: { less_than: period.end.toISOString() } },
       ],

@@ -21,7 +21,7 @@ export async function loadCustomerSummaries(
 
   const jobs = await payload.find({
     collection: "jobs",
-    where: { customer: { in: ids } },
+    where: { and: [{ customer: { in: ids } }, { archivedAt: { exists: false } }] },
     pagination: false,
     depth: 0,
     select: { customer: true, status: true, pickupAt: true, customerPricePence: true },

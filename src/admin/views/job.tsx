@@ -8,6 +8,7 @@ import {
   Phone,
   Printer,
   Repeat,
+  Trash2,
   UserMinus,
   UserPlus,
 } from "lucide-react";
@@ -20,7 +21,11 @@ import {
   setDriverMessageStatusAction,
   setStatusAction,
 } from "@/admin/actions/dispatch";
-import { cancelWebsiteBookingAction, resendManageLinkAction } from "@/admin/actions/jobs";
+import {
+  cancelWebsiteBookingAction,
+  deleteWebsiteBookingAction,
+  resendManageLinkAction,
+} from "@/admin/actions/jobs";
 import { auditValue } from "@/admin/audit-format";
 import { loadJobPayment } from "@/admin/data/payments";
 import { money, pickupLabel, relative, stamp } from "@/admin/format";
@@ -62,6 +67,7 @@ import {
 } from "@/domain/jobs/labels";
 import {
   beforeBoarding,
+  isDone,
   isFinal,
   previousStages,
   stageIndex,
@@ -139,6 +145,13 @@ function timelineFor(job: Job, events: JobEvent[]): TimelineEntry[] {
 
     switch (event.type) {
       case "updated":
+        // The Owner deleting a website booking says so in plain words.
+        if (event.field === "deleted") {
+          title = "Booking deleted";
+          detail = event.newValue?.replace(/^Booking deleted: /, "") ?? null;
+          tone = "danger";
+          break;
+        }
         title = `Changed ${label.toLowerCase() || "details"}`;
         detail = (
           <Change
@@ -449,7 +462,14 @@ export async function JobView(props: AdminViewServerProps) {
   // A website booking is cancelled whole, by those who amend bookings.
   const cancelsOrder =
     website && booking?.status === "confirmed" && can(user.role, "bookings.amend");
-  const orderLegs = cancelsOrder
+  // A completed or PNS booking is the Owner's to change (Cityline, 13 Oct 2026).
+  const changesDone = can(user.role, "jobs.editClosed");
+  const loadsLegs =
+    website &&
+    booking &&
+    !booking.archivedAt &&
+    (cancelsOrder || can(user.role, "bookings.delete"));
+  const orderLegs = loadsLegs
     ? ((
         await payload.find({
           collection: "jobs",
@@ -462,6 +482,13 @@ export async function JobView(props: AdminViewServerProps) {
         })
       ).docs as Job[])
     : [];
+
+  // The Owner deletes a website booking, before any journey on it is done.
+  const deletesOrder =
+    loadsLegs &&
+    can(user.role, "bookings.delete") &&
+    orderLegs.length > 0 &&
+    !orderLegs.some((leg) => isDone(leg.status) || leg.status === "on_board");
 
   // Whether the customer has paid, and any refund (Payments).
   const customerPaid =
@@ -494,6 +521,12 @@ export async function JobView(props: AdminViewServerProps) {
       </div>
 
       {message ? <Notice tone={message.tone}>{message.text}</Notice> : null}
+      {job.archivedAt ? (
+        <Notice tone="warn">
+          This booking was deleted on {stamp(new Date(job.archivedAt))}. It is kept on
+          record for TfL and the accounts, and no longer shows in operations.
+        </Notice>
+      ) : null}
       {notice === "assigned" && emailedNow === "0" ? (
         <Notice tone="danger">
           The passenger was not emailed the driver&apos;s details. The reason is in the
@@ -549,7 +582,7 @@ export async function JobView(props: AdminViewServerProps) {
                 Assign driver
               </ButtonLink>
             ) : null}
-            {edits && !closed ? (
+            {edits && (!closed || (isDone(status) && changesDone)) ? (
               <ButtonLink href={`/admin/jobs/${job.id}/edit`}>
                 <Pencil aria-hidden className="h-4 w-4" />
                 Edit
@@ -561,7 +594,10 @@ export async function JobView(props: AdminViewServerProps) {
                 Create return trip
               </ButtonLink>
             ) : null}
-            {website && booking && can(user.role, "bookings.amend") ? (
+            {website &&
+            booking &&
+            !booking.archivedAt &&
+            can(user.role, "bookings.amend") ? (
               <form action={resendManageLinkAction}>
                 <input type="hidden" name="jobId" value={job.id} />
                 <button type="submit" className={buttonClass("secondary", "md")}>
@@ -569,6 +605,45 @@ export async function JobView(props: AdminViewServerProps) {
                   Resend manage link
                 </button>
               </form>
+            ) : null}
+            {deletesOrder ? (
+              <ConfirmDialog
+                label="Delete booking"
+                icon={<Trash2 aria-hidden className="h-4 w-4" />}
+                variant="ghost"
+                size="md"
+                title={`Delete website booking ${booking!.reference}?`}
+                confirmLabel="Delete booking"
+                confirmVariant="danger"
+                pendingLabel="Deleting…"
+                action={deleteWebsiteBookingAction}
+                fields={{ jobId: job.id }}
+              >
+                <p>The booking is cancelled and removed from every screen and report:</p>
+                <ul className="flex flex-col gap-1">
+                  {orderLegs.map((leg) => (
+                    <li key={leg.id} className="text-sm">
+                      <span className="font-medium tabular-nums">{leg.reference}</span> ·{" "}
+                      {pickupLabel(new Date(leg.pickupAt))} · from {leg.pickupAddress}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-ink-3 text-sm">
+                  It is kept on record for TfL and the accounts, and its payment stays
+                  under Payments, so any refund can still be made and recorded. This
+                  cannot be undone here.
+                </p>
+                <label htmlFor="delete-order-reason" className="text-ink-2 font-medium">
+                  Why is it deleted?
+                </label>
+                <textarea
+                  id="delete-order-reason"
+                  name="reason"
+                  rows={2}
+                  required
+                  className={TEXTAREA_CLASS}
+                />
+              </ConfirmDialog>
             ) : null}
             <PrintButton className={buttonClass("secondary", "md")}>
               <Printer aria-hidden className="h-4 w-4" />
@@ -763,14 +838,20 @@ export async function JobView(props: AdminViewServerProps) {
                       The cycle starts once a driver is assigned.
                     </p>
                   ) : null}
-                  <StepBackForm
-                    key={status}
-                    jobId={job.id}
-                    options={previousStages(status).map((stage) => ({
-                      value: stage,
-                      label: stageName(stage),
-                    }))}
-                  />
+                  {isDone(status) && !changesDone ? (
+                    <p className="text-ink-3 text-sm">
+                      Completed: only the Owner can change it now.
+                    </p>
+                  ) : (
+                    <StepBackForm
+                      key={status}
+                      jobId={job.id}
+                      options={previousStages(status).map((stage) => ({
+                        value: stage,
+                        label: stageName(stage),
+                      }))}
+                    />
+                  )}
                   {changeable && (driver || !website || cancelsOrder) ? (
                     <div className="border-line flex flex-wrap gap-2 border-t pt-3 print:hidden">
                       {driver ? (

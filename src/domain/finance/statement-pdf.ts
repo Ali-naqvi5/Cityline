@@ -1,26 +1,48 @@
-import { PDFDocument, rgb, StandardFonts, type PDFFont, type PDFPage } from "pdf-lib";
+import {
+  clip,
+  endPath,
+  PDFDocument,
+  popGraphicsState,
+  pushGraphicsState,
+  rectangle,
+  rgb,
+  StandardFonts,
+  type PDFFont,
+  type PDFPage,
+  type RGB,
+} from "pdf-lib";
 
 import { formatPence, type Pence } from "@/domain/money";
 import { formatDate, formatTime } from "@/lib/time";
 
+import {
+  LOGO_LETTERING_PNG,
+  LOGO_MARK,
+  LOGO_SHAPES,
+  LOGO_WORDMARK,
+  type LogoRegion,
+} from "./cityline-logo";
 import { drawable, fit } from "./pdf-text";
 
 /**
- * A driver's payment statement as a PDF (Driver Pay, approved by Cityline,
- * 6 Oct 2026): who was paid, when and how, every booking it covers with its
- * price and any cash the driver collected, and the total. It is a statement
- * of payment for bookings — not an invoice and not a payslip: drivers are
- * independent, and an invoice would be theirs to issue.
+ * A driver's payment statement as a PDF (Driver Pay; layout from Cityline's
+ * design of 13 Oct 2026): the Cityline logo, who was paid, when and how,
+ * every booking it covers with its pickup, drop-off, price and any cash the
+ * driver collected, the totals, and — for a bank transfer — the driver's
+ * account, masked. It is a statement of payment for bookings, not an invoice
+ * or a payslip: drivers are independent, and an invoice would be theirs.
  *
- * A4, the standard Helvetica fonts (nothing to embed or bundle). Text the
- * font cannot draw is replaced, so an unusual character in an address can
- * never stop a statement being produced.
+ * A4 landscape, the standard Helvetica fonts (nothing to embed), the logo
+ * drawn as vector shapes. Text the font cannot draw is replaced, so an
+ * unusual character in an address never stops a statement being produced.
  */
 
 export interface StatementLine {
   pickupAt: Date;
   reference: string;
-  route: string;
+  pickup: string;
+  dropoff: string;
+  /** "Completed" or "PNS". */
   status: string;
   pricePence: number;
   cashPence: number;
@@ -35,6 +57,8 @@ export interface StatementData {
   voided: boolean;
   driverName: string;
   phvNumber: string | null;
+  /** The account paid into, masked; only for a bank transfer. */
+  bank: { holder: string; last4: string } | null;
   lines: StatementLine[];
   earnedPence: number;
   cashPence: number;
@@ -43,14 +67,43 @@ export interface StatementData {
   generatedAt: Date;
 }
 
-const A4 = { width: 595.28, height: 841.89 };
-const MARGIN = 48;
-const INK = rgb(0.06, 0.09, 0.16);
-const MUTED = rgb(0.4, 0.44, 0.5);
-const LINE = rgb(0.85, 0.87, 0.9);
-const ACCENT = rgb(0.11, 0.3, 0.85);
+const PAGE = { width: 841.89, height: 595.28 };
+const MARGIN = 36;
+const CONTENT = PAGE.width - 2 * MARGIN;
+
+const hex = (value: string): RGB =>
+  rgb(
+    parseInt(value.slice(1, 3), 16) / 255,
+    parseInt(value.slice(3, 5), 16) / 255,
+    parseInt(value.slice(5, 7), 16) / 255,
+  );
+const INK = hex("#1f2d35");
+const MUTED = hex("#5d6a72");
+const GREEN = hex("#1f9a43");
+const GREEN_DARK = hex("#17803a");
+const TINT = hex("#f1f8f3");
+const TINT_STRONG = hex("#e2f3e7");
+const RULE = hex("#a9dcb5");
+const GRID = hex("#d5ebdc");
+const PILL = hex("#d2f0da");
+const PNS_PILL = hex("#fcebc8");
+const PNS_INK = hex("#8a5a06");
+const VOID_RED = hex("#c0261b");
 
 const money = (pence: number) => formatPence(pence as Pence);
+
+/** The table's columns, left to right; they fill the content width. */
+const COLUMNS = [
+  { key: "date", label: "DATE", width: 112 },
+  { key: "pickup", label: "PICKUP", width: 168 },
+  { key: "dropoff", label: "DROPOFF", width: 160 },
+  { key: "booking", label: "BOOKING REF", width: 96 },
+  { key: "status", label: "STATUS", width: 90 },
+  { key: "fare", label: "FARE", width: 60, right: true },
+  { key: "cash", label: "CASH RECEIVED", width: CONTENT - 686, right: true },
+] as const;
+const CELL = 10;
+const LINE_HEIGHT = 12;
 
 export async function statementPdf(data: StatementData): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
@@ -59,197 +112,489 @@ export async function statementPdf(data: StatementData): Promise<Uint8Array> {
   pdf.setCreationDate(data.generatedAt);
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const italic = await pdf.embedFont(StandardFonts.HelveticaOblique);
+  // The wordmark's lettering, cleaned, as a picture (see cityline-logo.ts).
+  const lettering = await pdf.embedPng(Buffer.from(LOGO_LETTERING_PNG, "base64"));
   const clean = drawable(regular);
 
   const pages: PDFPage[] = [];
   let page!: PDFPage;
   let y = 0;
 
-  const text = (
-    value: string,
-    x: number,
-    at: number,
-    options: {
-      size?: number;
-      font?: PDFFont;
-      color?: ReturnType<typeof rgb>;
-      right?: boolean;
-    } = {},
-  ) => {
-    const size = options.size ?? 9;
-    const font = options.font ?? regular;
+  // --- Drawing helpers ------------------------------------------------------------
+
+  type TextOptions = {
+    size?: number;
+    font?: PDFFont;
+    color?: RGB;
+    align?: "left" | "right" | "center";
+    spacing?: number;
+  };
+  const widthOf = (value: string, options: TextOptions = {}) => {
     const safe = clean(value);
-    const width = font.widthOfTextAtSize(safe, size);
-    page.drawText(safe, {
-      x: options.right ? x - width : x,
-      y: at,
-      size,
-      font,
-      color: options.color ?? INK,
-    });
+    const font = options.font ?? regular;
+    const size = options.size ?? 9;
+    return (
+      font.widthOfTextAtSize(safe, size) +
+      (options.spacing ?? 0) * Math.max(0, safe.length - 1)
+    );
   };
-  const rule = (at: number, color = LINE) =>
-    page.drawLine({
-      start: { x: MARGIN, y: at },
-      end: { x: A4.width - MARGIN, y: at },
-      thickness: 0.7,
-      color,
-    });
-
-  // Columns of the bookings table.
-  const COLUMNS = {
-    date: MARGIN,
-    booking: MARGIN + 78,
-    route: MARGIN + 140,
-    status: MARGIN + 338,
-    price: A4.width - MARGIN - 62,
-    cash: A4.width - MARGIN,
+  const text = (value: string, x: number, at: number, options: TextOptions = {}) => {
+    const safe = clean(value);
+    const font = options.font ?? regular;
+    const size = options.size ?? 9;
+    const color = options.color ?? INK;
+    const width = widthOf(safe, options);
+    let left =
+      options.align === "right"
+        ? x - width
+        : options.align === "center"
+          ? x - width / 2
+          : x;
+    if (!options.spacing) {
+      page.drawText(safe, { x: left, y: at, size, font, color });
+      return;
+    }
+    // Letter-spaced labels, a character at a time.
+    for (const char of safe) {
+      page.drawText(char, { x: left, y: at, size, font, color });
+      left += font.widthOfTextAtSize(char, size) + options.spacing;
+    }
   };
-  const ROUTE_WIDTH = COLUMNS.status - COLUMNS.route - 10;
-  const STATUS_WIDTH = COLUMNS.price - 42 - COLUMNS.status;
+  /** Words wrapped to a width, at most `lines` of them, the last cut short. */
+  const wrap = (
+    value: string,
+    font: PDFFont,
+    size: number,
+    width: number,
+    lines: number,
+  ) => {
+    const words = clean(value).split(/\s+/).filter(Boolean);
+    const out: string[] = [];
+    let current = "";
+    for (const word of words) {
+      const next = current ? `${current} ${word}` : word;
+      if (font.widthOfTextAtSize(next, size) <= width || !current) {
+        current = next;
+      } else {
+        out.push(current);
+        current = word;
+      }
+    }
+    if (current) out.push(current);
+    if (out.length <= lines) return out.map((line) => fit(line, font, size, width));
+    const kept = out.slice(0, lines);
+    kept[lines - 1] = fit(`${kept[lines - 1]} ${out[lines]}…`, font, size, width);
+    return kept;
+  };
+  const hline = (from: number, to: number, at: number, color = RULE, thickness = 0.8) =>
+    page.drawLine({ start: { x: from, y: at }, end: { x: to, y: at }, thickness, color });
+  const vline = (x: number, top: number, bottom: number, color = GRID) =>
+    page.drawLine({ start: { x, y: top }, end: { x, y: bottom }, thickness: 0.6, color });
+  /** A rounded rectangle by its top-left corner (PDF coordinates). */
+  const roundRect = (
+    x: number,
+    top: number,
+    width: number,
+    height: number,
+    radius: number,
+    options: { fill?: RGB; border?: RGB },
+  ) => {
+    const r = Math.min(radius, width / 2, height / 2);
+    const w = width;
+    const h = height;
+    page.drawSvgPath(
+      `M ${r} 0 L ${w - r} 0 Q ${w} 0 ${w} ${r} L ${w} ${h - r} Q ${w} ${h} ${w - r} ${h} ` +
+        `L ${r} ${h} Q 0 ${h} 0 ${h - r} L 0 ${r} Q 0 0 ${r} 0 Z`,
+      {
+        x,
+        y: top,
+        color: options.fill,
+        borderColor: options.border,
+        borderWidth: options.border ? 0.8 : undefined,
+      },
+    );
+  };
+  /** Part of the logo, by its top-left corner and height, clipped to that part. */
+  const logo = (
+    region: LogoRegion,
+    left: number,
+    top: number,
+    height: number,
+    options: { opacity?: number } = {},
+  ) => {
+    const scale = height / region.height;
+    page.pushOperators(
+      pushGraphicsState(),
+      rectangle(left, top - height, region.width * scale, height),
+      clip(),
+      endPath(),
+    );
+    for (const shape of LOGO_SHAPES) {
+      page.drawSvgPath(shape.d, {
+        x: left - region.x * scale,
+        y: top + region.y * scale,
+        scale,
+        color: hex(shape.fill),
+        opacity: options.opacity,
+      });
+    }
+    page.pushOperators(popGraphicsState());
+    return region.width * scale;
+  };
+  const bankIcon = (left: number, top: number, size: number) => {
+    const s = size / 24;
+    page.drawSvgPath(
+      "M12 1 L23 7 L23 9 L1 9 L1 7 Z M3 10.5 H6 V18 H3 Z M8 10.5 H11 V18 H8 Z " +
+        "M13 10.5 H16 V18 H13 Z M18 10.5 H21 V18 H18 Z M1.5 19.5 H22.5 V22 H1.5 Z",
+      { x: left, y: top, scale: s, color: GREEN },
+    );
+  };
 
+  // --- Pages ----------------------------------------------------------------------
+
+  let tableTop = 0;
   const tableHeader = () => {
-    text("Date", COLUMNS.date, y, { font: bold, size: 8, color: MUTED });
-    text("Booking", COLUMNS.booking, y, { font: bold, size: 8, color: MUTED });
-    text("Route", COLUMNS.route, y, { font: bold, size: 8, color: MUTED });
-    text("Status", COLUMNS.status, y, { font: bold, size: 8, color: MUTED });
-    text("Price", COLUMNS.price, y, { font: bold, size: 8, color: MUTED, right: true });
-    text("Cash collected", COLUMNS.cash, y, {
-      font: bold,
-      size: 8,
-      color: MUTED,
-      right: true,
+    tableTop = y;
+    const height = 26;
+    roundRect(MARGIN, y, CONTENT, height, 6, { fill: TINT_STRONG });
+    page.drawRectangle({
+      x: MARGIN,
+      y: y - height,
+      width: CONTENT,
+      height: 8,
+      color: TINT_STRONG,
     });
-    y -= 6;
-    rule(y);
-    y -= 14;
+    let x = MARGIN;
+    for (const column of COLUMNS) {
+      const right = "right" in column && column.right;
+      text(column.label, right ? x + column.width - CELL : x + CELL, y - 16.5, {
+        font: bold,
+        size: 7.5,
+        color: GREEN_DARK,
+        spacing: 0.5,
+        align: right ? "right" : "left",
+      });
+      x += column.width;
+    }
+    y -= height;
+  };
+  /** The table's border and column lines, once its rows on this page are drawn. */
+  const closeTable = () => {
+    roundRect(MARGIN, tableTop, CONTENT, tableTop - y, 6, { border: GRID });
+    let x = MARGIN;
+    for (const column of COLUMNS.slice(0, -1)) {
+      x += column.width;
+      vline(x, tableTop, y);
+    }
   };
 
-  const newPage = (first: boolean) => {
-    page = pdf.addPage([A4.width, A4.height]);
+  const newPage = (first: boolean, withTable = true) => {
+    page = pdf.addPage([PAGE.width, PAGE.height]);
     pages.push(page);
-    y = A4.height - MARGIN;
+    // The skyline, faint, in the corner.
+    logo(LOGO_MARK, PAGE.width - 215, 170, 160, { opacity: 0.07 });
     if (data.voided) {
       page.drawText("VOID", {
-        x: A4.width / 2 - 110,
-        y: A4.height / 2 - 40,
-        size: 110,
+        x: PAGE.width / 2 - 130,
+        y: PAGE.height / 2 - 50,
+        size: 130,
         font: bold,
-        color: rgb(0.85, 0.2, 0.15),
-        opacity: 0.15,
+        color: VOID_RED,
+        opacity: 0.12,
       });
     }
-    if (first) {
-      text(data.company.name, MARGIN, y - 4, { font: bold, size: 15 });
-      text(data.company.address, MARGIN, y - 20, { size: 8.5, color: MUTED });
-      text(`${data.company.phone} · ${data.company.email}`, MARGIN, y - 32, {
-        size: 8.5,
-        color: MUTED,
-      });
-      text("PAYMENT STATEMENT", A4.width - MARGIN, y - 4, {
-        font: bold,
-        size: 12,
-        color: ACCENT,
-        right: true,
-      });
-      text(data.reference, A4.width - MARGIN, y - 20, { size: 10, right: true });
-      y -= 64;
-      rule(y);
-      y -= 22;
+    const top = PAGE.height - MARGIN;
 
-      const facts: [string, string][] = [
-        [
-          "Paid to",
-          data.driverName + (data.phvNumber ? ` (PHV licence ${data.phvNumber})` : ""),
-        ],
-        ["Date paid", formatDate(data.paidAt)],
-        [
-          "Method",
-          data.method + (data.bankReference ? ` · reference ${data.bankReference}` : ""),
-        ],
-        ["Covers", `Completed and PNS bookings up to ${formatDate(data.upTo)}`],
-      ];
-      for (const [label, value] of facts) {
-        text(label, MARGIN, y, { size: 9, color: MUTED });
-        text(value, MARGIN + 78, y, { size: 9.5 });
-        y -= 15;
-      }
-      y -= 14;
-    } else {
-      text(`${data.company.name} · ${data.reference} (continued)`, MARGIN, y - 4, {
-        size: 9,
-        color: MUTED,
-      });
-      y -= 26;
+    if (!first) {
+      const markWidth = logo(LOGO_MARK, MARGIN, top, 34);
+      text(
+        `DRIVER PAYMENT STATEMENT  ·  ${data.reference}  (continued)`,
+        MARGIN + markWidth + 12,
+        top - 21,
+        { font: bold, size: 10, color: GREEN, spacing: 0.4 },
+      );
+      y = top - 50;
+      if (withTable) tableHeader();
+      return;
     }
+
+    // The logo: the mark, and the name beside it.
+    const markWidth = logo(LOGO_MARK, MARGIN, top, 66);
+    const letteringHeight = 42;
+    page.drawImage(lettering, {
+      x: MARGIN + markWidth + 12,
+      y: top - 12 - letteringHeight,
+      width: (LOGO_WORDMARK.width / LOGO_WORDMARK.height) * letteringHeight,
+      height: letteringHeight,
+    });
+
+    // What this is, and its number.
+    const title = "DRIVER PAYMENT STATEMENT";
+    const titleOptions = { font: bold, size: 17, color: GREEN, spacing: 0.5 } as const;
+    text(title, PAGE.width - MARGIN, top - 17, { ...titleOptions, align: "right" });
+    hline(
+      PAGE.width - MARGIN - widthOf(title, titleOptions),
+      PAGE.width - MARGIN,
+      top - 26,
+      GREEN,
+      1,
+    );
+    text(data.reference, PAGE.width - MARGIN, top - 50, {
+      font: bold,
+      size: 18,
+      align: "right",
+    });
+
+    // How to reach Cityline.
+    let x = MARGIN;
+    const contact: [string, PDFFont][] = [
+      [data.company.address, italic],
+      [data.company.phone, regular],
+      [data.company.email, regular],
+    ];
+    contact.forEach(([value, font], index) => {
+      if (index) {
+        text("|", x + 9, top - 84, { size: 9.5, color: GREEN });
+        x += 24;
+      }
+      text(value, x, top - 84, { size: 9.5, font, color: index ? INK : MUTED });
+      x += widthOf(value, { size: 9.5, font });
+    });
+    hline(MARGIN, PAGE.width - MARGIN, top - 95);
+
+    // Paid to, when, how, and what it covers.
+    const band = { top: top - 107, height: 56 };
+    roundRect(MARGIN, band.top, CONTENT, band.height, 6, { fill: TINT });
+    const facts: [string, string[], string | null][] = [
+      [
+        "PAID TO",
+        [data.driverName],
+        data.phvNumber ? `PHV licence ${data.phvNumber}` : null,
+      ],
+      ["DATE PAID", [formatDate(data.paidAt)], null],
+      [
+        "PAYMENT METHOD",
+        [
+          data.method +
+            (data.bankReference ? `  ·  Reference ${data.bankReference}` : ""),
+        ],
+        null,
+      ],
+      ["COVERS", ["Completed and PNS bookings", `up to ${formatDate(data.upTo)}`], null],
+    ];
+    const columnWidth = CONTENT / facts.length;
+    facts.forEach(([label, lines, note], index) => {
+      const left = MARGIN + index * columnWidth + 16;
+      if (index)
+        vline(
+          MARGIN + index * columnWidth,
+          band.top - 12,
+          band.top - band.height + 12,
+          RULE,
+        );
+      text(label, left, band.top - 18, {
+        font: bold,
+        size: 8.5,
+        color: GREEN_DARK,
+        spacing: 0.8,
+      });
+      const size = lines.length > 1 ? 10 : 11.5;
+      lines.forEach((line, lineIndex) => {
+        text(
+          fit(clean(line), regular, size, columnWidth - 28),
+          left,
+          band.top - 34 - lineIndex * 12.5,
+          {
+            size,
+            font: lines.length > 1 ? regular : index === 0 ? bold : regular,
+          },
+        );
+      });
+      if (note) text(note, left, band.top - 48, { size: 8, color: MUTED });
+    });
+
+    y = band.top - band.height - 14;
     tableHeader();
   };
 
+  // --- The bookings -----------------------------------------------------------------
+
   newPage(true);
-  for (const line of data.lines) {
-    if (y < MARGIN + 40) newPage(false);
-    text(formatDate(line.pickupAt), COLUMNS.date, y);
-    text(formatTime(line.pickupAt), COLUMNS.date + 50, y, { color: MUTED });
-    text(line.reference, COLUMNS.booking, y);
-    text(fit(clean(line.route), regular, 9, ROUTE_WIDTH), COLUMNS.route, y);
-    text(fit(clean(line.status), regular, 9, STATUS_WIDTH), COLUMNS.status, y);
-    text(money(line.pricePence), COLUMNS.price, y, { right: true });
-    text(line.cashPence ? money(line.cashPence) : "—", COLUMNS.cash, y, {
-      right: true,
+  const textWidth = (key: string) =>
+    (COLUMNS.find((column) => column.key === key)?.width ?? 0) - 2 * CELL;
+  const columnLeft = (key: string) => {
+    let x = MARGIN;
+    for (const column of COLUMNS) {
+      if (column.key === key) return x;
+      x += column.width;
+    }
+    return x;
+  };
+
+  // Room the totals and bank details need below the last row.
+  const closingSpace = 120 + (data.bank ? 80 : 0) + (data.voided ? 18 : 0);
+  data.lines.forEach((line, index) => {
+    const pickup = wrap(line.pickup, regular, 9, textWidth("pickup"), 2);
+    const dropoff = wrap(line.dropoff, regular, 9, textWidth("dropoff"), 2);
+    const lines = Math.max(pickup.length, dropoff.length, 1);
+    const height = Math.max(30, 16 + lines * LINE_HEIGHT);
+    const last = index === data.lines.length - 1;
+    if (y - height < MARGIN + 40 || (last && y - height < MARGIN + closingSpace)) {
+      if (y < tableTop) closeTable();
+      newPage(false);
+    }
+
+    const rowTop = y;
+    const middle = rowTop - height / 2;
+    const firstBaseline = middle + ((lines - 1) * LINE_HEIGHT) / 2 - 3;
+    const single = middle - 3;
+    if (index) hline(MARGIN, MARGIN + CONTENT, rowTop, GRID, 0.6);
+
+    text(
+      `${formatDate(line.pickupAt)}, ${formatTime(line.pickupAt)}`,
+      columnLeft("date") + CELL,
+      single,
+      { size: 9 },
+    );
+    pickup.forEach((part, i) =>
+      text(part, columnLeft("pickup") + CELL, firstBaseline - i * LINE_HEIGHT, {
+        size: 9,
+      }),
+    );
+    dropoff.forEach((part, i) =>
+      text(part, columnLeft("dropoff") + CELL, firstBaseline - i * LINE_HEIGHT, {
+        size: 9,
+      }),
+    );
+    text(line.reference, columnLeft("booking") + CELL, single, { size: 9.5 });
+
+    // The status as a pill: green for completed, amber for a no-show.
+    const pns = line.status === "PNS";
+    const label = clean(line.status);
+    const pillWidth = widthOf(label, { font: bold, size: 8.5 }) + 22;
+    roundRect(columnLeft("status") + CELL, middle + 8.5, pillWidth, 17, 8.5, {
+      fill: pns ? PNS_PILL : PILL,
+    });
+    text(label, columnLeft("status") + CELL + pillWidth / 2, middle - 3, {
+      font: bold,
+      size: 8.5,
+      color: pns ? PNS_INK : GREEN_DARK,
+      align: "center",
+    });
+
+    const fareRight = columnLeft("fare") + textWidth("fare") + CELL;
+    text(money(line.pricePence), fareRight, single, { size: 9.5, align: "right" });
+    const cashRight = columnLeft("cash") + textWidth("cash") + CELL;
+    text(money(line.cashPence), cashRight, single, {
+      size: 9.5,
+      align: "right",
       color: line.cashPence ? INK : MUTED,
     });
-    y -= 16;
+    y -= height;
+  });
+  if (data.lines.length === 0) {
+    text("No bookings on this payment.", MARGIN + CELL, y - 20, { color: MUTED });
+    y -= 34;
   }
+  closeTable();
 
-  // Totals.
-  if (y < MARGIN + 110) newPage(false);
-  y -= 2;
-  rule(y);
-  y -= 20;
-  const totals: [string, string, boolean][] = [
+  // --- Totals ------------------------------------------------------------------------
+
+  // Not enough room left: the totals go on a page of their own.
+  if (y < MARGIN + closingSpace) newPage(false, false);
+  const anyPns = data.lines.some((line) => line.status === "PNS");
+  const boxWidth = 300;
+  const boxLeft = PAGE.width - MARGIN - boxWidth;
+  y -= 14;
+  const rows: [string, string][] = [
     [
-      `${data.lines.length} ${data.lines.length === 1 ? "booking" : "bookings"}`,
-      money(data.earnedPence),
-      false,
+      anyPns ? "Completed and PNS bookings" : "Completed bookings",
+      String(data.lines.length),
     ],
-    [
-      "Less cash you collected",
-      data.cashPence ? `-${money(data.cashPence)}` : money(0),
-      false,
-    ],
-    data.amountPence >= 0
-      ? ["Paid to you", money(data.amountPence), true]
-      : ["You paid Cityline", money(-data.amountPence), true],
+    ["Total booking fares", money(data.earnedPence)],
+    ["Less: cash received by driver", money(data.cashPence)],
   ];
-  for (const [label, value, strong] of totals) {
-    text(label, COLUMNS.price - 120, y, {
-      font: strong ? bold : regular,
-      size: strong ? 11 : 9.5,
-      color: strong ? INK : MUTED,
+  rows.forEach(([label, value], index) => {
+    text(label, boxLeft + 8, y - 16, { size: 10.5 });
+    text(value, boxLeft + boxWidth - 8, y - 16, {
+      size: 11,
+      font: index ? bold : regular,
+      align: "right",
     });
-    text(value, COLUMNS.cash, y, {
-      font: strong ? bold : regular,
-      size: strong ? 11 : 9.5,
-      right: true,
-    });
-    y -= strong ? 20 : 16;
-  }
-  if (data.voided) {
-    y -= 6;
-    text("This payment was voided and does not stand.", MARGIN, y, {
+    y -= 23;
+    hline(boxLeft, boxLeft + boxWidth, y, GRID, 0.6);
+  });
+  y -= 4;
+  const owed = data.amountPence < 0;
+  roundRect(boxLeft, y, boxWidth, 30, 6, { fill: TINT_STRONG });
+  text(
+    owed ? "NET PAID BY DRIVER TO CITYLINE" : "NET PAYMENT TO DRIVER",
+    boxLeft + 10,
+    y - 19,
+    {
       font: bold,
-      color: rgb(0.7, 0.14, 0.1),
+      size: 10.5,
+      color: GREEN_DARK,
+      spacing: 0.6,
+    },
+  );
+  text(money(Math.abs(data.amountPence)), boxLeft + boxWidth - 10, y - 20.5, {
+    font: bold,
+    size: 15,
+    color: GREEN_DARK,
+    align: "right",
+  });
+  y -= 30;
+  if (data.voided) {
+    y -= 18;
+    text("This payment was voided and does not stand.", boxLeft + 8, y, {
+      font: bold,
+      color: VOID_RED,
     });
   }
 
-  // Footer on every page.
+  // --- The driver's bank account, masked --------------------------------------------
+
+  if (data.bank) {
+    y -= 14;
+    hline(MARGIN, PAGE.width - MARGIN, y);
+    y -= 12;
+    bankIcon(MARGIN, y, 26);
+    const left = MARGIN + 46;
+    text("DRIVER BANK DETAILS", left, y - 12, {
+      font: bold,
+      size: 12,
+      color: GREEN,
+      spacing: 0.6,
+    });
+    const details: [string, string, number][] = [
+      ["Account holder:", data.bank.holder, 0],
+      ["Sort code:", "XX-XX-XX", 200],
+      ["Account number:", `•••• •••• ${data.bank.last4}`, 340],
+    ];
+    details.forEach(([label, value, offset], index) => {
+      if (index) vline(left + offset - 18, y - 20, y - 50, RULE);
+      text(label, left + offset, y - 29, { size: 9.5, color: MUTED });
+      text(value, left + offset, y - 45, { size: 11.5, font: bold });
+    });
+  }
+
+  // --- Footer on every page ------------------------------------------------------------
+
   pages.forEach((each, index) => {
     page = each;
+    hline(MARGIN, PAGE.width - 250, MARGIN + 2, RULE);
     text(
-      `${data.company.name} · Statement ${data.reference} · Produced ${formatDate(data.generatedAt)} · Page ${index + 1} of ${pages.length}`,
+      [
+        data.company.name,
+        `Statement ${data.reference}`,
+        `Produced ${formatDate(data.generatedAt)}`,
+        ...(pages.length > 1 ? [`Page ${index + 1} of ${pages.length}`] : []),
+      ].join("   ·   "),
       MARGIN,
-      MARGIN - 20,
-      { size: 7.5, color: MUTED },
+      MARGIN - 12,
+      { size: 8.5, color: MUTED },
     );
   });
 

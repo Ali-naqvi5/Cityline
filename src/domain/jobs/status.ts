@@ -68,6 +68,13 @@ const BEFORE_BOARDING: readonly JobStatus[] = [
 /** Closed jobs: their driver no longer changes. */
 export const FINAL_STATUSES: readonly JobStatus[] = ["completed", "no_show", "cancelled"];
 
+/** Work done: a completed booking or a passenger no-show. */
+export const DONE_STATUSES: readonly JobStatus[] = ["completed", "no_show"];
+
+export function isDone(status: string): boolean {
+  return (DONE_STATUSES as readonly string[]).includes(status);
+}
+
 export function isFinal(status: JobStatus): boolean {
   return FINAL_STATUSES.includes(status);
 }

@@ -260,6 +260,33 @@ export async function statementFor(
       : { docs: [] },
   ]);
   const licence = currentDocument(documents.docs as DriverDocument[], "phv_licence");
+  // Each booking's pickup and drop-off, for the statement's own columns.
+  const jobIds = (payment.lines ?? [])
+    .map((line) => relId(line.job))
+    .filter((id): id is number => id !== null);
+  const jobs = jobIds.length
+    ? await payload.find({
+        collection: "jobs",
+        where: { id: { in: jobIds } },
+        pagination: false,
+        depth: 0,
+        select: { pickupAddress: true, dropoffAddress: true, hours: true },
+        overrideAccess: true,
+      })
+    : { docs: [] };
+  const jobById = new Map((jobs.docs as Job[]).map((job) => [job.id, job]));
+  // A bank transfer shows the driver's account, masked: the holder and the
+  // last four digits only (Cityline, 13 Oct 2026).
+  const bank =
+    payment.method === "bank_transfer" && driver?.bankAccountLast4
+      ? {
+          holder:
+            openBankDetails(driver.bankDetailsSealed)?.accountName ||
+            driver.fullName ||
+            "Driver",
+          last4: driver.bankAccountLast4,
+        }
+      : null;
 
   return {
     reference: paymentReference(payment.id),
@@ -269,16 +296,26 @@ export async function statementFor(
     bankReference: payment.reference ?? null,
     voided: Boolean(payment.voidedAt),
     driverName: driver?.fullName ?? "Driver",
-    phvNumber: licence?.number ?? null,
-    lines: (payment.lines ?? []).map((line) => ({
-      pickupAt: new Date(line.pickupAt ?? payment.upTo),
-      reference: line.jobReference ?? "",
-      route: line.route ?? "",
-      // The short names, which fit the statement's column.
-      status: line.status === "no_show" ? "PNS" : "Completed",
-      pricePence: line.pricePence ?? 0,
-      cashPence: line.cashPence ?? 0,
-    })),
+    phvNumber: licence?.number ?? driver?.phvLicenceNumber ?? null,
+    bank,
+    lines: (payment.lines ?? []).map((line) => {
+      const job = jobById.get(relId(line.job) ?? 0);
+      // A booking no longer on record falls back to the route as paid.
+      const [routeFrom, routeTo] = (line.route ?? "").split(" to ");
+      return {
+        pickupAt: new Date(line.pickupAt ?? payment.upTo),
+        reference: line.jobReference ?? "",
+        pickup: job?.pickupAddress ?? routeFrom ?? "",
+        dropoff: job
+          ? (job.dropoffAddress ??
+            (job.hours ? `Hourly hire, ${job.hours} hours` : "As directed"))
+          : (routeTo ?? ""),
+        // The short names, which fit the statement's column.
+        status: line.status === "no_show" ? "PNS" : "Completed",
+        pricePence: line.pricePence ?? 0,
+        cashPence: line.cashPence ?? 0,
+      };
+    }),
     earnedPence: payment.earnedPence ?? 0,
     cashPence: payment.cashPence ?? 0,
     amountPence: payment.amountPence ?? 0,

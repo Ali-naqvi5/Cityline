@@ -197,11 +197,18 @@ export function searchConditions(q: string): Where[] {
   return conditions;
 }
 
+/**
+ * A deleted booking (Owner, website bookings only) is archived, never removed:
+ * kept for TfL and the accounts, and left out of every operations screen and
+ * report. The money screens still show its payment.
+ */
+export const NOT_DELETED: Where = { archivedAt: { exists: false } };
+
 export function buildBookingsWhere(
   filters: BookingFilters,
   now: Date = new Date(),
 ): Where {
-  const and: Where[] = [];
+  const and: Where[] = [NOT_DELETED];
 
   // Test bookings are for checking the site works; they are not operations.
   if (!filters.includeTest) and.push({ isTest: { not_equals: true } });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  changedDetails,
   lockedFieldViolations,
   normaliseSupplierReference,
   staffCreateProblems,
@@ -84,5 +85,39 @@ describe("staffCreateProblems", () => {
 describe("normaliseSupplierReference", () => {
   it("compares references without case or spaces around them", () => {
     expect(normaliseSupplierReference("  trip-123a ")).toBe("TRIP-123A");
+  });
+});
+
+describe("changedDetails", () => {
+  const done = {
+    status: "completed",
+    pickupAddress: "Heathrow Terminal 5",
+    extras: [{ id: "x1", slug: "child-seat", quantity: 1, unitPricePence: 0 }],
+    supplier: 3,
+    driverPricePence: 4000,
+  };
+
+  it("names the booking details a change would alter", () => {
+    expect(changedDetails(done, { ...done, pickupAddress: "Gatwick" })).toEqual([
+      "pickupAddress",
+    ]);
+    expect(
+      changedDetails(done, {
+        ...done,
+        extras: [{ id: "y2", slug: "child-seat", quantity: 2, unitPricePence: 0 }],
+      }),
+    ).toEqual(["extras"]);
+  });
+
+  it("leaves the driver price and unchanged details alone", () => {
+    expect(changedDetails(done, { ...done, driverPricePence: 3500 })).toEqual([]);
+    // Fresh row ids and a related record as an object are not changes.
+    expect(
+      changedDetails(done, {
+        ...done,
+        extras: [{ id: "z3", slug: "child-seat", quantity: 1, unitPricePence: 0 }],
+        supplier: { id: 3, name: "Trip.com" },
+      }),
+    ).toEqual([]);
   });
 });

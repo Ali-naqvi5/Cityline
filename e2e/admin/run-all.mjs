@@ -27,6 +27,7 @@ const ORDER = [
   "run-sheet",
   "supplier-money",
   "access-filters-classes",
+  "owner-rules",
 ];
 
 const wanted = process.argv.slice(2);

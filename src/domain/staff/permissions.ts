@@ -37,6 +37,10 @@ export const CAPABILITIES = [
   "quotes.view",
   "bookings.view",
   "bookings.amend",
+  // Owner only (Cityline, 13 Oct 2026): change a completed or PNS booking,
+  // and delete a website booking before any journey on it is done.
+  "jobs.editClosed",
+  "bookings.delete",
   // Fleet
   "drivers.view",
   "drivers.edit",

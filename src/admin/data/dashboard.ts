@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Payload } from "payload";
+import type { Payload, Where } from "payload";
 
 import { addDays, londonDay, londonDayBounds, mondayOf } from "@/admin/format";
 import { loadComplianceItems, type ComplianceItem } from "@/admin/data/fleet";
@@ -45,7 +45,10 @@ export interface DashboardData {
   };
 }
 
-const NOT_TEST = { isTest: { not_equals: true } } as const;
+/** Neither a test booking nor a deleted one. */
+const NOT_TEST: Where = {
+  and: [{ isTest: { not_equals: true } }, { archivedAt: { exists: false } }],
+};
 
 export async function loadDashboard(
   payload: Payload,

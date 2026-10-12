@@ -92,6 +92,7 @@ export interface JobsReportRow extends ReportJob {
 function where(filters: JobsReportFilters, start: Date, end: Date): Where {
   const and: Where[] = [
     { isTest: { not_equals: true } },
+    { archivedAt: { exists: false } },
     { pickupAt: { greater_than_equal: start.toISOString() } },
     { pickupAt: { less_than: end.toISOString() } },
   ];

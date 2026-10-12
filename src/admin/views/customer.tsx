@@ -81,7 +81,9 @@ export async function CustomerView(props: AdminViewServerProps) {
   const [jobs, orders] = await Promise.all([
     payload.find({
       collection: "jobs",
-      where: { customer: { equals: customer.id } },
+      where: {
+        and: [{ customer: { equals: customer.id } }, { archivedAt: { exists: false } }],
+      },
       sort: "-pickupAt",
       pagination: false,
       depth: 1,
@@ -91,7 +93,12 @@ export async function CustomerView(props: AdminViewServerProps) {
     can(user.role, "bookings.view")
       ? payload.find({
           collection: "bookings",
-          where: { customer: { equals: customer.id } },
+          where: {
+            and: [
+              { customer: { equals: customer.id } },
+              { archivedAt: { exists: false } },
+            ],
+          },
           sort: "-createdAt",
           limit: 50,
           depth: 0,

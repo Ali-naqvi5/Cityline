@@ -33,17 +33,69 @@ export const LOCKED_FIELD_LABELS: Record<(typeof LOCKED_FIELDS)[number], string>
 };
 
 function same(a: unknown, b: unknown): boolean {
-  const norm = (value: unknown) => {
+  const norm = (value: unknown): unknown => {
     if (value === undefined || value === "") return null;
+    // Payload gives array rows fresh ids; their content is what matters.
     if (Array.isArray(value))
-      return value.map((item) =>
-        item && typeof item === "object"
-          ? { address: (item as { address?: string }).address ?? null }
-          : item,
-      );
+      return value.map((item) => {
+        if (!item || typeof item !== "object") return item;
+        const { id: _id, ...rest } = item as Record<string, unknown>;
+        void _id;
+        return Object.fromEntries(
+          Object.entries(rest).map(([key, field]) => [key, norm(field)]),
+        );
+      });
+    // A related record, as an object or just its id.
+    if (value && typeof value === "object" && "id" in value)
+      return (value as { id: unknown }).id;
     return value;
   };
   return JSON.stringify(norm(a)) === JSON.stringify(norm(b));
+}
+
+/**
+ * A booking's own details: everything the booking form edits. Once a booking
+ * is completed or PNS only the Owner may change these (Cityline, 13 Oct
+ * 2026); the driver's price stays open, as it is often written afterwards.
+ */
+export const DETAIL_FIELDS = [
+  "supplier",
+  "supplierReference",
+  "pickupAt",
+  "pickupAddress",
+  "viaStops",
+  "dropoffAddress",
+  "hours",
+  "flightNumber",
+  "vehicleClassSlug",
+  "passengers",
+  "largeBags",
+  "smallBags",
+  "leadName",
+  "leadPhone",
+  "leadEmail",
+  "nameBoardText",
+  "meetAndGreet",
+  "bookerName",
+  "bookerPhone",
+  "bookerEmail",
+  "extras",
+  "customerPricePence",
+  "paymentMethod",
+  "driverNotes",
+  "internalNotes",
+  "notifyPassenger",
+  "isTest",
+] as const;
+
+/** Detail fields this change would alter. */
+export function changedDetails(
+  original: Record<string, unknown>,
+  change: Record<string, unknown>,
+): string[] {
+  return DETAIL_FIELDS.filter(
+    (field) => field in change && !same(original[field], change[field]),
+  );
 }
 
 /** Locked fields this change would alter, if the job is locked. */

@@ -123,7 +123,11 @@ export async function DriverView(props: AdminViewServerProps) {
     payload.find({
       collection: "jobs",
       where: {
-        and: [{ driver: { equals: id } }, { status: { in: [...OPEN_STATUSES] } }],
+        and: [
+          { driver: { equals: id } },
+          { status: { in: [...OPEN_STATUSES] } },
+          { archivedAt: { exists: false } },
+        ],
       },
       sort: "pickupAt",
       limit: 10,
@@ -134,7 +138,11 @@ export async function DriverView(props: AdminViewServerProps) {
     payload.find({
       collection: "jobs",
       where: {
-        and: [{ driver: { equals: id } }, { status: { not_in: [...OPEN_STATUSES] } }],
+        and: [
+          { driver: { equals: id } },
+          { status: { not_in: [...OPEN_STATUSES] } },
+          { archivedAt: { exists: false } },
+        ],
       },
       sort: "-pickupAt",
       limit: 10,

@@ -12,11 +12,13 @@ const data: StatementData = {
   voided: false,
   driverName: "Sam Taylor",
   phvNumber: "123456",
+  bank: { holder: "Sam Taylor", last4: "4821" },
   lines: [
     {
       pickupAt: new Date("2026-10-01T09:00:00Z"),
       reference: "J-000001",
-      route: "Heathrow Terminal 5 to 10 Wren Avenue, Uxbridge",
+      pickup: "Atlantis House, Rectory Road, Woodham Walter, Maldon",
+      dropoff: "Heathrow Airport, Terminal 5",
       status: "Completed",
       pricePence: 3500,
       cashPence: 0,
@@ -64,10 +66,16 @@ describe("the payment statement PDF", () => {
       ...data,
       voided: true,
       lines: [
-        { ...data.lines[0]!, route: "Heathrow → Zürich Straße 東京 😀", cashPence: 9000 },
+        {
+          ...data.lines[0]!,
+          pickup: "Heathrow → Zürich Straße 東京 😀",
+          status: "PNS",
+          cashPence: 9000,
+        },
       ],
       cashPence: 9000,
       amountPence: -5500,
+      bank: null,
     });
     expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
   });
