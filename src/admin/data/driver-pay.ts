@@ -19,7 +19,15 @@ import { can } from "@/domain/staff/permissions";
 import { company, formattedAddress } from "@/lib/company";
 import type { CsvColumn } from "@/lib/csv";
 import { openBankDetails, type BankDetails } from "@/lib/sealed";
-import type { Driver, DriverDocument, DriverPayment, Job, User } from "@/payload-types";
+import { statementReceipt } from "@/lib/statement-assets";
+import type {
+  Driver,
+  DriverDocument,
+  DriverPayment,
+  Job,
+  PrivateFile,
+  User,
+} from "@/payload-types";
 
 /**
  * Loading Driver Pay: what each driver is owed up to a chosen day, the
@@ -275,6 +283,17 @@ export async function statementFor(
       })
     : { docs: [] };
   const jobById = new Map((jobs.docs as Job[]).map((job) => [job.id, job]));
+  // The bank transfer receipt, if one was added, for the last page.
+  const receiptId = relId(payment.receipt);
+  const receiptFile = receiptId
+    ? ((await payload.findByID({
+        collection: "private-files",
+        id: receiptId,
+        depth: 0,
+        disableErrors: true,
+        overrideAccess: true,
+      })) as PrivateFile | null)
+    : null;
   // A bank transfer shows the driver's account: the holder, the sort code in
   // full, and the account number's last four digits only (Cityline, 13 Oct 2026).
   const account =
@@ -328,6 +347,7 @@ export async function statementFor(
       email: company.email,
     },
     generatedAt: now,
+    receipt: receiptFile?.filename ? await statementReceipt(receiptFile.filename) : null,
   };
 }
 

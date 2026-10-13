@@ -3,6 +3,7 @@ import path from "node:path";
 
 import sharp from "sharp";
 
+import { PRIVATE_FILES_DIR } from "@/collections/PrivateFiles";
 import type { StatementAssets } from "@/domain/finance/statement-pdf";
 
 /**
@@ -52,6 +53,27 @@ async function logoParts(): Promise<StatementAssets["logo"]> {
     };
   }
   return logo.parts;
+}
+
+/**
+ * A driver payment's bank transfer receipt, ready for the statement's last
+ * page: turned the right way up (phone photos carry their turn separately),
+ * no larger than 1800 pixels a side, on white, as a JPEG. Null if the file is
+ * missing or unreadable; the statement then goes without it.
+ */
+export async function statementReceipt(filename: string): Promise<Uint8Array | null> {
+  try {
+    const picture = await sharp(path.join(PRIVATE_FILES_DIR, path.basename(filename)))
+      .rotate()
+      .resize({ width: 1800, height: 1800, fit: "inside", withoutEnlargement: true })
+      .flatten({ background: "#ffffff" })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+    return new Uint8Array(picture);
+  } catch (error) {
+    console.error("A bank transfer receipt could not be read for a statement.", error);
+    return null;
+  }
 }
 
 /** About 2400 pixels across: sharp at the size the statement prints it. */

@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 
 import { chromium } from "@playwright/test";
+import sharp from "sharp";
 
 const base = "http://localhost:3000";
 const shots = "test-results/admin";
@@ -54,7 +55,8 @@ function pdfText(bytes) {
     "python",
     [
       "-c",
-      `from pypdf import PdfReader; print("\\n".join(p.extract_text() for p in PdfReader(r"${file}").pages))`,
+      // Pages apart with a form feed, so the last one can be told apart.
+      `from pypdf import PdfReader; print("\\f".join(p.extract_text() for p in PdfReader(r"${file}").pages))`,
     ],
     {
       encoding: "utf8",
@@ -100,6 +102,8 @@ const text = (page) => page.locator("body").innerText();
 // --- Fixtures (local database only) -----------------------------------------------
 const PAY_PHONE = "+447700900662";
 const fixtureJobs = `select id from jobs where lead_phone = '${PAY_PHONE}'`;
+const fixtureReceipts = `select receipt_id from driver_payments where id in (select _parent_id from driver_payments_lines where job_id in (${fixtureJobs}))`;
+sql(`delete from private_files where id in (${fixtureReceipts})`);
 sql(
   `delete from driver_payments where id in (select _parent_id from driver_payments_lines where job_id in (${fixtureJobs}))`,
 );
@@ -240,6 +244,25 @@ check(
     /To pay\s*£30\.00/.test(body),
 );
 await page.fill("#reference", "CITYLINE TEST");
+const offered = [await page.locator("#receipt").count()];
+await page.selectOption("#method", "cash");
+offered.push(await page.locator("#receipt").count());
+await page.selectOption("#method", "bank_transfer");
+offered.push(await page.locator("#receipt").count());
+check(
+  "a bank transfer offers an optional receipt; cash does not",
+  offered.join() === "1,0,1",
+  offered.join(),
+);
+await page.setInputFiles("#receipt", {
+  name: "transfer.png",
+  mimeType: "image/png",
+  buffer: await sharp({
+    create: { width: 500, height: 900, channels: 3, background: "#e8f5ec" },
+  })
+    .png()
+    .toBuffer(),
+});
 await page.getByRole("button", { name: "Record payment of £30.00" }).click();
 await page.waitForURL(/notice=paid/, { timeout: 20_000 });
 body = await text(page);
@@ -251,6 +274,25 @@ check(
       `select earned_pence || ' ' || cash_pence || ' ' || amount_pence || ' ' || method from driver_payments where id = ${paymentId}`,
     ) === "8000 5000 3000 bank_transfer" &&
     sql(`select count(*) from jobs where driver_payment_id = ${paymentId}`) === "3",
+);
+check(
+  "the receipt is kept as a private file on the payment",
+  sql(
+    `select f.purpose from driver_payments p join private_files f on f.id = p.receipt_id where p.id = ${paymentId}`,
+  ) === "receipt",
+);
+const receiptHref = await page
+  .getByRole("link", { name: "Receipt", exact: true })
+  .first()
+  .getAttribute("href");
+const receiptFile = await page.evaluate(async (href) => {
+  const response = await fetch(href);
+  return { status: response.status, type: response.headers.get("content-type") };
+}, receiptHref);
+check(
+  "the payment shows its receipt, which opens for staff",
+  receiptFile.status === 200 && /^image\//.test(receiptFile.type ?? ""),
+  JSON.stringify(receiptFile),
 );
 check(
   "each booking keeps the price it was paid at",
@@ -267,6 +309,18 @@ const pdf = await page.evaluate(async (id) => {
   };
 }, paymentId);
 const pdfBody = pdfText(pdf.bytes);
+const pdfPages = pdfBody.split("\f");
+const lastPage = pdfPages.at(-1) ?? "";
+check(
+  "the bank transfer receipt is the statement's last page, by itself",
+  pdfPages.length > 1 &&
+    /BANK TRANSFER RECEIPT/.test(lastPage) &&
+    !lastPage.includes(A.reference) &&
+    !/NET PAYMENT/.test(lastPage) &&
+    pdfPages.slice(0, -1).every((each) => !/BANK TRANSFER RECEIPT/.test(each)) &&
+    new RegExp(`Page ${pdfPages.length} of ${pdfPages.length}`).test(lastPage),
+  `${pdfPages.length} pages`,
+);
 check(
   "the statement is a PDF with the bookings, the cash and the total",
   pdf.status === 200 &&
@@ -274,8 +328,8 @@ check(
     /PAYMENT STATEMENT/.test(pdfBody) &&
     pdfBody.includes(A.reference) &&
     pdfBody.includes(C.reference) &&
-    /Less cash you collected/.test(pdfBody) &&
-    /Paid to you\s*£30\.00/.test(pdfBody),
+    /Less: cash received by driver/.test(pdfBody) &&
+    /NET PAYMENT TO DRIVER\s*£30\.00/.test(pdfBody),
   pdfBody.slice(0, 120).replace(/\s+/g, " "),
 );
 
@@ -467,6 +521,7 @@ sql("update users set ops_theme = 'dark' where email = 'accounts@local.test'");
 sql("update users set ops_theme = 'light' where email = 'accounts@local.test'");
 
 // Leave nothing behind for the other checks.
+sql(`delete from private_files where id in (${fixtureReceipts})`);
 sql(
   `delete from driver_payments where id in (select _parent_id from driver_payments_lines where job_id in (${fixtureJobs}))`,
 );

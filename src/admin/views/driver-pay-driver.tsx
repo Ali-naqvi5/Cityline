@@ -1,4 +1,4 @@
-import { ArrowLeft, FileText, MessageCircle, Undo2 } from "lucide-react";
+import { ArrowLeft, FileText, MessageCircle, Receipt, Undo2 } from "lucide-react";
 import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
@@ -39,7 +39,7 @@ import { formatPence, type Pence } from "@/domain/money";
 import { can } from "@/domain/staff/permissions";
 import { company, siteUrl } from "@/lib/company";
 import { formatDate } from "@/lib/time";
-import type { User } from "@/payload-types";
+import type { PrivateFile, User } from "@/payload-types";
 
 /**
  * Paying one driver (Driver Pay): where to send the money, their done and
@@ -273,6 +273,10 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
                         (payment.recordedBy as User).email)
                       : "Staff";
                   const amount = payment.amountPence ?? 0;
+                  const receipt =
+                    payment.receipt && typeof payment.receipt === "object"
+                      ? (payment.receipt as PrivateFile)
+                      : null;
                   return (
                     <li
                       key={payment.id}
@@ -320,6 +324,17 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
                           <FileText aria-hidden className="h-4 w-4" />
                           PDF
                         </a>
+                        {receipt?.url ? (
+                          <a
+                            href={receipt.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={buttonClass("secondary", "sm")}
+                          >
+                            <Receipt aria-hidden className="h-4 w-4" />
+                            Receipt
+                          </a>
+                        ) : null}
                         {!payment.voidedAt && consent ? (
                           <a
                             href={sendLink(payment)}

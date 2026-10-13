@@ -28,8 +28,10 @@ import { drawable, fit } from "./pdf-text";
  * site's own file, split into its picture and its name
  * (`lib/statement-assets.ts`). A long statement continues on pages with a
  * smaller header (the logo only); every page has the footer with its page
- * number (Cityline, 13 Oct 2026). Text the font cannot draw is replaced, so an unusual
- * character in an address never stops a statement being produced.
+ * number (Cityline, 13 Oct 2026). A bank transfer's receipt, if one was
+ * added, is printed by itself on the last page. Text the font cannot draw is
+ * replaced, so an unusual character in an address never stops a statement
+ * being produced.
  */
 
 export interface StatementLine {
@@ -63,6 +65,11 @@ export interface StatementData {
   amountPence: number;
   company: { name: string; address: string; phone: string; email: string };
   generatedAt: Date;
+  /**
+   * The bank transfer receipt as a JPEG, if one was added: printed on its own
+   * as the last page, as proof of the payment (Cityline, 13 Oct 2026).
+   */
+  receipt?: Uint8Array | null;
 }
 
 /** The fonts and logo a statement is drawn with (`lib/statement-assets.ts`). */
@@ -368,8 +375,8 @@ export async function statementPdf(
   };
 
   /** The faint logo and the corners. */
-  const decorate = () => {
-    if (mark) {
+  const decorate = (watermark: boolean) => {
+    if (mark && watermark) {
       picture(mark, 244, 500, 430, 0.05);
     }
     shape("M0 0 L95 0 L95 24 C60 46 30 66 0 96 Z", { fill: CORNER_LIGHT });
@@ -503,10 +510,10 @@ export async function statementPdf(
     box(LEFT, tableTop, WIDTH, y - tableTop, 8, { border: GRID, borderWidth: 1.2 });
   };
 
-  const newPage = (first: boolean, withTable = true) => {
+  const newPage = (first: boolean, withTable = true, watermark = true) => {
     page = pdf.addPage([PAGE.width, PAGE.height]);
     pages.push(page);
-    decorate();
+    decorate(watermark);
     if (first) {
       fullHeader();
     } else {
@@ -689,6 +696,32 @@ export async function statementPdf(
       dot += i === 3 ? 19 : 11.5;
     }
     text(data.bank.last4, dot + 4, bankTop + 95.5, { size: 16.5, font: semibold });
+  }
+
+  // --- The bank transfer receipt, by itself on the last page ----------------------------
+
+  if (data.receipt) {
+    const receipt = await pdf.embedJpg(data.receipt);
+    // A plain page for the proof: no faint logo behind it.
+    newPage(false, false, false);
+    text("BANK TRANSFER RECEIPT", 745.5, 160, {
+      size: 15.5,
+      font: bold,
+      color: GREEN_TEXT,
+      align: "center",
+    });
+    // Fitted into the page below the heading, centred both ways, framed.
+    const area = { top: 185, bottom: 955, width: 1150 };
+    const scale = Math.min(
+      area.width / receipt.width,
+      (area.bottom - area.top) / receipt.height,
+    );
+    const width = receipt.width * scale;
+    const height = receipt.height * scale;
+    const left = 745.5 - width / 2;
+    const top = area.top + (area.bottom - area.top - height) / 2;
+    picture(receipt, left, top, height);
+    box(left, top, width, height, 0, { border: GRID, borderWidth: 1.2 });
   }
 
   // --- The footer, on every page with its number -----------------------------------------

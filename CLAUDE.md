@@ -248,6 +248,16 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   across every page. Continuation pages carry a logo-only header and the
   table header; every page has the footer with "Page n of N". A cash payment leaves
   the bank-details space empty.
+- **Bank transfer receipt on a driver payment** (Cityline, 13 Oct 2026):
+  Review and pay offers an optional upload, for bank transfers only. It
+  must be a picture (JPG, PNG or WebP, up to 10 MB, checked readable with
+  sharp). It is kept as a `private-files` row (`purpose: receipt`, linked
+  by `driver-payments.receipt`) and set at recording; payments are never
+  edited. The statement prints it by itself on an extra last page. That
+  page has the corners, the small logo, a heading and the footer, but no
+  watermark. `statementReceipt` turns the picture the right way up, sizes
+  it and makes it a JPEG. The payment list shows a Receipt button. A
+  missing or unreadable file only drops that page.
 - **One logo everywhere** (Cityline, 13 Oct 2026):
   `public/brand/cityline-logo.svg` is used on the website header, the
   admin, and the statements. Its viewBox is cropped to the artwork (1112 ×

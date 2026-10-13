@@ -1,4 +1,5 @@
 import { PDFDocument } from "pdf-lib";
+import sharp from "sharp";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { statementAssets } from "@/lib/statement-assets";
@@ -76,6 +77,23 @@ describe("the payment statement PDF", () => {
       await statementPdf({ ...data, lines: [data.lines[0]!, data.lines[0]!] }, assets),
     );
     expect(pdf.getPageCount()).toBe(1);
+  });
+
+  it("puts a bank transfer receipt by itself on an extra last page", async () => {
+    const receipt = new Uint8Array(
+      await sharp({
+        create: { width: 600, height: 900, channels: 3, background: "#dddddd" },
+      })
+        .jpeg()
+        .toBuffer(),
+    );
+    const pages = async (with_: boolean) =>
+      (
+        await PDFDocument.load(
+          await statementPdf({ ...data, receipt: with_ ? receipt : null }, assets),
+        )
+      ).getPageCount();
+    expect(await pages(true)).toBe((await pages(false)) + 1);
   });
 
   it("is not stopped by characters the font cannot draw, or a driver owing money", async () => {

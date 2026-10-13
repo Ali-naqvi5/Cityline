@@ -50,6 +50,7 @@ export function PayDriverForm({
   lines: PayLine[];
 }) {
   const [state, action, pending] = useActionState(recordDriverPaymentAction, EMPTY_FORM);
+  const [method, setMethod] = useState("bank_transfer");
   const [chosen, setChosen] = useState<Set<number>>(
     () => new Set(lines.map((line) => line.id)),
   );
@@ -165,7 +166,8 @@ export function PayDriverForm({
           <select
             id="method"
             name="method"
-            defaultValue="bank_transfer"
+            value={method}
+            onChange={(event) => setMethod(event.target.value)}
             className={inputClass()}
           >
             {Object.entries(PAYMENT_METHODS).map(([value, label]) => (
@@ -192,6 +194,24 @@ export function PayDriverForm({
             className={TEXTAREA_CLASS}
           />
         </FormField>
+        {method === "bank_transfer" ? (
+          <FormField
+            id="receipt"
+            label="Bank transfer receipt"
+            hint="Optional. A photo or screenshot (JPG, PNG or WebP, up to 10 MB). It goes on its own last page of the statement."
+            error={state.errors.receipt}
+            wide
+          >
+            <input
+              id="receipt"
+              name="receipt"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="text-ink-2 file:border-line file:bg-surface file:text-ink hover:file:bg-sunken w-full text-sm file:mr-3 file:rounded-md file:border file:px-3 file:py-1.5 file:text-sm"
+              {...invalid(state.errors.receipt, "receipt")}
+            />
+          </FormField>
+        ) : null}
       </div>
 
       <FormMessage state={state} />

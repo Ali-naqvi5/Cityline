@@ -224,6 +224,15 @@ export const DriverPayments: CollectionConfig = {
       })),
     },
     { name: "reference", type: "text", admin: { description: "The bank reference." } },
+    {
+      name: "receipt",
+      type: "upload",
+      relationTo: "private-files",
+      admin: {
+        description:
+          "The bank transfer receipt, if one was added: a picture, printed on its own as the statement's last page.",
+      },
+    },
     { name: "notes", type: "textarea" },
     {
       name: "lines",

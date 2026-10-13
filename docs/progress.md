@@ -14,17 +14,17 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 
 ## At a glance
 
-| Check                   | State                                                               |
-| ----------------------- | ------------------------------------------------------------------- |
-| `pnpm typecheck`        | passing (see the `.next/dev` trap below)                            |
-| `pnpm lint`             | passing                                                             |
-| `pnpm format:check`     | passing                                                             |
-| `pnpm check:compliance` | passing — 423 files, wording + claims                               |
-| `pnpm check:migrations` | passing — 16 migrations, additive only                              |
-| `pnpm test`             | passing — 588 tests across 62 files                                 |
-| `pnpm build`            | passing (13 Oct)                                                    |
-| `pnpm e2e`              | last run 29 Sep — 18 tests passing                                  |
-| `pnpm e2e:admin`        | `owner-rules` passed 13 Oct; the other 17 not run since 10 Oct move |
+| Check                   | State                                                                    |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `pnpm typecheck`        | passing (see the `.next/dev` trap below)                                 |
+| `pnpm lint`             | passing                                                                  |
+| `pnpm format:check`     | passing                                                                  |
+| `pnpm check:compliance` | passing — 424 files, wording + claims                                    |
+| `pnpm check:migrations` | passing — 17 migrations, additive only                                   |
+| `pnpm test`             | passing — 589 tests across 62 files                                      |
+| `pnpm build`            | passing (13 Oct)                                                         |
+| `pnpm e2e`              | last run 29 Sep — 18 tests passing                                       |
+| `pnpm e2e:admin`        | `owner-rules`, `driver-pay` passed 13 Oct; the other 16 not since 10 Oct |
 
 History is on GitHub (`Ali-naqvi5/Cityline`, branch `main`). Pushing `main`
 deploys to production — there is no staging (see below).
@@ -35,7 +35,7 @@ deploys to production — there is no staging (see below).
 
 ### Git and deploys
 
-- `main` is **5 commits ahead of `origin/main`**, none of them pushed yet. The
+- `main` is **6 commits ahead of `origin/main`**, none of them pushed yet. The
   Owner pushes; a push to `main` deploys to production.
   - `4a5ee98` (12 Oct): deploy safety. A verified database dump before
     migrations, a stricter migration check, capped backup deletes.
@@ -43,7 +43,12 @@ deploys to production — there is no staging (see below).
     Delete booking for website bookings.
   - `dcd43da`, then `5b819fe`: the driver statement v2 and the new logo
     everywhere.
-  - Then the commit that carries this update.
+  - `5fa3c7f`: the statement footer on every page, and the first version of
+    this update.
+  - Then the bank transfer receipt on driver payments. It brings **one
+    migration**, `20261013_021613_driver_payment_receipt`, which only adds a
+    column, a foreign key and an index. The deploy script dumps the database
+    before it runs.
 - **Last pushed:** `1ac4c5a` (10 Oct, by the Owner). Nobody has checked
   whether that deploy run went green: there is no `gh` CLI on this PC. Look at
   GitHub Actions.
@@ -95,6 +100,8 @@ Each decision is written up in `CLAUDE.md`:
 - The driver payment statement v2, drawn to the Owner's mock-up and brief,
   in Montserrat, with the new logo. Every page carries a footer with its page
   number.
+- Review and pay takes an optional bank transfer receipt, a picture. It is
+  printed by itself as the statement's last page, as proof of the payment.
 - **Declined; don't propose these again:** two-factor sign-in, and every
   audit suggestion the Owner did not answer.
 

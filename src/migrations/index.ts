@@ -14,6 +14,7 @@ import * as migration_20261006_095524_payments_and_refunds from "./20261006_0955
 import * as migration_20261008_203544_outsourced_drivers from "./20261008_203544_outsourced_drivers";
 import * as migration_20261009_224314_green_vehicle_class from "./20261009_224314_green_vehicle_class";
 import * as migration_20261010_000823_outsourced_phv_number from "./20261010_000823_outsourced_phv_number";
+import * as migration_20261013_021613_driver_payment_receipt from "./20261013_021613_driver_payment_receipt";
 
 export const migrations = [
   {
@@ -95,5 +96,10 @@ export const migrations = [
     up: migration_20261010_000823_outsourced_phv_number.up,
     down: migration_20261010_000823_outsourced_phv_number.down,
     name: "20261010_000823_outsourced_phv_number",
+  },
+  {
+    up: migration_20261013_021613_driver_payment_receipt.up,
+    down: migration_20261013_021613_driver_payment_receipt.down,
+    name: "20261013_021613_driver_payment_receipt",
   },
 ];

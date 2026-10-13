@@ -662,6 +662,10 @@ export interface DriverPayment {
    * The bank reference.
    */
   reference?: string | null;
+  /**
+   * The bank transfer receipt, if one was added: a picture, printed on its own as the statement's last page.
+   */
+  receipt?: (number | null) | PrivateFile;
   notes?: string | null;
   /**
    * The bookings paid for, as they were when paid.
@@ -1516,6 +1520,7 @@ export interface DriverPaymentsSelect<T extends boolean = true> {
   paidAt?: T;
   method?: T;
   reference?: T;
+  receipt?: T;
   notes?: T;
   lines?:
     | T
