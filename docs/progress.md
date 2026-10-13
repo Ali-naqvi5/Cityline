@@ -3,7 +3,7 @@
 Where the build actually stands. Read this before starting work; update it
 before finishing.
 
-**Last updated:** 6 October 2026
+**Last updated:** 13 October 2026
 
 Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-deviations.md)
 (why the build differs from the designs), [`runbook-vps.md`](runbook-vps.md)
@@ -14,19 +14,123 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 
 ## At a glance
 
-| Check                   | State                                  |
-| ----------------------- | -------------------------------------- |
-| `pnpm typecheck`        | passing                                |
-| `pnpm lint`             | passing                                |
-| `pnpm format:check`     | passing                                |
-| `pnpm check:compliance` | passing — 411 files, wording + claims  |
-| `pnpm check:migrations` | passing — 13 migrations, additive only |
-| `pnpm test`             | passing — 565 tests across 61 files    |
-| `pnpm build`            | passing                                |
-| `pnpm e2e`              | last run 29 Sep — 18 tests passing     |
+| Check                   | State                                                               |
+| ----------------------- | ------------------------------------------------------------------- |
+| `pnpm typecheck`        | passing (see the `.next/dev` trap below)                            |
+| `pnpm lint`             | passing                                                             |
+| `pnpm format:check`     | passing                                                             |
+| `pnpm check:compliance` | passing — 423 files, wording + claims                               |
+| `pnpm check:migrations` | passing — 16 migrations, additive only                              |
+| `pnpm test`             | passing — 588 tests across 62 files                                 |
+| `pnpm build`            | passing (13 Oct)                                                    |
+| `pnpm e2e`              | last run 29 Sep — 18 tests passing                                  |
+| `pnpm e2e:admin`        | `owner-rules` passed 13 Oct; the other 17 not run since 10 Oct move |
 
 History is on GitHub (`Ali-naqvi5/Cityline`, branch `main`). Pushing `main`
 deploys to production — there is no staging (see below).
+
+---
+
+## Where things stand on 13 Oct 2026 — read this first
+
+### Git and deploys
+
+- `main` is **5 commits ahead of `origin/main`**, none of them pushed yet. The
+  Owner pushes; a push to `main` deploys to production.
+  - `4a5ee98` (12 Oct): deploy safety. A verified database dump before
+    migrations, a stricter migration check, capped backup deletes.
+  - `8ad4da5`: completed bookings are the Owner's to change; Owner-only
+    Delete booking for website bookings.
+  - `dcd43da`, then `5b819fe`: the driver statement v2 and the new logo
+    everywhere.
+  - Then the commit that carries this update.
+- **Last pushed:** `1ac4c5a` (10 Oct, by the Owner). Nobody has checked
+  whether that deploy run went green: there is no `gh` CLI on this PC. Look at
+  GitHub Actions.
+- **Before the next push, copy the deploy files to the server by hand.** A
+  deploy does not copy `scripts/deploy.sh` or `docker/pg-backup/`.
+  `runbook-vps.md` ("Copy from the repository") has the three commands.
+  Without this, the server keeps the old deploy script, which lacks the
+  verified pre-migration dump.
+- **After the deploy, check:**
+  - the new logo in the website header and the admin;
+  - a driver's statement link (Driver Pay → a payment → send details).
+
+### The admin panel
+
+Built (menu items with `ready: true` in `admin/nav.ts`):
+
+- Dashboard.
+- Bookings: the list, plus each booking's page, edit, new, assign, cancel
+  and delete.
+- Customers.
+- Drivers & cars, Compliance, Suppliers.
+- Payments, Refunds, Driver Pay, Supplier Money, Expenses, Financial Reports.
+- Jobs Report, Driver Report, Daily Run Sheet.
+- Audit Log, Settings.
+- The phone views.
+
+Each screen's rules are in `CLAUDE.md` → "Admin (operations screens)".
+
+Still "Soon" (not built): Quotes, Supplier Reports, Vehicle Reports, TfL
+Booking Register, Staff, Prices & Catalogue, Booking Rules, Company Details,
+Media / Content.
+
+### Decided in the Owner's review (10–13 Oct)
+
+Each decision is written up in `CLAUDE.md`:
+
+- Payload's raw record screens are Owner only.
+- Six car classes, in one list shared by the site and the admin. Green Class
+  is new; the minibus is retired.
+- Payment links on a booking are written by the system only.
+- Cancel booking for website orders: the whole order, with a reason. No
+  money moves.
+- Outsourced drivers: personal details and their car only, never checked by
+  compliance. Their PHV number is optional.
+- A completed or PNS booking is the Owner's to change. The driver price can
+  still be written.
+- Delete booking: website bookings, Owner only, and only before any journey
+  is done. It archives, never erases.
+- The driver payment statement v2, drawn to the Owner's mock-up and brief,
+  in Montserrat, with the new logo. Every page carries a footer with its page
+  number.
+- **Declined; don't propose these again:** two-factor sign-in, and every
+  audit suggestion the Owner did not answer.
+
+### Next steps, in order
+
+1. Copy the deploy files to the VPS. The Owner then pushes and checks the
+   deploy (above).
+2. Website follow-ups, owed since 11 Oct:
+   - Green Class needs real fares and its own photo; it uses the saloon's
+     for now.
+   - Green Class is missing from `domain/pricing/indicative.ts`.
+   - Minibus wording to remove: the "Minibus hire" page
+     (`content/services.ts`), `lib/navigation.ts`, `content/home.ts`, the
+     seaport FAQs (`domain/places/seaports.ts`), and the fleet,
+     luggage-guide and services meta descriptions.
+   - Every fare on the site is still a placeholder.
+3. Backups: a restore test, then WAL archiving for point-in-time recovery.
+4. Stripe: add `charge.updated` to the webhook endpoint (table below).
+5. The company number for invoices.
+6. Put off by Cityline: the "Soon" reports (see "Pending" below), and TfL's
+   complaints and lost-property records.
+
+### How the Owner works
+
+- The Owner reviews one section at a time and asks for changes in batches.
+  Record what they ask for, then build it.
+- Before any redesign, ask the Owner for a design brief. Pause for approval
+  on each report.
+- Write replies in plain words.
+- Commit locally after each batch, and scan the staged diff for secrets
+  first: `sk_`, `pk_`, `rk_`, `whsec_`, `ntly_`, the test password,
+  `PAYLOAD_SECRET=`, `DATABASE_URL=`.
+- **Push only when the Owner asks.**
+- Claude's memory for this project
+  (`~/.claude/projects/d--Cityline-transfers/memory/`) keeps the decisions
+  and preferences.
 
 ---
 
@@ -39,7 +143,7 @@ deploys to production — there is no staging (see below).
 | S2     | Places, zones, pricing engine   | **Not started** — blocked on the launch price tables                             |
 | S3     | Quote, steps 1–2                | Steps 1–2 built on placeholder fares; `/quote` and Places autocomplete not built |
 | S4     | Steps 3–4, Stripe, confirmation | **Done in test mode.** Card payments through Stripe; live keys still to come     |
-| S5+    | Manage booking, pages, admin    | Manage booking, emails, help and legal pages built; **admin in progress**        |
+| S5+    | Manage booking, pages, admin    | Manage booking, emails, help and legal pages built; **admin largely built**      |
 
 The build ran ahead of S2, so **every fare on the site is a placeholder**. The
 funnel has four working screens standing on invented numbers.
@@ -416,10 +520,38 @@ pages use, so the page's `noindex` and the sitemap cannot disagree.
 
 ## Known issues and traps
 
-**Native binding after a dependency change.** `pnpm add`/`remove` can drop
-vitest's platform binding, and `pnpm install` will report "Already up to date".
-Fix: `pnpm install --force`. Documented in `CLAUDE.md`; it has cost an hour
-twice.
+**Native binding after a dependency change.** `pnpm add` or `remove` can
+drop vitest's platform binding, and `pnpm install` then reports "Already up to
+date". Fix: `pnpm install --frozen-lockfile --force`. It happened again on 13
+Oct, when `@pdf-lib/fontkit` was added.
+
+**Admin browser checks need emails off.** Start the dev server with
+`NUNTLY_API_KEY= pnpm dev`, then run `pnpm e2e:admin`. Never run them against
+the Owner's own dev server, which has the real email key. The checks change
+local records and put them back.
+
+**A stopped dev server can keep port 3000.** Stopping a backgrounded `pnpm
+dev` can leave `next`'s own node process running. Find it on port 3000 and end
+it by PID.
+
+**Turbopack cache panic** ("restoring failed"): `rm -rf .next/dev`, then
+restart.
+
+**`tsc` can fail on route types after `.next/dev` is cleared.** The dev
+server's own route list (`.next/dev/types/routes.d.ts`) can miss the nested
+`[ref]` pages, and `tsc` then fails on `/book/confirmed/[ref]` and
+`/manage/[ref]/…`. The code is fine, and CI has no `.next/dev`. Delete
+`.next/dev/types` with the dev server stopped, or type-check with a tsconfig
+that leaves `.next/dev` out.
+
+**The dev server rewrites `src/app/(payload)/admin/importMap.js`**
+unformatted. Run `prettier --write` on it; its content does not change.
+
+**Driver statement assets come from `public/`.** `lib/statement-assets.ts`
+reads the Montserrat fonts and `brand/cityline-logo.svg` from `process.cwd()`.
+The Docker image keeps `public/` at `/app/public`. The logo is split at the
+first empty band below its picture, so a replacement logo must keep the
+stacked layout: picture above, name below.
 
 **Content-Security-Policy** is in place — see `src/lib/csp.ts` and the
 29 Sep 2026 entry below. The `Permissions-Policy` in `next.config.ts` names
@@ -552,6 +684,7 @@ and Controller).
 | Needed for | Item                                                                                                                                                                                              |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | S2         | **Launch price tables** — fixed fares per class, per-mile tariff, surcharges, extras. The main blocker                                                                                            |
+| Website    | Green Class fares and its own photo; it borrows the saloon's placeholders                                                                                                                         |
 | S3         | Google Maps keys (Places autocomplete, BK-02)                                                                                                                                                     |
 | Launch     | Stripe live activation, restricted live key, live webhook endpoint, Apple Pay domain — `runbook-vps.md` §10                                                                                       |
 | Now        | Add `charge.updated` to the Stripe webhook endpoint (and the key's read permissions) so card fees arrive by themselves — `runbook-vps.md` §10; until then, Payments → "Get card fees from Stripe" |
@@ -570,9 +703,10 @@ Placeholders currently in the build are listed in `design-deviations.md` §11.
 
 ## Suggested next steps
 
-1. **The admin panel** — bookings and jobs for the office, refunds, dispatch.
-   The emails and manage booking are waiting on it to be the safety net.
-2. **Verify the Nuntly domain**, then set `CUSTOMER_EMAILS=live` at launch.
-3. S2 proper, once the price tables land; BK-02 address suggestions with the
+The near-term list is under "Where things stand on 13 Oct 2026" at the top.
+Further out:
+
+1. **Verify the Nuntly domain**, then set `CUSTOMER_EMAILS=live` at launch.
+2. S2 proper, once the price tables land; BK-02 address suggestions with the
    Google keys.
-4. Stripe live mode — `runbook-vps.md` §10.
+3. Stripe live mode — `runbook-vps.md` §10.

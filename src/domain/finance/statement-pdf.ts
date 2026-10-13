@@ -27,8 +27,8 @@ import { drawable, fit } from "./pdf-text";
  * and subset; the corners and icons are vector shapes; the logo is the
  * site's own file, split into its picture and its name
  * (`lib/statement-assets.ts`). A long statement continues on pages with a
- * smaller header (the logo only); the footer is on the last page (Cityline,
- * 13 Oct 2026). Text the font cannot draw is replaced, so an unusual
+ * smaller header (the logo only); every page has the footer with its page
+ * number (Cityline, 13 Oct 2026). Text the font cannot draw is replaced, so an unusual
  * character in an address never stops a statement being produced.
  */
 
@@ -691,19 +691,22 @@ export async function statementPdf(
     text(data.bank.last4, dot + 4, bankTop + 95.5, { size: 16.5, font: semibold });
   }
 
-  // --- The footer, on the last page ----------------------------------------------------
+  // --- The footer, on every page with its number -----------------------------------------
 
-  text(
-    [
-      data.company.name,
-      `Statement ${data.reference}`,
-      `Produced ${formatDate(data.generatedAt)}`,
-      `Page ${pages.length} of ${pages.length}`,
-    ].join("   ·   "),
-    60,
-    998.5,
-    { size: 12.5 },
-  );
+  pages.forEach((each, index) => {
+    page = each;
+    text(
+      [
+        data.company.name,
+        `Statement ${data.reference}`,
+        `Produced ${formatDate(data.generatedAt)}`,
+        `Page ${index + 1} of ${pages.length}`,
+      ].join("   ·   "),
+      60,
+      998.5,
+      { size: 12.5 },
+    );
+  });
 
   // VOID across every page of a voided payment's statement, over everything.
   if (data.voided) {

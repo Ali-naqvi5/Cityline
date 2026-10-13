@@ -246,7 +246,7 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   full and the account number's last four digits only. A driver who owes
   gets "Net paid by driver to Cityline", and a voided statement gets VOID
   across every page. Continuation pages carry a logo-only header and the
-  table header; the footer is on the last page only. A cash payment leaves
+  table header; every page has the footer with "Page n of N". A cash payment leaves
   the bank-details space empty.
 - **One logo everywhere** (Cityline, 13 Oct 2026):
   `public/brand/cityline-logo.svg` is used on the website header, the
