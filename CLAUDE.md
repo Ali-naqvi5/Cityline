@@ -239,9 +239,12 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   The statement follows the Owner's mock-up (13 Oct 2026): A4 landscape,
   the logo, an info band, one row per booking with pickup, drop-off and a
   Completed/PNS pill, totals ending in "Net payment to driver", and the
-  driver's bank details masked (bank transfers only). The logo is drawn from
-  `domain/finance/cityline-logo.ts`, generated from `public/brand/cityline-logo.svg` by
-  `scripts/build-statement-logo.mjs` — rerun it if the logo changes.
+  driver's bank details masked (bank transfers only). Logo: a file named
+  `public/brand/statement-logo` (.svg, .png, .jpg or .webp) is used when
+  present (`admin/data/statement-logo.ts`, trimmed and sized by sharp);
+  otherwise the built-in one, `domain/finance/cityline-logo.ts`, generated
+  from the traced `public/brand/cityline-logo.svg` by
+  `scripts/build-statement-logo.mjs`.
 - **Supplier Money** (`/admin/supplier-money`, Owner and Accounts): what each
   partner owes — the booking price for completed, PNS, and cancelled
   bookings the office marks "partner pays" (`jobs.cancellationCharge`; every

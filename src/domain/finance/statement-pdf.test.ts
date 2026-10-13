@@ -61,6 +61,18 @@ describe("the payment statement PDF", () => {
     expect(pdf.getPageCount()).toBeGreaterThan(1);
   });
 
+  it("uses the office's own logo picture when one is given", async () => {
+    // A one-pixel PNG.
+    const logo = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+      "base64",
+    );
+    const plain = await statementPdf(data);
+    const withLogo = await statementPdf({ ...data, logo });
+    expect((await PDFDocument.load(withLogo)).getPageCount()).toBe(1);
+    expect(withLogo.length).not.toBe(plain.length);
+  });
+
   it("is not stopped by characters the font cannot draw, or a driver owing money", async () => {
     const bytes = await statementPdf({
       ...data,

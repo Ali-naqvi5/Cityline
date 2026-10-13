@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Payload, Where } from "payload";
 
+import { statementLogo } from "@/admin/data/statement-logo";
 import { currentDocument } from "@/domain/compliance/documents";
 import { relId } from "@/domain/dispatch/assignment";
 import {
@@ -326,6 +327,7 @@ export async function statementFor(
       email: company.email,
     },
     generatedAt: now,
+    logo: await statementLogo(),
   };
 }
 

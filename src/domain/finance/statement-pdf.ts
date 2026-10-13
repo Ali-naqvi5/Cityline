@@ -32,8 +32,9 @@ import { drawable, fit } from "./pdf-text";
  * account, masked. It is a statement of payment for bookings, not an invoice
  * or a payslip: drivers are independent, and an invoice would be theirs.
  *
- * A4 landscape, the standard Helvetica fonts (nothing to embed), the logo
- * drawn as vector shapes. Text the font cannot draw is replaced, so an
+ * A4 landscape, the standard Helvetica fonts (nothing to embed), and the
+ * office's own logo picture when one is given, else the built-in one drawn
+ * as vector shapes. Text the font cannot draw is replaced, so an
  * unusual character in an address never stops a statement being produced.
  */
 
@@ -65,6 +66,11 @@ export interface StatementData {
   amountPence: number;
   company: { name: string; address: string; phone: string; email: string };
   generatedAt: Date;
+  /**
+   * The office's own logo as a PNG, when one is provided
+   * (`admin/data/statement-logo.ts`); without it, the built-in drawing.
+   */
+  logo?: Uint8Array | null;
 }
 
 const PAGE = { width: 841.89, height: 595.28 };
@@ -115,6 +121,7 @@ export async function statementPdf(data: StatementData): Promise<Uint8Array> {
   const italic = await pdf.embedFont(StandardFonts.HelveticaOblique);
   // The wordmark's lettering, cleaned, as a picture (see cityline-logo.ts).
   const lettering = await pdf.embedPng(Buffer.from(LOGO_LETTERING_PNG, "base64"));
+  const picture = data.logo ? await pdf.embedPng(data.logo) : null;
   const clean = drawable(regular);
 
   const pages: PDFPage[] = [];
@@ -242,6 +249,25 @@ export async function statementPdf(data: StatementData): Promise<Uint8Array> {
     page.pushOperators(popGraphicsState());
     return region.width * scale;
   };
+  /** The office's logo picture, fitted into a box by its top-left corner. */
+  const pictureLogo = (
+    left: number,
+    top: number,
+    maxWidth: number,
+    maxHeight: number,
+    options: { opacity?: number } = {},
+  ) => {
+    if (!picture) return 0;
+    const scale = Math.min(maxWidth / picture.width, maxHeight / picture.height);
+    page.drawImage(picture, {
+      x: left,
+      y: top - picture.height * scale,
+      width: picture.width * scale,
+      height: picture.height * scale,
+      opacity: options.opacity,
+    });
+    return picture.width * scale;
+  };
   const bankIcon = (left: number, top: number, size: number) => {
     const s = size / 24;
     page.drawSvgPath(
@@ -292,8 +318,9 @@ export async function statementPdf(data: StatementData): Promise<Uint8Array> {
   const newPage = (first: boolean, withTable = true) => {
     page = pdf.addPage([PAGE.width, PAGE.height]);
     pages.push(page);
-    // The skyline, faint, in the corner.
-    logo(LOGO_MARK, PAGE.width - 215, 170, 160, { opacity: 0.07 });
+    // The skyline (or the office's logo), faint, in the corner.
+    if (picture) pictureLogo(PAGE.width - 236, 160, 200, 140, { opacity: 0.07 });
+    else logo(LOGO_MARK, PAGE.width - 215, 170, 160, { opacity: 0.07 });
     if (data.voided) {
       page.drawText("VOID", {
         x: PAGE.width / 2 - 130,
@@ -307,7 +334,9 @@ export async function statementPdf(data: StatementData): Promise<Uint8Array> {
     const top = PAGE.height - MARGIN;
 
     if (!first) {
-      const markWidth = logo(LOGO_MARK, MARGIN, top, 34);
+      const markWidth = picture
+        ? pictureLogo(MARGIN, top, 160, 34)
+        : logo(LOGO_MARK, MARGIN, top, 34);
       text(
         `DRIVER PAYMENT STATEMENT  ·  ${data.reference}  (continued)`,
         MARGIN + markWidth + 12,
@@ -319,15 +348,19 @@ export async function statementPdf(data: StatementData): Promise<Uint8Array> {
       return;
     }
 
-    // The logo: the mark, and the name beside it.
-    const markWidth = logo(LOGO_MARK, MARGIN, top, 66);
-    const letteringHeight = 42;
-    page.drawImage(lettering, {
-      x: MARGIN + markWidth + 12,
-      y: top - 12 - letteringHeight,
-      width: (LOGO_WORDMARK.width / LOGO_WORDMARK.height) * letteringHeight,
-      height: letteringHeight,
-    });
+    // The logo: the office's picture, or the mark with the name beside it.
+    if (picture) {
+      pictureLogo(MARGIN, top + 4, 380, 72);
+    } else {
+      const markWidth = logo(LOGO_MARK, MARGIN, top, 66);
+      const letteringHeight = 42;
+      page.drawImage(lettering, {
+        x: MARGIN + markWidth + 12,
+        y: top - 12 - letteringHeight,
+        width: (LOGO_WORDMARK.width / LOGO_WORDMARK.height) * letteringHeight,
+        height: letteringHeight,
+      });
+    }
 
     // What this is, and its number.
     const title = "DRIVER PAYMENT STATEMENT";
