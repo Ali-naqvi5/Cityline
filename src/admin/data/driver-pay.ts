@@ -2,7 +2,6 @@ import "server-only";
 
 import type { Payload, Where } from "payload";
 
-import { statementLogo } from "@/admin/data/statement-logo";
 import { currentDocument } from "@/domain/compliance/documents";
 import { relId } from "@/domain/dispatch/assignment";
 import {
@@ -276,15 +275,17 @@ export async function statementFor(
       })
     : { docs: [] };
   const jobById = new Map((jobs.docs as Job[]).map((job) => [job.id, job]));
-  // A bank transfer shows the driver's account, masked: the holder and the
-  // last four digits only (Cityline, 13 Oct 2026).
+  // A bank transfer shows the driver's account: the holder, the sort code in
+  // full, and the account number's last four digits only (Cityline, 13 Oct 2026).
+  const account =
+    payment.method === "bank_transfer" && driver?.bankAccountLast4
+      ? openBankDetails(driver.bankDetailsSealed)
+      : null;
   const bank =
     payment.method === "bank_transfer" && driver?.bankAccountLast4
       ? {
-          holder:
-            openBankDetails(driver.bankDetailsSealed)?.accountName ||
-            driver.fullName ||
-            "Driver",
+          holder: account?.accountName || driver.fullName || "Driver",
+          sortCode: account?.sortCode ?? null,
           last4: driver.bankAccountLast4,
         }
       : null;
@@ -327,7 +328,6 @@ export async function statementFor(
       email: company.email,
     },
     generatedAt: now,
-    logo: await statementLogo(),
   };
 }
 

@@ -236,15 +236,22 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   fonts) and a signed, expiring link for the driver
   (`domain/finance/statement-link.ts`, `/api/statements/<token>`), sent with
   the WhatsApp note. Not an invoice or a payslip — drivers are independent.
-  The statement follows the Owner's mock-up (13 Oct 2026): A4 landscape,
-  the logo, an info band, one row per booking with pickup, drop-off and a
-  Completed/PNS pill, totals ending in "Net payment to driver", and the
-  driver's bank details masked (bank transfers only). Logo: a file named
-  `public/brand/statement-logo` (.svg, .png, .jpg or .webp) is used when
-  present (`admin/data/statement-logo.ts`, trimmed and sized by sharp);
-  otherwise the built-in one, `domain/finance/cityline-logo.ts`, generated
-  from the traced `public/brand/cityline-logo.svg` by
-  `scripts/build-statement-logo.mjs`.
+  The statement is drawn to the Owner's mock-up and pixel brief (13 Oct
+  2026). Positions are in the mock-up's 1491 × 1055 px and scaled to A4
+  landscape. Text is Montserrat (`public/fonts/montserrat`, OFL; embedded
+  with `@pdf-lib/fontkit`). The corners and icons are vectors. The logo is
+  `public/brand/cityline-logo.svg`, split by `lib/statement-assets.ts` into
+  its picture and its name, set side by side, with the picture as a faint
+  watermark. The bank details (bank transfers only) show the sort code in
+  full and the account number's last four digits only. A driver who owes
+  gets "Net paid by driver to Cityline", and a voided statement gets VOID
+  across every page. Continuation pages carry a logo-only header and the
+  table header; the footer is on the last page only. A cash payment leaves
+  the bank-details space empty.
+- **One logo everywhere** (Cityline, 13 Oct 2026):
+  `public/brand/cityline-logo.svg` is used on the website header, the
+  admin, and the statements. Its viewBox is cropped to the artwork (1112 ×
+  773), and the `<img>` width and height hints match it.
 - **Supplier Money** (`/admin/supplier-money`, Owner and Accounts): what each
   partner owes — the booking price for completed, PNS, and cancelled
   bookings the office marks "partner pays" (`jobs.cancellationCharge`; every

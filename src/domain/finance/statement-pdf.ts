@@ -1,13 +1,9 @@
+import fontkit from "@pdf-lib/fontkit";
 import {
-  clip,
-  endPath,
   PDFDocument,
-  popGraphicsState,
-  pushGraphicsState,
-  rectangle,
   rgb,
-  StandardFonts,
   type PDFFont,
+  type PDFImage,
   type PDFPage,
   type RGB,
 } from "pdf-lib";
@@ -15,27 +11,25 @@ import {
 import { formatPence, type Pence } from "@/domain/money";
 import { formatDate, formatTime } from "@/lib/time";
 
-import {
-  LOGO_LETTERING_PNG,
-  LOGO_MARK,
-  LOGO_SHAPES,
-  LOGO_WORDMARK,
-  type LogoRegion,
-} from "./cityline-logo";
 import { drawable, fit } from "./pdf-text";
 
 /**
- * A driver's payment statement as a PDF (Driver Pay; layout from Cityline's
- * design of 13 Oct 2026): the Cityline logo, who was paid, when and how,
- * every booking it covers with its pickup, drop-off, price and any cash the
- * driver collected, the totals, and — for a bank transfer — the driver's
- * account, masked. It is a statement of payment for bookings, not an invoice
- * or a payslip: drivers are independent, and an invoice would be theirs.
+ * A driver's payment statement as a PDF (Driver Pay). It is drawn to
+ * Cityline's mock-up and design brief of 13 Oct 2026: the logo, who was paid,
+ * when and how, every booking it covers with its pickup, drop-off, price and
+ * any cash the driver collected, the totals, and the driver's bank details for
+ * a bank transfer (sort code in full, account number masked). It is a
+ * statement of payment for bookings, not an invoice or a payslip: drivers are
+ * independent, and an invoice would be theirs.
  *
- * A4 landscape, the standard Helvetica fonts (nothing to embed), and the
- * office's own logo picture when one is given, else the built-in one drawn
- * as vector shapes. Text the font cannot draw is replaced, so an
- * unusual character in an address never stops a statement being produced.
+ * Every position and size below is in the mock-up's pixels, 1491 × 1055 for an
+ * A4 landscape page; `K` turns them into points. Text is Montserrat, embedded
+ * and subset; the corners and icons are vector shapes; the logo is the
+ * site's own file, split into its picture and its name
+ * (`lib/statement-assets.ts`). A long statement continues on pages with a
+ * smaller header (the logo only); the footer is on the last page (Cityline,
+ * 13 Oct 2026). Text the font cannot draw is replaced, so an unusual
+ * character in an address never stops a statement being produced.
  */
 
 export interface StatementLine {
@@ -58,24 +52,42 @@ export interface StatementData {
   voided: boolean;
   driverName: string;
   phvNumber: string | null;
-  /** The account paid into, masked; only for a bank transfer. */
-  bank: { holder: string; last4: string } | null;
+  /**
+   * The account paid into, for a bank transfer only: the sort code in full
+   * (null when it cannot be read) and the account number's last four digits.
+   */
+  bank: { holder: string; sortCode: string | null; last4: string } | null;
   lines: StatementLine[];
   earnedPence: number;
   cashPence: number;
   amountPence: number;
   company: { name: string; address: string; phone: string; email: string };
   generatedAt: Date;
+}
+
+/** The fonts and logo a statement is drawn with (`lib/statement-assets.ts`). */
+export interface StatementAssets {
+  fonts: { regular: Uint8Array; semibold: Uint8Array; bold: Uint8Array };
   /**
-   * The office's own logo as a PNG, when one is provided
-   * (`admin/data/statement-logo.ts`); without it, the built-in drawing.
+   * The logo's picture and its name as PNGs; `name` is null when the logo
+   * could not be split, and the whole logo is the picture.
    */
-  logo?: Uint8Array | null;
+  logo: { mark: Uint8Array; name: Uint8Array | null } | null;
 }
 
 const PAGE = { width: 841.89, height: 595.28 };
-const MARGIN = 36;
-const CONTENT = PAGE.width - 2 * MARGIN;
+/** Points per mock-up pixel. */
+const K = PAGE.width / 1491;
+const LEFT = 57;
+const RIGHT = 1435;
+const WIDTH = RIGHT - LEFT;
+/** Montserrat's capital letters, as a share of its size. */
+const CAP = 0.7;
+/** Rows stop here on a page that continues, clear of the bottom corner. */
+const ROWS_BOTTOM = 950;
+/** The totals and bank details after the last row, and where they must end. */
+const CLOSING = 24 + 200 + 25 + 126;
+const CLOSING_BOTTOM = 960;
 
 const hex = (value: string): RGB =>
   rgb(
@@ -83,90 +95,149 @@ const hex = (value: string): RGB =>
     parseInt(value.slice(3, 5), 16) / 255,
     parseInt(value.slice(5, 7), 16) / 255,
   );
-const INK = hex("#1f2d35");
+const INK = hex("#1f313b");
 const MUTED = hex("#5d6a72");
+const BRAND = hex("#2aa434");
 const GREEN = hex("#1f9a43");
-const GREEN_DARK = hex("#17803a");
-const TINT = hex("#f1f8f3");
-const TINT_STRONG = hex("#e2f3e7");
-const RULE = hex("#a9dcb5");
-const GRID = hex("#d5ebdc");
-const PILL = hex("#d2f0da");
-const PNS_PILL = hex("#fcebc8");
-const PNS_INK = hex("#8a5a06");
+const GREEN_TEXT = hex("#00852f");
+const GREEN_DARK = hex("#006b32");
+const BAND = hex("#f2f9f4");
+const PANEL = hex("#f6faf7");
+const NET_ROW = hex("#e6f4ea");
+const NET_RULE = hex("#9dc5a8");
+const TABLE_HEAD = hex("#edf7f0");
+const BORDER = hex("#cbe8d4");
+const BANK_BORDER = hex("#d7ecde");
+const BANK_FILL = hex("#fbfdfb");
+const GRID = hex("#d6eadf");
+const SOFT_GRID = hex("#e3efe7");
+const DIVIDER = hex("#8dc39d");
+const TITLE_RULE = hex("#9cc8ab");
+const PILL = hex("#d3f2db");
+const PNS_PILL = hex("#e4eee7");
+const CORNER_DARK = hex("#1f7d45");
+const CORNER_LIGHT = hex("#7cc44a");
+const CORNER_GREEN = hex("#45b04f");
 const VOID_RED = hex("#c0261b");
 
 const money = (pence: number) => formatPence(pence as Pence);
 
+/**
+ * Icons on a 24-unit grid with the box their ink fills ([x, y, width,
+ * height]). Material Icons (Apache 2.0) but the coins, drawn here as lines.
+ */
+const ICONS = {
+  pin: {
+    d: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
+    box: [5, 2, 14, 20],
+  },
+  phone: {
+    d: "M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z",
+    box: [3, 3, 18, 18],
+  },
+  mail: {
+    d: "M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z",
+    box: [2, 4, 20, 16],
+  },
+  person: {
+    d: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",
+    box: [4, 4, 16, 16],
+  },
+  calendar: {
+    d: "M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z",
+    box: [3, 2, 18, 20],
+  },
+  card: {
+    d: "M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z",
+    box: [2, 4, 20, 16],
+  },
+  document: {
+    d: "M8 16h8v2H8zm0-4h8v2H8zm6-10H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z",
+    box: [4, 2, 16, 20],
+  },
+  bank: {
+    d: "M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z",
+    box: [2, 1, 19, 21],
+  },
+  coins: {
+    d:
+      "M4 5.5 A8 2.6 0 1 0 20 5.5 A8 2.6 0 1 0 4 5.5 Z M4 5.5 V18.5 M20 5.5 V18.5 " +
+      "M4 9.8 A8 2.6 0 0 0 20 9.8 M4 14.1 A8 2.6 0 0 0 20 14.1 M4 18.5 A8 2.6 0 0 0 20 18.5",
+    box: [3.2, 2.1, 17.6, 19.8],
+    stroke: true,
+  },
+} as const;
+type Icon = keyof typeof ICONS;
+
 /** The table's columns, left to right; they fill the content width. */
 const COLUMNS = [
-  { key: "date", label: "DATE", width: 112 },
-  { key: "pickup", label: "PICKUP", width: 168 },
-  { key: "dropoff", label: "DROPOFF", width: 160 },
-  { key: "booking", label: "BOOKING REF", width: 96 },
-  { key: "status", label: "STATUS", width: 90 },
-  { key: "fare", label: "FARE", width: 60, right: true },
-  { key: "cash", label: "CASH RECEIVED", width: CONTENT - 686, right: true },
+  { key: "date", label: "DATE", width: 180 },
+  { key: "pickup", label: "PICKUP", width: 284 },
+  { key: "dropoff", label: "DROPOFF", width: 269 },
+  { key: "booking", label: "BOOKING REF", width: 160 },
+  { key: "status", label: "STATUS", width: 180 },
+  { key: "fare", label: "FARE", width: 159 },
+  { key: "cash", label: "CASH RECEIVED", width: 146 },
 ] as const;
-const CELL = 10;
-const LINE_HEIGHT = 12;
+type Column = (typeof COLUMNS)[number]["key"];
+const PAD = 20;
+const ROW_TEXT = 14.5;
+const ROW_LINE = 22;
 
-export async function statementPdf(data: StatementData): Promise<Uint8Array> {
+export async function statementPdf(
+  data: StatementData,
+  assets: StatementAssets,
+): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
+  pdf.registerFontkit(fontkit);
   pdf.setTitle(`Payment statement ${data.reference}`);
   pdf.setAuthor(data.company.name);
   pdf.setCreationDate(data.generatedAt);
-  const regular = await pdf.embedFont(StandardFonts.Helvetica);
-  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
-  const italic = await pdf.embedFont(StandardFonts.HelveticaOblique);
-  // The wordmark's lettering, cleaned, as a picture (see cityline-logo.ts).
-  const lettering = await pdf.embedPng(Buffer.from(LOGO_LETTERING_PNG, "base64"));
-  const picture = data.logo ? await pdf.embedPng(data.logo) : null;
+  const [regular, semibold, bold] = await Promise.all([
+    pdf.embedFont(assets.fonts.regular, { subset: true }),
+    pdf.embedFont(assets.fonts.semibold, { subset: true }),
+    pdf.embedFont(assets.fonts.bold, { subset: true }),
+  ]);
+  const mark = assets.logo ? await pdf.embedPng(assets.logo.mark) : null;
+  const name = assets.logo?.name ? await pdf.embedPng(assets.logo.name) : null;
   const clean = drawable(regular);
 
   const pages: PDFPage[] = [];
   let page!: PDFPage;
+  /** Down the page, in mock-up pixels. */
   let y = 0;
 
-  // --- Drawing helpers ------------------------------------------------------------
+  // --- Drawing helpers, in mock-up pixels from the page's top-left corner ----------
 
   type TextOptions = {
-    size?: number;
+    size: number;
     font?: PDFFont;
     color?: RGB;
     align?: "left" | "right" | "center";
-    spacing?: number;
+    opacity?: number;
   };
-  const widthOf = (value: string, options: TextOptions = {}) => {
+  const widthOf = (value: string, size: number, font: PDFFont = regular) =>
+    font.widthOfTextAtSize(clean(value), size);
+  /** Text by its baseline; returns its width. */
+  const text = (value: string, x: number, baseline: number, options: TextOptions) => {
     const safe = clean(value);
     const font = options.font ?? regular;
-    const size = options.size ?? 9;
-    return (
-      font.widthOfTextAtSize(safe, size) +
-      (options.spacing ?? 0) * Math.max(0, safe.length - 1)
-    );
-  };
-  const text = (value: string, x: number, at: number, options: TextOptions = {}) => {
-    const safe = clean(value);
-    const font = options.font ?? regular;
-    const size = options.size ?? 9;
-    const color = options.color ?? INK;
-    const width = widthOf(safe, options);
-    let left =
+    const width = font.widthOfTextAtSize(safe, options.size);
+    const left =
       options.align === "right"
         ? x - width
         : options.align === "center"
           ? x - width / 2
           : x;
-    if (!options.spacing) {
-      page.drawText(safe, { x: left, y: at, size, font, color });
-      return;
-    }
-    // Letter-spaced labels, a character at a time.
-    for (const char of safe) {
-      page.drawText(char, { x: left, y: at, size, font, color });
-      left += font.widthOfTextAtSize(char, size) + options.spacing;
-    }
+    page.drawText(safe, {
+      x: left * K,
+      y: PAGE.height - baseline * K,
+      size: options.size * K,
+      font,
+      color: options.color ?? INK,
+      opacity: options.opacity,
+    });
+    return width;
   };
   /** Words wrapped to a width, at most `lines` of them, the last cut short. */
   const wrap = (
@@ -194,442 +265,459 @@ export async function statementPdf(data: StatementData): Promise<Uint8Array> {
     kept[lines - 1] = fit(`${kept[lines - 1]} ${out[lines]}…`, font, size, width);
     return kept;
   };
-  const hline = (from: number, to: number, at: number, color = RULE, thickness = 0.8) =>
-    page.drawLine({ start: { x: from, y: at }, end: { x: to, y: at }, thickness, color });
-  const vline = (x: number, top: number, bottom: number, color = GRID) =>
-    page.drawLine({ start: { x, y: top }, end: { x, y: bottom }, thickness: 0.6, color });
-  /** A rounded rectangle by its top-left corner (PDF coordinates). */
-  const roundRect = (
+  type ShapeOptions = {
+    x?: number;
+    y?: number;
+    scale?: number;
+    fill?: RGB;
+    border?: RGB;
+    borderWidth?: number;
+    opacity?: number;
+  };
+  /** An SVG path, placed by its origin; line widths are in its own units. */
+  const shape = (path: string, options: ShapeOptions) =>
+    page.drawSvgPath(path, {
+      x: (options.x ?? 0) * K,
+      y: PAGE.height - (options.y ?? 0) * K,
+      scale: K * (options.scale ?? 1),
+      color: options.fill,
+      borderColor: options.border,
+      borderWidth: options.border ? (options.borderWidth ?? 1) : undefined,
+      opacity: options.opacity,
+      borderOpacity: options.opacity,
+    });
+  const line = (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    color: RGB,
+    thickness = 1,
+  ) =>
+    page.drawLine({
+      start: { x: x1 * K, y: PAGE.height - y1 * K },
+      end: { x: x2 * K, y: PAGE.height - y2 * K },
+      thickness: thickness * K,
+      color,
+    });
+  /** A rounded rectangle by its top-left corner; `square` squares two corners. */
+  const box = (
     x: number,
     top: number,
     width: number,
     height: number,
     radius: number,
-    options: { fill?: RGB; border?: RGB },
+    options: ShapeOptions & { square?: "top" | "bottom" },
   ) => {
     const r = Math.min(radius, width / 2, height / 2);
+    const t = options.square === "top" ? 0 : r;
+    const b = options.square === "bottom" ? 0 : r;
     const w = width;
     const h = height;
-    page.drawSvgPath(
-      `M ${r} 0 L ${w - r} 0 Q ${w} 0 ${w} ${r} L ${w} ${h - r} Q ${w} ${h} ${w - r} ${h} ` +
-        `L ${r} ${h} Q 0 ${h} 0 ${h - r} L 0 ${r} Q 0 0 ${r} 0 Z`,
-      {
-        x,
-        y: top,
-        color: options.fill,
-        borderColor: options.border,
-        borderWidth: options.border ? 0.8 : undefined,
-      },
+    shape(
+      `M ${t} 0 L ${w - t} 0 Q ${w} 0 ${w} ${t} L ${w} ${h - b} Q ${w} ${h} ${w - b} ${h} ` +
+        `L ${b} ${h} Q 0 ${h} 0 ${h - b} L 0 ${t} Q 0 0 ${t} 0 Z`,
+      { ...options, x, y: top },
     );
   };
-  /** Part of the logo, by its top-left corner and height, clipped to that part. */
-  const logo = (
-    region: LogoRegion,
-    left: number,
+  /** An icon by its top-left corner and height; returns its width. */
+  const icon = (kind: Icon, x: number, top: number, height: number, color = GREEN) => {
+    const glyph = ICONS[kind];
+    const [bx, by, bw, bh] = glyph.box;
+    const scale = height / bh;
+    shape(glyph.d, {
+      x: x - bx * scale,
+      y: top - by * scale,
+      scale,
+      ...("stroke" in glyph ? { border: color, borderWidth: 1.7 } : { fill: color }),
+    });
+    return bw * scale;
+  };
+  /** A picture by its top-left corner and height; returns its width. */
+  const picture = (
+    image: PDFImage,
+    x: number,
     top: number,
     height: number,
-    options: { opacity?: number } = {},
+    opacity?: number,
   ) => {
-    const scale = height / region.height;
-    page.pushOperators(
-      pushGraphicsState(),
-      rectangle(left, top - height, region.width * scale, height),
-      clip(),
-      endPath(),
-    );
-    for (const shape of LOGO_SHAPES) {
-      page.drawSvgPath(shape.d, {
-        x: left - region.x * scale,
-        y: top + region.y * scale,
-        scale,
-        color: hex(shape.fill),
-        opacity: options.opacity,
-      });
-    }
-    page.pushOperators(popGraphicsState());
-    return region.width * scale;
-  };
-  /** The office's logo picture, fitted into a box by its top-left corner. */
-  const pictureLogo = (
-    left: number,
-    top: number,
-    maxWidth: number,
-    maxHeight: number,
-    options: { opacity?: number } = {},
-  ) => {
-    if (!picture) return 0;
-    const scale = Math.min(maxWidth / picture.width, maxHeight / picture.height);
-    page.drawImage(picture, {
-      x: left,
-      y: top - picture.height * scale,
-      width: picture.width * scale,
-      height: picture.height * scale,
-      opacity: options.opacity,
+    const width = (image.width / image.height) * height;
+    page.drawImage(image, {
+      x: x * K,
+      y: PAGE.height - (top + height) * K,
+      width: width * K,
+      height: height * K,
+      opacity,
     });
-    return picture.width * scale;
-  };
-  const bankIcon = (left: number, top: number, size: number) => {
-    const s = size / 24;
-    page.drawSvgPath(
-      "M12 1 L23 7 L23 9 L1 9 L1 7 Z M3 10.5 H6 V18 H3 Z M8 10.5 H11 V18 H8 Z " +
-        "M13 10.5 H16 V18 H13 Z M18 10.5 H21 V18 H18 Z M1.5 19.5 H22.5 V22 H1.5 Z",
-      { x: left, y: top, scale: s, color: GREEN },
-    );
+    return width;
   };
 
-  // --- Pages ----------------------------------------------------------------------
+  // --- What every page has ----------------------------------------------------------
 
-  let tableTop = 0;
-  const tableHeader = () => {
-    tableTop = y;
-    const height = 26;
-    roundRect(MARGIN, y, CONTENT, height, 6, { fill: TINT_STRONG });
-    page.drawRectangle({
-      x: MARGIN,
-      y: y - height,
-      width: CONTENT,
-      height: 8,
-      color: TINT_STRONG,
-    });
-    let x = MARGIN;
-    for (const column of COLUMNS) {
-      const right = "right" in column && column.right;
-      text(column.label, right ? x + column.width - CELL : x + CELL, y - 16.5, {
-        font: bold,
-        size: 7.5,
-        color: GREEN_DARK,
-        spacing: 0.5,
-        align: right ? "right" : "left",
-      });
-      x += column.width;
-    }
-    y -= height;
-  };
-  /** The table's border and column lines, once its rows on this page are drawn. */
-  const closeTable = () => {
-    roundRect(MARGIN, tableTop, CONTENT, tableTop - y, 6, { border: GRID });
-    let x = MARGIN;
-    for (const column of COLUMNS.slice(0, -1)) {
-      x += column.width;
-      vline(x, tableTop, y);
-    }
-  };
-
-  const newPage = (first: boolean, withTable = true) => {
-    page = pdf.addPage([PAGE.width, PAGE.height]);
-    pages.push(page);
-    // The skyline (or the office's logo), faint, in the corner.
-    if (picture) pictureLogo(PAGE.width - 236, 160, 200, 140, { opacity: 0.07 });
-    else logo(LOGO_MARK, PAGE.width - 215, 170, 160, { opacity: 0.07 });
-    if (data.voided) {
-      page.drawText("VOID", {
-        x: PAGE.width / 2 - 130,
-        y: PAGE.height / 2 - 50,
-        size: 130,
-        font: bold,
-        color: VOID_RED,
-        opacity: 0.12,
-      });
-    }
-    const top = PAGE.height - MARGIN;
-
-    if (!first) {
-      const markWidth = picture
-        ? pictureLogo(MARGIN, top, 160, 34)
-        : logo(LOGO_MARK, MARGIN, top, 34);
-      text(
-        `DRIVER PAYMENT STATEMENT  ·  ${data.reference}  (continued)`,
-        MARGIN + markWidth + 12,
-        top - 21,
-        { font: bold, size: 10, color: GREEN, spacing: 0.4 },
-      );
-      y = top - 50;
-      if (withTable) tableHeader();
-      return;
-    }
-
-    // The logo: the office's picture, or the mark with the name beside it.
-    if (picture) {
-      pictureLogo(MARGIN, top + 4, 380, 72);
+  /** The logo, its picture with its name beside it, at a share of full size. */
+  const logo = (x: number, top: number, scale: number) => {
+    if (mark && name) {
+      picture(mark, x, top, 142 * scale);
+      picture(name, x + 230 * scale, top + 45 * scale, 75 * scale);
+    } else if (mark) {
+      picture(mark, x, top, 142 * scale);
     } else {
-      const markWidth = logo(LOGO_MARK, MARGIN, top, 66);
-      const letteringHeight = 42;
-      page.drawImage(lettering, {
-        x: MARGIN + markWidth + 12,
-        y: top - 12 - letteringHeight,
-        width: (LOGO_WORDMARK.width / LOGO_WORDMARK.height) * letteringHeight,
-        height: letteringHeight,
-      });
+      text("CITYLINE", x, top + 92 * scale, { size: 74 * scale, font: bold });
+      text("AIRPORT TRANSFERS", x, top + 122 * scale, { size: 26 * scale, font: bold });
     }
+  };
 
-    // What this is, and its number.
-    const title = "DRIVER PAYMENT STATEMENT";
-    const titleOptions = { font: bold, size: 17, color: GREEN, spacing: 0.5 } as const;
-    text(title, PAGE.width - MARGIN, top - 17, { ...titleOptions, align: "right" });
-    hline(
-      PAGE.width - MARGIN - widthOf(title, titleOptions),
-      PAGE.width - MARGIN,
-      top - 26,
-      GREEN,
-      1,
+  /** The faint logo and the corners. */
+  const decorate = () => {
+    if (mark) {
+      picture(mark, 244, 500, 430, 0.05);
+    }
+    shape("M0 0 L95 0 L95 24 C60 46 30 66 0 96 Z", { fill: CORNER_LIGHT });
+    shape("M0 0 H186 C140 8 60 32 0 75 Z", { fill: CORNER_DARK });
+    shape("M1335 0 C1380 8 1440 22 1491 47 V0 Z", { fill: BRAND });
+    shape("M1316 21 C1380 17 1450 32 1491 57 V71 C1450 42 1385 24 1316 21 Z", {
+      fill: INK,
+    });
+    shape(
+      "M1141 1055 C1250 1022 1380 985 1491 953 V976 C1420 990 1300 1030 1186 1055 Z",
+      { fill: CORNER_GREEN },
     );
-    text(data.reference, PAGE.width - MARGIN, top - 50, {
+    shape("M1186 1055 C1300 1035 1420 995 1491 984 V1055 Z", { fill: INK });
+  };
+
+  // --- The first page's header ---------------------------------------------------------
+
+  const fullHeader = () => {
+    logo(49, 33, 1);
+    line(899.5, 70, 899.5, 161, GREEN, 1.5);
+
+    // DRIVER PAYMENT STATEMENT, in two greens, fitted beside the divider.
+    const first = "DRIVER ";
+    const rest = "PAYMENT STATEMENT";
+    const size = Math.min(31, (31 * (RIGHT - 932)) / widthOf(first + rest, 31, bold));
+    const restWidth = widthOf(rest, size, bold);
+    text(rest, RIGHT, 104.5, { size, font: bold, color: GREEN_DARK, align: "right" });
+    text(first, RIGHT - restWidth, 104.5, {
+      size,
       font: bold,
-      size: 18,
+      color: GREEN,
       align: "right",
     });
+    line(930, 121.5, RIGHT, 121.5, TITLE_RULE, 1.2);
+    text(data.reference, RIGHT - 1, 160.5, { size: 27, font: semibold, align: "right" });
 
     // How to reach Cityline.
-    let x = MARGIN;
-    const contact: [string, PDFFont][] = [
-      [data.company.address, italic],
-      [data.company.phone, regular],
-      [data.company.email, regular],
+    let x = 61;
+    const contact: [Icon, string, number][] = [
+      ["pin", data.company.address, 23],
+      ["phone", data.company.phone, 20],
+      ["mail", data.company.email, 17],
     ];
-    contact.forEach(([value, font], index) => {
+    contact.forEach(([kind, value, height], index) => {
       if (index) {
-        text("|", x + 9, top - 84, { size: 9.5, color: GREEN });
         x += 24;
+        line(x, 196, x, 218, DIVIDER, 1);
+        x += 23;
       }
-      text(value, x, top - 84, { size: 9.5, font, color: index ? INK : MUTED });
-      x += widthOf(value, { size: 9.5, font });
+      x += icon(kind, x, 207.5 - height / 2, height) + 19;
+      x += text(value, x, 212.5, { size: 16 });
     });
-    hline(MARGIN, PAGE.width - MARGIN, top - 95);
+    line(LEFT, 241, RIGHT, 241, BRAND, 2);
 
     // Paid to, when, how, and what it covers.
-    const band = { top: top - 107, height: 56 };
-    roundRect(MARGIN, band.top, CONTENT, band.height, 6, { fill: TINT });
-    const facts: [string, string[], string | null][] = [
-      [
-        "PAID TO",
-        [data.driverName],
-        data.phvNumber ? `PHV licence ${data.phvNumber}` : null,
-      ],
-      ["DATE PAID", [formatDate(data.paidAt)], null],
-      [
-        "PAYMENT METHOD",
-        [
-          data.method +
-            (data.bankReference ? `  ·  Reference ${data.bankReference}` : ""),
-        ],
-        null,
-      ],
-      ["COVERS", ["Completed and PNS bookings", `up to ${formatDate(data.upTo)}`], null],
-    ];
-    const columnWidth = CONTENT / facts.length;
-    facts.forEach(([label, lines, note], index) => {
-      const left = MARGIN + index * columnWidth + 16;
-      if (index)
-        vline(
-          MARGIN + index * columnWidth,
-          band.top - 12,
-          band.top - band.height + 12,
-          RULE,
-        );
-      text(label, left, band.top - 18, {
-        font: bold,
-        size: 8.5,
-        color: GREEN_DARK,
-        spacing: 0.8,
-      });
-      const size = lines.length > 1 ? 10 : 11.5;
-      lines.forEach((line, lineIndex) => {
-        text(
-          fit(clean(line), regular, size, columnWidth - 28),
-          left,
-          band.top - 34 - lineIndex * 12.5,
-          {
-            size,
-            font: lines.length > 1 ? regular : index === 0 ? bold : regular,
-          },
-        );
-      });
-      if (note) text(note, left, band.top - 48, { size: 8, color: MUTED });
-    });
+    box(LEFT, 269, WIDTH, 110, 9, { fill: BAND });
+    for (const divider of [403, 704, 1096])
+      line(divider, 286, divider, 362, DIVIDER, 1.2);
+    const label = (value: string, x: number) =>
+      text(value, x, 303.5, { size: 15.5, font: bold, color: GREEN_TEXT });
 
-    y = band.top - band.height - 14;
-    tableHeader();
+    icon("person", 79, 290, 24);
+    label("PAID TO", 126);
+    text(fit(clean(data.driverName), semibold, 17, 403 - 126 - 16), 126, 332.5, {
+      size: 17,
+      font: semibold,
+    });
+    if (data.phvNumber) {
+      text(`PHV licence ${data.phvNumber}`, 126, 356, { size: 13.5, color: MUTED });
+    }
+
+    icon("calendar", 436, 289, 26);
+    label("DATE PAID", 478);
+    text(formatDate(data.paidAt), 478, 332.5, { size: 17, font: semibold });
+
+    icon("card", 736, 291, 22);
+    label("PAYMENT METHOD", 787);
+    const method =
+      data.method + (data.bankReference ? `  ·  Reference ${data.bankReference}` : "");
+    const methodWidth = 1096 - 787 - 16;
+    (widthOf(method, 15) <= methodWidth
+      ? [method]
+      : wrap(method, regular, 15, methodWidth, 2)
+    ).forEach((part, index) => text(part, 787, 333.5 + index * 25, { size: 15 }));
+
+    icon("document", 1128, 289, 26);
+    label("COVERS", 1173);
+    ["Completed and PNS bookings", `up to ${formatDate(data.upTo)}`].forEach(
+      (part, index) => text(part, 1173, 333.5 + index * 25, { size: 15 }),
+    );
+
+    y = 401;
   };
 
-  // --- The bookings -----------------------------------------------------------------
+  // --- The table --------------------------------------------------------------------
 
-  newPage(true);
-  const textWidth = (key: string) =>
-    (COLUMNS.find((column) => column.key === key)?.width ?? 0) - 2 * CELL;
-  const columnLeft = (key: string) => {
-    let x = MARGIN;
+  const columnLeft = (key: Column) => {
+    let x = LEFT;
     for (const column of COLUMNS) {
       if (column.key === key) return x;
       x += column.width;
     }
     return x;
   };
+  const textWidth = (key: Column) =>
+    (COLUMNS.find((column) => column.key === key)?.width ?? 0) - 2 * PAD;
 
-  // Room the totals and bank details need below the last row.
-  const closingSpace = 120 + (data.bank ? 80 : 0) + (data.voided ? 18 : 0);
-  data.lines.forEach((line, index) => {
-    const pickup = wrap(line.pickup, regular, 9, textWidth("pickup"), 2);
-    const dropoff = wrap(line.dropoff, regular, 9, textWidth("dropoff"), 2);
+  let tableTop = 0;
+  let rowsOnPage = 0;
+  const tableHeader = () => {
+    tableTop = y;
+    rowsOnPage = 0;
+    box(LEFT, y, WIDTH, 43.5, 8, { fill: TABLE_HEAD, square: "bottom" });
+    for (const column of COLUMNS) {
+      text(column.label, columnLeft(column.key) + PAD, y + 28.5, {
+        size: 14,
+        font: semibold,
+        color: GREEN_TEXT,
+      });
+    }
+    y += 43.5;
+    line(LEFT, y, RIGHT, y, GRID);
+  };
+  /** The column lines and border, once this page's rows are drawn. */
+  const closeTable = () => {
+    let x = LEFT;
+    for (const column of COLUMNS.slice(0, -1)) {
+      x += column.width;
+      line(x, tableTop, x, y, GRID);
+    }
+    box(LEFT, tableTop, WIDTH, y - tableTop, 8, { border: GRID, borderWidth: 1.2 });
+  };
+
+  const newPage = (first: boolean, withTable = true) => {
+    page = pdf.addPage([PAGE.width, PAGE.height]);
+    pages.push(page);
+    decorate();
+    if (first) {
+      fullHeader();
+    } else {
+      logo(49, 33, 0.6);
+      y = 145;
+    }
+    if (withTable) tableHeader();
+  };
+
+  // --- The bookings -----------------------------------------------------------------
+
+  newPage(true);
+  const rowCap = ROW_TEXT * CAP;
+  data.lines.forEach((entry, index) => {
+    const pickup = wrap(entry.pickup, regular, ROW_TEXT, textWidth("pickup"), 3);
+    const dropoff = wrap(entry.dropoff, regular, ROW_TEXT, textWidth("dropoff"), 3);
     const lines = Math.max(pickup.length, dropoff.length, 1);
-    const height = Math.max(30, 16 + lines * LINE_HEIGHT);
+    const block = rowCap + (lines - 1) * ROW_LINE;
+    const height = Math.max(46, block + 35);
+    // A row is never split; the last one stays with the totals.
     const last = index === data.lines.length - 1;
-    if (y - height < MARGIN + 40 || (last && y - height < MARGIN + closingSpace)) {
-      if (y < tableTop) closeTable();
+    if (
+      y + height > ROWS_BOTTOM ||
+      (last && y + height + CLOSING > CLOSING_BOTTOM && rowsOnPage > 0)
+    ) {
+      closeTable();
       newPage(false);
     }
 
-    const rowTop = y;
-    const middle = rowTop - height / 2;
-    const firstBaseline = middle + ((lines - 1) * LINE_HEIGHT) / 2 - 3;
-    const single = middle - 3;
-    if (index) hline(MARGIN, MARGIN + CONTENT, rowTop, GRID, 0.6);
-
+    if (rowsOnPage) line(LEFT, y, RIGHT, y, GRID);
+    const middle = y + height / 2;
+    // Each cell's lines centred in the row on their own.
+    const firstLine = (count: number) =>
+      middle - (rowCap + (count - 1) * ROW_LINE) / 2 + rowCap;
+    const single = middle + rowCap / 2 - 0.5;
     text(
-      `${formatDate(line.pickupAt)}, ${formatTime(line.pickupAt)}`,
-      columnLeft("date") + CELL,
+      `${formatDate(entry.pickupAt)}, ${formatTime(entry.pickupAt)}`,
+      columnLeft("date") + PAD,
       single,
-      { size: 9 },
+      { size: ROW_TEXT },
     );
-    pickup.forEach((part, i) =>
-      text(part, columnLeft("pickup") + CELL, firstBaseline - i * LINE_HEIGHT, {
-        size: 9,
-      }),
-    );
-    dropoff.forEach((part, i) =>
-      text(part, columnLeft("dropoff") + CELL, firstBaseline - i * LINE_HEIGHT, {
-        size: 9,
-      }),
-    );
-    text(line.reference, columnLeft("booking") + CELL, single, { size: 9.5 });
+    for (const [key, parts] of [
+      ["pickup", pickup],
+      ["dropoff", dropoff],
+    ] as const) {
+      parts.forEach((part, i) =>
+        text(part, columnLeft(key) + PAD, firstLine(parts.length) + i * ROW_LINE, {
+          size: ROW_TEXT,
+        }),
+      );
+    }
+    text(entry.reference, columnLeft("booking") + PAD, single, { size: ROW_TEXT });
 
-    // The status as a pill: green for completed, amber for a no-show.
-    const pns = line.status === "PNS";
-    const label = clean(line.status);
-    const pillWidth = widthOf(label, { font: bold, size: 8.5 }) + 22;
-    roundRect(columnLeft("status") + CELL, middle + 8.5, pillWidth, 17, 8.5, {
-      fill: pns ? PNS_PILL : PILL,
-    });
-    text(label, columnLeft("status") + CELL + pillWidth / 2, middle - 3, {
-      font: bold,
-      size: 8.5,
-      color: pns ? PNS_INK : GREEN_DARK,
+    // The status as a pill.
+    const pns = entry.status === "PNS";
+    const status = clean(entry.status);
+    const pillLeft = columnLeft("status") + 25;
+    const pillWidth = widthOf(status, 13.5, semibold) + 42;
+    box(pillLeft, middle - 14.5, pillWidth, 29, 14.5, { fill: pns ? PNS_PILL : PILL });
+    text(status, pillLeft + pillWidth / 2, middle + (13.5 * CAP) / 2, {
+      size: 13.5,
+      font: semibold,
+      color: pns ? GREEN_DARK : GREEN_TEXT,
       align: "center",
     });
 
-    const fareRight = columnLeft("fare") + textWidth("fare") + CELL;
-    text(money(line.pricePence), fareRight, single, { size: 9.5, align: "right" });
-    const cashRight = columnLeft("cash") + textWidth("cash") + CELL;
-    text(money(line.cashPence), cashRight, single, {
-      size: 9.5,
-      align: "right",
-      color: line.cashPence ? INK : MUTED,
-    });
-    y -= height;
+    text(money(entry.pricePence), columnLeft("fare") + PAD, single, { size: ROW_TEXT });
+    text(money(entry.cashPence), columnLeft("cash") + PAD, single, { size: ROW_TEXT });
+    y += height;
+    rowsOnPage++;
   });
   if (data.lines.length === 0) {
-    text("No bookings on this payment.", MARGIN + CELL, y - 20, { color: MUTED });
-    y -= 34;
+    text("No bookings on this payment.", LEFT + PAD, y + 28, {
+      size: ROW_TEXT,
+      color: MUTED,
+    });
+    y += 46;
   }
   closeTable();
 
-  // --- Totals ------------------------------------------------------------------------
+  // --- Totals -----------------------------------------------------------------------
 
-  // Not enough room left: the totals go on a page of their own.
-  if (y < MARGIN + closingSpace) newPage(false, false);
-  const anyPns = data.lines.some((line) => line.status === "PNS");
-  const boxWidth = 300;
-  const boxLeft = PAGE.width - MARGIN - boxWidth;
-  y -= 14;
-  const rows: [string, string][] = [
+  if (y + CLOSING > CLOSING_BOTTOM) {
+    newPage(false, false);
+    y -= 24;
+  }
+  const top = y + 24;
+  const panelLeft = 852;
+  const panelWidth = RIGHT - panelLeft;
+  box(panelLeft, top, panelWidth, 200, 9, { fill: PANEL, opacity: 0.92 });
+  box(panelLeft, top + 140.5, panelWidth, 59.5, 9, { fill: NET_ROW, square: "top" });
+  box(panelLeft, top, panelWidth, 200, 9, { border: BORDER, borderWidth: 1.2 });
+
+  const anyPns = data.lines.some((entry) => entry.status === "PNS");
+  const rows: [string, string, number, number][] = [
     [
       anyPns ? "Completed and PNS bookings" : "Completed bookings",
       String(data.lines.length),
+      top,
+      48,
     ],
-    ["Total booking fares", money(data.earnedPence)],
-    ["Less: cash received by driver", money(data.cashPence)],
+    ["Total booking fares", money(data.earnedPence), top + 48, 46],
+    ["Less: cash received by driver", money(data.cashPence), top + 94, 46.5],
   ];
-  rows.forEach(([label, value], index) => {
-    text(label, boxLeft + 8, y - 16, { size: 10.5 });
-    text(value, boxLeft + boxWidth - 8, y - 16, {
-      size: 11,
-      font: index ? bold : regular,
+  rows.forEach(([label, value, rowTop, height], index) => {
+    const middle = rowTop + height / 2;
+    text(label, 875, middle + (15 * CAP) / 2, { size: 15 });
+    text(value, 1419, middle + (18 * CAP) / 2, {
+      size: 18,
+      font: semibold,
       align: "right",
     });
-    y -= 23;
-    hline(boxLeft, boxLeft + boxWidth, y, GRID, 0.6);
+    if (index < 2) line(872, rowTop + height, 1416, rowTop + height, SOFT_GRID);
   });
-  y -= 4;
+  line(872, top + 140.5, 1416, top + 140.5, NET_RULE, 1.5);
+
+  // What Cityline pays the driver, or what the driver owes when their cash
+  // came to more than their bookings.
   const owed = data.amountPence < 0;
-  roundRect(boxLeft, y, boxWidth, 30, 6, { fill: TINT_STRONG });
+  icon("coins", 876, top + 154, 31);
   text(
     owed ? "NET PAID BY DRIVER TO CITYLINE" : "NET PAYMENT TO DRIVER",
-    boxLeft + 10,
-    y - 19,
+    923,
+    top + 175.5,
     {
+      size: 15.5,
       font: bold,
-      size: 10.5,
       color: GREEN_DARK,
-      spacing: 0.6,
     },
   );
-  text(money(Math.abs(data.amountPence)), boxLeft + boxWidth - 10, y - 20.5, {
+  text(money(Math.abs(data.amountPence)), 1419, top + 179.5, {
+    size: 26,
     font: bold,
-    size: 15,
     color: GREEN_DARK,
     align: "right",
   });
-  y -= 30;
   if (data.voided) {
-    y -= 18;
-    text("This payment was voided and does not stand.", boxLeft + 8, y, {
+    text("This payment was voided and does not stand.", LEFT, top + 175.5, {
+      size: 15,
       font: bold,
       color: VOID_RED,
     });
   }
 
-  // --- The driver's bank account, masked --------------------------------------------
+  // --- The driver's bank account; for cash, the space stays empty ---------------------
 
   if (data.bank) {
-    y -= 14;
-    hline(MARGIN, PAGE.width - MARGIN, y);
-    y -= 12;
-    bankIcon(MARGIN, y, 26);
-    const left = MARGIN + 46;
-    text("DRIVER BANK DETAILS", left, y - 12, {
+    const bankTop = top + 200 + 25;
+    box(LEFT, bankTop, WIDTH, 126, 9, { fill: BANK_FILL, opacity: 0.85 });
+    box(LEFT, bankTop, WIDTH, 126, 9, { border: BANK_BORDER, borderWidth: 1.2 });
+    icon("bank", 77, bankTop + 24, 44);
+    text("DRIVER BANK DETAILS", 148, bankTop + 35.5, {
+      size: 17,
       font: bold,
-      size: 12,
-      color: GREEN,
-      spacing: 0.6,
+      color: GREEN_TEXT,
     });
-    const details: [string, string, number][] = [
-      ["Account holder:", data.bank.holder, 0],
-      ["Sort code:", "XX-XX-XX", 200],
-      ["Account number:", `•••• •••• ${data.bank.last4}`, 340],
+    const fields: [string, string, number, number][] = [
+      ["Account holder:", data.bank.holder, 148, 370],
+      ["Sort code:", data.bank.sortCode ?? "Not on record", 419, 599],
     ];
-    details.forEach(([label, value, offset], index) => {
-      if (index) vline(left + offset - 18, y - 20, y - 50, RULE);
-      text(label, left + offset, y - 29, { size: 9.5, color: MUTED });
-      text(value, left + offset, y - 45, { size: 11.5, font: bold });
+    fields.forEach(([label, value, x, end], index) => {
+      if (index) line(x - 49, bankTop + 50, x - 49, bankTop + 105, DIVIDER, 1.2);
+      text(label, x, bankTop + 67.5, { size: 14 });
+      text(fit(clean(value), semibold, 16.5, end - x - 16), x, bankTop + 95.5, {
+        size: 16.5,
+        font: semibold,
+      });
     });
+    // The account number masked: two groups of four dots, then its last four digits.
+    line(599, bankTop + 50, 599, bankTop + 105, DIVIDER, 1.2);
+    text("Account number:", 648, bankTop + 67.5, { size: 14 });
+    let dot = 651.4;
+    for (let i = 0; i < 8; i++) {
+      page.drawCircle({
+        x: dot * K,
+        y: PAGE.height - (bankTop + 90) * K,
+        size: 3.4 * K,
+        color: INK,
+      });
+      dot += i === 3 ? 19 : 11.5;
+    }
+    text(data.bank.last4, dot + 4, bankTop + 95.5, { size: 16.5, font: semibold });
   }
 
-  // --- Footer on every page ------------------------------------------------------------
+  // --- The footer, on the last page ----------------------------------------------------
 
-  pages.forEach((each, index) => {
-    page = each;
-    hline(MARGIN, PAGE.width - 250, MARGIN + 2, RULE);
-    text(
-      [
-        data.company.name,
-        `Statement ${data.reference}`,
-        `Produced ${formatDate(data.generatedAt)}`,
-        ...(pages.length > 1 ? [`Page ${index + 1} of ${pages.length}`] : []),
-      ].join("   ·   "),
-      MARGIN,
-      MARGIN - 12,
-      { size: 8.5, color: MUTED },
-    );
-  });
+  text(
+    [
+      data.company.name,
+      `Statement ${data.reference}`,
+      `Produced ${formatDate(data.generatedAt)}`,
+      `Page ${pages.length} of ${pages.length}`,
+    ].join("   ·   "),
+    60,
+    998.5,
+    { size: 12.5 },
+  );
+
+  // VOID across every page of a voided payment's statement, over everything.
+  if (data.voided) {
+    for (const each of pages) {
+      page = each;
+      text("VOID", 745, 690, {
+        size: 230,
+        font: bold,
+        color: VOID_RED,
+        align: "center",
+        opacity: 0.12,
+      });
+    }
+  }
 
   return pdf.save();
 }

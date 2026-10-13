@@ -2,6 +2,7 @@ import { statementFor } from "@/admin/data/driver-pay";
 import { verifyStatementToken } from "@/domain/finance/statement-link";
 import { statementPdf } from "@/domain/finance/statement-pdf";
 import { payloadClient } from "@/lib/payload";
+import { statementAssets } from "@/lib/statement-assets";
 
 /**
  * A driver opening their payment statement from the link in their WhatsApp
@@ -33,7 +34,7 @@ export async function GET(
   const data = await statementFor(payload, paymentId, { overrideAccess: true }, now);
   if (!data || data.voided) return gone();
 
-  const pdf = await statementPdf(data);
+  const pdf = await statementPdf(data, await statementAssets());
   return new Response(Buffer.from(pdf), {
     headers: {
       "Content-Type": "application/pdf",

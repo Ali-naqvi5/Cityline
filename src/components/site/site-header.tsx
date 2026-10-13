@@ -29,8 +29,8 @@ export function SiteHeader() {
           <Image
             src="/brand/cityline-logo.svg"
             alt=""
-            width={708}
-            height={531}
+            width={1112}
+            height={773}
             priority
             className="h-21 w-auto transition-transform duration-300 motion-safe:group-hover:scale-105"
           />

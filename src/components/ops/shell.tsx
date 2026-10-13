@@ -36,8 +36,8 @@ function Logo({ className }: { className?: string }) {
     <Image
       src="/brand/cityline-logo.svg"
       alt="Cityline Airport Transfers"
-      width={708}
-      height={531}
+      width={1112}
+      height={773}
       priority
       className={cx("ops-logo", className)}
     />

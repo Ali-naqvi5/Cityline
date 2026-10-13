@@ -2,6 +2,7 @@ import { statementFor } from "@/admin/data/driver-pay";
 import { statementPdf } from "@/domain/finance/statement-pdf";
 import { staffCan, type StaffIdentity } from "@/domain/staff/permissions";
 import { payloadClient } from "@/lib/payload";
+import { statementAssets } from "@/lib/statement-assets";
 import type { User } from "@/payload-types";
 
 /**
@@ -31,7 +32,7 @@ export async function GET(
     : null;
   if (!data) return new Response("No such payment.", { status: 404 });
 
-  const pdf = await statementPdf(data);
+  const pdf = await statementPdf(data, await statementAssets());
   return new Response(Buffer.from(pdf), {
     headers: {
       "Content-Type": "application/pdf",

@@ -1,7 +1,14 @@
 import { PDFDocument } from "pdf-lib";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { statementPdf, type StatementData } from "./statement-pdf";
+import { statementAssets } from "@/lib/statement-assets";
+
+import { statementPdf, type StatementAssets, type StatementData } from "./statement-pdf";
+
+let assets: StatementAssets;
+beforeAll(async () => {
+  assets = await statementAssets();
+});
 
 const data: StatementData = {
   reference: "DP-000012",
@@ -12,7 +19,7 @@ const data: StatementData = {
   voided: false,
   driverName: "Sam Taylor",
   phvNumber: "123456",
-  bank: { holder: "Sam Taylor", last4: "4821" },
+  bank: { holder: "Sam Taylor", sortCode: "12-34-56", last4: "4821" },
   lines: [
     {
       pickupAt: new Date("2026-10-01T09:00:00Z"),
@@ -38,7 +45,7 @@ const data: StatementData = {
 
 describe("the payment statement PDF", () => {
   it("is a one-page PDF for a short statement", async () => {
-    const bytes = await statementPdf(data);
+    const bytes = await statementPdf(data, assets);
     expect(Buffer.from(bytes.slice(0, 5)).toString()).toBe("%PDF-");
     const pdf = await PDFDocument.load(bytes);
     expect(pdf.getPageCount()).toBe(1);
@@ -51,44 +58,45 @@ describe("the payment statement PDF", () => {
       reference: `J-${String(index + 1).padStart(6, "0")}`,
     }));
     const pdf = await PDFDocument.load(
-      await statementPdf({
-        ...data,
-        lines,
-        earnedPence: 3500 * 70,
-        amountPence: 3500 * 70,
-      }),
+      await statementPdf(
+        { ...data, lines, earnedPence: 3500 * 70, amountPence: 3500 * 70 },
+        assets,
+      ),
     );
     expect(pdf.getPageCount()).toBeGreaterThan(1);
   });
 
-  it("uses the office's own logo picture when one is given", async () => {
-    // A one-pixel PNG.
-    const logo = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
-      "base64",
+  it("draws the logo from the site's own file, its picture and name apart", () => {
+    expect(assets.logo?.mark.length).toBeGreaterThan(1000);
+    expect(assets.logo?.name?.length).toBeGreaterThan(1000);
+  });
+
+  it("keeps two bookings, the totals and the bank details on one page", async () => {
+    const pdf = await PDFDocument.load(
+      await statementPdf({ ...data, lines: [data.lines[0]!, data.lines[0]!] }, assets),
     );
-    const plain = await statementPdf(data);
-    const withLogo = await statementPdf({ ...data, logo });
-    expect((await PDFDocument.load(withLogo)).getPageCount()).toBe(1);
-    expect(withLogo.length).not.toBe(plain.length);
+    expect(pdf.getPageCount()).toBe(1);
   });
 
   it("is not stopped by characters the font cannot draw, or a driver owing money", async () => {
-    const bytes = await statementPdf({
-      ...data,
-      voided: true,
-      lines: [
-        {
-          ...data.lines[0]!,
-          pickup: "Heathrow → Zürich Straße 東京 😀",
-          status: "PNS",
-          cashPence: 9000,
-        },
-      ],
-      cashPence: 9000,
-      amountPence: -5500,
-      bank: null,
-    });
+    const bytes = await statementPdf(
+      {
+        ...data,
+        voided: true,
+        lines: [
+          {
+            ...data.lines[0]!,
+            pickup: "Heathrow → Zürich Straße 東京 😀",
+            status: "PNS",
+            cashPence: 9000,
+          },
+        ],
+        cashPence: 9000,
+        amountPence: -5500,
+        bank: null,
+      },
+      assets,
+    );
     expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
   });
 });

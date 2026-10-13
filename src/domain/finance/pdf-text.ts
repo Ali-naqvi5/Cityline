@@ -1,9 +1,8 @@
 import type { PDFFont } from "pdf-lib";
 
 /**
- * Text helpers for the finance PDFs (driver statements, partner invoices),
- * which use the standard Helvetica fonts: nothing to embed, but they can draw
- * only Latin-1 characters.
+ * Text helpers for the finance PDFs (driver statements in Montserrat,
+ * partner invoices in the standard Helvetica, which draws only Latin-1).
  */
 
 /** Only what the font can draw: anything else becomes "?". */

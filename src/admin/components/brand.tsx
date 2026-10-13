@@ -11,8 +11,8 @@ export function AdminLogo() {
     <Image
       src="/brand/cityline-logo.svg"
       alt="Cityline Airport Transfers"
-      width={708}
-      height={531}
+      width={1112}
+      height={773}
       priority
       style={{ height: 72, width: "auto" }}
     />
@@ -24,8 +24,8 @@ export function AdminIcon() {
     <Image
       src="/brand/cityline-logo.svg"
       alt="Cityline"
-      width={708}
-      height={531}
+      width={1112}
+      height={773}
       style={{ height: 28, width: "auto" }}
     />
   );
