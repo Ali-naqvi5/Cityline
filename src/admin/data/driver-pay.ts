@@ -158,6 +158,17 @@ export async function loadPayments(
   return found.docs as DriverPayment[];
 }
 
+/**
+ * The first day a payment covers (Cityline, 14 Oct 2026). Kept on the
+ * payment when it is recorded; one made before then starts at its first
+ * booking.
+ */
+export function periodFromOf(
+  payment: Pick<DriverPayment, "periodFrom" | "lines" | "upTo">,
+): Date {
+  return new Date(payment.periodFrom ?? payment.lines?.[0]?.pickupAt ?? payment.upTo);
+}
+
 /** What was paid in total — voided payments never count. */
 export function paidTotal(payments: readonly DriverPayment[]): number {
   return payments
@@ -312,6 +323,7 @@ export async function statementFor(
   return {
     reference: paymentReference(payment.id),
     paidAt: new Date(payment.paidAt),
+    periodFrom: periodFromOf(payment),
     upTo: new Date(payment.upTo),
     method: PAYMENT_METHODS[payment.method as PaymentMethod] ?? payment.method,
     bankReference: payment.reference ?? null,
@@ -370,7 +382,8 @@ export const DRIVER_PAYMENTS_CSV_COLUMNS: CsvColumn<DriverPayment>[] = [
         ? ((row.driver as Driver).fullName ?? "")
         : String(relId(row.driver) ?? ""),
   },
-  { header: "Bookings up to", value: (row) => csvDay(row.upTo) },
+  { header: "Covers from", value: (row) => csvDay(periodFromOf(row).toISOString()) },
+  { header: "Covers to", value: (row) => csvDay(row.upTo) },
   { header: "Bookings", value: (row) => row.lines?.length ?? 0 },
   { header: "Driver prices (£)", value: (row) => pounds(row.earnedPence) },
   { header: "Cash collected by driver (£)", value: (row) => pounds(row.cashPence) },

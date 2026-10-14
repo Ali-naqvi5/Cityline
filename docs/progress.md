@@ -3,7 +3,7 @@
 Where the build actually stands. Read this before starting work; update it
 before finishing.
 
-**Last updated:** 13 October 2026
+**Last updated:** 14 October 2026
 
 Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-deviations.md)
 (why the build differs from the designs), [`runbook-vps.md`](runbook-vps.md)
@@ -14,50 +14,41 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 
 ## At a glance
 
-| Check                   | State                                                                    |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `pnpm typecheck`        | passing (see the `.next/dev` trap below)                                 |
-| `pnpm lint`             | passing                                                                  |
-| `pnpm format:check`     | passing                                                                  |
-| `pnpm check:compliance` | passing — 424 files, wording + claims                                    |
-| `pnpm check:migrations` | passing — 17 migrations, additive only                                   |
-| `pnpm test`             | passing — 589 tests across 62 files                                      |
-| `pnpm build`            | passing (13 Oct)                                                         |
-| `pnpm e2e`              | last run 29 Sep — 18 tests passing                                       |
-| `pnpm e2e:admin`        | `owner-rules`, `driver-pay` passed 13 Oct; the other 16 not since 10 Oct |
+| Check                   | State                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
+| `pnpm typecheck`        | passing (see the `.next/dev` trap below)                                                         |
+| `pnpm lint`             | passing                                                                                          |
+| `pnpm format:check`     | passing                                                                                          |
+| `pnpm check:compliance` | passing — 424 files, wording + claims                                                            |
+| `pnpm check:migrations` | passing — 18 migrations, additive only                                                           |
+| `pnpm test`             | passing — 593 tests across 62 files                                                              |
+| `pnpm build`            | passing (13 Oct)                                                                                 |
+| `pnpm e2e`              | last run 29 Sep — 18 tests passing                                                               |
+| `pnpm e2e:admin`        | `owner-rules`, `driver-pay`, `driver-pay-period` passed 13–14 Oct; the other 16 not since 10 Oct |
 
 History is on GitHub (`Ali-naqvi5/Cityline`, branch `main`). Pushing `main`
 deploys to production — there is no staging (see below).
 
 ---
 
-## Where things stand on 13 Oct 2026 — read this first
+## Where things stand on 14 Oct 2026 — read this first
 
 ### Git and deploys
 
-- `main` is **6 commits ahead of `origin/main`**, none of them pushed yet. The
-  Owner pushes; a push to `main` deploys to production.
-  - `4a5ee98` (12 Oct): deploy safety. A verified database dump before
-    migrations, a stricter migration check, capped backup deletes.
-  - `8ad4da5`: completed bookings are the Owner's to change; Owner-only
-    Delete booking for website bookings.
-  - `dcd43da`, then `5b819fe`: the driver statement v2 and the new logo
-    everywhere.
-  - `5fa3c7f`: the statement footer on every page, and the first version of
-    this update.
-  - Then the bank transfer receipt on driver payments. It brings **one
-    migration**, `20261013_021613_driver_payment_receipt`, which only adds a
-    column, a foreign key and an index. The deploy script dumps the database
-    before it runs.
-- **Last pushed:** `1ac4c5a` (10 Oct, by the Owner). Nobody has checked
-  whether that deploy run went green: there is no `gh` CLI on this PC. Look at
-  GitHub Actions.
-- **Before the next push, copy the deploy files to the server by hand.** A
-  deploy does not copy `scripts/deploy.sh` or `docker/pg-backup/`.
-  `runbook-vps.md` ("Copy from the repository") has the three commands.
-  Without this, the server keeps the old deploy script, which lacks the
-  verified pre-migration dump.
-- **After the deploy, check:**
+- **Everything up to `c4cc007` (13 Oct) is pushed and live.** The live
+  site serves that day's logo and fonts. That includes the deploy-safety
+  commit, the Owner-only rules, the statement v2 with the new logo, and the
+  bank transfer receipt with its migration.
+- **Not yet known:** whether the Owner copied `scripts/deploy.sh` and
+  `docker/pg-backup/` to the server before that push. A deploy does not
+  copy them; `runbook-vps.md` ("Copy from the repository") has the three
+  commands. Until they are copied, the server runs the old deploy script,
+  without the verified pre-migration dump. Ask before the next push.
+- **Waiting to be pushed (14 Oct): the payment period.** It brings **one
+  migration**, `20261014_153546_driver_payment_period`. The migration
+  adds the `period_from` column, then fills it in for the payments
+  already made, by the same rule as new ones. It writes only that column.
+- **After each deploy, check:**
   - the new logo in the website header and the admin;
   - a driver's statement link (Driver Pay → a payment → send details).
 
@@ -102,6 +93,12 @@ Each decision is written up in `CLAUDE.md`:
   number.
 - Review and pay takes an optional bank transfer receipt, a picture. It is
   printed by itself as the statement's last page, as proof of the payment.
+- Each driver payment shows the **period it covers**, e.g. "14 Oct – 25 Oct
+  2026". It runs from the day after the driver's last payment to its own
+  "up to" day, whatever days were worked (14 Oct).
+- **Declined: changing a booking's driver after completion,** by anyone,
+  the Owner included (14 Oct). Voiding a payment frees its bookings back to
+  the driver on the booking.
 - **Declined; don't propose these again:** two-factor sign-in, and every
   audit suggestion the Owner did not answer.
 

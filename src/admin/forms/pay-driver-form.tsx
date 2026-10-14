@@ -16,13 +16,19 @@ import {
   TEXTAREA_CLASS,
 } from "@/components/ops/form";
 import { cx } from "@/components/ops/primitives";
-import { PAYMENT_METHODS } from "@/domain/finance/driver-pay";
+import {
+  PAYMENT_METHODS,
+  paymentPeriod,
+  paymentPeriodStart,
+} from "@/domain/finance/driver-pay";
 import { formatPence, type Pence } from "@/domain/money";
 
 export interface PayLine {
   id: number;
   reference: string;
   when: string;
+  /** The pickup's London day, "YYYY-MM-DD". */
+  day: string;
   route: string;
   status: string;
   pricePence: number;
@@ -33,19 +39,25 @@ const money = (pence: number) => formatPence(pence as Pence);
 
 /**
  * Paying a driver for their done, priced bookings up to the chosen day. All
- * are ticked to start with; the totals follow the ticks. The server works the
- * payment out again from the bookings themselves when it saves.
+ * are ticked to start with; the totals follow the ticks, and so does the
+ * period it covers — from the day after the driver's last payment. The server
+ * works the payment out again from the bookings themselves when it saves.
  */
+const noonOf = (day: string) => new Date(`${day}T12:00:00Z`);
+
 export function PayDriverForm({
   driverId,
   driverName,
   upTo,
+  previousUpTo,
   today,
   lines,
 }: {
   driverId: number;
   driverName: string;
   upTo: string;
+  /** The day the driver's last payment ran up to, if they have one. */
+  previousUpTo: string | null;
   today: string;
   lines: PayLine[];
 }) {
@@ -58,6 +70,13 @@ export function PayDriverForm({
   const earned = picked.reduce((sum, line) => sum + line.pricePence, 0);
   const cash = picked.reduce((sum, line) => sum + line.cashPence, 0);
   const net = earned - cash;
+  const firstDay = picked.map((line) => line.day).sort()[0];
+  const covers = firstDay
+    ? paymentPeriod(
+        noonOf(paymentPeriodStart({ upTo, previousUpTo, firstBooking: firstDay })),
+        noonOf(upTo),
+      )
+    : null;
   const toggle = (id: number) =>
     setChosen((current) => {
       const next = new Set(current);
@@ -139,6 +158,12 @@ export function PayDriverForm({
       </fieldset>
 
       <dl className="border-line grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 rounded-md border p-3 text-sm tabular-nums">
+        {covers ? (
+          <>
+            <dt className="text-ink-3">Covers</dt>
+            <dd className="text-right">{covers}</dd>
+          </>
+        ) : null}
         <dt className="text-ink-3">Driver prices</dt>
         <dd className="text-right">{money(earned)}</dd>
         <dt className="text-ink-3">Less cash {driverName} collected</dt>

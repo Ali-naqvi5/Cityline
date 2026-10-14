@@ -11,6 +11,7 @@ import {
 import { formatPence, type Pence } from "@/domain/money";
 import { formatDate, formatTime } from "@/lib/time";
 
+import { paymentPeriod } from "./driver-pay";
 import { drawable, fit } from "./pdf-text";
 
 /**
@@ -48,6 +49,8 @@ export interface StatementLine {
 export interface StatementData {
   reference: string;
   paidAt: Date;
+  /** The period it covers: from the day after the driver's last payment. */
+  periodFrom: Date;
   upTo: Date;
   method: string;
   bankReference: string | null;
@@ -464,7 +467,7 @@ export async function statementPdf(
 
     icon("document", 1128, 289, 26);
     label("COVERS", 1173);
-    ["Completed and PNS bookings", `up to ${formatDate(data.upTo)}`].forEach(
+    ["Completed and PNS bookings", paymentPeriod(data.periodFrom, data.upTo)].forEach(
       (part, index) => text(part, 1173, 333.5 + index * 25, { size: 15 }),
     );
 

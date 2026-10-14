@@ -653,6 +653,10 @@ export interface DriverPayment {
   id: number;
   driver: number | Driver;
   /**
+   * The first day this payment covers: the day after the driver's last payment, or its first booking's day. Worked out when it is recorded.
+   */
+  periodFrom?: string | null;
+  /**
    * Covers bookings picked up on or before this day.
    */
   upTo: string;
@@ -1516,6 +1520,7 @@ export interface PrivateFilesSelect<T extends boolean = true> {
  */
 export interface DriverPaymentsSelect<T extends boolean = true> {
   driver?: T;
+  periodFrom?: T;
   upTo?: T;
   paidAt?: T;
   method?: T;

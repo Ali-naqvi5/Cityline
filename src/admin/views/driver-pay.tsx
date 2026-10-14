@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
 import { isValidDay, londonDay, londonDayBounds, shortDay } from "@/admin/format";
-import { loadOwed, loadPayments, paidTotal } from "@/admin/data/driver-pay";
+import { loadOwed, loadPayments, paidTotal, periodFromOf } from "@/admin/data/driver-pay";
 import { param, requireStaff } from "@/admin/guard";
 import { resolvePeriod } from "@/admin/reports/period";
 import { DownloadCsv, FILTER_GRID, PeriodFields, PeriodLine } from "@/admin/reports/ui";
@@ -17,8 +17,9 @@ import { DeniedPage, EmptyState } from "@/components/ops/states";
 import { relId } from "@/domain/dispatch/assignment";
 import {
   PAYMENT_METHODS,
-  paymentReference,
   type PaymentMethod,
+  paymentPeriod,
+  paymentReference,
 } from "@/domain/finance/driver-pay";
 import { formatPence, type Pence } from "@/domain/money";
 import { formatDate } from "@/lib/time";
@@ -317,6 +318,9 @@ export async function DriverPayView(props: AdminViewServerProps) {
                   <th scope="col" className={TH}>
                     Driver
                   </th>
+                  <th scope="col" className={TH}>
+                    Covers
+                  </th>
                   <th scope="col" className={TH_NUM}>
                     Bookings
                   </th>
@@ -379,6 +383,9 @@ export async function DriverPayView(props: AdminViewServerProps) {
                         ) : (
                           "—"
                         )}
+                      </td>
+                      <td className={`${TD} whitespace-nowrap tabular-nums`}>
+                        {paymentPeriod(periodFromOf(payment), new Date(payment.upTo))}
                       </td>
                       <td className={TD_NUM}>{payment.lines?.length ?? 0}</td>
                       <td className={`${TD_NUM} font-medium`}>

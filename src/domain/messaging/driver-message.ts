@@ -1,3 +1,4 @@
+import { paymentPeriod } from "@/domain/finance/driver-pay";
 import { vehicleClassName } from "@/domain/jobs/labels";
 import { formatPence, type Pence } from "@/domain/money";
 import { EXTRAS } from "@/domain/pricing/extras";
@@ -216,6 +217,8 @@ export function whatsappChat(phone: string): string {
 export interface PaymentMessage {
   reference: string;
   paidAt: Date;
+  /** The period it covers: from the day after the driver's last payment. */
+  periodFrom: Date;
   upTo: Date;
   method: string;
   bankReference: string | null;
@@ -253,7 +256,7 @@ export function paymentMessage(
       ? `${firstName}, this settles ${amount} you paid Cityline on ${payDay.format(payment.paidAt)} by ${how}.`
       : `${firstName}, we paid you ${amount} on ${payDay.format(payment.paidAt)} by ${how}.`,
     "",
-    `${payment.bookings} ${payment.bookings === 1 ? "booking" : "bookings"} up to ${payDay.format(payment.upTo)}: ${formatPence(payment.earnedPence as Pence)}`,
+    `${payment.bookings} ${payment.bookings === 1 ? "booking" : "bookings"}, ${paymentPeriod(payment.periodFrom, payment.upTo)}: ${formatPence(payment.earnedPence as Pence)}`,
     ...(payment.cashPence
       ? [`Less cash you collected: ${formatPence(payment.cashPence as Pence)}`]
       : []),

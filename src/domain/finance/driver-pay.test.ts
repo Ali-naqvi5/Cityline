@@ -4,6 +4,8 @@ import {
   cashHeldPence,
   isPayable,
   owedUpTo,
+  paymentPeriod,
+  paymentPeriodStart,
   paymentReference,
   payTotals,
   priceChangedSincePaid,
@@ -93,6 +95,38 @@ describe("driver pay", () => {
     expect(routeText(job({}))).toBe("Heathrow Terminal 5 to Uxbridge");
     expect(routeText(job({ dropoffAddress: null, hours: 3 }))).toBe(
       "Heathrow Terminal 5 to hourly hire, 3 hours",
+    );
+  });
+});
+
+describe("a payment's period", () => {
+  const start = (upTo: string, previousUpTo: string | null, firstBooking: string) =>
+    paymentPeriodStart({ upTo, previousUpTo, firstBooking });
+
+  it("runs from the day after the last payment, whatever days were worked", () => {
+    expect(start("2026-10-25", "2026-10-13", "2026-10-17")).toBe("2026-10-14");
+    // Across the end of a month.
+    expect(start("2026-11-05", "2026-10-31", "2026-11-02")).toBe("2026-11-01");
+  });
+
+  it("starts a first payment on its first booking's day", () => {
+    expect(start("2026-10-13", null, "2026-10-09")).toBe("2026-10-09");
+  });
+
+  it("reaches back to a booking paid late, so every booking is inside", () => {
+    expect(start("2026-10-25", "2026-10-13", "2026-10-10")).toBe("2026-10-10");
+    // Paid again after a void, up to the same day as another payment.
+    expect(start("2026-10-13", null, "2026-10-09")).toBe("2026-10-09");
+  });
+
+  it("reads as dates, one date for one day", () => {
+    const day = (iso: string) => new Date(`${iso}T11:00:00Z`);
+    expect(paymentPeriod(day("2026-10-14"), day("2026-10-25"))).toBe(
+      "14 Oct – 25 Oct 2026",
+    );
+    expect(paymentPeriod(day("2026-10-13"), day("2026-10-13"))).toBe("13 Oct 2026");
+    expect(paymentPeriod(day("2026-12-28"), day("2027-01-03"))).toBe(
+      "28 Dec 2026 – 3 Jan 2027",
     );
   });
 });

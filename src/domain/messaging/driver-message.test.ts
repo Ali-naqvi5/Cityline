@@ -117,6 +117,7 @@ describe("the payment note on WhatsApp", () => {
   const payment = {
     reference: "DP-000012",
     paidAt: new Date("2026-10-06T11:00:00Z"),
+    periodFrom: new Date("2026-09-29T11:00:00Z"),
     upTo: new Date("2026-10-05T11:00:00Z"),
     method: "Bank transfer",
     bankReference: "CITYLINE 12",
@@ -133,7 +134,7 @@ describe("the payment note on WhatsApp", () => {
     expect(text).toContain(
       "Sam, we paid you £85.00 on 6 Oct 2026 by bank transfer (reference CITYLINE 12).",
     );
-    expect(text).toContain("3 bookings up to 5 Oct 2026: £140.00");
+    expect(text).toContain("3 bookings, 29 Sept – 5 Oct 2026: £140.00");
     expect(text).toContain("Less cash you collected: £55.00");
     expect(text).toContain("Paid to you: £85.00");
     expect(text).toContain(

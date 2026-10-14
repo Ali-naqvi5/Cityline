@@ -14,6 +14,7 @@ beforeAll(async () => {
 const data: StatementData = {
   reference: "DP-000012",
   paidAt: new Date("2026-10-06T11:00:00Z"),
+  periodFrom: new Date("2026-09-29T11:00:00Z"),
   upTo: new Date("2026-10-05T11:00:00Z"),
   method: "Bank transfer",
   bankReference: "CITYLINE 12",

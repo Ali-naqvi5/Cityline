@@ -231,7 +231,15 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   covers a set of bookings; its collection hook works out the lines and
   totals from the bookings (typed amounts are ignored) and refuses a booking
   already paid, unpriced or someone else's. Payments are never edited or
-  deleted, only voided with a reason, which frees their bookings. Each has a
+  deleted, only voided with a reason, which frees their bookings. Each
+  payment covers a **period** (Cityline, 14 Oct 2026), shown as "14 Oct –
+  25 Oct 2026" on the statement, the WhatsApp note, both payment lists, the
+  pay form and the CSV. It runs from the day after the driver's last
+  payment (not voided) to its own "up to" day, whatever days were worked.
+  A first payment starts at its first booking, and a late-paid older
+  booking moves the start back to its day (`paymentPeriodStart`). It is
+  stored as `periodFrom` when the payment is recorded, so a sent statement
+  never changes. Each has a
   PDF statement (`domain/finance/statement-pdf.ts`, pdf-lib, standard
   fonts) and a signed, expiring link for the driver
   (`domain/finance/statement-link.ts`, `/api/statements/<token>`), sent with

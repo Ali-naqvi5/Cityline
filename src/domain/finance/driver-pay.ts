@@ -1,4 +1,5 @@
 import type { JobStatus } from "@/domain/jobs/labels";
+import { DISPLAY_TIMEZONE } from "@/lib/time";
 
 /**
  * Driver pay (approved by Cityline, 6 Oct 2026): what each driver is owed,
@@ -12,6 +13,8 @@ import type { JobStatus } from "@/domain/jobs/labels";
  *     booking has cash: at a PNS nobody paid.
  *   - Pay runs up to any date the office chooses; each payment records the
  *     bookings it covers, so none can be paid twice.
+ *   - Each payment covers a period: from the day after the driver's last
+ *     payment to the day it runs up to (Cityline, 14 Oct 2026).
  *
  * Drivers are independent: this is payment for bookings, never wages.
  */
@@ -117,3 +120,63 @@ export const PAYMENT_METHODS = {
   other: "Other",
 } as const;
 export type PaymentMethod = keyof typeof PAYMENT_METHODS;
+
+/** A London day, "YYYY-MM-DD", plus whole days. */
+function addDays(day: string, days: number): string {
+  const date = new Date(`${day}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+/**
+ * The first day a payment covers (Cityline, 14 Oct 2026): the day after the
+ * driver's last payment, whatever days they worked in between — paid on the
+ * 13th, then up to the 25th, the second covers the 14th to the 25th.
+ *
+ *   - `previousUpTo` is the day the driver's last payment ran up to: the
+ *     latest of their payments not voided that ran up to an earlier day.
+ *   - A first payment starts on its first booking's day.
+ *   - A booking older than that, paid late (its price written late, or paid
+ *     again after a void), moves the start back to its day, so every booking
+ *     on the statement falls inside the period.
+ *
+ * All days are London days, "YYYY-MM-DD".
+ */
+export function paymentPeriodStart(args: {
+  upTo: string;
+  previousUpTo: string | null;
+  firstBooking: string;
+}): string {
+  const afterPrevious = args.previousUpTo
+    ? addDays(args.previousUpTo, 1)
+    : args.firstBooking;
+  return [afterPrevious, args.firstBooking, args.upTo].sort()[0]!;
+}
+
+const dayMonth = new Intl.DateTimeFormat("en-GB", {
+  timeZone: DISPLAY_TIMEZONE,
+  day: "numeric",
+  month: "short",
+});
+const dayMonthYear = new Intl.DateTimeFormat("en-GB", {
+  timeZone: DISPLAY_TIMEZONE,
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+const londonYear = new Intl.DateTimeFormat("en-GB", {
+  timeZone: DISPLAY_TIMEZONE,
+  year: "numeric",
+});
+
+/**
+ * A payment's period in words: "14 Oct – 25 Oct 2026", one day as
+ * "13 Oct 2026", across a new year "28 Dec 2026 – 3 Jan 2027".
+ */
+export function paymentPeriod(from: Date, to: Date): string {
+  const end = dayMonthYear.format(to);
+  if (dayMonthYear.format(from) === end) return end;
+  return londonYear.format(from) === londonYear.format(to)
+    ? `${dayMonth.format(from)} – ${end}`
+    : `${dayMonthYear.format(from)} – ${end}`;
+}

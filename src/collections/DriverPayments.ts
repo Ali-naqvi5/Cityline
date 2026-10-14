@@ -6,13 +6,14 @@ import {
   cashHeldPence,
   isPayable,
   PAYMENT_METHODS,
+  paymentPeriodStart,
   paymentReference,
   payTotals,
   routeText,
   type PayJob,
 } from "@/domain/finance/driver-pay";
 import type { JobStatus } from "@/domain/jobs/labels";
-import { londonToUtc } from "@/lib/time";
+import { londonDateAndTime, londonToUtc } from "@/lib/time";
 import type { Job } from "@/payload-types";
 
 import { auditChanges } from "./hooks/audit";
@@ -20,7 +21,8 @@ import { auditChanges } from "./hooks/audit";
 /**
  * Payments to drivers (Driver Pay, approved by Cityline, 6 Oct 2026).
  *
- * Each one covers a set of bookings, picked up to a chosen date. The server
+ * Each one covers a set of bookings, picked up to a chosen date, and a period
+ * from the day after the driver's last payment (Cityline, 14 Oct 2026). The server
  * works out the lines and totals from the bookings themselves — the driver
  * price written on each, less any cash the driver collected — so nothing
  * typed can disagree with the bookings, and a booking already paid cannot be
@@ -155,6 +157,37 @@ export const DriverPayments: CollectionConfig = {
         }
 
         jobs.sort((a, b) => a.pickupAt.localeCompare(b.pickupAt));
+
+        // The period it covers: from the day after the driver's last payment
+        // (not voided) to the day this one runs up to. Kept with the payment,
+        // so a statement already sent never changes.
+        const londonDay = (value: string) => londonDateAndTime(new Date(value)).date;
+        const upToDay = londonDay(String(data.upTo));
+        const previous = await req.payload.find({
+          collection: "driver-payments",
+          where: {
+            and: [
+              { driver: { equals: driverId } },
+              { voidedAt: { exists: false } },
+              { upTo: { less_than: londonToUtc(upToDay, "00:00").toISOString() } },
+            ],
+          },
+          sort: "-upTo",
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        });
+        const previousUpTo = previous.docs[0]?.upTo;
+        data.periodFrom = londonToUtc(
+          paymentPeriodStart({
+            upTo: upToDay,
+            previousUpTo: previousUpTo ? londonDay(previousUpTo) : null,
+            firstBooking: londonDay(jobs[0]!.pickupAt),
+          }),
+          "12:00",
+        ).toISOString();
+
         const totals = payTotals(jobs);
         data.lines = jobs.map((job) => ({
           job: job.id,
@@ -206,6 +239,14 @@ export const DriverPayments: CollectionConfig = {
       relationTo: "drivers",
       required: true,
       index: true,
+    },
+    {
+      name: "periodFrom",
+      type: "date",
+      admin: {
+        description:
+          "The first day this payment covers: the day after the driver's last payment, or its first booking's day. Worked out when it is recorded.",
+      },
     },
     {
       name: "upTo",

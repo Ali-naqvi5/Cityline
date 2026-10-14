@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
 import { voidDriverPaymentAction } from "@/admin/actions/driver-pay";
-import { loadDriverPay } from "@/admin/data/driver-pay";
+import { loadDriverPay, periodFromOf } from "@/admin/data/driver-pay";
 import { isValidDay, londonDay, londonDayBounds, shortDay, clock } from "@/admin/format";
 import { PayDriverForm } from "@/admin/forms/pay-driver-form";
 import { param, requireStaff, segment } from "@/admin/guard";
@@ -28,9 +28,10 @@ import { DeniedPage, EmptyState } from "@/components/ops/states";
 import {
   cashHeldPence,
   PAYMENT_METHODS,
+  type PaymentMethod,
+  paymentPeriod,
   paymentReference,
   routeText,
-  type PaymentMethod,
 } from "@/domain/finance/driver-pay";
 import { STATEMENT_LINK_DAYS, statementToken } from "@/domain/finance/statement-link";
 import { stageName } from "@/domain/jobs/status";
@@ -91,6 +92,7 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
         {
           reference: paymentReference(payment.id),
           paidAt: new Date(payment.paidAt),
+          periodFrom: periodFromOf(payment),
           upTo: new Date(payment.upTo),
           method: PAYMENT_METHODS[payment.method as PaymentMethod] ?? payment.method,
           bankReference: payment.reference ?? null,
@@ -104,6 +106,17 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
       ),
     );
   const consent = Boolean(driver.whatsappConsentAt);
+  // The day the driver's last payment (not voided) ran up to, before this
+  // one's: the period a new payment covers starts the day after.
+  const upToStart = londonDayBounds(upTo).start.getTime();
+  const previousUpTo =
+    payments
+      .filter(
+        (payment) => !payment.voidedAt && new Date(payment.upTo).getTime() < upToStart,
+      )
+      .map((payment) => londonDay(new Date(payment.upTo)))
+      .sort()
+      .at(-1) ?? null;
   const paidNow = justPaid
     ? payments.find((payment) => payment.id === justPaid)
     : undefined;
@@ -205,11 +218,13 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
                 driverId={driver.id}
                 driverName={driver.firstName}
                 upTo={upTo}
+                previousUpTo={previousUpTo}
                 today={today}
                 lines={owed.payable.map((job) => ({
                   id: job.id,
                   reference: job.reference,
                   when: `${shortDay(new Date(job.pickupAt))} ${clock(new Date(job.pickupAt))}`,
+                  day: londonDay(new Date(job.pickupAt)),
                   route: routeText(job),
                   status: stageName(job.status),
                   pricePence: job.driverPricePence ?? 0,
@@ -305,8 +320,9 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
                           {PAYMENT_METHODS[payment.method as PaymentMethod] ??
                             payment.method}
                           {payment.reference ? ` · ${payment.reference}` : ""} ·{" "}
-                          {counted(payment.lines?.length ?? 0, "booking")} up to{" "}
-                          {formatDate(new Date(payment.upTo))} · recorded by {recordedBy}
+                          {counted(payment.lines?.length ?? 0, "booking")},{" "}
+                          {paymentPeriod(periodFromOf(payment), new Date(payment.upTo))} ·
+                          recorded by {recordedBy}
                         </p>
                         {payment.voidedAt ? (
                           <p className="text-danger text-xs">
