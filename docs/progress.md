@@ -39,11 +39,14 @@ deploys to production — there is no staging (see below).
   site serves that day's logo and fonts. That includes the deploy-safety
   commit, the Owner-only rules, the statement v2 with the new logo, and the
   bank transfer receipt with its migration.
-- **Not yet known:** whether the Owner copied `scripts/deploy.sh` and
-  `docker/pg-backup/` to the server before that push. A deploy does not
-  copy them; `runbook-vps.md` ("Copy from the repository") has the three
-  commands. Until they are copied, the server runs the old deploy script,
-  without the verified pre-migration dump. Ask before the next push.
+- **Optional, not blocking:** copy `scripts/deploy.sh` and
+  `docker/pg-backup/` to the server, once, whenever convenient. A deploy does
+  not copy them; `runbook-vps.md` ("Copy from the repository") has the
+  three commands.
+  - Deploys never touch the database volume, and migrations only add.
+  - The server's current script already dumps the database before
+    migrating; the newer one also checks the dump finished before going on.
+  - The Owner may already have copied them; nobody has confirmed.
 - **Waiting to be pushed (14 Oct): the payment period.** It brings **one
   migration**, `20261014_153546_driver_payment_period`. The migration
   adds the `period_from` column, then fills it in for the payments
