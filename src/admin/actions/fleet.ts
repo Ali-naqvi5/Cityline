@@ -205,23 +205,28 @@ export async function saveDriverPhotoAction(
   redirect(`/admin/drivers/${id}?notice=photo-saved`);
 }
 
-/** Owner and Accounts (spec §22, widened 6 Oct 2026): sealed before it is stored, never shown in lists. */
+/**
+ * Owner and Accounts (spec §22, widened 6 Oct 2026): sealed before it is
+ * stored, never shown in lists. A driver's, or a subcontracting operator's
+ * (`owner=operators`, Cityline, 15 Oct 2026).
+ */
 export async function saveBankDetailsAction(
   _previous: FormState,
   formData: FormData,
 ): Promise<FormState> {
   const { payload, user } = await staffForAction("drivers.bankDetails");
   const id = Number(text(formData, "id"));
+  const collection = text(formData, "owner") === "operators" ? "operators" : "drivers";
 
   if (text(formData, "remove") === "1") {
     await payload.update({
-      collection: "drivers",
+      collection,
       id,
       data: { bankDetailsSealed: null, bankAccountLast4: null },
       user,
       overrideAccess: false,
     });
-    redirect(`/admin/drivers/${id}?notice=bank-removed`);
+    redirect(`/admin/${collection}/${id}?notice=bank-removed`);
   }
 
   const details = normaliseBankDetails({
@@ -239,7 +244,7 @@ export async function saveBankDetailsAction(
 
   try {
     await payload.update({
-      collection: "drivers",
+      collection,
       id,
       data: {
         bankDetailsSealed: sealBankDetails(details),
@@ -251,7 +256,7 @@ export async function saveBankDetailsAction(
   } catch (error) {
     return payloadErrors(error, "saving bank details");
   }
-  redirect(`/admin/drivers/${id}?notice=bank-saved`);
+  redirect(`/admin/${collection}/${id}?notice=bank-saved`);
 }
 
 // --- Vehicles ------------------------------------------------------------------

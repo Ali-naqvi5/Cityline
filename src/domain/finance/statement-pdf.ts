@@ -56,7 +56,11 @@ export interface StatementData {
   bankReference: string | null;
   voided: boolean;
   driverName: string;
-  phvNumber: string | null;
+  /**
+   * Under the name: "PHV licence 123456" for a driver; for a subcontracting
+   * operator, their licence and who licensed them.
+   */
+  licence: string | null;
   /**
    * The account paid into, for a bank transfer only: the sort code in full
    * (null when it cannot be read) and the account number's last four digits.
@@ -447,8 +451,24 @@ export async function statementPdf(
       size: 17,
       font: semibold,
     });
-    if (data.phvNumber) {
-      text(`PHV licence ${data.phvNumber}`, 126, 356, { size: 13.5, color: MUTED });
+    if (data.licence) {
+      // One line for a driver's PHV licence; an operator's licence and its
+      // council may need two, a little smaller.
+      const room = 403 - 126 - 16;
+      const parts = data.licence.split(" · ");
+      const lines =
+        widthOf(data.licence, 13.5) <= room
+          ? [clean(data.licence)]
+          : parts.length === 2 && parts.every((part) => widthOf(part, 12) <= room)
+            ? parts.map((part) => clean(part))
+            : wrap(data.licence, regular, 12, room, 2);
+      const size = lines.length > 1 || widthOf(data.licence, 13.5) > room ? 12 : 13.5;
+      lines.forEach((line, index) =>
+        text(line, 126, (lines.length > 1 ? 352 : 356) + index * 15, {
+          size,
+          color: MUTED,
+        }),
+      );
     }
 
     icon("calendar", 436, 289, 26);

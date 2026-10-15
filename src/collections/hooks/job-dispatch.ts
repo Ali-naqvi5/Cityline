@@ -8,12 +8,13 @@ import {
 import { checkAssignment, relId } from "@/domain/dispatch/assignment";
 import { trackedChanges } from "@/domain/jobs/history";
 import { isJobStatus, type JobStatus } from "@/domain/jobs/labels";
+import { licensedFromText, operatorCheck } from "@/domain/operators/operators";
 import {
   beforeBoarding,
   previousStages,
   statusChangeProblem,
 } from "@/domain/jobs/status";
-import type { Job } from "@/payload-types";
+import type { Job, Operator } from "@/payload-types";
 
 /**
  * Dispatch rules on every write to a job (JOB-05, JOB-06, JOB-08; spec §10,
@@ -23,7 +24,20 @@ import type { Job } from "@/payload-types";
  * Note that Payload has already filled every field missing from the change
  * with the stored value by the time these run, so changes are found by
  * comparing values, never by looking for keys.
+ *
+ * A booking goes to a driver (with their car) or to a subcontracting
+ * operator (Cityline, 15 Oct 2026), never both. The rules are the same for
+ * either: a reason to take them off, no change once the passenger is on
+ * board, and the stages from Assigned on.
  */
+
+/** The operator's details as the booking's record keeps them. */
+const NO_OPERATOR = {
+  operator: null,
+  subcontractorName: null,
+  subcontractorLicenceNo: null,
+  subcontractorLicensedFrom: null,
+};
 
 type JobData = Partial<Job> & Record<string, unknown>;
 
@@ -76,9 +90,14 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
       ? original.status
       : "unassigned";
   const requested: JobStatus = isJobStatus(job.status) ? job.status : from;
-  const before = { driver: relId(original.driver), vehicle: relId(original.vehicle) };
+  const before = {
+    driver: relId(original.driver),
+    vehicle: relId(original.vehicle),
+    operator: relId(original.operator),
+  };
   let driver = relId(job.driver);
   let vehicle = relId(job.vehicle);
+  let operator = relId(job.operator);
   const pickupAt = new Date(String(job.pickupAt ?? original.pickupAt));
   const jobClass = String(job.vehicleClassSlug ?? original.vehicleClassSlug ?? "");
   const passengers = Number(job.passengers ?? original.passengers ?? 0) || null;
@@ -88,19 +107,35 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
     job.takenAt ??= now.toISOString();
   }
 
-  // Asking for Unassigned is asking for the driver to be taken off.
+  // Asking for Unassigned is asking for the driver (or operator) to be taken off.
   if (requested === "unassigned" && from !== "unassigned") {
     driver = null;
+    operator = null;
   }
   if (driver === null) vehicle = null;
+  if (driver !== null && operator !== null) {
+    fail(req, [
+      {
+        path: "operator",
+        message: "A booking goes to a driver or to an operator, not both.",
+      },
+    ]);
+  }
 
   let status = requested;
-  const driverChanged = driver !== before.driver || vehicle !== before.vehicle;
+  const driverChanged =
+    driver !== before.driver ||
+    vehicle !== before.vehicle ||
+    operator !== before.operator;
+  const assignee = (d: number | null, o: number | null) =>
+    d !== null ? `driver:${d}` : o !== null ? `operator:${o}` : null;
+  const assignedBefore = assignee(before.driver, before.operator);
+  const assignedNow = assignee(driver, operator);
 
-  // Taking a driver off a booking, or giving it to someone else, needs a
-  // reason from whoever does it. It goes on the job's history and into the
-  // Driver Report, so a driver is never counted against without one.
-  const takenOff = before.driver !== null && driver !== before.driver;
+  // Taking a driver (or operator) off a booking, or giving it to someone
+  // else, needs a reason from whoever does it. It goes on the job's history
+  // and into the Driver Report, so a driver is never counted against without one.
+  const takenOff = assignedBefore !== null && assignedNow !== assignedBefore;
   const takenOffReason = String(job.takenOffReason ?? "").trim();
   delete job.takenOffReason; // never stored on the job itself
   if (
@@ -132,8 +167,9 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
     ]);
   }
 
-  if (driverChanged && driver === null) {
+  if (driverChanged && assignedNow === null) {
     Object.assign(job, {
+      ...NO_OPERATOR,
       driver: null,
       vehicle: null,
       driverPhvNo: null,
@@ -184,6 +220,7 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
       ]);
     }
     Object.assign(job, {
+      ...NO_OPERATOR,
       driver,
       vehicle,
       driverPhvNo: check.phvNumber,
@@ -200,6 +237,76 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
     // On `req.context`, not the hook's `context` argument: the lookups above
     // replace `req.context` with a copy, and the after-change hook reads this.
     req.context.assignedDriver = `${check.driver.fullName ?? "Driver"} · ${check.vehicle.registration}`;
+  } else if (driverChanged && operator !== null) {
+    // To a subcontracting operator: their own driver and car, none on record.
+    if (status === "cancelled") {
+      fail(req, [
+        {
+          path: "operator",
+          message: "A job being cancelled cannot be given to an operator.",
+        },
+      ]);
+    }
+    const found = (await req.payload.findByID({
+      collection: "operators",
+      id: operator,
+      depth: 0,
+      overrideAccess: true,
+      disableErrors: true,
+      req,
+    })) as Operator | null;
+    if (!found)
+      fail(req, [{ path: "operator", message: "That operator is not on record." }]);
+    const { blocks } = operatorCheck(found, pickupAt);
+    if (blocks.length) {
+      fail(req, [
+        {
+          path: "operator",
+          message: `${found.name} cannot take this booking. ${blocks.join(" ")}`,
+        },
+      ]);
+    }
+    Object.assign(job, {
+      driver: null,
+      vehicle: null,
+      driverPhvNo: null,
+      vehicleReg: null,
+      operator,
+      subcontractorName: found.name,
+      subcontractorLicenceNo: found.licenceNumber ?? null,
+      subcontractorLicensedFrom: licensedFromText(found),
+      dispatchedByUser: req.user?.id ?? null,
+      dispatchedAt: now.toISOString(),
+      driverMessageStatus: "not_sent",
+      driverMessageAt: null,
+      passengerMessageStatus: "not_sent",
+      passengerMessageAt: null,
+    });
+    status = "assigned";
+    req.context.assignedDriver = `${found.name} (operator)`;
+  } else if (
+    staff &&
+    operator !== null &&
+    pickupAt.getTime() !== new Date(String(original.pickupAt)).getTime()
+  ) {
+    // The same operator, a new time: is their licence still good then?
+    const found = (await req.payload.findByID({
+      collection: "operators",
+      id: operator,
+      depth: 0,
+      overrideAccess: true,
+      disableErrors: true,
+      req,
+    })) as Operator | null;
+    const blocks = found ? operatorCheck(found, pickupAt).blocks : [];
+    if (blocks.length) {
+      fail(req, [
+        {
+          path: "pickupAt",
+          message: `The operator cannot take the job at this time: ${blocks.join(" ")} Take them off first, or choose another.`,
+        },
+      ]);
+    }
   } else if (
     staff &&
     driver !== null &&
@@ -234,7 +341,7 @@ export const applyDispatchRules: CollectionBeforeChangeHook = async ({
     const problem = statusChangeProblem({
       from,
       to: status,
-      hasDriver: driver !== null,
+      hasDriver: driver !== null || operator !== null,
       pickupAt,
       now,
       cancelReason: String(job.cancelReason ?? original.cancelReason ?? ""),
@@ -280,12 +387,18 @@ export const recordJobHistory: CollectionAfterChangeHook = async ({
 
   const driverBefore = relId(previous.driver);
   const driverNow = relId(job.driver);
+  const operatorBefore = relId(previous.operator);
+  const operatorNow = relId(job.operator);
   const driverChanged =
-    driverBefore !== driverNow || relId(previous.vehicle) !== relId(job.vehicle);
+    driverBefore !== driverNow ||
+    relId(previous.vehicle) !== relId(job.vehicle) ||
+    operatorBefore !== operatorNow;
 
   if (driverChanged) {
     let before: string | null = null;
-    if (driverBefore !== null) {
+    if (operatorBefore !== null) {
+      before = `${previous.subcontractorName ?? "Operator"} (operator)`;
+    } else if (driverBefore !== null) {
       const old = await req.payload.findByID({
         collection: "drivers",
         id: driverBefore,
@@ -309,7 +422,7 @@ export const recordJobHistory: CollectionAfterChangeHook = async ({
           }
         : {};
     events.push(
-      driverNow === null
+      driverNow === null && operatorNow === null
         ? { type: "unassigned", field: "driver", oldValue: before, ...takenOff }
         : {
             type: "assigned",

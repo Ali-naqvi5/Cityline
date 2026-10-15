@@ -214,7 +214,12 @@ export async function loadJobsReport(
       largeBags: job.largeBags,
       smallBags: job.smallBags,
       passenger: job.nameBoardText || job.leadName,
-      driverName: driverId ? (driverName.get(driverId) ?? null) : null,
+      // A subcontracting operator's booking names the operator (Cityline, 15 Oct 2026).
+      driverName: driverId
+        ? (driverName.get(driverId) ?? null)
+        : job.operator
+          ? `${job.subcontractorName ?? "Operator"} (operator)`
+          : null,
       vehicleReg: job.vehicleReg ?? null,
       takenBy:
         job.source === "website"

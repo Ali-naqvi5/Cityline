@@ -324,7 +324,13 @@ export async function RunSheetView(props: AdminViewServerProps) {
                 key={job.id}
                 job={job}
                 showDriver
-                driverName={job.driverId ? (nameOf.get(job.driverId) ?? null) : null}
+                driverName={
+                  job.driverId
+                    ? (nameOf.get(job.driverId) ?? null)
+                    : job.operatorName
+                      ? `${job.operatorName} (operator)`
+                      : null
+                }
               />
             ))}
           </ul>

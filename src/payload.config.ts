@@ -23,6 +23,7 @@ import { Quotes } from "@/collections/Quotes";
 import { Refunds } from "@/collections/Refunds";
 import { SupplierInvoices } from "@/collections/SupplierInvoices";
 import { SupplierPayments } from "@/collections/SupplierPayments";
+import { Operators } from "@/collections/Operators";
 import { Suppliers } from "@/collections/Suppliers";
 import { Users } from "@/collections/Users";
 import { VehicleDocuments } from "@/collections/VehicleDocuments";
@@ -195,6 +196,12 @@ export default buildConfig({
           exact: true,
           meta: { title: "Driver Pay" },
         },
+        opsDriverPayOperator: {
+          Component: "@/admin/views/driver-pay-driver#DriverPayDriverView",
+          path: "/driver-pay/operators/:id",
+          exact: true,
+          meta: { title: "Driver Pay" },
+        },
         opsDriverPayDriver: {
           Component: "@/admin/views/driver-pay-driver#DriverPayDriverView",
           path: "/driver-pay/:id",
@@ -334,6 +341,30 @@ export default buildConfig({
           exact: true,
           meta: { title: "Supplier" },
         },
+        opsOperators: {
+          Component: "@/admin/views/operators#OperatorsView",
+          path: "/operators",
+          exact: true,
+          meta: { title: "Subcontracting operators" },
+        },
+        opsOperatorNew: {
+          Component: "@/admin/views/operator-edit#OperatorEditView",
+          path: "/operators/new",
+          exact: true,
+          meta: { title: "Add an operator" },
+        },
+        opsOperatorEdit: {
+          Component: "@/admin/views/operator-edit#OperatorEditView",
+          path: "/operators/:id/edit",
+          exact: true,
+          meta: { title: "Edit operator" },
+        },
+        opsOperator: {
+          Component: "@/admin/views/operator#OperatorView",
+          path: "/operators/:id",
+          exact: true,
+          meta: { title: "Subcontracting operator" },
+        },
         opsAudit: {
           Component: "@/admin/views/audit#AuditView",
           path: "/audit",
@@ -366,6 +397,7 @@ export default buildConfig({
     Vehicles,
     VehicleDocuments,
     Suppliers,
+    Operators,
     PrivateFiles,
     // Finance.
     DriverPayments,

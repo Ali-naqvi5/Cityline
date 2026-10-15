@@ -15,6 +15,7 @@ import {
 } from "@/domain/finance/driver-pay";
 import type { StatementData } from "@/domain/finance/statement-pdf";
 import type { JobStatus } from "@/domain/jobs/labels";
+import { licensedFromText } from "@/domain/operators/operators";
 import { can } from "@/domain/staff/permissions";
 import { company, formattedAddress } from "@/lib/company";
 import type { CsvColumn } from "@/lib/csv";
@@ -25,17 +26,89 @@ import type {
   DriverDocument,
   DriverPayment,
   Job,
+  Operator,
   PrivateFile,
   User,
 } from "@/payload-types";
 
 /**
- * Loading Driver Pay: what each driver is owed up to a chosen day, the
- * payments made, and a payment as its statement. Test bookings are never
- * paid for. Owner and Accounts.
+ * Loading Driver Pay: what each driver — or subcontracting operator — is
+ * owed up to a chosen day, the payments made, and a payment as its
+ * statement. Test bookings are never paid for. Owner and Accounts.
  */
 
 type As = { user: User; overrideAccess: false };
+
+/**
+ * Who is paid (Cityline, 15 Oct 2026): a driver, or a subcontracting operator,
+ * paid the same way for the bookings they did.
+ */
+export interface Payee {
+  kind: "driver" | "operator";
+  id: number;
+  name: string;
+  /** How a message to them starts: a driver's first name, an operator's contact. */
+  greeting: string;
+  phone: string;
+  whatsappConsent: boolean;
+  /** Their page under Fleet, and the page where they are paid. */
+  href: string;
+  payHref: string;
+  bankAccountLast4: string | null;
+  bankDetailsSealed: string | null;
+}
+
+export const payHrefOf = (kind: Payee["kind"], id: number) =>
+  kind === "operator" ? `/admin/driver-pay/operators/${id}` : `/admin/driver-pay/${id}`;
+
+export function payeeOfDriver(driver: Driver): Payee {
+  return {
+    kind: "driver",
+    id: driver.id,
+    name: driver.fullName ?? `Driver ${driver.id}`,
+    greeting: driver.firstName,
+    phone: driver.phone,
+    whatsappConsent: Boolean(driver.whatsappConsentAt),
+    href: `/admin/drivers/${driver.id}`,
+    payHref: payHrefOf("driver", driver.id),
+    bankAccountLast4: driver.bankAccountLast4 ?? null,
+    bankDetailsSealed: driver.bankDetailsSealed ?? null,
+  };
+}
+
+export function payeeOfOperator(operator: Operator): Payee {
+  return {
+    kind: "operator",
+    id: operator.id,
+    name: operator.name,
+    greeting: operator.contactName?.split(" ")[0] || operator.name,
+    phone: operator.phone,
+    whatsappConsent: Boolean(operator.whatsappConsentAt),
+    href: `/admin/operators/${operator.id}`,
+    payHref: payHrefOf("operator", operator.id),
+    bankAccountLast4: operator.bankAccountLast4 ?? null,
+    bankDetailsSealed: operator.bankDetailsSealed ?? null,
+  };
+}
+
+/** A payment's payee, by name and page, from a payment read with depth 1. */
+export function payeeOfPayment(
+  payment: DriverPayment,
+): { name: string; payHref: string } | null {
+  if (payment.operator) {
+    const operator =
+      typeof payment.operator === "object" ? (payment.operator as Operator) : null;
+    const id = relId(payment.operator)!;
+    return {
+      name: operator ? `${operator.name} (operator)` : `Operator ${id}`,
+      payHref: payHrefOf("operator", id),
+    };
+  }
+  const id = relId(payment.driver);
+  if (!id) return null;
+  const driver = typeof payment.driver === "object" ? (payment.driver as Driver) : null;
+  return { name: driver?.fullName ?? `Driver ${id}`, payHref: payHrefOf("driver", id) };
+}
 
 export function toPayJob(job: Job): PayJob {
   return {
@@ -57,31 +130,42 @@ export function toPayJob(job: Job): PayJob {
 const DONE: Where = { status: { in: ["completed", "no_show"] } };
 
 export interface OwedRow {
-  driver: Driver;
+  payee: Payee;
   owed: DriverOwed;
   /** The earliest unpaid booking. */
   oldest: string | null;
 }
 
 export interface ChangedAfterPaid extends PayJob {
-  driverId: number | null;
+  payee: Payee | null;
 }
 
-/** Every driver with done, unpaid bookings picked up before `before`. */
+/** A booking's payee key: its driver, or its subcontracting operator. */
+const payeeKey = (job: Job) =>
+  relId(job.driver) !== null
+    ? `driver:${relId(job.driver)}`
+    : relId(job.operator) !== null
+      ? `operator:${relId(job.operator)}`
+      : null;
+
+/**
+ * Every driver and subcontracting operator with done, unpaid bookings picked
+ * up before `before`.
+ */
 export async function loadOwed(
   payload: Payload,
   user: User,
   before: Date,
 ): Promise<{ rows: OwedRow[]; changed: ChangedAfterPaid[] }> {
   const as: As = { user, overrideAccess: false };
-  const [unpaid, paid, drivers] = await Promise.all([
+  const [unpaid, paid, drivers, operators] = await Promise.all([
     payload.find({
       collection: "jobs",
       where: {
         and: [
           DONE,
           { isTest: { not_equals: true } },
-          { driver: { exists: true } },
+          { or: [{ driver: { exists: true } }, { operator: { exists: true } }] },
           { driverPayment: { exists: false } },
           { pickupAt: { less_than: before.toISOString() } },
         ],
@@ -101,32 +185,40 @@ export async function loadOwed(
       ...as,
     }),
     payload.find({ collection: "drivers", pagination: false, depth: 0, ...as }),
+    payload.find({ collection: "operators", pagination: false, depth: 0, ...as }),
   ]);
 
-  const byDriver = new Map<number, PayJob[]>();
+  const payees = new Map<string, Payee>([
+    ...(drivers.docs as Driver[]).map(
+      (driver) => [`driver:${driver.id}`, payeeOfDriver(driver)] as const,
+    ),
+    ...(operators.docs as Operator[]).map(
+      (operator) => [`operator:${operator.id}`, payeeOfOperator(operator)] as const,
+    ),
+  ]);
+  const byPayee = new Map<string, PayJob[]>();
   for (const job of unpaid.docs as Job[]) {
-    const driverId = relId(job.driver);
-    if (driverId === null) continue;
-    byDriver.set(driverId, [...(byDriver.get(driverId) ?? []), toPayJob(job)]);
+    const key = payeeKey(job);
+    if (key === null) continue;
+    byPayee.set(key, [...(byPayee.get(key) ?? []), toPayJob(job)]);
   }
-  const driverById = new Map(
-    (drivers.docs as Driver[]).map((driver) => [driver.id, driver]),
-  );
-  const rows: OwedRow[] = [...byDriver.entries()]
-    .filter(([driverId]) => driverById.has(driverId))
-    .map(([driverId, jobs]) => ({
-      driver: driverById.get(driverId)!,
+  const rows: OwedRow[] = [...byPayee.entries()]
+    .filter(([key]) => payees.has(key))
+    .map(([key, jobs]) => ({
+      payee: payees.get(key)!,
       owed: owedUpTo(jobs, before),
       oldest: jobs[0]?.pickupAt ?? null,
     }))
     .sort(
       (a, b) =>
-        b.owed.netPence - a.owed.netPence ||
-        (a.driver.fullName ?? "").localeCompare(b.driver.fullName ?? ""),
+        b.owed.netPence - a.owed.netPence || a.payee.name.localeCompare(b.payee.name),
     );
 
   const changed = (paid.docs as Job[])
-    .map((job) => ({ ...toPayJob(job), driverId: relId(job.driver) }))
+    .map((job) => {
+      const key = payeeKey(job);
+      return { ...toPayJob(job), payee: key ? (payees.get(key) ?? null) : null };
+    })
     .filter(priceChangedSincePaid);
 
   return { rows, changed };
@@ -137,7 +229,7 @@ export async function loadPayments(
   payload: Payload,
   user: User,
   range: { start: Date; end: Date },
-  driverId?: number,
+  payee?: { kind: Payee["kind"]; id: number },
 ): Promise<DriverPayment[]> {
   const found = await payload.find({
     collection: "driver-payments",
@@ -145,7 +237,7 @@ export async function loadPayments(
       and: [
         { paidAt: { greater_than_equal: range.start.toISOString() } },
         { paidAt: { less_than: range.end.toISOString() } },
-        ...(driverId ? [{ driver: { equals: driverId } }] : []),
+        ...(payee ? [{ [payee.kind]: { equals: payee.id } }] : []),
       ],
     },
     sort: "-paidAt",
@@ -177,28 +269,42 @@ export function paidTotal(payments: readonly DriverPayment[]): number {
 }
 
 export interface DriverPayData {
-  driver: Driver;
+  payee: Payee;
   bank: BankDetails | null;
   canSeeBank: boolean;
   owed: DriverOwed;
   payments: DriverPayment[];
 }
 
+/** One driver's — or subcontracting operator's — pay: owed, and paid. */
 export async function loadDriverPay(
   payload: Payload,
   user: User,
-  driverId: number,
+  who: { kind: Payee["kind"]; id: number },
   before: Date,
 ): Promise<DriverPayData | null> {
   const as: As = { user, overrideAccess: false };
-  const driver = (await payload.findByID({
-    collection: "drivers",
-    id: driverId,
-    depth: 0,
-    disableErrors: true,
-    ...as,
-  })) as Driver | null;
-  if (!driver) return null;
+  const record =
+    who.kind === "operator"
+      ? ((await payload.findByID({
+          collection: "operators",
+          id: who.id,
+          depth: 0,
+          disableErrors: true,
+          ...as,
+        })) as Operator | null)
+      : ((await payload.findByID({
+          collection: "drivers",
+          id: who.id,
+          depth: 0,
+          disableErrors: true,
+          ...as,
+        })) as Driver | null);
+  if (!record) return null;
+  const payee =
+    who.kind === "operator"
+      ? payeeOfOperator(record as Operator)
+      : payeeOfDriver(record as Driver);
 
   const [unpaid, payments] = await Promise.all([
     payload.find({
@@ -207,7 +313,7 @@ export async function loadDriverPay(
         and: [
           DONE,
           { isTest: { not_equals: true } },
-          { driver: { equals: driverId } },
+          { [who.kind]: { equals: who.id } },
           { driverPayment: { exists: false } },
           { pickupAt: { less_than: before.toISOString() } },
         ],
@@ -219,7 +325,7 @@ export async function loadDriverPay(
     }),
     payload.find({
       collection: "driver-payments",
-      where: { driver: { equals: driverId } },
+      where: { [who.kind]: { equals: who.id } },
       sort: "-paidAt",
       pagination: false,
       depth: 1,
@@ -229,8 +335,8 @@ export async function loadDriverPay(
 
   const canSeeBank = can(user.role, "drivers.bankDetails");
   return {
-    driver,
-    bank: canSeeBank ? openBankDetails(driver.bankDetailsSealed) : null,
+    payee,
+    bank: canSeeBank ? openBankDetails(payee.bankDetailsSealed) : null,
     canSeeBank,
     owed: owedUpTo((unpaid.docs as Job[]).map(toPayJob), before),
     payments: payments.docs as DriverPayment[],
@@ -256,6 +362,16 @@ export async function statementFor(
   })) as DriverPayment | null;
   if (!payment) return null;
   const driverId = relId(payment.driver);
+  const operatorId = relId(payment.operator);
+  const operator = operatorId
+    ? ((await payload.findByID({
+        collection: "operators",
+        id: operatorId,
+        depth: 0,
+        disableErrors: true,
+        overrideAccess: true,
+      })) as Operator | null)
+    : null;
   const [driver, documents] = await Promise.all([
     driverId
       ? (payload.findByID({
@@ -305,20 +421,27 @@ export async function statementFor(
         overrideAccess: true,
       })) as PrivateFile | null)
     : null;
-  // A bank transfer shows the driver's account: the holder, the sort code in
+  // Paid to a driver, or to a subcontracting operator (Cityline, 15 Oct 2026).
+  const payee = operator
+    ? payeeOfOperator(operator)
+    : driver
+      ? payeeOfDriver(driver)
+      : null;
+  // A bank transfer shows the payee's account: the holder, the sort code in
   // full, and the account number's last four digits only (Cityline, 13 Oct 2026).
   const account =
-    payment.method === "bank_transfer" && driver?.bankAccountLast4
-      ? openBankDetails(driver.bankDetailsSealed)
+    payment.method === "bank_transfer" && payee?.bankAccountLast4
+      ? openBankDetails(payee.bankDetailsSealed)
       : null;
   const bank =
-    payment.method === "bank_transfer" && driver?.bankAccountLast4
+    payment.method === "bank_transfer" && payee?.bankAccountLast4
       ? {
-          holder: account?.accountName || driver.fullName || "Driver",
+          holder: account?.accountName || payee.name,
           sortCode: account?.sortCode ?? null,
-          last4: driver.bankAccountLast4,
+          last4: payee.bankAccountLast4,
         }
       : null;
+  const phvNumber = licence?.number ?? driver?.phvLicenceNumber ?? null;
 
   return {
     reference: paymentReference(payment.id),
@@ -328,8 +451,18 @@ export async function statementFor(
     method: PAYMENT_METHODS[payment.method as PaymentMethod] ?? payment.method,
     bankReference: payment.reference ?? null,
     voided: Boolean(payment.voidedAt),
-    driverName: driver?.fullName ?? "Driver",
-    phvNumber: licence?.number ?? driver?.phvLicenceNumber ?? null,
+    driverName: payee?.name ?? "Driver",
+    // Under the name: a driver's PHV licence, or the operator's licence.
+    licence: operator
+      ? [
+          operator.licenceNumber ? `Operator licence ${operator.licenceNumber}` : null,
+          licensedFromText(operator),
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : phvNumber
+        ? `PHV licence ${phvNumber}`
+        : null,
     bank,
     lines: (payment.lines ?? []).map((line) => {
       const job = jobById.get(relId(line.job) ?? 0);
@@ -371,17 +504,11 @@ const csvDay = (iso: string | null | undefined) =>
     : "";
 const pounds = (pence: number | null | undefined) => ((pence ?? 0) / 100).toFixed(2);
 
-/** One row per payment to a driver, for accounts. */
+/** One row per payment to a driver or subcontracting operator, for accounts. */
 export const DRIVER_PAYMENTS_CSV_COLUMNS: CsvColumn<DriverPayment>[] = [
   { header: "Payment", value: (row) => paymentReference(row.id) },
   { header: "Date paid", value: (row) => csvDay(row.paidAt) },
-  {
-    header: "Driver",
-    value: (row) =>
-      row.driver && typeof row.driver === "object"
-        ? ((row.driver as Driver).fullName ?? "")
-        : String(relId(row.driver) ?? ""),
-  },
+  { header: "Driver", value: (row) => payeeOfPayment(row)?.name ?? "" },
   { header: "Covers from", value: (row) => csvDay(periodFromOf(row).toISOString()) },
   { header: "Covers to", value: (row) => csvDay(row.upTo) },
   { header: "Bookings", value: (row) => row.lines?.length ?? 0 },

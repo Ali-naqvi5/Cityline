@@ -63,7 +63,7 @@ import { beforeBoarding, isFinal, stageName } from "@/domain/jobs/status";
 import { SERVICE_LABELS, serviceType, type ServiceType } from "@/domain/jobs/service";
 import { VEHICLE_CLASSES } from "@/domain/pricing/vehicle-classes";
 import { can } from "@/domain/staff/permissions";
-import type { Booking, Driver, Job, Supplier, User } from "@/payload-types";
+import type { Booking, Driver, Job, Operator, Supplier, User } from "@/payload-types";
 
 /**
  * The bookings dashboard (spec §9, Cityline's brief of 2 Oct 2026): every
@@ -152,6 +152,7 @@ const firstName = (name: string | null | undefined) => (name ?? "").split(" ")[0
 interface Choices {
   suppliers: Supplier[];
   drivers: Driver[];
+  operators: Operator[];
   staff: User[];
 }
 
@@ -252,7 +253,13 @@ function Filters({ filters, choices }: { filters: BookingFilters; choices: Choic
       <div className="col-span-2 hidden grid-cols-2 gap-3 peer-checked:grid md:col-span-4 md:grid md:grid-cols-4 xl:col-span-6 xl:grid-cols-6">
         <div>
           <Label htmlFor="bookings-driver">Driver</Label>
-          <Select id="bookings-driver" name="driver" defaultValue={filters.driver ?? ""}>
+          <Select
+            id="bookings-driver"
+            name="driver"
+            defaultValue={
+              filters.operator ? `op-${filters.operator}` : (filters.driver ?? "")
+            }
+          >
             <option value="">Any driver</option>
             <option value="none">No driver yet</option>
             {choices.drivers.map((driver) => (
@@ -260,6 +267,15 @@ function Filters({ filters, choices }: { filters: BookingFilters; choices: Choic
                 {driver.fullName}
               </option>
             ))}
+            {choices.operators.length ? (
+              <optgroup label="Subcontracting operators">
+                {choices.operators.map((operator) => (
+                  <option key={operator.id} value={`op-${operator.id}`}>
+                    {operator.name}
+                  </option>
+                ))}
+              </optgroup>
+            ) : null}
           </Select>
         </div>
         <div>
@@ -562,6 +578,13 @@ function BookingsTable({
                         {job.vehicleReg}
                       </span>
                     </>
+                  ) : job.operator ? (
+                    <>
+                      <span className="text-ink block truncate font-medium">
+                        {job.subcontractorName}
+                      </span>
+                      <span className="text-ink-3 block whitespace-nowrap">Operator</span>
+                    </>
                   ) : closed ? (
                     <span className="text-ink-4">—</span>
                   ) : (
@@ -708,16 +731,22 @@ function BookingCards({ jobs, now }: { jobs: Job[]; now: Date }) {
               <span
                 className={cx(
                   "text-sm font-medium",
-                  driver ? "text-ink-2" : urgent ? "text-danger" : "text-warn",
+                  driver || job.operator
+                    ? "text-ink-2"
+                    : urgent
+                      ? "text-danger"
+                      : "text-warn",
                 )}
               >
                 {driver
                   ? `${driver.fullName} · ${job.vehicleReg}`
-                  : isFinal(status)
-                    ? ""
-                    : urgent
-                      ? `No driver — ${at < now ? "overdue" : relative(at, now)}`
-                      : "No driver"}
+                  : job.operator
+                    ? `${job.subcontractorName} · operator`
+                    : isFinal(status)
+                      ? ""
+                      : urgent
+                        ? `No driver — ${at < now ? "overdue" : relative(at, now)}`
+                        : "No driver"}
               </span>
             </Link>
           </li>
@@ -806,65 +835,77 @@ export async function BookingsView(props: AdminViewServerProps) {
     console.error("[admin/bookings] could not load bookings", error);
   }
 
-  const [suppliers, drivers, staff, todayCount, needDriver, noPrice] = await Promise.all([
-    payload.find({
-      collection: "suppliers",
-      sort: "name",
-      pagination: false,
-      depth: 0,
-      ...as,
-    }),
-    payload.find({
-      collection: "drivers",
-      where: { status: { not_equals: "left" } },
-      sort: "fullName",
-      pagination: false,
-      depth: 0,
-      ...as,
-    }),
-    payload.find({
-      collection: "users",
-      sort: "name",
-      pagination: false,
-      depth: 0,
-      ...as,
-    }),
-    payload.count({
-      collection: "jobs",
-      where: {
-        and: [
-          notTest,
-          { status: { not_equals: "cancelled" } },
-          { pickupAt: { greater_than_equal: today.start.toISOString() } },
-          { pickupAt: { less_than: today.end.toISOString() } },
-        ],
-      },
-      ...as,
-    }),
-    payload.count({
-      collection: "jobs",
-      where: {
-        and: [
-          notTest,
-          { status: { equals: "unassigned" } },
-          { pickupAt: { less_than: new Date(now.getTime() + 86_400_000).toISOString() } },
-        ],
-      },
-      ...as,
-    }),
-    payload.count({
-      collection: "jobs",
-      where: {
-        and: [
-          notTest,
-          { status: { in: [...OPEN_STATUSES, "completed"] } },
-          { driver: { exists: true } },
-          { driverPricePence: { exists: false } },
-        ],
-      },
-      ...as,
-    }),
-  ]);
+  const [operators, suppliers, drivers, staff, todayCount, needDriver, noPrice] =
+    await Promise.all([
+      can(user.role, "operators.view")
+        ? payload.find({
+            collection: "operators",
+            sort: "name",
+            pagination: false,
+            depth: 0,
+            ...as,
+          })
+        : Promise.resolve({ docs: [] as Operator[] }),
+      payload.find({
+        collection: "suppliers",
+        sort: "name",
+        pagination: false,
+        depth: 0,
+        ...as,
+      }),
+      payload.find({
+        collection: "drivers",
+        where: { status: { not_equals: "left" } },
+        sort: "fullName",
+        pagination: false,
+        depth: 0,
+        ...as,
+      }),
+      payload.find({
+        collection: "users",
+        sort: "name",
+        pagination: false,
+        depth: 0,
+        ...as,
+      }),
+      payload.count({
+        collection: "jobs",
+        where: {
+          and: [
+            notTest,
+            { status: { not_equals: "cancelled" } },
+            { pickupAt: { greater_than_equal: today.start.toISOString() } },
+            { pickupAt: { less_than: today.end.toISOString() } },
+          ],
+        },
+        ...as,
+      }),
+      payload.count({
+        collection: "jobs",
+        where: {
+          and: [
+            notTest,
+            { status: { equals: "unassigned" } },
+            {
+              pickupAt: { less_than: new Date(now.getTime() + 86_400_000).toISOString() },
+            },
+          ],
+        },
+        ...as,
+      }),
+      payload.count({
+        collection: "jobs",
+        where: {
+          and: [
+            notTest,
+            { status: { in: [...OPEN_STATUSES, "completed"] } },
+            { or: [{ driver: { exists: true } }, { operator: { exists: true } }] },
+            { driverPricePence: { exists: false } },
+          ],
+        },
+        ...as,
+      }),
+    ]);
 
   const dispatches = can(user.role, "jobs.dispatch");
   const edits = can(user.role, "jobs.edit");
@@ -932,6 +973,7 @@ export async function BookingsView(props: AdminViewServerProps) {
           choices={{
             suppliers: suppliers.docs,
             drivers: drivers.docs,
+            operators: operators.docs,
             staff: staff.docs,
           }}
         />

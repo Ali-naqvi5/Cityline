@@ -241,6 +241,7 @@ export async function loadRunSheet(
       meetAndGreet: job.meetAndGreet ?? false,
       driverNotes: job.driverNotes ?? null,
       driverId: relId(job.driver),
+      operatorName: job.operator ? (job.subcontractorName ?? "Operator") : null,
       vehicleReg: job.vehicleReg ?? null,
       problems: relId(job.driver) ? problemsAt(job) : [],
     };
@@ -309,7 +310,15 @@ export function runSheetCsvColumns(
     },
     { header: "Meet and greet", value: (row) => (row.meetAndGreet ? "Yes" : "No") },
     { header: "Driver notes", value: (row) => row.driverNotes },
-    { header: "Driver", value: (row) => (row.driverId ? driverName(row.driverId) : "") },
+    {
+      header: "Driver",
+      value: (row) =>
+        row.driverId
+          ? driverName(row.driverId)
+          : row.operatorName
+            ? `${row.operatorName} (operator)`
+            : "",
+    },
     { header: "Vehicle", value: (row) => row.vehicleReg },
     { header: "Stage", value: (row) => stageName(row.status) },
     { header: "Problems", value: (row) => row.problems.join("; ") },

@@ -14,9 +14,12 @@ import { inputClass, invalid, SubmitButton, submitWith } from "@/components/ops/
 export function DriverPriceForm({
   jobId,
   pricePence,
+  operator = false,
 }: {
   jobId: number;
   pricePence: number | null;
+  /** The booking is with a subcontracting operator: the operator's price. */
+  operator?: boolean;
 }) {
   const [state, action, pending] = useActionState(setDriverPriceAction, EMPTY_FORM);
   const error = state.errors.driverPrice;
@@ -25,7 +28,7 @@ export function DriverPriceForm({
     <form onSubmit={submitWith(action)} className="flex flex-col gap-1.5">
       <input type="hidden" name="jobId" value={jobId} />
       <label htmlFor="driverPrice" className="text-ink-3 text-xs font-medium">
-        Driver price
+        {operator ? "Operator price" : "Driver price"}
       </label>
       <div className="flex items-start gap-2">
         <div className="relative w-32">
@@ -56,7 +59,7 @@ export function DriverPriceForm({
         </p>
       ) : (
         <p className="text-ink-3 text-xs">
-          What Cityline pays the driver for this booking.
+          What Cityline pays the {operator ? "operator" : "driver"} for this booking.
         </p>
       )}
       {state.message ? <p className="text-danger text-sm">{state.message}</p> : null}

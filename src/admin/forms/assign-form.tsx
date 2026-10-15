@@ -56,8 +56,8 @@ export function AssignForm({
   jobId: number;
   job: { jobClass: string; passengers: number | null };
   drivers: BoardDriver[];
-  /** The driver on the job now, if any. */
-  current: { driverId: number; name: string } | null;
+  /** Whoever has the job now, if anyone: a driver, or an operator (no driver id). */
+  current: { driverId: number | null; name: string } | null;
   notifyPassenger: boolean;
   canEmailPassenger: boolean;
   /** Whether driver details are emailed to passengers at all. */
@@ -67,7 +67,9 @@ export function AssignForm({
 }) {
   const [state, action, pending] = useActionState(assignDriverAction, EMPTY_FORM);
   const [query, setQuery] = useState("");
-  const [driverId, setDriverId] = useState(current ? String(current.driverId) : "");
+  const [driverId, setDriverId] = useState(
+    current?.driverId ? String(current.driverId) : "",
+  );
 
   const verdict = (driver: BoardDriver): Verdict => ({
     blocks: [...driver.blocks, ...(driver.car ? driver.car.blocks : [NO_CAR])],

@@ -46,14 +46,15 @@ const money = (pence: number) => formatPence(pence as Pence);
 const noonOf = (day: string) => new Date(`${day}T12:00:00Z`);
 
 export function PayDriverForm({
-  driverId,
+  payee,
   driverName,
   upTo,
   previousUpTo,
   today,
   lines,
 }: {
-  driverId: number;
+  /** Who is paid: a driver, or a subcontracting operator. */
+  payee: { kind: "driver" | "operator"; id: number };
   driverName: string;
   upTo: string;
   /** The day the driver's last payment ran up to, if they have one. */
@@ -87,7 +88,8 @@ export function PayDriverForm({
 
   return (
     <form onSubmit={submitWith(action)} className="flex flex-col gap-4">
-      <input type="hidden" name="driverId" value={driverId} />
+      <input type="hidden" name="payeeKind" value={payee.kind} />
+      <input type="hidden" name="payeeId" value={payee.id} />
       <input type="hidden" name="upTo" value={upTo} />
 
       {/* A fieldset is as wide as its content unless told otherwise. */}

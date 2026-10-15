@@ -3,7 +3,13 @@ import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
 import { isValidDay, londonDay, londonDayBounds, shortDay } from "@/admin/format";
-import { loadOwed, loadPayments, paidTotal, periodFromOf } from "@/admin/data/driver-pay";
+import {
+  loadOwed,
+  loadPayments,
+  paidTotal,
+  payeeOfPayment,
+  periodFromOf,
+} from "@/admin/data/driver-pay";
 import { param, requireStaff } from "@/admin/guard";
 import { resolvePeriod } from "@/admin/reports/period";
 import { DownloadCsv, FILTER_GRID, PeriodFields, PeriodLine } from "@/admin/reports/ui";
@@ -14,7 +20,6 @@ import { Label, TextInput } from "@/components/ops/form-controls";
 import { Badge, buttonClass, PageHeader, Panel } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
-import { relId } from "@/domain/dispatch/assignment";
 import {
   PAYMENT_METHODS,
   type PaymentMethod,
@@ -23,7 +28,7 @@ import {
 } from "@/domain/finance/driver-pay";
 import { formatPence, type Pence } from "@/domain/money";
 import { formatDate } from "@/lib/time";
-import type { Driver, User } from "@/payload-types";
+import type { User } from "@/payload-types";
 
 /**
  * Driver Pay (approved by Cityline, 6 Oct 2026): what each driver is owed for
@@ -52,27 +57,14 @@ export async function DriverPayView(props: AdminViewServerProps) {
   const before = londonDayBounds(upTo).end;
   const period = resolvePeriod(params, now);
 
-  const [{ rows, changed }, payments, previous, drivers] = await Promise.all([
+  const [{ rows, changed }, payments, previous] = await Promise.all([
     loadOwed(payload, user, before),
     loadPayments(payload, user, { start: period.start, end: period.end }),
     loadPayments(payload, user, {
       start: period.previous.start,
       end: period.previous.end,
     }),
-    payload.find({
-      collection: "drivers",
-      pagination: false,
-      depth: 0,
-      user,
-      overrideAccess: false,
-    }),
   ]);
-  const driverName = new Map(
-    (drivers.docs as Driver[]).map((driver) => [
-      driver.id,
-      driver.fullName ?? `Driver ${driver.id}`,
-    ]),
-  );
 
   const toPay = rows.reduce((sum, row) => sum + Math.max(0, row.owed.netPence), 0);
   const cashHeld = rows.reduce((sum, row) => sum + row.owed.cashPence, 0);
@@ -190,9 +182,17 @@ export async function DriverPayView(props: AdminViewServerProps) {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.driver.id} className="border-line border-t">
+                  <tr
+                    key={`${row.payee.kind}:${row.payee.id}`}
+                    className="border-line border-t"
+                  >
                     <td className={TD}>
-                      <span className="text-ink font-medium">{row.driver.fullName}</span>
+                      <span className="text-ink font-medium">{row.payee.name}</span>
+                      {row.payee.kind === "operator" ? (
+                        <Badge tone="special" className="ml-2 align-middle">
+                          Operator
+                        </Badge>
+                      ) : null}
                       {row.owed.missingPrice.length ? (
                         <Badge tone="warn" className="ml-2 align-middle">
                           {row.owed.missingPrice.length} without a price
@@ -218,7 +218,7 @@ export async function DriverPayView(props: AdminViewServerProps) {
                     </td>
                     <td className={`${TD} text-right`}>
                       <Link
-                        href={`/admin/driver-pay/${row.driver.id}?upTo=${upTo}`}
+                        href={`${row.payee.payHref}?upTo=${upTo}`}
                         className={buttonClass("secondary", "sm")}
                       >
                         Review and pay
@@ -274,9 +274,7 @@ export async function DriverPayView(props: AdminViewServerProps) {
                           {job.reference}
                         </Link>
                       </td>
-                      <td className={TD}>
-                        {job.driverId ? driverName.get(job.driverId) : "—"}
-                      </td>
+                      <td className={TD}>{job.payee?.name ?? "—"}</td>
                       <td className={TD_NUM}>{money(job.driverPaidPricePence ?? 0)}</td>
                       <td className={TD_NUM}>{money(job.driverPricePence ?? 0)}</td>
                       <td className={`${TD_NUM} font-medium`}>
@@ -340,7 +338,7 @@ export async function DriverPayView(props: AdminViewServerProps) {
               </thead>
               <tbody>
                 {payments.map((payment) => {
-                  const driverId = relId(payment.driver);
+                  const payee = payeeOfPayment(payment);
                   const recordedBy =
                     payment.recordedBy && typeof payment.recordedBy === "object"
                       ? ((payment.recordedBy as User).name ??
@@ -373,12 +371,9 @@ export async function DriverPayView(props: AdminViewServerProps) {
                         {formatDate(new Date(payment.paidAt))}
                       </td>
                       <td className={TD}>
-                        {driverId ? (
-                          <Link
-                            href={`/admin/driver-pay/${driverId}`}
-                            className="hover:underline"
-                          >
-                            {driverName.get(driverId) ?? `Driver ${driverId}`}
+                        {payee ? (
+                          <Link href={payee.payHref} className="hover:underline">
+                            {payee.name}
                           </Link>
                         ) : (
                           "—"

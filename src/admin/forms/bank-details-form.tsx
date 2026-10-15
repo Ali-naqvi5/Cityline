@@ -15,9 +15,12 @@ import {
 /** Owner and Accounts. Sealed on the server before it is stored (spec §22). */
 export function BankDetailsForm({
   driverId,
+  operator = false,
   hasDetails,
 }: {
+  /** The driver's id, or the subcontracting operator's with `operator`. */
   driverId: number;
+  operator?: boolean;
   hasDetails: boolean;
 }) {
   const [state, action, pending] = useActionState(saveBankDetailsAction, EMPTY_FORM);
@@ -30,6 +33,7 @@ export function BankDetailsForm({
         autoComplete="off"
       >
         <input type="hidden" name="id" value={driverId} />
+        {operator ? <input type="hidden" name="owner" value="operators" /> : null}
         <FormField id="accountName" label="Account name">
           <input
             id="accountName"
@@ -70,6 +74,7 @@ export function BankDetailsForm({
       {hasDetails ? (
         <form onSubmit={submitWith(action)}>
           <input type="hidden" name="id" value={driverId} />
+          {operator ? <input type="hidden" name="owner" value="operators" /> : null}
           <input type="hidden" name="remove" value="1" />
           <SubmitButton pending={pending} variant="ghost" pendingLabel="Removing…">
             Remove bank details

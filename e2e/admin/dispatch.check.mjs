@@ -690,10 +690,23 @@ check(
 );
 await page.screenshot({ path: `${shots}/booking-progress.png`, fullPage: true });
 
-await page.selectOption(`#step-back-${pastJob}`, "at_pickup");
-await page.getByRole("button", { name: "Step back" }).click();
-await page.waitForURL(/notice=status-at_pickup/, { timeout: 15_000 });
-body = await text(page);
+// A completed booking is the Owner's to change (Cityline, 13 Oct 2026): the
+// Controller is not offered a step back; the Owner steps it back.
+check(
+  "a Controller is not offered a step back once the booking is completed",
+  (await page.locator(`#step-back-${pastJob}`).count()) === 0 &&
+    /Completed: only the Owner can change it now/.test(await text(page)),
+);
+{
+  const owner = await session("owner@local.test");
+  await owner.page.goto(`${base}/admin/jobs/${pastJob}`, { waitUntil: "networkidle" });
+  await owner.page.selectOption(`#step-back-${pastJob}`, "at_pickup");
+  await owner.page.getByRole("button", { name: "Step back" }).click();
+  await owner.page.waitForURL(/notice=status-at_pickup/, { timeout: 15_000 });
+  body = await text(owner.page);
+  await owner.context.close();
+}
+await page.goto(`${base}/admin/jobs/${pastJob}`, { waitUntil: "networkidle" });
 check(
   "stepping back from Completed to DAP undoes the later stages and says so in the history",
   sql(

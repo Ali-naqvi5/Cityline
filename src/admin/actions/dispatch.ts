@@ -25,7 +25,7 @@ import type { DriverMessageKind } from "@/domain/messaging/driver-message";
 import { driverDetailsEmail } from "@/domain/notifications/booking-emails";
 import { sendEmail } from "@/lib/email";
 import { driverDetailsEmailsOn } from "@/lib/features";
-import type { Booking, Driver, Job, User, Vehicle } from "@/payload-types";
+import type { Booking, Driver, Job, Operator, User, Vehicle } from "@/payload-types";
 
 /**
  * Creating, editing and dispatching jobs (spec §13, §14, §19, §27, §28).
@@ -272,7 +272,10 @@ export async function assignDriverAction(
   }
 
   const previousDriver = relId(job.driver);
-  const replacing = previousDriver !== null && previousDriver !== driverId;
+  // Taking the booking from a subcontracting operator needs a reason too.
+  const replacing =
+    (previousDriver !== null && previousDriver !== driverId) ||
+    relId(job.operator) !== null;
   const reason = takenOffReasonFrom(formData);
   if (replacing && !reason) {
     return { errors: { reason: TAKEN_OFF_MESSAGE }, message: TAKEN_OFF_MESSAGE };
@@ -286,6 +289,7 @@ export async function assignDriverAction(
       data: {
         driver: driverId,
         vehicle: vehicleId,
+        operator: null,
         ...(replacing ? { takenOffReason: reason } : {}),
         notifyPassenger: formData.get("notifyPassenger") === "on",
         // Left as it was when the box is empty: a change of driver keeps the
@@ -309,6 +313,70 @@ export async function assignDriverAction(
   if (previousDriver && previousDriver !== driverId)
     query.set("previous", String(previousDriver));
   redirect(`/admin/jobs/${job.id}?${query}`);
+}
+
+/**
+ * Giving a booking to a subcontracting operator (Cityline, 15 Oct 2026): a
+ * licensed operator who does it with their own driver and car. It runs the
+ * same stages as a driver's; the price is what Cityline pays the operator,
+ * paid in Driver Pay. Taking it from whoever has it needs a reason.
+ */
+export async function assignOperatorAction(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { payload, user } = await staffForAction("jobs.dispatch");
+  const job = await jobFor(payload, user, Number(text(formData, "jobId")));
+  if (!job) return { errors: {}, message: "That job no longer exists." };
+
+  const operatorId = Number(text(formData, "operatorId"));
+  if (!Number.isInteger(operatorId) || operatorId <= 0) {
+    return {
+      errors: { operatorId: "Choose an operator." },
+      message: "Choose an operator.",
+    };
+  }
+  const price = driverPriceFrom(formData);
+  if (price === "invalid") {
+    return {
+      errors: { driverPrice: DRIVER_PRICE_MESSAGE },
+      message: "Check the operator's price.",
+    };
+  }
+  const currentOperator = relId(job.operator);
+  const replacing =
+    relId(job.driver) !== null ||
+    (currentOperator !== null && currentOperator !== operatorId);
+  const reason = takenOffReasonFrom(formData);
+  if (replacing && !reason) {
+    return { errors: { reason: TAKEN_OFF_MESSAGE }, message: TAKEN_OFF_MESSAGE };
+  }
+
+  try {
+    await payload.update({
+      collection: "jobs",
+      id: job.id,
+      data: {
+        operator: operatorId,
+        driver: null,
+        vehicle: null,
+        ...(replacing ? { takenOffReason: reason } : {}),
+        ...(price === null ? {} : { driverPricePence: price }),
+      },
+      user,
+      overrideAccess: false,
+    });
+  } catch (error) {
+    const state = withReasonError(
+      payloadErrors(error, "giving a booking to an operator"),
+    );
+    if (state.errors.operator) state.errors.operatorId = state.errors.operator;
+    return state;
+  }
+  const previousDriver = relId(job.driver);
+  redirect(
+    `/admin/jobs/${job.id}?notice=assigned-operator${previousDriver ? `&previous=${previousDriver}` : ""}`,
+  );
 }
 
 export async function removeDriverAction(
@@ -464,23 +532,42 @@ const KIND_LABELS: Record<DriverMessageKind, string> = {
  */
 export async function recordWhatsAppAction(
   jobId: number,
-  driverId: number,
+  recipientId: number,
   kind: DriverMessageKind,
+  recipient: "driver" | "operator" = "driver",
 ): Promise<void> {
   const { payload, user } = await staffForAction("jobs.dispatch");
   const job = await jobFor(payload, user, jobId);
   if (!job) return;
-  const driver = (await payload.findByID({
-    collection: "drivers",
-    id: driverId,
-    depth: 0,
-    user,
-    overrideAccess: false,
-    disableErrors: true,
-  })) as Driver | null;
-  if (!driver) return;
+  const found =
+    recipient === "operator"
+      ? ((await payload.findByID({
+          collection: "operators",
+          id: recipientId,
+          depth: 0,
+          user,
+          overrideAccess: false,
+          disableErrors: true,
+        })) as Operator | null)
+      : ((await payload.findByID({
+          collection: "drivers",
+          id: recipientId,
+          depth: 0,
+          user,
+          overrideAccess: false,
+          disableErrors: true,
+        })) as Driver | null);
+  if (!found) return;
+  const name =
+    recipient === "operator"
+      ? `${(found as Operator).name} (operator)`
+      : ((found as Driver).fullName ?? "the driver");
+  const theirs =
+    recipient === "operator"
+      ? relId(job.operator) === found.id
+      : relId(job.driver) === found.id;
 
-  if ((kind === "new" || kind === "update") && relId(job.driver) === driver.id) {
+  if ((kind === "new" || kind === "update") && theirs) {
     await payload.update({
       collection: "jobs",
       id: job.id,
@@ -492,7 +579,7 @@ export async function recordWhatsAppAction(
   await recordEvent(payload, user, job.id, {
     type: "message_sent",
     field: "whatsapp",
-    newValue: `${KIND_LABELS[kind]} opened in WhatsApp for ${driver.fullName ?? "the driver"}`,
+    newValue: `${KIND_LABELS[kind]} opened in WhatsApp for ${name}`,
   });
 }
 
@@ -506,7 +593,7 @@ export async function setDriverMessageStatusAction(formData: FormData): Promise<
   const { payload, user } = await staffForAction("jobs.dispatch");
   const job = await jobFor(payload, user, Number(text(formData, "jobId")));
   const status = text(formData, "status");
-  if (!job || !(status in MESSAGE_STATUS_LABELS) || !job.driver) {
+  if (!job || !(status in MESSAGE_STATUS_LABELS) || !(job.driver || job.operator)) {
     redirect(`/admin/jobs/${job?.id ?? ""}`);
   }
   await payload.update({

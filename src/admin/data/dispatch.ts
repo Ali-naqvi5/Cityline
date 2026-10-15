@@ -5,7 +5,8 @@ import type { Payload } from "payload";
 import { carCheck, CLASH_MINUTES, driverCheck } from "@/domain/dispatch/eligibility";
 import { relId } from "@/domain/dispatch/assignment";
 import { OPEN_STATUSES } from "@/domain/jobs/labels";
-import type { Job, User } from "@/payload-types";
+import { licensedFromText, operatorCheck } from "@/domain/operators/operators";
+import type { Job, Operator, User } from "@/payload-types";
 
 import { loadDrivers, loadVehicles, ownerEngagement } from "./fleet";
 
@@ -142,4 +143,53 @@ export async function loadAssignmentBoard(
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** A subcontracting operator, as the assign page lists them. */
+export interface BoardOperator {
+  id: number;
+  name: string;
+  licensedFrom: string;
+  licenceNumber: string | null;
+  phone: string;
+  blocks: string[];
+  warnings: string[];
+}
+
+/**
+ * The subcontracting operators a job could go to (Cityline, 15 Oct 2026),
+ * checked against its pickup: one who has left, or whose recorded licence has
+ * run out, cannot take it. Those who have left are not listed unless the job
+ * is theirs now. The jobs collection's hook checks again when it is saved.
+ */
+export async function loadOperatorBoard(
+  payload: Payload,
+  user: User,
+  job: Job,
+): Promise<BoardOperator[]> {
+  const pickupAt = new Date(job.pickupAt);
+  const current = relId(job.operator);
+  const found = await payload.find({
+    collection: "operators",
+    sort: "name",
+    pagination: false,
+    depth: 0,
+    user,
+    overrideAccess: false,
+  });
+  return (found.docs as Operator[])
+    .filter(
+      (operator) =>
+        operator.id === current ||
+        !operator.dateLeft ||
+        new Date(operator.dateLeft) > pickupAt,
+    )
+    .map((operator) => ({
+      id: operator.id,
+      name: operator.name,
+      licensedFrom: licensedFromText(operator),
+      licenceNumber: operator.licenceNumber ?? null,
+      phone: operator.phone,
+      ...operatorCheck(operator, pickupAt),
+    }));
 }

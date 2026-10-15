@@ -18,13 +18,16 @@ export function WhatsAppButton({
   href,
   jobId,
   driverId,
+  operator = false,
   kind,
   label,
   variant = "primary",
 }: {
   href: string;
   jobId: number;
+  /** Who it goes to: the driver's id, or the operator's with `operator`. */
   driverId: number;
+  operator?: boolean;
   kind: DriverMessageKind;
   label: string;
   variant?: ButtonVariant;
@@ -38,7 +41,12 @@ export function WhatsAppButton({
       className={buttonClass(variant, "md")}
       onClick={() =>
         startTransition(async () => {
-          await recordWhatsAppAction(jobId, driverId, kind);
+          await recordWhatsAppAction(
+            jobId,
+            driverId,
+            kind,
+            operator ? "operator" : "driver",
+          );
           router.refresh();
         })
       }

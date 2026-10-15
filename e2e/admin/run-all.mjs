@@ -19,6 +19,7 @@ const ORDER = [
   "customers",
   "driver-pay",
   "driver-pay-period",
+  "operators",
   "expenses",
   "finance-report",
   "job-form",

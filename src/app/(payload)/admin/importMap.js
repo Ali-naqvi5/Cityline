@@ -34,6 +34,9 @@ import { ComplianceView as ComplianceView_4fb5b7cbbfd1ff69333d568991958cea } fro
 import { SuppliersView as SuppliersView_12c21d99cee898b2f1c4b0261af79483 } from "@/admin/views/suppliers";
 import { SupplierEditView as SupplierEditView_9bba9ac9d3d9454de8ffbc4ab9b4befd } from "@/admin/views/supplier-edit";
 import { SupplierView as SupplierView_f0082cf78846fbe490530ba18cf335f6 } from "@/admin/views/supplier";
+import { OperatorsView as OperatorsView_142d274f6945a6a5e43fc7eae48a0487 } from "@/admin/views/operators";
+import { OperatorEditView as OperatorEditView_3becffd0f9170dc2567491b8afa2ce5f } from "@/admin/views/operator-edit";
+import { OperatorView as OperatorView_f43a89948b04b811197fbcd090780748 } from "@/admin/views/operator";
 import { AuditView as AuditView_8b89ac28f9934dce49bc5588fd8fc7d3 } from "@/admin/views/audit";
 import { SettingsView as SettingsView_7fe7b5526c06e463b8bb586987c5dafe } from "@/admin/views/settings";
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from "@payloadcms/next/rsc";
@@ -94,6 +97,10 @@ export const importMap = {
   "@/admin/views/supplier-edit#SupplierEditView":
     SupplierEditView_9bba9ac9d3d9454de8ffbc4ab9b4befd,
   "@/admin/views/supplier#SupplierView": SupplierView_f0082cf78846fbe490530ba18cf335f6,
+  "@/admin/views/operators#OperatorsView": OperatorsView_142d274f6945a6a5e43fc7eae48a0487,
+  "@/admin/views/operator-edit#OperatorEditView":
+    OperatorEditView_3becffd0f9170dc2567491b8afa2ce5f,
+  "@/admin/views/operator#OperatorView": OperatorView_f43a89948b04b811197fbcd090780748,
   "@/admin/views/audit#AuditView": AuditView_8b89ac28f9934dce49bc5588fd8fc7d3,
   "@/admin/views/settings#SettingsView": SettingsView_7fe7b5526c06e463b8bb586987c5dafe,
   "@payloadcms/next/rsc#CollectionCards":

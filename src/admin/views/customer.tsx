@@ -220,7 +220,9 @@ export async function CustomerView(props: AdminViewServerProps) {
                           <span className="text-ink-3 block text-xs">
                             {driver
                               ? `${driver.fullName} · ${job.vehicleReg}`
-                              : "No driver"}
+                              : job.operator
+                                ? `${job.subcontractorName} · operator`
+                                : "No driver"}
                           </span>
                         </span>
                         <span className="flex items-start gap-3 md:flex-col md:items-end md:gap-1">

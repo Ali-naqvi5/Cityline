@@ -246,6 +246,15 @@ export const Jobs: CollectionConfig = {
         { name: "driver", type: "relationship", relationTo: "drivers", index: true },
         { name: "vehicle", type: "relationship", relationTo: "vehicles", index: true },
         {
+          // Or the booking goes to another licensed operator, who does it with
+          // their own driver and car (Cityline, 15 Oct 2026). A booking has a
+          // driver or an operator, never both.
+          name: "operator",
+          type: "relationship",
+          relationTo: "operators",
+          index: true,
+        },
+        {
           // Why the driver is coming off, sent with the change that removes or
           // replaces them. Never stored on the job: the dispatch hook requires
           // it from staff and writes it to the job's history.
@@ -272,7 +281,14 @@ export const Jobs: CollectionConfig = {
         { name: "takenAt", type: "date" },
         { name: "dispatchedByUser", type: "relationship", relationTo: "users" },
         { name: "dispatchedAt", type: "date" },
-        { name: "subcontractorName", type: "text" },
+        {
+          // The operator a booking was passed to, as their licence stood that
+          // day: copied at assignment, like the driver's PHV number.
+          name: "subcontractorName",
+          type: "text",
+        },
+        { name: "subcontractorLicenceNo", type: "text" },
+        { name: "subcontractorLicensedFrom", type: "text" },
         { name: "driverConfirmedAt", type: "date" },
         { name: "onTheWayAt", type: "date", admin: { description: "DOW" } },
         { name: "atPickupAt", type: "date", admin: { description: "DAP" } },

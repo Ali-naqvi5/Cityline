@@ -51,6 +51,10 @@ export const CAPABILITIES = [
   "compliance.verify",
   "suppliers.view",
   "suppliers.edit",
+  // Subcontracting operators: licensed operators Cityline passes bookings to
+  // (Cityline, 15 Oct 2026).
+  "operators.view",
+  "operators.edit",
   // Finance
   "finance.jobs",
   "payments.view",
@@ -97,6 +101,8 @@ const CONTROLLER: readonly Capability[] = [
   "compliance.verify",
   "suppliers.view",
   "suppliers.edit",
+  "operators.view",
+  "operators.edit",
   "reports.operational",
   "tfl.register",
   "runSheet",
@@ -113,6 +119,7 @@ const ACCOUNTS: readonly Capability[] = [
   "customers.view",
   "drivers.view",
   "suppliers.view",
+  "operators.view",
   // Finance.
   "finance.jobs",
   "payments.view",

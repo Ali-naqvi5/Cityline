@@ -20,12 +20,18 @@ import { PAYMENT_METHODS, type PaymentMethod } from "@/domain/finance/driver-pay
 
 const RECEIPT_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
+/** A payee's page in Driver Pay: a driver's, or a subcontracting operator's. */
+const payHref = (kind: "driver" | "operator", id: number) =>
+  kind === "operator" ? `/admin/driver-pay/operators/${id}` : `/admin/driver-pay/${id}`;
+
 export async function recordDriverPaymentAction(
   _previous: FormState,
   formData: FormData,
 ): Promise<FormState> {
   const { payload, user } = await staffForAction("driverPay.manage");
-  const driverId = Number(text(formData, "driverId"));
+  // Paid to a driver, or to a subcontracting operator (Cityline, 15 Oct 2026).
+  const payeeKind = text(formData, "payeeKind") === "operator" ? "operator" : "driver";
+  const payeeId = Number(text(formData, "payeeId") || text(formData, "driverId"));
   const upTo = text(formData, "upTo");
   const paidAt = text(formData, "paidAt");
   const method = text(formData, "method");
@@ -54,7 +60,7 @@ export async function recordDriverPaymentAction(
       errors.receipt = "That picture could not be read. Try another.";
     }
   }
-  if (!Number.isInteger(driverId) || driverId <= 0 || !isValidDay(upTo)) {
+  if (!Number.isInteger(payeeId) || payeeId <= 0 || !isValidDay(upTo)) {
     return { errors, message: "That driver or date is not valid. Reload the page." };
   }
   if (Object.keys(errors).length) {
@@ -81,7 +87,7 @@ export async function recordDriverPaymentAction(
     const saved = await payload.create({
       collection: "driver-payments",
       data: {
-        driver: driverId,
+        [payeeKind]: payeeId,
         upTo: dayToIso(upTo)!,
         paidAt: dayToIso(paidAt)!,
         method: method as PaymentMethod,
@@ -97,7 +103,9 @@ export async function recordDriverPaymentAction(
   } catch (error) {
     return payloadErrors(error, "recording a driver payment");
   }
-  redirect(`/admin/driver-pay/${driverId}?upTo=${upTo}&notice=paid&payment=${paymentId}`);
+  redirect(
+    `${payHref(payeeKind, payeeId)}?upTo=${upTo}&notice=paid&payment=${paymentId}`,
+  );
 }
 
 /** Whether the upload really is a picture the statement can print. */
@@ -116,7 +124,8 @@ export async function voidDriverPaymentAction(
 ): Promise<FormState> {
   const { payload, user } = await staffForAction("driverPay.manage");
   const id = Number(text(formData, "paymentId"));
-  const driverId = Number(text(formData, "driverId"));
+  const payeeKind = text(formData, "payeeKind") === "operator" ? "operator" : "driver";
+  const payeeId = Number(text(formData, "payeeId") || text(formData, "driverId"));
   const reason = text(formData, "reason").slice(0, 1000);
   if (!reason) {
     return { errors: { reason: "Write why this payment is void." }, message: "" };
@@ -134,5 +143,5 @@ export async function voidDriverPaymentAction(
     if (state.errors.voidReason) state.errors.reason = state.errors.voidReason;
     return state;
   }
-  redirect(`/admin/driver-pay/${driverId}?notice=voided`);
+  redirect(`${payHref(payeeKind, payeeId)}?notice=voided`);
 }

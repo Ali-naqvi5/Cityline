@@ -77,6 +77,17 @@ describe("parseBookingFilters", () => {
   });
 });
 
+describe("a subcontracting operator in the driver filter", () => {
+  it("reads op-3 as operator 3, and filters by them", () => {
+    const filters = parseBookingFilters({ driver: "op-3" });
+    expect(filters).toMatchObject({ driver: null, operator: 3 });
+    expect(conditions(buildBookingsWhere(filters, NOW))).toEqual(
+      expect.arrayContaining([{ operator: { equals: 3 } }]),
+    );
+    expect(bookingsHref(filters)).toContain("driver=op-3");
+  });
+});
+
 describe("pickupRange", () => {
   it("starts 'upcoming' at the beginning of today, London time", () => {
     const { from, to } = pickupRange({ when: "upcoming", from: "", to: "" }, NOW);
@@ -134,7 +145,8 @@ describe("buildBookingsWhere", () => {
     const where = buildBookingsWhere(parseBookingFilters({ noDriverPrice: "1" }), NOW);
     expect(conditions(where)).toEqual(
       expect.arrayContaining([
-        { driver: { exists: true } },
+        // With a driver, or with a subcontracting operator.
+        { or: [{ driver: { exists: true } }, { operator: { exists: true } }] },
         { driverPricePence: { exists: false } },
       ]),
     );
@@ -154,6 +166,7 @@ describe("buildBookingsWhere", () => {
       expect.arrayContaining([
         { supplier: { equals: 3 } },
         { driver: { exists: false } },
+        { operator: { exists: false } },
         { paymentMethod: { equals: "cash" } },
         { takenByUser: { equals: 2 } },
       ]),

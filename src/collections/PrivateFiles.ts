@@ -36,6 +36,7 @@ export const PrivateFiles: CollectionConfig = {
       "vehicles.view",
       "expenses.view",
       "driverPay.view",
+      "operators.view",
     ),
     create: allowAny(
       "drivers.edit",
@@ -43,6 +44,7 @@ export const PrivateFiles: CollectionConfig = {
       "compliance.verify",
       "expenses.manage",
       "driverPay.manage",
+      "operators.edit",
     ),
     update: () => false,
     delete: () => false,
@@ -62,6 +64,7 @@ export const PrivateFiles: CollectionConfig = {
         { label: "Vehicle document", value: "vehicle_document" },
         { label: "Driver photo", value: "driver_photo" },
         { label: "Receipt", value: "receipt" },
+        { label: "Operator licence", value: "operator_licence" },
         { label: "Other", value: "other" },
       ],
     },

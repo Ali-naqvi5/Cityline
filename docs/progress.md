@@ -3,7 +3,7 @@
 Where the build actually stands. Read this before starting work; update it
 before finishing.
 
-**Last updated:** 14 October 2026
+**Last updated:** 15 October 2026
 
 Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-deviations.md)
 (why the build differs from the designs), [`runbook-vps.md`](runbook-vps.md)
@@ -14,24 +14,24 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 
 ## At a glance
 
-| Check                   | State                                                                                            |
-| ----------------------- | ------------------------------------------------------------------------------------------------ |
-| `pnpm typecheck`        | passing (see the `.next/dev` trap below)                                                         |
-| `pnpm lint`             | passing                                                                                          |
-| `pnpm format:check`     | passing                                                                                          |
-| `pnpm check:compliance` | passing — 424 files, wording + claims                                                            |
-| `pnpm check:migrations` | passing — 18 migrations, additive only                                                           |
-| `pnpm test`             | passing — 593 tests across 62 files                                                              |
-| `pnpm build`            | passing (13 Oct)                                                                                 |
-| `pnpm e2e`              | last run 29 Sep — 18 tests passing                                                               |
-| `pnpm e2e:admin`        | `owner-rules`, `driver-pay`, `driver-pay-period` passed 13–14 Oct; the other 16 not since 10 Oct |
+| Check                   | State                                                                                                                                                                                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm typecheck`        | passing (see the `.next/dev` trap below)                                                                                                                                                                     |
+| `pnpm lint`             | passing                                                                                                                                                                                                      |
+| `pnpm format:check`     | passing                                                                                                                                                                                                      |
+| `pnpm check:compliance` | passing — 437 files, wording + claims                                                                                                                                                                        |
+| `pnpm check:migrations` | passing — 19 migrations, additive only                                                                                                                                                                       |
+| `pnpm test`             | passing — 598 tests across 63 files                                                                                                                                                                          |
+| `pnpm build`            | passing (15 Oct)                                                                                                                                                                                             |
+| `pnpm e2e`              | last run 29 Sep — 18 tests passing                                                                                                                                                                           |
+| `pnpm e2e:admin`        | 15 Oct: `operators`, `fleet`, `dispatch`, `assign`, `driver-pay`, `driver-pay-period`, `owner-rules`, `run-sheet`, `report`, `finance-report`, `access-filters-classes` passed; the other 9 not since 10 Oct |
 
 History is on GitHub (`Ali-naqvi5/Cityline`, branch `main`). Pushing `main`
 deploys to production — there is no staging (see below).
 
 ---
 
-## Where things stand on 14 Oct 2026 — read this first
+## Where things stand on 15 Oct 2026 — read this first
 
 ### Git and deploys
 
@@ -47,10 +47,15 @@ deploys to production — there is no staging (see below).
   - The server's current script already dumps the database before
     migrating; the newer one also checks the dump finished before going on.
   - The Owner may already have copied them; nobody has confirmed.
-- **Waiting to be pushed (14 Oct): the payment period.** It brings **one
-  migration**, `20261014_153546_driver_payment_period`. The migration
-  adds the `period_from` column, then fills it in for the payments
-  already made, by the same rule as new ones. It writes only that column.
+- **Pushed (14 Oct): the payment period,** with its migration
+  `20261014_153546_driver_payment_period`.
+- **Waiting to be pushed (15 Oct): subcontracting operators.** It brings
+  **one migration**, `20261015_161905_subcontracting_operators`.
+  - It adds the `operators` table, the booking's `operator_id` and its two
+    TfL record columns, and the payment's `operator_id`.
+  - It adds one private-file purpose.
+  - It lets a payment's `driver_id` be empty, for payments to operators.
+  - No existing data changes.
 - **After each deploy, check:**
   - the new logo in the website header and the admin;
   - a driver's statement link (Driver Pay → a payment → send details).
@@ -99,6 +104,12 @@ Each decision is written up in `CLAUDE.md`:
 - Each driver payment shows the **period it covers**, e.g. "14 Oct – 25 Oct
   2026". It runs from the day after the driver's last payment to its own
   "up to" day, whatever days were worked (14 Oct).
+- **Subcontracting operators** (15 Oct), under Fleet:
+  - These are licensed operators Cityline passes bookings to. They use
+    their own drivers and cars, with no compliance checks.
+  - A booking goes to one from the assign page and runs the same stages.
+  - They are paid in Driver Pay. TfL's record on the booking names them,
+    their licence and who licensed them.
 - **Declined: changing a booking's driver after completion,** by anyone,
   the Owner included (14 Oct). Voiding a payment frees its bookings back to
   the driver on the booking.

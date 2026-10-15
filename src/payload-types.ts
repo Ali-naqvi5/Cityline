@@ -80,6 +80,7 @@ export interface Config {
     vehicles: Vehicle;
     'vehicle-documents': VehicleDocument;
     suppliers: Supplier;
+    operators: Operator;
     'private-files': PrivateFile;
     'driver-payments': DriverPayment;
     'supplier-payments': SupplierPayment;
@@ -108,6 +109,7 @@ export interface Config {
     vehicles: VehiclesSelect<false> | VehiclesSelect<true>;
     'vehicle-documents': VehicleDocumentsSelect<false> | VehicleDocumentsSelect<true>;
     suppliers: SuppliersSelect<false> | SuppliersSelect<true>;
+    operators: OperatorsSelect<false> | OperatorsSelect<true>;
     'private-files': PrivateFilesSelect<false> | PrivateFilesSelect<true>;
     'driver-payments': DriverPaymentsSelect<false> | DriverPaymentsSelect<true>;
     'supplier-payments': SupplierPaymentsSelect<false> | SupplierPaymentsSelect<true>;
@@ -393,6 +395,7 @@ export interface Job {
     | 'cancelled';
   driver?: (number | null) | Driver;
   vehicle?: (number | null) | Vehicle;
+  operator?: (number | null) | Operator;
   takenOffReason?: string | null;
   /**
    * Copied onto the job at assignment, not looked up later (CMP-03). The register must show the number that applied on the day.
@@ -407,6 +410,8 @@ export interface Job {
   dispatchedByUser?: (number | null) | User;
   dispatchedAt?: string | null;
   subcontractorName?: string | null;
+  subcontractorLicenceNo?: string | null;
+  subcontractorLicensedFrom?: string | null;
   driverConfirmedAt?: string | null;
   /**
    * DOW
@@ -573,7 +578,7 @@ export interface Driver {
  */
 export interface PrivateFile {
   id: number;
-  purpose: 'driver_document' | 'vehicle_document' | 'driver_photo' | 'receipt' | 'other';
+  purpose: 'driver_document' | 'vehicle_document' | 'driver_photo' | 'receipt' | 'operator_licence' | 'other';
   uploadedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
@@ -644,6 +649,52 @@ export interface Vehicle {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "operators".
+ */
+export interface Operator {
+  id: number;
+  name: string;
+  /**
+   * The company's registered name, if different.
+   */
+  legalName?: string | null;
+  licensedFrom: 'tfl' | 'council' | 'scotland';
+  /**
+   * The council or authority, when not TfL.
+   */
+  licensingAuthority?: string | null;
+  licenceNumber?: string | null;
+  licenceExpiresAt?: string | null;
+  /**
+   * A copy of their operator licence.
+   */
+  licenceCopy?: (number | null) | PrivateFile;
+  /**
+   * Where they take bookings.
+   */
+  operatingCentre?: string | null;
+  contactName?: string | null;
+  phone: string;
+  email?: string | null;
+  /**
+   * When they agreed to receive jobs on WhatsApp.
+   */
+  whatsappConsentAt?: string | null;
+  dateJoined?: string | null;
+  /**
+   * No bookings go to them from this day.
+   */
+  dateLeft?: string | null;
+  companyNumber?: string | null;
+  vatNumber?: string | null;
+  bankDetailsSealed?: string | null;
+  bankAccountLast4?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Payments to drivers for their bookings. Voided, never edited or deleted.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -651,7 +702,8 @@ export interface Vehicle {
  */
 export interface DriverPayment {
   id: number;
-  driver: number | Driver;
+  driver?: (number | null) | Driver;
+  operator?: (number | null) | Operator;
   /**
    * The first day this payment covers: the day after the driver's last payment, or its first booking's day. Worked out when it is recorded.
    */
@@ -1094,6 +1146,10 @@ export interface PayloadLockedDocument {
         value: number | Supplier;
       } | null)
     | ({
+        relationTo: 'operators';
+        value: number | Operator;
+      } | null)
+    | ({
         relationTo: 'private-files';
         value: number | PrivateFile;
       } | null)
@@ -1281,6 +1337,7 @@ export interface JobsSelect<T extends boolean = true> {
   status?: T;
   driver?: T;
   vehicle?: T;
+  operator?: T;
   takenOffReason?: T;
   driverPhvNo?: T;
   vehicleReg?: T;
@@ -1289,6 +1346,8 @@ export interface JobsSelect<T extends boolean = true> {
   dispatchedByUser?: T;
   dispatchedAt?: T;
   subcontractorName?: T;
+  subcontractorLicenceNo?: T;
+  subcontractorLicensedFrom?: T;
   driverConfirmedAt?: T;
   onTheWayAt?: T;
   atPickupAt?: T;
@@ -1497,6 +1556,33 @@ export interface SuppliersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "operators_select".
+ */
+export interface OperatorsSelect<T extends boolean = true> {
+  name?: T;
+  legalName?: T;
+  licensedFrom?: T;
+  licensingAuthority?: T;
+  licenceNumber?: T;
+  licenceExpiresAt?: T;
+  licenceCopy?: T;
+  operatingCentre?: T;
+  contactName?: T;
+  phone?: T;
+  email?: T;
+  whatsappConsentAt?: T;
+  dateJoined?: T;
+  dateLeft?: T;
+  companyNumber?: T;
+  vatNumber?: T;
+  bankDetailsSealed?: T;
+  bankAccountLast4?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "private-files_select".
  */
 export interface PrivateFilesSelect<T extends boolean = true> {
@@ -1520,6 +1606,7 @@ export interface PrivateFilesSelect<T extends boolean = true> {
  */
 export interface DriverPaymentsSelect<T extends boolean = true> {
   driver?: T;
+  operator?: T;
   periodFrom?: T;
   upTo?: T;
   paidAt?: T;

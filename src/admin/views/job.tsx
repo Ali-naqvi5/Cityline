@@ -3,9 +3,7 @@ import {
   Ban,
   Lock,
   Mail,
-  MessageCircle,
   Pencil,
-  Phone,
   Printer,
   Repeat,
   Trash2,
@@ -34,6 +32,7 @@ import { NextStageButtons, StageProgress } from "@/admin/forms/stage-controls";
 import { StepBackForm } from "@/admin/forms/step-back-form";
 import { WhatsAppButton } from "@/admin/forms/whatsapp-button";
 import { param, requireStaff } from "@/admin/guard";
+import { ContactButtons } from "@/components/ops/contact-buttons";
 import { ConfirmDialog } from "@/components/ops/dialog";
 import { TEXTAREA_CLASS } from "@/components/ops/form-classes";
 import { PrintButton } from "@/components/ops/filter-form";
@@ -76,7 +75,6 @@ import {
 import {
   driverMessage,
   messageJobFrom,
-  whatsappChat,
   whatsappLink,
   type DriverMessageKind,
 } from "@/domain/messaging/driver-message";
@@ -90,6 +88,7 @@ import type {
   Customer,
   Driver,
   Job,
+  Operator,
   JobEvent,
   Supplier,
   User,
@@ -239,32 +238,6 @@ function extraName(slug: string): string {
   return EXTRAS.find((extra) => extra.slug === slug)?.name ?? slug;
 }
 
-/** Call or WhatsApp someone from the booking — the operator runs jobs live. */
-function ContactButtons({ phone, who }: { phone: string; who: string }) {
-  return (
-    <span className="mt-1.5 flex flex-wrap gap-1.5 print:hidden">
-      <a
-        href={`tel:${phone}`}
-        className={buttonClass("secondary", "sm")}
-        aria-label={`Call ${who}`}
-      >
-        <Phone aria-hidden className="h-4 w-4" />
-        Call
-      </a>
-      <a
-        href={whatsappChat(phone)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={buttonClass("secondary", "sm")}
-        aria-label={`WhatsApp ${who}`}
-      >
-        <MessageCircle aria-hidden className="h-4 w-4" />
-        WhatsApp
-      </a>
-    </span>
-  );
-}
-
 const NOTICES: Record<string, { tone: "ok" | "warn" | "danger"; text: string }> = {
   "link-sent": { tone: "ok", text: "Manage booking link emailed to the customer." },
   "link-failed": {
@@ -278,6 +251,10 @@ const NOTICES: Record<string, { tone: "ok" | "warn" | "danger"; text: string }> 
   created: { tone: "ok", text: "Booking created." },
   saved: { tone: "ok", text: "Changes saved." },
   assigned: { tone: "ok", text: "Driver assigned. Send them the job on WhatsApp below." },
+  "assigned-operator": {
+    tone: "ok",
+    text: "Given to the operator. Send them the job on WhatsApp below.",
+  },
   "driver-removed": { tone: "ok", text: "Driver removed. The job is unassigned again." },
   "status-no_show": {
     tone: "ok",
@@ -314,27 +291,34 @@ const PASSENGER_STATUS: Record<string, { label: string; tone: Tone }> = {
   failed: { label: "Not sent — failed", tone: "danger" },
 };
 
+/** Who a booking's WhatsApp message goes to: its driver, or its operator. */
+interface Recipient {
+  id: number;
+  name: string;
+  phone: string;
+  consent: boolean;
+  operator: boolean;
+  editHref: string;
+}
+
 function DriverMessage({
   job,
-  driver,
+  to,
   kind,
   label,
   variant,
 }: {
   job: Job;
-  driver: Driver;
+  to: Recipient;
   kind: DriverMessageKind;
   label: string;
   variant?: "primary" | "secondary";
 }) {
-  if (!driver.whatsappConsentAt) {
+  if (!to.consent) {
     return (
       <p className="text-ink-3 text-sm">
-        {driver.fullName} has not agreed to receive jobs on WhatsApp (WA-05).{" "}
-        <Link
-          href={`/admin/drivers/${driver.id}/edit`}
-          className="text-accent hover:underline"
-        >
+        {to.name} has not agreed to receive jobs on WhatsApp (WA-05).{" "}
+        <Link href={to.editHref} className="text-accent hover:underline">
           Record their consent
         </Link>{" "}
         to send it from here.
@@ -344,9 +328,10 @@ function DriverMessage({
   const text = driverMessage(kind, messageJobFrom(job), company.phone);
   return (
     <WhatsAppButton
-      href={whatsappLink(driver.phone, text)}
+      href={whatsappLink(to.phone, text)}
       jobId={job.id}
-      driverId={driver.id}
+      driverId={to.id}
+      operator={to.operator}
       kind={kind}
       label={label}
       variant={variant}
@@ -432,6 +417,28 @@ export async function JobView(props: AdminViewServerProps) {
   const supplier =
     typeof job.supplier === "object" ? (job.supplier as Supplier | null) : null;
   const driver = typeof job.driver === "object" ? (job.driver as Driver | null) : null;
+  // Or a subcontracting operator, who does it with their own driver and car.
+  const operator =
+    typeof job.operator === "object" ? (job.operator as Operator | null) : null;
+  const recipient: Recipient | null = driver
+    ? {
+        id: driver.id,
+        name: driver.fullName ?? "The driver",
+        phone: driver.phone,
+        consent: Boolean(driver.whatsappConsentAt),
+        operator: false,
+        editHref: `/admin/drivers/${driver.id}/edit`,
+      }
+    : operator
+      ? {
+          id: operator.id,
+          name: operator.name,
+          phone: operator.phone,
+          consent: Boolean(operator.whatsappConsentAt),
+          operator: true,
+          editHref: `/admin/operators/${operator.id}/edit`,
+        }
+      : null;
   const vehicle =
     typeof job.vehicle === "object" ? (job.vehicle as Vehicle | null) : null;
   const outbound =
@@ -533,14 +540,24 @@ export async function JobView(props: AdminViewServerProps) {
           history below.
         </Notice>
       ) : null}
-      {previousDriver && (notice === "assigned" || notice === "driver-removed") ? (
+      {previousDriver &&
+      (notice === "assigned" ||
+        notice === "driver-removed" ||
+        notice === "assigned-operator") ? (
         <div className="border-warn-line bg-warn-soft mb-4 flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
           <p className="text-ink text-sm">
             Tell <strong>{previousDriver.fullName}</strong> the job is no longer theirs.
           </p>
           <DriverMessage
             job={job}
-            driver={previousDriver}
+            to={{
+              id: previousDriver.id,
+              name: previousDriver.fullName ?? "The driver",
+              phone: previousDriver.phone,
+              consent: Boolean(previousDriver.whatsappConsentAt),
+              operator: false,
+              editHref: `/admin/drivers/${previousDriver.id}/edit`,
+            }}
             kind="removed"
             label="Send “job removed” on WhatsApp"
             variant="secondary"
@@ -576,7 +593,7 @@ export async function JobView(props: AdminViewServerProps) {
         }
         actions={
           <div className="flex flex-wrap gap-2 print:hidden">
-            {dispatches && !closed && !driver ? (
+            {dispatches && !closed && !driver && !job.operator ? (
               <ButtonLink href={`/admin/jobs/${job.id}/assign`} variant="primary">
                 <UserPlus aria-hidden className="h-4 w-4" />
                 Assign driver
@@ -1000,7 +1017,7 @@ export async function JobView(props: AdminViewServerProps) {
             title="Driver and dispatch"
             description="The TfL booking record (CMP-03)"
             actions={
-              dispatches && changeable && driver ? (
+              dispatches && changeable && (driver || job.operator) ? (
                 <ButtonLink href={`/admin/jobs/${job.id}/assign`} size="sm">
                   Change
                 </ButtonLink>
@@ -1008,41 +1025,89 @@ export async function JobView(props: AdminViewServerProps) {
             }
           >
             <Fields className="sm:grid-cols-1">
-              <Field label="Driver">
-                {driver ? (
-                  <>
-                    <Link
-                      href={`/admin/drivers/${driver.id}`}
-                      className="text-ink font-medium hover:underline"
-                    >
-                      {driver.fullName}
-                    </Link>
-                    <span className="text-ink-3 block text-sm tabular-nums">
-                      {driver.phone}
+              {job.operator ? (
+                <>
+                  <Field label="Subcontracted to">
+                    {operator ? (
+                      <Link
+                        href={`/admin/operators/${operator.id}`}
+                        className="text-ink font-medium hover:underline"
+                      >
+                        {operator.name}
+                      </Link>
+                    ) : (
+                      <span className="text-ink font-medium">
+                        {job.subcontractorName}
+                      </span>
+                    )}
+                    <span className="text-ink-3 block text-sm">
+                      Their own driver and car
                     </span>
-                    <ContactButtons phone={driver.phone} who={driver.firstName} />
-                  </>
-                ) : (
-                  <NotRecorded>Not assigned</NotRecorded>
-                )}
-              </Field>
-              <Field label="PHV licence">
-                {job.driverPhvNo || <NotRecorded>Not assigned</NotRecorded>}
-              </Field>
-              <Field label="Vehicle">
-                {vehicle ? (
-                  <>
-                    <span className="font-medium tabular-nums">
-                      {vehicle.registration}
-                    </span>{" "}
-                    <span className="text-ink-3 text-sm">
-                      {vehicle.colour} {vehicle.make} {vehicle.model}
-                    </span>
-                  </>
-                ) : (
-                  job.vehicleReg || <NotRecorded>Not assigned</NotRecorded>
-                )}
-              </Field>
+                    {operator ? (
+                      <>
+                        <span className="text-ink-3 block text-sm tabular-nums">
+                          {operator.phone}
+                        </span>
+                        <ContactButtons
+                          phone={operator.phone}
+                          who={operator.contactName || operator.name}
+                        />
+                      </>
+                    ) : null}
+                  </Field>
+                  <Field label="Licensed by">
+                    {job.subcontractorLicensedFrom || (
+                      <NotRecorded>Not recorded</NotRecorded>
+                    )}
+                  </Field>
+                  <Field label="Operator licence">
+                    {job.subcontractorLicenceNo || (
+                      <NotRecorded>Not recorded</NotRecorded>
+                    )}
+                  </Field>
+                </>
+              ) : null}
+              {job.operator ? null : (
+                <Field label="Driver">
+                  {driver ? (
+                    <>
+                      <Link
+                        href={`/admin/drivers/${driver.id}`}
+                        className="text-ink font-medium hover:underline"
+                      >
+                        {driver.fullName}
+                      </Link>
+                      <span className="text-ink-3 block text-sm tabular-nums">
+                        {driver.phone}
+                      </span>
+                      <ContactButtons phone={driver.phone} who={driver.firstName} />
+                    </>
+                  ) : (
+                    <NotRecorded>Not assigned</NotRecorded>
+                  )}
+                </Field>
+              )}
+              {job.operator ? null : (
+                <Field label="PHV licence">
+                  {job.driverPhvNo || <NotRecorded>Not assigned</NotRecorded>}
+                </Field>
+              )}
+              {job.operator ? null : (
+                <Field label="Vehicle">
+                  {vehicle ? (
+                    <>
+                      <span className="font-medium tabular-nums">
+                        {vehicle.registration}
+                      </span>{" "}
+                      <span className="text-ink-3 text-sm">
+                        {vehicle.colour} {vehicle.make} {vehicle.model}
+                      </span>
+                    </>
+                  ) : (
+                    job.vehicleReg || <NotRecorded>Not assigned</NotRecorded>
+                  )}
+                </Field>
+              )}
               <Field label="Dispatched by">
                 {dispatcher ? (
                   <>
@@ -1073,6 +1138,7 @@ export async function JobView(props: AdminViewServerProps) {
                   key={job.driverPricePence ?? "none"}
                   jobId={job.id}
                   pricePence={job.driverPricePence ?? null}
+                  operator={Boolean(job.operator)}
                 />
               ) : (
                 <Fields className="sm:grid-cols-1">
@@ -1089,9 +1155,13 @@ export async function JobView(props: AdminViewServerProps) {
             </div>
           </Panel>
 
-          {driver && dispatches && (!closed || status === "cancelled") ? (
+          {recipient && dispatches && (!closed || status === "cancelled") ? (
             <Panel
-              title="Driver's WhatsApp message"
+              title={
+                recipient.operator
+                  ? "Operator's WhatsApp message"
+                  : "Driver's WhatsApp message"
+              }
               actions={<Badge tone={messageStatus.tone}>{messageStatus.label}</Badge>}
             >
               <div className="flex flex-col gap-3">
@@ -1103,14 +1173,18 @@ export async function JobView(props: AdminViewServerProps) {
                 {job.status === "cancelled" ? (
                   <DriverMessage
                     job={job}
-                    driver={driver}
+                    to={recipient}
                     kind="cancelled"
-                    label="Tell the driver it is cancelled"
+                    label={
+                      recipient.operator
+                        ? "Tell the operator it is cancelled"
+                        : "Tell the driver it is cancelled"
+                    }
                   />
                 ) : !closed ? (
                   <DriverMessage
                     job={job}
-                    driver={driver}
+                    to={recipient}
                     kind={job.driverMessageStatus === "not_sent" ? "new" : "update"}
                     label={
                       job.driverMessageStatus === "not_sent"

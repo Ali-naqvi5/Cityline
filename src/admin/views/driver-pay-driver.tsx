@@ -46,7 +46,8 @@ import type { PrivateFile, User } from "@/payload-types";
  * Paying one driver (Driver Pay): where to send the money, their done and
  * priced bookings up to the chosen day — tick what this payment covers — and
  * every payment made to them, each with its statement as a PDF and ready to
- * send on WhatsApp. Owner and Accounts.
+ * send on WhatsApp. Owner and Accounts. A subcontracting operator is paid on
+ * the same page, at `/driver-pay/operators/:id` (Cityline, 15 Oct 2026).
  */
 
 const money = (pence: number) => formatPence(pence as Pence);
@@ -54,8 +55,15 @@ const sortCode = (value: string) =>
   value.replace(/\D/g, "").replace(/(\d{2})(?=\d)/g, "$1-");
 
 export async function DriverPayDriverView(props: AdminViewServerProps) {
-  const idSegment = segment(props, 1);
-  const context = requireStaff(props, "driverPay.view", `/admin/driver-pay/${idSegment}`);
+  const kind = segment(props, 1) === "operators" ? "operator" : "driver";
+  const idSegment = kind === "operator" ? segment(props, 2) : segment(props, 1);
+  const context = requireStaff(
+    props,
+    "driverPay.view",
+    kind === "operator"
+      ? `/admin/driver-pay/operators/${idSegment}`
+      : `/admin/driver-pay/${idSegment}`,
+  );
   if (context.denied) return <DeniedPage reason={context.reason} />;
   const { user, payload } = context;
   const now = new Date();
@@ -64,21 +72,30 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
   const upTo = isValidDay(upToParam) ? upToParam : today;
 
   const data = Number.isInteger(Number(idSegment))
-    ? await loadDriverPay(payload, user, Number(idSegment), londonDayBounds(upTo).end)
+    ? await loadDriverPay(
+        payload,
+        user,
+        { kind, id: Number(idSegment) },
+        londonDayBounds(upTo).end,
+      )
     : null;
   if (!data) {
     return (
       <OpsShell user={user} active="driver-pay">
         <Panel>
           <EmptyState
-            title="No driver with that number"
+            title={
+              kind === "operator"
+                ? "No operator with that number"
+                : "No driver with that number"
+            }
             action={<ButtonLink href="/admin/driver-pay">Back to Driver Pay</ButtonLink>}
           />
         </Panel>
       </OpsShell>
     );
   }
-  const { driver, bank, canSeeBank, owed, payments } = data;
+  const { payee, bank, canSeeBank, owed, payments } = data;
   const canManage = can(user.role, "driverPay.manage");
   const notice = param(props.searchParams, "notice");
   const justPaid = Number(param(props.searchParams, "payment")) || null;
@@ -86,9 +103,9 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
 
   const sendLink = (payment: (typeof payments)[number]) =>
     whatsappLink(
-      driver.phone,
+      payee.phone,
       paymentMessage(
-        driver.firstName,
+        payee.greeting,
         {
           reference: paymentReference(payment.id),
           paidAt: new Date(payment.paidAt),
@@ -105,7 +122,7 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
         company.phone,
       ),
     );
-  const consent = Boolean(driver.whatsappConsentAt);
+  const consent = payee.whatsappConsent;
   // The day the driver's last payment (not voided) ran up to, before this
   // one's: the period a new payment covers starts the day after.
   const upToStart = londonDayBounds(upTo).start.getTime();
@@ -137,7 +154,7 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
           <p className="text-ok text-sm">
             Payment {paymentReference(paidNow.id)} recorded:{" "}
             <strong>{money(Math.abs(paidNow.amountPence ?? 0))}</strong>
-            {(paidNow.amountPence ?? 0) < 0 ? ` paid by ${driver.firstName}` : ""}.
+            {(paidNow.amountPence ?? 0) < 0 ? ` paid by ${payee.greeting}` : ""}.
           </p>
           <div className="flex flex-wrap gap-2">
             {consent ? (
@@ -169,13 +186,10 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
 
       <PageHeader
         eyebrow="Driver Pay"
-        title={driver.fullName ?? "Driver"}
+        title={payee.name}
         meta={
-          <Link
-            href={`/admin/drivers/${driver.id}`}
-            className="text-accent text-sm hover:underline"
-          >
-            Driver&apos;s page
+          <Link href={payee.href} className="text-accent text-sm hover:underline">
+            {payee.kind === "operator" ? "Operator's page" : "Driver's page"}
           </Link>
         }
       />
@@ -186,10 +200,7 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
             title={`Owed up to ${formatDate(new Date(`${upTo}T12:00:00Z`))}`}
             description="Completed and PNS bookings with a driver price, not yet paid"
             actions={
-              <FilterForm
-                action={`/admin/driver-pay/${driver.id}`}
-                className="flex items-end gap-2"
-              >
+              <FilterForm action={payee.payHref} className="flex items-end gap-2">
                 <div>
                   <Label htmlFor="driver-pay-up-to">Up to</Label>
                   <TextInput
@@ -215,8 +226,8 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
               <PayDriverForm
                 // A new list of bookings starts fresh, every one ticked.
                 key={owed.payable.map((job) => job.id).join(",")}
-                driverId={driver.id}
-                driverName={driver.firstName}
+                payee={{ kind: payee.kind, id: payee.id }}
+                driverName={payee.greeting}
                 upTo={upTo}
                 previousUpTo={previousUpTo}
                 today={today}
@@ -274,7 +285,7 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
 
           <Panel
             title="Payments"
-            description={`${payments.length} made to ${driver.firstName}, newest first`}
+            description={`${payments.length} made to ${payee.greeting}, newest first`}
             bodyClassName="p-0"
           >
             {payments.length === 0 ? (
@@ -311,7 +322,7 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
                           <span className="tabular-nums">
                             {amount >= 0
                               ? money(amount)
-                              : `${money(-amount)} paid by ${driver.firstName}`}
+                              : `${money(-amount)} paid by ${payee.greeting}`}
                           </span>
                           {payment.voidedAt ? <Badge tone="danger">Void</Badge> : null}
                         </p>
@@ -372,7 +383,11 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
                             confirmLabel="Void payment"
                             confirmVariant="danger"
                             action={voidDriverPaymentAction}
-                            fields={{ paymentId: payment.id, driverId: driver.id }}
+                            fields={{
+                              paymentId: payment.id,
+                              payeeKind: payee.kind,
+                              payeeId: payee.id,
+                            }}
                           >
                             <p>
                               The payment stays on record, marked void, and its{" "}
@@ -422,11 +437,8 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
             ) : (
               <p className="text-sm">
                 <NotRecorded>No bank details on record.</NotRecorded>{" "}
-                <Link
-                  href={`/admin/drivers/${driver.id}`}
-                  className="text-accent hover:underline"
-                >
-                  Add them on the driver&apos;s page
+                <Link href={payee.href} className="text-accent hover:underline">
+                  Add them on their page
                 </Link>
                 .
               </p>
@@ -435,8 +447,8 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
           <Panel title="Statements on WhatsApp">
             <p className="text-ink-2 text-sm">
               {consent
-                ? `Each payment can be sent to ${driver.firstName} with a private link to its PDF statement, valid for ${STATEMENT_LINK_DAYS} days.`
-                : `${driver.firstName} has not agreed to WhatsApp messages. Download the PDF and send it another way.`}
+                ? `Each payment can be sent to ${payee.greeting} with a private link to its PDF statement, valid for ${STATEMENT_LINK_DAYS} days.`
+                : `${payee.greeting} has not agreed to WhatsApp messages. Download the PDF and send it another way.`}
             </p>
           </Panel>
         </div>

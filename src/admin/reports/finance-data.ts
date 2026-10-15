@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Payload } from "payload";
 
+import { payeeOfPayment } from "@/admin/data/driver-pay";
 import { paymentHref } from "@/admin/data/payments";
 import { londonDay } from "@/admin/format";
 import { expenseReference } from "@/collections/Expenses";
@@ -16,7 +17,6 @@ import type { CsvColumn } from "@/lib/csv";
 import type {
   Booking,
   CustomerPayment,
-  Driver,
   DriverPayment,
   Expense,
   Job,
@@ -262,20 +262,18 @@ export async function loadFinanceMovements(
   }
 
   for (const payment of drivers.docs as DriverPayment[]) {
-    const driver =
-      payment.driver && typeof payment.driver === "object"
-        ? (payment.driver as Driver)
-        : null;
+    // Paid to a driver, or to a subcontracting operator (Cityline, 15 Oct 2026).
+    const payee = payeeOfPayment(payment);
     for (const line of payment.lines ?? []) {
       const jobId = relId(line.job);
       if (isTestJob(jobId)) continue;
       const base = {
         ...at(payment.paidAt),
         record: paymentReference(payment.id),
-        recordHref: `/admin/driver-pay/${relId(payment.driver)}`,
+        recordHref: payee?.payHref ?? "/admin/driver-pay",
         bookings: [{ id: jobId ?? 0, reference: line.jobReference ?? "" }],
         ...sourceOfJob(jobId),
-        detail: driver?.fullName ?? "Driver",
+        detail: payee?.name ?? "Driver",
       };
       if (line.pricePence) {
         movements.push({

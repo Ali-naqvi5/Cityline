@@ -20,7 +20,7 @@ const data: StatementData = {
   bankReference: "CITYLINE 12",
   voided: false,
   driverName: "Sam Taylor",
-  phvNumber: "123456",
+  licence: "PHV licence 123456",
   bank: { holder: "Sam Taylor", sortCode: "12-34-56", last4: "4821" },
   lines: [
     {

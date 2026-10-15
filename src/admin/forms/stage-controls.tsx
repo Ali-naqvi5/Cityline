@@ -171,7 +171,10 @@ export function StageProgress({ job }: { job: Job }) {
       {LINE.map(({ stage, field }) => {
         const shown: JobStatus = stage === "on_board" && noShow ? "no_show" : stage;
         const value = job[shown === "no_show" ? "noShowAt" : field];
-        const at = typeof value === "string" && job.driver ? new Date(value) : null;
+        const at =
+          typeof value === "string" && (job.driver || job.operator)
+            ? new Date(value)
+            : null;
         const current = shown === status;
         return (
           <li

@@ -87,9 +87,21 @@ export const DriverPayments: CollectionConfig = {
           return data;
         }
 
-        // A new payment: its lines and totals come from the bookings.
+        // A new payment: its lines and totals come from the bookings. It is
+        // to a driver or to a subcontracting operator, never both.
         const driverId = relId(data.driver);
-        if (!driverId) fail(req, "driver", "Choose the driver.");
+        const operatorId = relId(data.operator);
+        if (!driverId && !operatorId) fail(req, "driver", "Choose the driver.");
+        if (driverId && operatorId) {
+          fail(req, "operator", "A payment is to a driver or an operator, not both.");
+        }
+        const payee = driverId
+          ? ({ field: "driver", id: driverId, who: "driven by this driver" } as const)
+          : ({
+              field: "operator",
+              id: operatorId!,
+              who: "done by this operator",
+            } as const);
         if (!data.upTo) fail(req, "upTo", "Choose the date the payment runs up to.");
         const before = londonToUtc(
           new Date(String(data.upTo)).toISOString().slice(0, 10),
@@ -129,12 +141,12 @@ export const DriverPayments: CollectionConfig = {
           driverPaymentId: relId(job.driverPayment),
           driverPaidPricePence: job.driverPaidPricePence ?? null,
         }));
-        const driverOf = new Map(
-          (found.docs as Job[]).map((job) => [job.id, relId(job.driver)]),
+        const payeeOf = new Map(
+          (found.docs as Job[]).map((job) => [job.id, relId(job[payee.field])]),
         );
         for (const job of jobs) {
-          if (driverOf.get(job.id) !== driverId) {
-            fail(req, "lines", `${job.reference} was not driven by this driver.`);
+          if (payeeOf.get(job.id) !== payee.id) {
+            fail(req, "lines", `${job.reference} was not ${payee.who}.`);
           }
           if (!isPayable(job)) {
             fail(
@@ -158,16 +170,16 @@ export const DriverPayments: CollectionConfig = {
 
         jobs.sort((a, b) => a.pickupAt.localeCompare(b.pickupAt));
 
-        // The period it covers: from the day after the driver's last payment
-        // (not voided) to the day this one runs up to. Kept with the payment,
-        // so a statement already sent never changes.
+        // The period it covers: from the day after the driver's (or
+        // operator's) last payment, not voided, to the day this one runs up
+        // to. Kept with the payment, so a statement already sent never changes.
         const londonDay = (value: string) => londonDateAndTime(new Date(value)).date;
         const upToDay = londonDay(String(data.upTo));
         const previous = await req.payload.find({
           collection: "driver-payments",
           where: {
             and: [
-              { driver: { equals: driverId } },
+              { [payee.field]: { equals: payee.id } },
               { voidedAt: { exists: false } },
               { upTo: { less_than: londonToUtc(upToDay, "00:00").toISOString() } },
             ],
@@ -234,10 +246,17 @@ export const DriverPayments: CollectionConfig = {
   },
   fields: [
     {
+      // Who was paid: a driver, or a subcontracting operator (Cityline, 15
+      // Oct 2026) — one of the two.
       name: "driver",
       type: "relationship",
       relationTo: "drivers",
-      required: true,
+      index: true,
+    },
+    {
+      name: "operator",
+      type: "relationship",
+      relationTo: "operators",
       index: true,
     },
     {

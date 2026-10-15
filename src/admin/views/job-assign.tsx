@@ -1,11 +1,12 @@
-import { ArrowLeft, Plane, UsersRound } from "lucide-react";
+import { ArrowLeft, Building, Plane, UserRound, UsersRound } from "lucide-react";
 import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 
-import { loadAssignmentBoard } from "@/admin/data/dispatch";
+import { loadAssignmentBoard, loadOperatorBoard } from "@/admin/data/dispatch";
 import { pickupLabel, relative } from "@/admin/format";
 import { AssignForm } from "@/admin/forms/assign-form";
-import { requireStaff, segment } from "@/admin/guard";
+import { AssignOperatorForm } from "@/admin/forms/assign-operator-form";
+import { param, requireStaff, segment } from "@/admin/guard";
 import { JobStatusBadge, Route } from "@/components/ops/jobs";
 import { ButtonLink, PageHeader, Panel } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
@@ -14,12 +15,14 @@ import { relId } from "@/domain/dispatch/assignment";
 import { driverDetailsEmailsOn } from "@/lib/features";
 import { vehicleClassName } from "@/domain/jobs/labels";
 import { beforeBoarding, isFinal } from "@/domain/jobs/status";
+import { can } from "@/domain/staff/permissions";
 import type { Job } from "@/payload-types";
 
 /**
  * Assigning a driver to a job (`/jobs/:id/assign`, spec §19): every driver,
  * each with their own car, which goes with them (Cityline, 9 Oct 2026). What
- * cannot legally go is shown with the reason.
+ * cannot legally go is shown with the reason. Or, with `?to=operator`, giving
+ * it to a subcontracting operator (Cityline, 15 Oct 2026).
  */
 export async function JobAssignView(props: AdminViewServerProps) {
   const idSegment = segment(props, 1);
@@ -69,9 +72,15 @@ export async function JobAssignView(props: AdminViewServerProps) {
     );
   }
 
-  const drivers = await loadAssignmentBoard(payload, user, job, now);
+  const toOperator =
+    param(props.searchParams, "to") === "operator" && can(user.role, "operators.view");
+  const [drivers, operators] = await Promise.all([
+    toOperator ? Promise.resolve([]) : loadAssignmentBoard(payload, user, job, now),
+    toOperator ? loadOperatorBoard(payload, user, job) : Promise.resolve([]),
+  ]);
   const at = new Date(job.pickupAt);
   const currentDriverId = relId(job.driver);
+  const currentOperatorId = relId(job.operator);
   const currentDriver = currentDriverId
     ? await payload.findByID({
         collection: "drivers",
@@ -82,6 +91,21 @@ export async function JobAssignView(props: AdminViewServerProps) {
         disableErrors: true,
       })
     : null;
+  // Whoever has the booking now, by name: a driver, or an operator.
+  const current = currentDriverId
+    ? {
+        driverId: currentDriverId,
+        operatorId: null,
+        name: currentDriver?.fullName ?? "The current driver",
+      }
+    : currentOperatorId
+      ? {
+          driverId: null,
+          operatorId: currentOperatorId,
+          name: job.subcontractorName ?? "The current operator",
+        }
+      : null;
+  const assigned = current !== null;
 
   return (
     <OpsShell user={user} active="bookings">
@@ -95,41 +119,89 @@ export async function JobAssignView(props: AdminViewServerProps) {
         </Link>
       </div>
       <PageHeader
-        title={job.driver ? "Change driver" : "Assign driver"}
+        title={
+          toOperator
+            ? assigned
+              ? "Give to an operator"
+              : "Assign to an operator"
+            : assigned
+              ? "Change driver"
+              : "Assign driver"
+        }
         meta={<JobStatusBadge status={job.status} />}
+        actions={
+          toOperator ? (
+            <ButtonLink href={`/admin/jobs/${job.id}/assign`}>
+              <UserRound aria-hidden className="h-4 w-4" />
+              Assign a driver instead
+            </ButtonLink>
+          ) : can(user.role, "operators.view") ? (
+            <ButtonLink href={`/admin/jobs/${job.id}/assign?to=operator`}>
+              <Building aria-hidden className="h-4 w-4" />
+              Assign to an operator
+            </ButtonLink>
+          ) : null
+        }
       />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <Panel
-          title="Driver"
-          description="Each driver comes with their own car. A different class or too few seats is a warning; a licence, MOT or insurance out of date stops it."
-        >
-          {drivers.length ? (
-            <AssignForm
-              jobId={job.id}
-              job={{ jobClass: job.vehicleClassSlug, passengers: job.passengers ?? null }}
-              drivers={drivers}
-              notifyPassenger={job.notifyPassenger ?? true}
-              canEmailPassenger={Boolean(job.leadEmail || job.bookerEmail)}
-              passengerEmails={driverDetailsEmailsOn()}
-              driverPricePence={job.driverPricePence ?? null}
-              current={
-                currentDriverId
-                  ? {
-                      driverId: currentDriverId,
-                      name: currentDriver?.fullName ?? "The current driver",
-                    }
-                  : null
-              }
-              cancelHref={back}
-            />
-          ) : (
-            <EmptyState
-              title="No drivers yet"
-              description="Add a driver and their car under Fleet first."
-            />
-          )}
-        </Panel>
+        {toOperator ? (
+          <Panel
+            title="Subcontracting operator"
+            description="Another licensed operator does the job with their own driver and car. One who has left, or whose licence has run out, cannot take it."
+          >
+            {operators.length ? (
+              <AssignOperatorForm
+                jobId={job.id}
+                operators={operators}
+                current={
+                  current ? { operatorId: current.operatorId, name: current.name } : null
+                }
+                pricePence={job.driverPricePence ?? null}
+                cancelHref={back}
+              />
+            ) : (
+              <EmptyState
+                title="No subcontracting operators yet"
+                description="Add one under Fleet → Subcontracting Operators first."
+                action={
+                  can(user.role, "operators.edit") ? (
+                    <ButtonLink href="/admin/operators/new">Add an operator</ButtonLink>
+                  ) : undefined
+                }
+              />
+            )}
+          </Panel>
+        ) : (
+          <Panel
+            title="Driver"
+            description="Each driver comes with their own car. A different class or too few seats is a warning; a licence, MOT or insurance out of date stops it."
+          >
+            {drivers.length ? (
+              <AssignForm
+                jobId={job.id}
+                job={{
+                  jobClass: job.vehicleClassSlug,
+                  passengers: job.passengers ?? null,
+                }}
+                drivers={drivers}
+                notifyPassenger={job.notifyPassenger ?? true}
+                canEmailPassenger={Boolean(job.leadEmail || job.bookerEmail)}
+                passengerEmails={driverDetailsEmailsOn()}
+                driverPricePence={job.driverPricePence ?? null}
+                current={
+                  current ? { driverId: current.driverId, name: current.name } : null
+                }
+                cancelHref={back}
+              />
+            ) : (
+              <EmptyState
+                title="No drivers yet"
+                description="Add a driver and their car under Fleet first."
+              />
+            )}
+          </Panel>
+        )}
 
         <div className="flex flex-col gap-5">
           <Panel title="The job">

@@ -40,6 +40,8 @@ export interface RunSheetJob {
   meetAndGreet: boolean;
   driverNotes: string | null;
   driverId: number | null;
+  /** Or the subcontracting operator it went to, by name (Cityline, 15 Oct 2026). */
+  operatorName: string | null;
   vehicleReg: string | null;
   /** What will not be valid at the pickup: a document, or the driver or car. */
   problems: string[];
@@ -118,7 +120,9 @@ export function buildRunSheet(
     if (isFinal(job.status)) continue;
     const at = new Date(job.pickupAt);
     const soon = at.getTime() - now.getTime() <= SOON_MINUTES * MINUTE_MS;
-    const name = job.driverId ? (driverById.get(job.driverId)?.name ?? "The driver") : "";
+    const name = job.driverId
+      ? (driverById.get(job.driverId)?.name ?? "The driver")
+      : (job.operatorName ?? "");
     if (job.status === "unassigned") {
       warn(job, soon ? "danger" : "warn", `No driver yet — ${untilText(at, now)}`);
     } else if (job.status === "assigned") {
@@ -198,7 +202,7 @@ export function buildRunSheet(
   return {
     jobs: ordered,
     days,
-    unassigned: ordered.filter((job) => job.driverId === null),
+    unassigned: ordered.filter((job) => job.driverId === null && !job.operatorName),
     warnings,
   };
 }

@@ -335,7 +335,37 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   cannot go. TfL's driver record treats their licence copies and photo as held
   offline (`heldOffline`). Their PHV licence number is an optional field
   (`drivers.phvLicenceNumber`), never checked, copied onto their bookings
-  when given.
+  when given. Outsourced work is moving to subcontracting operators, because
+  TfL will not let Cityline run drivers outside its licence. The Owner is
+  removing outsourced drivers by hand; don't touch them.
+- **Subcontracting operators** (`operators`, Fleet → Subcontracting
+  Operators, Cityline, 15 Oct 2026). These are other licensed operators who
+  do a booking with their own driver and car.
+  - **The law:** Private Hire Vehicles (London) Act 1998 s.5 allows passing a
+    booking only to an operator licensed by TfL, by a district council, or
+    in Scotland. Cityline stays responsible to the passenger.
+  - **Fields:** only the name, licensed from (with the council when not
+    TfL) and a contact phone are required. Bank details are saved apart,
+    by the Owner and Accounts (`saveBankDetailsAction` with
+    `owner=operators`).
+  - **No car or compliance checks.** Only their own licence counts:
+    `operatorCheck` blocks one who has left or whose recorded licence has
+    run out, and missing licence details only warn.
+  - **Assigning:** a booking has a driver or an operator, never both. The
+    assign page has an operator mode (`?to=operator`,
+    `assignOperatorAction`). `applyDispatchRules` treats an operator like
+    a driver: a reason to take them off, no change once on board, the
+    same stages. It copies `subcontractorName`, `subcontractorLicenceNo`
+    and `subcontractorLicensedFrom` onto the booking for TfL's record.
+  - **Pay:** operators are paid inside Driver Pay
+    (`/admin/driver-pay/operators/:id`). `driver-payments.operator` is set
+    instead of `driver`, the booking's `driverPricePence` is the operator
+    price, and the statement says "Operator licence … · <authority>".
+    `Payee` in `admin/data/driver-pay.ts` covers both.
+  - **Other screens:** the bookings list, run sheet, Jobs Report and
+    customer pages name the operator. The bookings Driver filter takes
+    `op-<id>`. The WhatsApp job message goes to the operator's phone with
+    their consent.
 - **Payment links on a booking are the system's** (Cityline, 10 Oct 2026): a
   job's links to its driver payment, partner payment, invoice and office
   payment, the paid-price snapshots, the card fee and the website lock carry

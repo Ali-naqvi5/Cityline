@@ -65,8 +65,10 @@ export interface BookingFilters {
   status: JobStatus | "open" | "";
   source: JobSource | "";
   supplier: number | null;
-  /** A driver's id, "none" for no driver, or null for anyone. */
+  /** A driver's id, "none" for no driver (nor operator), or null for anyone. */
   driver: number | "none" | null;
+  /** A subcontracting operator's id (`driver=op-3` in the address). */
+  operator: number | null;
   vehicle: string;
   payment: string;
   takenBy: number | null;
@@ -120,7 +122,8 @@ export function parseBookingFilters(params: Params): BookingFilters {
     status: status === "open" || isJobStatus(status) ? status : "",
     source: isJobSource(source) ? source : "",
     supplier: id(read(params, "supplier")),
-    driver: driver === "none" ? "none" : id(driver),
+    driver: driver === "none" ? "none" : driver.startsWith("op-") ? null : id(driver),
+    operator: driver.startsWith("op-") ? id(driver.slice(3)) : null,
     vehicle: VEHICLE_CLASSES.some((item) => item.slug === vehicle) ? vehicle : "",
     payment: payment in PAYMENT_METHOD_LABELS ? payment : "",
     takenBy: id(read(params, "takenBy")),
@@ -235,14 +238,18 @@ export function buildBookingsWhere(
 
   if (filters.source) and.push({ source: { equals: filters.source } });
   if (filters.supplier) and.push({ supplier: { equals: filters.supplier } });
-  if (filters.driver === "none") and.push({ driver: { exists: false } });
-  else if (filters.driver) and.push({ driver: { equals: filters.driver } });
+  if (filters.driver === "none") {
+    // Nobody on it yet: no driver, and no subcontracting operator either.
+    and.push({ driver: { exists: false } });
+    and.push({ operator: { exists: false } });
+  } else if (filters.driver) and.push({ driver: { equals: filters.driver } });
+  if (filters.operator) and.push({ operator: { equals: filters.operator } });
   if (filters.vehicle) and.push({ vehicleClassSlug: { equals: filters.vehicle } });
   if (filters.payment) and.push({ paymentMethod: { equals: filters.payment } });
   if (filters.takenBy) and.push({ takenByUser: { equals: filters.takenBy } });
 
   if (filters.noDriverPrice) {
-    and.push({ driver: { exists: true } });
+    and.push({ or: [{ driver: { exists: true } }, { operator: { exists: true } }] });
     and.push({ driverPricePence: { exists: false } });
   }
 
@@ -266,6 +273,7 @@ export function activeFilterCount(filters: BookingFilters): number {
     filters.source,
     filters.supplier,
     filters.driver,
+    filters.operator,
     filters.vehicle,
     filters.payment,
     filters.takenBy,
@@ -291,6 +299,7 @@ export function bookingsHref(
   if (next.source) query.set("source", next.source);
   if (next.supplier) query.set("supplier", String(next.supplier));
   if (next.driver) query.set("driver", String(next.driver));
+  else if (next.operator) query.set("driver", `op-${next.operator}`);
   if (next.vehicle) query.set("vehicle", next.vehicle);
   if (next.payment) query.set("payment", next.payment);
   if (next.takenBy) query.set("takenBy", String(next.takenBy));
