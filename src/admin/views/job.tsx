@@ -864,7 +864,7 @@ export async function JobView(props: AdminViewServerProps) {
             title="Progress"
             description={
               dispatches && !closed
-                ? "Move the booking on as the driver reports in. One stage at a time."
+                ? `Move the booking on as the ${operator ? "operator" : "driver"} reports in. One stage at a time.`
                 : undefined
             }
             actions={<JobStatusBadge status={status} />}
@@ -873,11 +873,12 @@ export async function JobView(props: AdminViewServerProps) {
               <StageProgress job={job} />
               {dispatches ? (
                 <>
-                  {driver ? (
+                  {/* A subcontracting operator runs the same stages as a driver. */}
+                  {driver || operator ? (
                     <NextStageButtons job={job} now={now} className="print:hidden" />
                   ) : !closed ? (
                     <p className="text-ink-3 text-sm">
-                      The cycle starts once a driver is assigned.
+                      The cycle starts once a driver or operator is assigned.
                     </p>
                   ) : null}
                   {isDone(status) && !changesDone ? (

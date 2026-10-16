@@ -265,8 +265,31 @@ try {
     `status ${res.status}`,
   );
 
-  // --- The same stages, to Completed ----------------------------------------------------
-  const stages = ["driver_confirmed", "on_the_way", "at_pickup", "on_board", "completed"];
+  // --- The same stages, to Completed: the first two pressed on the screens -------------
+  const statusNow = () => sql(`select status from jobs where id = ${job.id}`);
+  const waitForStatus = async (wanted) => {
+    for (let i = 0; i < 60 && statusNow() !== wanted; i++) await page.waitForTimeout(500);
+    return statusNow() === wanted;
+  };
+  await page.goto(`${base}/admin/jobs/${job.id}`, { waitUntil: "networkidle" });
+  const confirm = page.getByRole("button", { name: /confirmed/i });
+  check(
+    "the booking page offers the operator's booking its next stage",
+    (await confirm.count()) === 1 &&
+      !(await main(page)).includes("The cycle starts once"),
+  );
+  await confirm.click();
+  check(
+    "pressing it moves the booking on: Confirmed",
+    await waitForStatus("driver_confirmed"),
+  );
+  await page.goto(`${base}/admin/bookings?when=all&driver=op-${north}`, {
+    waitUntil: "networkidle",
+  });
+  const listed = page.locator("tr", { hasText: job.reference });
+  await listed.getByRole("button", { name: "DOW" }).click();
+  check("the bookings list moves it on too: DOW", await waitForStatus("on_the_way"));
+  const stages = ["at_pickup", "on_board", "completed"];
   const results = [];
   for (const status of stages) {
     const step = await api(`/api/jobs/${job.id}`, controllerToken, {

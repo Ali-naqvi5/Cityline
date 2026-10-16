@@ -12,7 +12,8 @@ import type { Job } from "@/payload-types";
 
 /**
  * Moving a booking through its cycle (Cityline, 2 Oct 2026): the operator,
- * on the phone to the driver, presses the next stage as it happens. Only the
+ * on the phone to the driver, presses the next stage as it happens. A
+ * booking with a subcontracting operator runs the same stages (15 Oct 2026). Only the
  * next stage is offered — the server refuses a jump anyway — and a
  * passenger no-show asks for confirmation, with the driver's price beside it
  * so it can be cut in the same step.
@@ -46,6 +47,7 @@ type StageJob = Pick<
   | "leadName"
   | "pickupAddress"
   | "driverPricePence"
+  | "operator"
 >;
 
 export function NextStageButtons({
@@ -67,6 +69,8 @@ export function NextStageButtons({
   if (stages.length === 0) return null;
   const size = compact ? "sm" : "md";
   const hidden = { jobId: job.id, ...(returnTo ? { returnTo } : {}) };
+  // A subcontracting operator runs the same stages, at the operator's price.
+  const who = job.operator ? "operator" : "driver";
 
   return (
     <div className={cx("flex flex-wrap items-start gap-2", className)}>
@@ -100,14 +104,14 @@ export function NextStageButtons({
                 {job.leadName} did not turn up for the pickup at {job.pickupAddress}.
               </p>
               <p>
-                The driver&apos;s price is{" "}
+                The {who}&apos;s price is{" "}
                 {job.driverPricePence == null
                   ? "not written yet"
                   : money(job.driverPricePence)}
                 . If you are paying them less for the wait, write the new price.
               </p>
               <label htmlFor={`pns-price-${job.id}`} className="text-ink-2 font-medium">
-                Driver price (£)
+                {job.operator ? "Operator price (£)" : "Driver price (£)"}
               </label>
               <input
                 id={`pns-price-${job.id}`}

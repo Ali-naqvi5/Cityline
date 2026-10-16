@@ -631,16 +631,23 @@ function BookingsTable({
                 </td>
                 <td className={cx(TD, "text-right whitespace-nowrap")}>
                   <span className="inline-flex items-start gap-1">
-                    {dispatches && driver ? (
+                    {/* A subcontracting operator runs the same stages as a driver. */}
+                    {dispatches && (driver || job.operator) ? (
                       <NextStageButtons job={job} now={now} compact returnTo={returnTo} />
                     ) : null}
                     {dispatches && beforeBoarding(status) ? (
                       <Link
                         href={`/admin/jobs/${job.id}/assign`}
-                        aria-label={`${driver ? "Change driver for" : "Assign a driver to"} ${job.reference}`}
-                        title={driver ? "Change driver" : "Assign driver"}
+                        aria-label={`${driver ? "Change driver for" : job.operator ? "Change operator for" : "Assign a driver to"} ${job.reference}`}
+                        title={
+                          driver
+                            ? "Change driver"
+                            : job.operator
+                              ? "Change operator"
+                              : "Assign driver"
+                        }
                         className={buttonClass(
-                          driver ? "ghost" : "primary",
+                          driver || job.operator ? "ghost" : "primary",
                           "sm",
                           "px-2",
                         )}
