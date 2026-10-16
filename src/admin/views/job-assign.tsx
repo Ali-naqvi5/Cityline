@@ -158,6 +158,7 @@ export async function JobAssignView(props: AdminViewServerProps) {
                   current ? { operatorId: current.operatorId, name: current.name } : null
                 }
                 pricePence={job.driverPricePence ?? null}
+                customerPricePence={job.customerPricePence ?? null}
                 cancelHref={back}
               />
             ) : (
@@ -189,6 +190,7 @@ export async function JobAssignView(props: AdminViewServerProps) {
                 canEmailPassenger={Boolean(job.leadEmail || job.bookerEmail)}
                 passengerEmails={driverDetailsEmailsOn()}
                 driverPricePence={job.driverPricePence ?? null}
+                customerPricePence={job.customerPricePence ?? null}
                 current={
                   current ? { driverId: current.driverId, name: current.name } : null
                 }

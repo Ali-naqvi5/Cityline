@@ -86,6 +86,34 @@ describe("supplier money", () => {
     expect(owed.overduePence).toBe(9000);
     expect(owed.uninvoiced).toBe(2);
     expect(owed.toDecide.map((item) => item.id)).toEqual([4]);
+    expect(owed.netPence).toBe(15000);
+  });
+
+  it("takes the partner's open penalties off what they owe", () => {
+    const owed = partnerOwed(
+      [job({ id: 1 })],
+      new Date("2026-10-06T23:00:00.000Z"),
+      30,
+      new Date("2026-10-06T12:00:00.000Z"),
+      [
+        {
+          id: 3,
+          jobId: 1,
+          jobReference: "J-000001",
+          supplierReference: "TRIP-1",
+          penalisedAt: "2026-10-05T12:00:00.000Z",
+          reason: "Driver late",
+          amountPence: 1000,
+          driverSharePence: 0,
+        },
+      ],
+    );
+    expect(owed).toMatchObject({
+      totalPence: 6000,
+      penaltiesPence: 1000,
+      netPence: 5000,
+    });
+    expect(owed.penalties.map((penalty) => penalty.id)).toEqual([3]);
   });
 
   it("numbers invoices and receipts", () => {

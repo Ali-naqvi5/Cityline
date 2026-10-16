@@ -17,6 +17,7 @@ import { Expenses } from "@/collections/Expenses";
 import { Drivers } from "@/collections/Drivers";
 import { JobEvents } from "@/collections/JobEvents";
 import { Jobs } from "@/collections/Jobs";
+import { PartnerPenalties } from "@/collections/PartnerPenalties";
 import { Payments } from "@/collections/Payments";
 import { PrivateFiles } from "@/collections/PrivateFiles";
 import { Quotes } from "@/collections/Quotes";
@@ -403,6 +404,7 @@ export default buildConfig({
     DriverPayments,
     SupplierPayments,
     SupplierInvoices,
+    PartnerPenalties,
     Expenses,
     CustomerPayments,
     // Staff accounts for the admin itself, and what they change.

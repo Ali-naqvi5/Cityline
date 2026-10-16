@@ -1,13 +1,14 @@
 import { ValidationError, type PayloadRequest } from "payload";
 
 import { relId } from "@/domain/dispatch/assignment";
+import { penaltyReference } from "@/domain/finance/penalties";
 import {
   isChargeable,
   partnerRoute,
   type CancellationCharge,
 } from "@/domain/finance/supplier-money";
 import type { JobStatus } from "@/domain/jobs/labels";
-import type { Job } from "@/payload-types";
+import type { Job, PartnerPenalty } from "@/payload-types";
 
 /**
  * Shared by partner receipts and invoices (Supplier Money): turn the bookings
@@ -101,6 +102,102 @@ export async function partnerLines(
           : "Completed",
     amountPence: job.customerPricePence!,
   }));
+}
+
+/** A penalty a partner payment or invoice takes off, as it was then. */
+export interface PartnerPenaltyLine {
+  penalty: number;
+  penaltyReference: string;
+  jobReference: string;
+  supplierReference: string | null;
+  penalisedAt: string;
+  reason: string;
+  amountPence: number;
+}
+
+/**
+ * Partner penalties (Cityline, 16 Oct 2026) taken off a partner's payment,
+ * or shown on an invoice: turned into lines from the penalties themselves,
+ * refusing any that are void, another partner's, or already taken off one.
+ */
+export async function partnerPenaltyLines(
+  req: PayloadRequest,
+  collection: string,
+  supplierId: number,
+  requested: unknown,
+  covered: "supplierPayment" | "supplierInvoice",
+): Promise<PartnerPenaltyLine[]> {
+  const fail = failOn(collection, req);
+  const ids = [
+    ...new Set(
+      ((requested ?? []) as { penalty?: unknown }[])
+        .map((line) => relId(line.penalty))
+        .filter((id): id is number => id !== null),
+    ),
+  ];
+  if (ids.length === 0) return [];
+  const found = await req.payload.find({
+    collection: "partner-penalties",
+    where: { id: { in: ids } },
+    pagination: false,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  });
+  if (found.docs.length !== ids.length)
+    fail("penalties", "One of those penalties is not on record.");
+  const penalties = (found.docs as PartnerPenalty[]).sort((a, b) =>
+    a.penalisedAt.localeCompare(b.penalisedAt),
+  );
+  for (const penalty of penalties) {
+    const reference = penaltyReference(penalty.id);
+    if (penalty.voidedAt) fail("penalties", `${reference} is void.`);
+    if (relId(penalty.supplier) !== supplierId) {
+      fail("penalties", `${reference} is not this partner's.`);
+    }
+    if (relId(penalty.supplierPayment)) {
+      fail("penalties", `${reference} was already taken off a payment.`);
+    }
+    if (covered === "supplierInvoice" && relId(penalty.supplierInvoice)) {
+      fail("penalties", `${reference} is already on an invoice.`);
+    }
+  }
+  return penalties.map((penalty) => ({
+    penalty: penalty.id,
+    penaltyReference: penaltyReference(penalty.id),
+    jobReference: penalty.jobReference ?? "",
+    supplierReference: penalty.supplierReference ?? null,
+    penalisedAt: penalty.penalisedAt,
+    reason: (penalty.reason ?? "").slice(0, 300),
+    amountPence: penalty.amountPence,
+  }));
+}
+
+/** Point each penalty taken off at its record — or free them on a void. */
+export async function linkPenalties(
+  req: PayloadRequest,
+  field: "supplierPayment" | "supplierInvoice" | "driverPayment",
+  doc: {
+    id: number;
+    penalties?: { penalty?: unknown }[] | null;
+    voidedAt?: string | null;
+  },
+  previous: { voidedAt?: string | null } | undefined,
+  operation: string,
+): Promise<void> {
+  const voided = operation === "update" && doc.voidedAt && !previous?.voidedAt;
+  if (operation !== "create" && !voided) return;
+  for (const line of doc.penalties ?? []) {
+    const penaltyId = relId(line.penalty);
+    if (!penaltyId) continue;
+    await req.payload.update({
+      collection: "partner-penalties",
+      id: penaltyId,
+      data: { [field]: voided ? null : doc.id },
+      overrideAccess: true,
+      req,
+    });
+  }
 }
 
 /**

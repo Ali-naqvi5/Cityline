@@ -14,7 +14,9 @@ function move(
   amount: number,
   overrides: Partial<Movement> = {},
 ): Movement {
-  const out = ["refund", "card_fee", "driver_pay", "expense"].includes(kind);
+  const out = ["refund", "card_fee", "driver_pay", "partner_penalty", "expense"].includes(
+    kind,
+  );
   return {
     day: "2026-10-02",
     at: "2026-10-02T10:00:00.000Z",
@@ -56,10 +58,12 @@ describe("the money in and out", () => {
       officePence: 9000,
       cashPence: 5500,
       partnerPence: 20000,
+      penaltiesFromDriversPence: 0,
       inPence: 48100,
       refundsPence: 6800,
       feesPence: 448,
       driversPence: 12500,
+      penaltiesPence: 0,
       expensesPence: 2500,
       outPence: 22248,
       profitPence: 25852,
@@ -85,6 +89,30 @@ describe("the money in and out", () => {
       inPence: 14500,
       driversPence: 3500,
       netPence: 11000,
+    });
+  });
+
+  it("takes a partner's penalty off, less the driver's share, on that partner's row", () => {
+    // £100 of bookings, less a £10 penalty: £90 reached the bank. £5 of it
+    // came off the driver's £35, so £30 went to them.
+    const partner = { source: "partner-2", sourceLabel: "Blue Cars" };
+    const fined = [
+      move("partner_receipt", 10000, partner),
+      move("partner_penalty", 1000, partner),
+      move("driver_pay", 3500, partner),
+      move("penalty_from_driver", 500, partner),
+    ];
+    expect(linesOf(fined)).toMatchObject({
+      partnerPence: 10000,
+      penaltiesFromDriversPence: 500,
+      penaltiesPence: 1000,
+      profitPence: 10000 - 1000 - 3500 + 500,
+    });
+    expect(bySource(fined)[0]).toMatchObject({
+      inPence: 10000,
+      penaltiesPence: 500,
+      driversPence: 3500,
+      netPence: 6000,
     });
   });
 

@@ -43,11 +43,18 @@ export async function recordDriverPaymentAction(
     .getAll("job")
     .map((value) => Number(value))
     .filter((id) => Number.isInteger(id) && id > 0);
+  // The driver's share of partner penalties to take off (Cityline, 16 Oct 2026).
+  const penaltyIds = formData
+    .getAll("penalty")
+    .map((value) => Number(value))
+    .filter((id) => Number.isInteger(id) && id > 0);
 
   const errors: Record<string, string> = {};
   if (!isValidDay(paidAt)) errors.paidAt = "Enter the date it was paid.";
   if (!(method in PAYMENT_METHODS)) errors.method = "Choose how it was paid.";
-  if (jobIds.length === 0) errors.jobs = "Choose at least one booking to pay.";
+  if (jobIds.length === 0 && penaltyIds.length === 0) {
+    errors.jobs = "Choose at least one booking to pay.";
+  }
   const receiptBytes = receipt ? Buffer.from(await receipt.arrayBuffer()) : null;
   if (receipt && receiptBytes) {
     if (method !== "bank_transfer") {
@@ -95,6 +102,7 @@ export async function recordDriverPaymentAction(
         notes: notes || null,
         receipt: file?.id ?? null,
         lines: jobIds.map((job) => ({ job })),
+        penalties: penaltyIds.map((penalty) => ({ penalty })),
       },
       user,
       overrideAccess: false,

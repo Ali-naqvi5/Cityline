@@ -7,9 +7,11 @@ import {
   markInvoiceSentAction,
   voidPartnerRecordAction,
 } from "@/admin/actions/supplier-money";
+import { PenaltyList } from "@/admin/components/penalty-list";
 import { INVOICE_STATE_LABELS, loadPartner } from "@/admin/data/supplier-money";
 import { clock, isValidDay, londonDay, londonDayBounds, shortDay } from "@/admin/format";
 import { PartnerMoneyForm } from "@/admin/forms/partner-money-form";
+import { PenaltyForm } from "@/admin/forms/penalty-form";
 import { param, requireStaff, segment } from "@/admin/guard";
 import { counted } from "@/components/ops/charts/scale";
 import { ActionButton, ConfirmDialog } from "@/components/ops/dialog";
@@ -30,6 +32,7 @@ import {
 } from "@/components/ops/primitives";
 import { OpsShell } from "@/components/ops/shell";
 import { DeniedPage, EmptyState } from "@/components/ops/states";
+import { penaltyReference } from "@/domain/finance/penalties";
 import {
   dueDate,
   invoiceNumber,
@@ -46,8 +49,9 @@ import type { User } from "@/payload-types";
 /**
  * One partner's money (Supplier Money): what they owe up to the chosen day —
  * tick bookings to record money that came in, or to make an invoice — the
- * late cancellations to decide, and every invoice and payment, each voidable
- * with a reason. Invoices are made here and sent by the office.
+ * late cancellations to decide, their penalties (Cityline, 16 Oct 2026),
+ * and every invoice and payment, each voidable with a reason. Invoices are
+ * made here and sent by the office.
  */
 
 const money = (pence: number) => formatPence(pence as Pence);
@@ -65,6 +69,8 @@ const NOTICES: Record<string, string> = {
   sent: "Invoice marked sent.",
   unsent: "Invoice marked not sent.",
   voided: "Voided. Its bookings are free again.",
+  penalty: "Penalty recorded. It comes off what the partner owes.",
+  "penalty-voided": "Penalty voided.",
 };
 const recorder = (value: unknown) =>
   value && typeof value === "object"
@@ -102,7 +108,7 @@ export async function SupplierMoneyPartnerView(props: AdminViewServerProps) {
       </OpsShell>
     );
   }
-  const { supplier, owed, receipts, invoices } = data;
+  const { supplier, owed, receipts, invoices, penalties, invoicedPenalties } = data;
   const canManage = can(user.role, "supplierMoney.manage");
   const invoiceNumbers = new Map(
     invoices.map((invoice) => [invoice.id, invoiceNumber(invoice.id)]),
@@ -201,7 +207,7 @@ export async function SupplierMoneyPartnerView(props: AdminViewServerProps) {
 
           <Panel
             title={`Owed up to ${formatDate(new Date(`${upTo}T12:00:00Z`))}`}
-            description={`${counted(owed.owed.length, "booking")} · ${money(owed.totalPence)}${owed.overduePence ? ` · ${money(owed.overduePence)} overdue` : ""}`}
+            description={`${counted(owed.owed.length, "booking")} · ${money(owed.totalPence)}${owed.penaltiesPence ? ` · less ${money(owed.penaltiesPence)} penalties: ${money(owed.netPence)}` : ""}${owed.overduePence ? ` · ${money(owed.overduePence)} overdue` : ""}`}
             actions={
               <FilterForm
                 action={`/admin/supplier-money/${supplier.id}`}
@@ -252,12 +258,59 @@ export async function SupplierMoneyPartnerView(props: AdminViewServerProps) {
                     overdue: due.getTime() < now.getTime(),
                   };
                 })}
+                penalties={owed.penalties.map((penalty) => {
+                  const invoiceId = invoicedPenalties.get(penalty.id);
+                  return {
+                    id: penalty.id,
+                    reference: penaltyReference(penalty.id),
+                    booking: [penalty.jobReference, penalty.supplierReference]
+                      .filter(Boolean)
+                      .join(" · "),
+                    when: formatDate(new Date(penalty.penalisedAt)),
+                    reason: penalty.reason,
+                    amountPence: penalty.amountPence,
+                    invoice: invoiceId
+                      ? (invoiceNumbers.get(invoiceId) ?? "Invoiced")
+                      : null,
+                  };
+                })}
               />
             ) : (
               <p className="text-ink-2 text-sm">
-                {owed.owed.length} bookings, {money(owed.totalPence)} owed.
+                {owed.owed.length} bookings, {money(owed.netPence)} owed
+                {owed.penaltiesPence
+                  ? ` after ${money(owed.penaltiesPence)} of penalties`
+                  : ""}
+                .
               </p>
             )}
+          </Panel>
+
+          <Panel
+            title="Penalties"
+            description="What this partner fined Cityline, taken off what they pay. Recorded by hand only."
+            bodyClassName="p-0"
+          >
+            {penalties.length === 0 ? (
+              <EmptyState title="No penalties" />
+            ) : (
+              <PenaltyList
+                penalties={penalties}
+                canVoid={canManage}
+                back={{ from: "partner", supplierId: supplier.id }}
+                showBooking
+              />
+            )}
+            {canManage ? (
+              <details className="border-line border-t px-4 py-3">
+                <summary className="text-accent cursor-pointer text-sm font-medium">
+                  Record a penalty
+                </summary>
+                <div className="pt-4">
+                  <PenaltyForm supplierId={supplier.id} today={today} />
+                </div>
+              </details>
+            ) : null}
           </Panel>
 
           <Panel
@@ -303,6 +356,9 @@ export async function SupplierMoneyPartnerView(props: AdminViewServerProps) {
                           ? ` · due ${formatDate(new Date(invoice.dueAt))}`
                           : ""}{" "}
                         · {counted(invoice.lines?.length ?? 0, "booking")}
+                        {invoice.penaltiesPence
+                          ? ` · less ${money(invoice.penaltiesPence)} penalties`
+                          : ""}
                       </p>
                       {invoice.voidedAt ? (
                         <p className="text-danger text-xs">Void: {invoice.voidReason}</p>
@@ -404,8 +460,11 @@ export async function SupplierMoneyPartnerView(props: AdminViewServerProps) {
                         {RECEIPT_METHODS[receipt.method as ReceiptMethod] ??
                           receipt.method}
                         {receipt.reference ? ` · ${receipt.reference}` : ""} ·{" "}
-                        {counted(receipt.lines?.length ?? 0, "booking")} · recorded by{" "}
-                        {recorder(receipt.recordedBy)}
+                        {counted(receipt.lines?.length ?? 0, "booking")}
+                        {receipt.penaltiesPence
+                          ? ` · less ${money(receipt.penaltiesPence)} penalties`
+                          : ""}{" "}
+                        · recorded by {recorder(receipt.recordedBy)}
                       </p>
                       {receipt.voidedAt ? (
                         <p className="text-danger text-xs">Void: {receipt.voidReason}</p>
@@ -429,8 +488,11 @@ export async function SupplierMoneyPartnerView(props: AdminViewServerProps) {
                       >
                         <p>
                           It stays on record, marked void, and its{" "}
-                          {counted(receipt.lines?.length ?? 0, "booking")} count as owed
-                          again.
+                          {counted(receipt.lines?.length ?? 0, "booking")}
+                          {receipt.penalties?.length
+                            ? ` and ${counted(receipt.penalties.length, "penalty", "penalties")}`
+                            : ""}{" "}
+                          count as owed again.
                         </p>
                         <label
                           htmlFor={`void-receipt-${receipt.id}`}

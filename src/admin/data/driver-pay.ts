@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Payload, Where } from "payload";
 
+import { toPenaltyLine } from "@/admin/data/supplier-money";
 import { currentDocument } from "@/domain/compliance/documents";
 import { relId } from "@/domain/dispatch/assignment";
 import {
@@ -13,6 +14,7 @@ import {
   type PayJob,
   type PaymentMethod,
 } from "@/domain/finance/driver-pay";
+import type { PenaltyLine } from "@/domain/finance/penalties";
 import type { StatementData } from "@/domain/finance/statement-pdf";
 import type { JobStatus } from "@/domain/jobs/labels";
 import { licensedFromText } from "@/domain/operators/operators";
@@ -27,13 +29,15 @@ import type {
   DriverPayment,
   Job,
   Operator,
+  PartnerPenalty,
   PrivateFile,
   User,
 } from "@/payload-types";
 
 /**
  * Loading Driver Pay: what each driver — or subcontracting operator — is
- * owed up to a chosen day, the payments made, and a payment as its
+ * owed up to a chosen day, less their share of partner penalties not yet
+ * taken off (Cityline, 16 Oct 2026), the payments made, and a payment as its
  * statement. Test bookings are never paid for. Owner and Accounts.
  */
 
@@ -129,6 +133,43 @@ export function toPayJob(job: Job): PayJob {
 
 const DONE: Where = { status: { in: ["completed", "no_show"] } };
 
+/**
+ * Partner penalties passed to a driver or operator and not yet taken off a
+ * payment — for one payee, or all of them.
+ */
+async function openDeductions(
+  payload: Payload,
+  as: As,
+  payee?: { kind: Payee["kind"]; id: number },
+): Promise<PartnerPenalty[]> {
+  const found = await payload.find({
+    collection: "partner-penalties",
+    where: {
+      and: [
+        { voidedAt: { exists: false } },
+        { driverPayment: { exists: false } },
+        { driverSharePence: { greater_than: 0 } },
+        payee
+          ? { [payee.kind]: { equals: payee.id } }
+          : { or: [{ driver: { exists: true } }, { operator: { exists: true } }] },
+      ],
+    },
+    sort: "penalisedAt",
+    pagination: false,
+    depth: 0,
+    ...as,
+  });
+  return found.docs as PartnerPenalty[];
+}
+
+/** A penalty's payee key: the driver, or the operator, it is taken from. */
+const penaltyPayeeKey = (penalty: PartnerPenalty) =>
+  relId(penalty.driver) !== null
+    ? `driver:${relId(penalty.driver)}`
+    : relId(penalty.operator) !== null
+      ? `operator:${relId(penalty.operator)}`
+      : null;
+
 export interface OwedRow {
   payee: Payee;
   owed: DriverOwed;
@@ -158,7 +199,7 @@ export async function loadOwed(
   before: Date,
 ): Promise<{ rows: OwedRow[]; changed: ChangedAfterPaid[] }> {
   const as: As = { user, overrideAccess: false };
-  const [unpaid, paid, drivers, operators] = await Promise.all([
+  const [unpaid, paid, drivers, operators, deductions] = await Promise.all([
     payload.find({
       collection: "jobs",
       where: {
@@ -186,6 +227,7 @@ export async function loadOwed(
     }),
     payload.find({ collection: "drivers", pagination: false, depth: 0, ...as }),
     payload.find({ collection: "operators", pagination: false, depth: 0, ...as }),
+    openDeductions(payload, as),
   ]);
 
   const payees = new Map<string, Payee>([
@@ -202,13 +244,26 @@ export async function loadOwed(
     if (key === null) continue;
     byPayee.set(key, [...(byPayee.get(key) ?? []), toPayJob(job)]);
   }
+  const deductedFrom = new Map<string, PenaltyLine[]>();
+  for (const penalty of deductions) {
+    const key = penaltyPayeeKey(penalty);
+    if (key === null) continue;
+    deductedFrom.set(key, [...(deductedFrom.get(key) ?? []), toPenaltyLine(penalty)]);
+    if (!byPayee.has(key)) byPayee.set(key, []);
+  }
   const rows: OwedRow[] = [...byPayee.entries()]
     .filter(([key]) => payees.has(key))
     .map(([key, jobs]) => ({
       payee: payees.get(key)!,
-      owed: owedUpTo(jobs, before),
+      owed: owedUpTo(jobs, before, deductedFrom.get(key) ?? []),
       oldest: jobs[0]?.pickupAt ?? null,
     }))
+    .filter(
+      (row) =>
+        row.owed.payable.length ||
+        row.owed.missingPrice.length ||
+        row.owed.penalties.length,
+    )
     .sort(
       (a, b) =>
         b.owed.netPence - a.owed.netPence || a.payee.name.localeCompare(b.payee.name),
@@ -306,7 +361,7 @@ export async function loadDriverPay(
       ? payeeOfOperator(record as Operator)
       : payeeOfDriver(record as Driver);
 
-  const [unpaid, payments] = await Promise.all([
+  const [unpaid, payments, deductions] = await Promise.all([
     payload.find({
       collection: "jobs",
       where: {
@@ -331,6 +386,7 @@ export async function loadDriverPay(
       depth: 1,
       ...as,
     }),
+    openDeductions(payload, as, who),
   ]);
 
   const canSeeBank = can(user.role, "drivers.bankDetails");
@@ -338,7 +394,11 @@ export async function loadDriverPay(
     payee,
     bank: canSeeBank ? openBankDetails(payee.bankDetailsSealed) : null,
     canSeeBank,
-    owed: owedUpTo((unpaid.docs as Job[]).map(toPayJob), before),
+    owed: owedUpTo(
+      (unpaid.docs as Job[]).map(toPayJob),
+      before,
+      deductions.map(toPenaltyLine),
+    ),
     payments: payments.docs as DriverPayment[],
   };
 }
@@ -484,6 +544,13 @@ export async function statementFor(
     }),
     earnedPence: payment.earnedPence ?? 0,
     cashPence: payment.cashPence ?? 0,
+    penalties: (payment.penalties ?? []).map((line) => ({
+      penalisedAt: new Date(line.penalisedAt ?? payment.paidAt),
+      reference: line.jobReference ?? "",
+      reason: line.reason ?? "",
+      amountPence: line.amountPence ?? 0,
+    })),
+    penaltiesPence: payment.penaltiesPence ?? 0,
     amountPence: payment.amountPence ?? 0,
     company: {
       name: company.tradingName,
@@ -514,6 +581,7 @@ export const DRIVER_PAYMENTS_CSV_COLUMNS: CsvColumn<DriverPayment>[] = [
   { header: "Bookings", value: (row) => row.lines?.length ?? 0 },
   { header: "Driver prices (£)", value: (row) => pounds(row.earnedPence) },
   { header: "Cash collected by driver (£)", value: (row) => pounds(row.cashPence) },
+  { header: "Penalties taken off (£)", value: (row) => pounds(row.penaltiesPence) },
   { header: "Paid (£)", value: (row) => pounds(row.amountPence) },
   {
     header: "Method",

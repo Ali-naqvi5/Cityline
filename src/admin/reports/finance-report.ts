@@ -9,9 +9,11 @@ import type { Period } from "./period";
  *
  *   in   card payments on the website, office bookings marked paid, money
  *        received from partners, and cash a passenger paid a driver on an
- *        office booking — counted when it is settled on the driver's payment
- *   out  refunds, card fees, the driver's price on each booking paid for, and
- *        Cityline's own expenses
+ *        office booking — counted when it is settled on the driver's payment;
+ *        and a driver's share of a partner penalty, taken off their payment
+ *   out  refunds, card fees, the driver's price on each booking paid for,
+ *        partner penalties — counted on the payment they were taken off
+ *        (Cityline, 16 Oct 2026) — and Cityline's own expenses
  *
  * Split by where the money came from: the website, the office, and each
  * partner. Cityline's own expenses belong to none of them. Pure: the screen
@@ -23,9 +25,11 @@ export type MovementKind =
   | "office_payment"
   | "office_cash"
   | "partner_receipt"
+  | "penalty_from_driver"
   | "refund"
   | "card_fee"
   | "driver_pay"
+  | "partner_penalty"
   | "expense";
 
 export const MOVEMENT_LABELS: Record<MovementKind, string> = {
@@ -33,9 +37,11 @@ export const MOVEMENT_LABELS: Record<MovementKind, string> = {
   office_payment: "Office booking paid",
   office_cash: "Cash on an office booking, settled with the driver",
   partner_receipt: "Received from a partner",
+  penalty_from_driver: "Penalty share, taken off a driver's payment",
   refund: "Refund",
   card_fee: "Card fee",
   driver_pay: "Driver's price, paid",
+  partner_penalty: "Partner penalty, taken off their payment",
   expense: "Expense",
 };
 
@@ -66,10 +72,12 @@ export interface FinanceLines {
   officePence: number;
   cashPence: number;
   partnerPence: number;
+  penaltiesFromDriversPence: number;
   inPence: number;
   refundsPence: number;
   feesPence: number;
   driversPence: number;
+  penaltiesPence: number;
   expensesPence: number;
   outPence: number;
   profitPence: number;
@@ -80,9 +88,11 @@ const FIELD: Record<MovementKind, keyof FinanceLines> = {
   office_payment: "officePence",
   office_cash: "cashPence",
   partner_receipt: "partnerPence",
+  penalty_from_driver: "penaltiesFromDriversPence",
   refund: "refundsPence",
   card_fee: "feesPence",
   driver_pay: "driversPence",
+  partner_penalty: "penaltiesPence",
   expense: "expensesPence",
 };
 
@@ -92,10 +102,12 @@ export function linesOf(movements: readonly Movement[]): FinanceLines {
     officePence: 0,
     cashPence: 0,
     partnerPence: 0,
+    penaltiesFromDriversPence: 0,
     inPence: 0,
     refundsPence: 0,
     feesPence: 0,
     driversPence: 0,
+    penaltiesPence: 0,
     expensesPence: 0,
     outPence: 0,
     profitPence: 0,
@@ -116,7 +128,12 @@ export interface SourceRow {
   refundsPence: number;
   feesPence: number;
   driversPence: number;
-  /** In, less refunds, card fees and drivers: what this source left Cityline. */
+  /** Partner penalties, less the drivers' shares of them. */
+  penaltiesPence: number;
+  /**
+   * In, less refunds, card fees, drivers and penalties: what this source left
+   * Cityline.
+   */
   netPence: number;
 }
 
@@ -135,12 +152,17 @@ export function bySource(movements: readonly Movement[]): SourceRow[] {
       refundsPence: 0,
       feesPence: 0,
       driversPence: 0,
+      penaltiesPence: 0,
       netPence: 0,
     };
-    row.inPence += movement.inPence;
+    // A driver's share of a penalty is counted against the penalty, not as
+    // money the source brought in.
+    if (movement.kind === "penalty_from_driver") row.penaltiesPence -= movement.inPence;
+    else row.inPence += movement.inPence;
     if (movement.kind === "refund") row.refundsPence += movement.outPence;
     if (movement.kind === "card_fee") row.feesPence += movement.outPence;
     if (movement.kind === "driver_pay") row.driversPence += movement.outPence;
+    if (movement.kind === "partner_penalty") row.penaltiesPence += movement.outPence;
     row.netPence += movement.inPence - movement.outPence;
     rows.set(movement.source, row);
   }

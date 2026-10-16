@@ -1,6 +1,8 @@
 import type { JobStatus } from "@/domain/jobs/labels";
 import { DISPLAY_TIMEZONE } from "@/lib/time";
 
+import { driverSharesTotal, type PenaltyLine } from "./penalties";
+
 /**
  * Driver pay (approved by Cityline, 6 Oct 2026): what each driver is owed,
  * built from the driver price written on each booking.
@@ -15,6 +17,8 @@ import { DISPLAY_TIMEZONE } from "@/lib/time";
  *     bookings it covers, so none can be paid twice.
  *   - Each payment covers a period: from the day after the driver's last
  *     payment to the day it runs up to (Cityline, 14 Oct 2026).
+ *   - A partner penalty's share passed to the driver comes off their next
+ *     payment, whichever bookings it covers (Cityline, 16 Oct 2026).
  *
  * Drivers are independent: this is payment for bookings, never wages.
  */
@@ -76,14 +80,28 @@ export interface PayTotals {
   earnedPence: number;
   /** Cash the driver already holds. */
   cashPence: number;
-  /** What to pay: earned less cash. Below zero, the driver owes Cityline. */
+  /** The driver's share of partner penalties, taken off. */
+  penaltiesPence: number;
+  /**
+   * What to pay: earned less cash and penalties. Below zero, the driver owes
+   * Cityline.
+   */
   netPence: number;
 }
 
-export function payTotals(jobs: readonly PayJob[]): PayTotals {
+export function payTotals(
+  jobs: readonly PayJob[],
+  penalties: readonly Pick<PenaltyLine, "driverSharePence">[] = [],
+): PayTotals {
   const earnedPence = jobs.reduce((sum, job) => sum + (job.driverPricePence ?? 0), 0);
   const cashPence = jobs.reduce((sum, job) => sum + cashHeldPence(job), 0);
-  return { earnedPence, cashPence, netPence: earnedPence - cashPence };
+  const penaltiesPence = driverSharesTotal(penalties);
+  return {
+    earnedPence,
+    cashPence,
+    penaltiesPence,
+    netPence: earnedPence - cashPence - penaltiesPence,
+  };
 }
 
 export interface DriverOwed extends PayTotals {
@@ -91,10 +109,19 @@ export interface DriverOwed extends PayTotals {
   payable: PayJob[];
   /** Done, but no driver price written: cannot be paid yet. */
   missingPrice: PayJob[];
+  /** Penalty shares not yet taken off a payment, whatever their date. */
+  penalties: PenaltyLine[];
 }
 
-/** What a driver is owed for bookings picked up before `before`. */
-export function owedUpTo(jobs: readonly PayJob[], before: Date): DriverOwed {
+/**
+ * What a driver is owed for bookings picked up before `before`, less their
+ * share of partner penalties not yet taken off.
+ */
+export function owedUpTo(
+  jobs: readonly PayJob[],
+  before: Date,
+  penalties: readonly PenaltyLine[] = [],
+): DriverOwed {
   const inRange = jobs.filter(
     (job) =>
       isWorkDone(job) &&
@@ -105,7 +132,8 @@ export function owedUpTo(jobs: readonly PayJob[], before: Date): DriverOwed {
   return {
     payable,
     missingPrice: inRange.filter((job) => job.driverPricePence === null),
-    ...payTotals(payable),
+    penalties: [...penalties],
+    ...payTotals(payable, penalties),
   };
 }
 

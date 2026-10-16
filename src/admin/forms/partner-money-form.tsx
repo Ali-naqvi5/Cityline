@@ -29,33 +29,66 @@ export interface PartnerLine {
   overdue: boolean;
 }
 
+/** A partner penalty not yet taken off a payment (Cityline, 16 Oct 2026). */
+export interface PartnerPenaltyChoice {
+  id: number;
+  /** PN-… */
+  reference: string;
+  /** The booking it was for: ours, and the partner's. */
+  booking: string;
+  when: string;
+  reason: string;
+  amountPence: number;
+  /** The invoice it is already on, if any. */
+  invoice: string | null;
+}
+
 const money = (pence: number) => formatPence(pence as Pence);
 
 /**
  * What a partner owes, ticked to start with: record money that came in for
- * the ticked bookings, or make an invoice for them. Making an invoice only
- * makes it — the office sends it, if and when it chooses.
+ * the ticked bookings, or make an invoice for them. The partner's penalties
+ * not yet taken off are ticked too, and come off the total (Cityline, 16 Oct
+ * 2026). Making an invoice only makes it — the office sends it, if and when
+ * it chooses.
  */
 export function PartnerMoneyForm({
   supplierId,
   upTo,
   today,
   lines,
+  penalties = [],
 }: {
   supplierId: number;
   upTo: string;
   today: string;
   lines: PartnerLine[];
+  penalties?: PartnerPenaltyChoice[];
 }) {
   const [state, action, pending] = useActionState(partnerMoneyAction, EMPTY_FORM);
   const [chosen, setChosen] = useState<Set<number>>(
     () => new Set(lines.map((line) => line.id)),
   );
+  const [fined, setFined] = useState<Set<number>>(
+    () => new Set(penalties.map((penalty) => penalty.id)),
+  );
   const picked = lines.filter((line) => chosen.has(line.id));
-  const total = picked.reduce((sum, line) => sum + line.amountPence, 0);
-  const alreadyInvoiced = picked.filter((line) => line.invoice).length;
+  const pickedPenalties = penalties.filter((penalty) => fined.has(penalty.id));
+  const bookings = picked.reduce((sum, line) => sum + line.amountPence, 0);
+  const less = pickedPenalties.reduce((sum, penalty) => sum + penalty.amountPence, 0);
+  const total = bookings - less;
+  const alreadyInvoiced =
+    picked.filter((line) => line.invoice).length +
+    pickedPenalties.filter((penalty) => penalty.invoice).length;
   const toggle = (id: number) =>
     setChosen((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const toggleFined = (id: number) =>
+    setFined((current) => {
       const next = new Set(current);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -135,12 +168,75 @@ export function PartnerMoneyForm({
         ) : null}
       </fieldset>
 
-      <p className="border-line flex items-baseline justify-between rounded-md border p-3 text-sm">
-        <span className="text-ink font-semibold">Ticked</span>
-        <span className="text-ink text-base font-semibold tabular-nums">
-          {money(total)}
-        </span>
-      </p>
+      {penalties.length ? (
+        <fieldset className="min-w-0">
+          <legend className="text-ink-2 mb-2 text-sm font-medium">
+            Penalties to take off
+          </legend>
+          <ul className="border-line divide-line divide-y rounded-md border">
+            {penalties.map((penalty) => (
+              <li key={penalty.id}>
+                <label
+                  htmlFor={`penalty-${penalty.id}`}
+                  className={cx(
+                    "flex cursor-pointer items-start gap-3 px-3 py-2.5",
+                    fined.has(penalty.id) ? "bg-accent-soft/50" : "hover:bg-sunken",
+                  )}
+                >
+                  <input
+                    id={`penalty-${penalty.id}`}
+                    type="checkbox"
+                    name="penalty"
+                    value={penalty.id}
+                    checked={fined.has(penalty.id)}
+                    onChange={() => toggleFined(penalty.id)}
+                    className="accent-accent mt-0.5 h-4 w-4 shrink-0"
+                  />
+                  <span className="min-w-0 flex-1 text-sm">
+                    <span className="text-ink font-medium tabular-nums">
+                      {penalty.when}
+                    </span>
+                    <span className="text-ink-3">
+                      {" "}
+                      · {penalty.reference} · {penalty.booking}
+                    </span>
+                    <span className="text-ink-2 block truncate">{penalty.reason}</span>
+                    {penalty.invoice ? (
+                      <span className="mt-0.5 flex text-xs">
+                        <Badge tone="info">{penalty.invoice}</Badge>
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="text-danger shrink-0 text-sm font-medium tabular-nums">
+                    {money(-penalty.amountPence)}
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+          {state.errors.penalties ? (
+            <p className="text-danger mt-1 text-sm">{state.errors.penalties}</p>
+          ) : null}
+        </fieldset>
+      ) : null}
+
+      <dl className="border-line grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 rounded-md border p-3 text-sm tabular-nums">
+        {penalties.length ? (
+          <>
+            <dt className="text-ink-3">Bookings ticked</dt>
+            <dd className="text-right">{money(bookings)}</dd>
+            <dt className="text-ink-3">Less penalties</dt>
+            <dd className="text-right">{less ? money(-less) : money(0)}</dd>
+          </>
+        ) : null}
+        <dt className="text-ink font-semibold">Ticked</dt>
+        <dd className="text-ink text-right text-base font-semibold">{money(total)}</dd>
+      </dl>
+      {total < 0 ? (
+        <p className="text-danger text-sm">
+          The penalties come to more than the bookings ticked. Untick some penalties.
+        </p>
+      ) : null}
 
       <FormMessage state={state} />
 
@@ -190,7 +286,7 @@ export function PartnerMoneyForm({
               type="submit"
               name="intent"
               value="receipt"
-              disabled={pending || picked.length === 0}
+              disabled={pending || picked.length === 0 || total < 0}
               className={buttonClass("primary", "md")}
             >
               <Banknote aria-hidden className="h-4 w-4" />
@@ -217,9 +313,9 @@ export function PartnerMoneyForm({
           </FormField>
           {alreadyInvoiced ? (
             <p className="text-warn text-xs">
-              {alreadyInvoiced} ticked{" "}
-              {alreadyInvoiced === 1 ? "booking is" : "bookings are"} already on an
-              invoice. Untick {alreadyInvoiced === 1 ? "it" : "them"} to make a new one.
+              {alreadyInvoiced} ticked {alreadyInvoiced === 1 ? "line is" : "lines are"}{" "}
+              already on an invoice. Untick {alreadyInvoiced === 1 ? "it" : "them"} to
+              make a new one.
             </p>
           ) : null}
           <div>
@@ -227,7 +323,9 @@ export function PartnerMoneyForm({
               type="submit"
               name="intent"
               value="invoice"
-              disabled={pending || picked.length === 0 || alreadyInvoiced > 0}
+              disabled={
+                pending || picked.length === 0 || alreadyInvoiced > 0 || total < 0
+              }
               className={buttonClass("secondary", "md")}
             >
               <FileText aria-hidden className="h-4 w-4" />

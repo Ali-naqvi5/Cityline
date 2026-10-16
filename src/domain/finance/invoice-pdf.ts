@@ -9,8 +9,10 @@ import { drawable, fit } from "./pdf-text";
  * An invoice to a partner (Supplier Money, approved by Cityline, 6 Oct 2026):
  * Cityline's full company name and address, the partner billed, a unique
  * number, the invoice and due dates, each booking with the partner's own
- * reference, and the total. Cityline is not registered for VAT, so none is
- * charged and the invoice says so.
+ * reference, and the total. The partner's penalties not yet taken off a
+ * payment show as minus lines, so the total is what they will pay (Cityline,
+ * 16 Oct 2026). Cityline is not registered for VAT, so none is charged and
+ * the invoice says so.
  *
  * The office decides whether and when to send it; this only draws it. A4, the
  * standard Helvetica fonts.
@@ -25,6 +27,16 @@ export interface InvoiceLine {
   amountPence: number;
 }
 
+/** A partner penalty shown as a minus line. */
+export interface InvoicePenalty {
+  penalisedAt: Date;
+  /** The booking it was for. */
+  reference: string;
+  supplierReference: string | null;
+  reason: string;
+  amountPence: number;
+}
+
 export interface InvoiceData {
   number: string;
   issuedAt: Date;
@@ -33,6 +45,9 @@ export interface InvoiceData {
   voided: boolean;
   partner: { name: string; billingAddress: string | null; contactName: string | null };
   lines: InvoiceLine[];
+  /** None on invoices before 16 Oct 2026. */
+  penalties?: InvoicePenalty[];
+  /** The bookings, less the penalties. */
   totalPence: number;
   company: {
     legalName: string;
@@ -225,8 +240,24 @@ export async function invoicePdf(data: InvoiceData): Promise<Uint8Array> {
     text(money(line.amountPence), COLUMNS.amount, y, { right: true });
     y -= 16;
   }
+  const penalties = data.penalties ?? [];
+  for (const penalty of penalties) {
+    if (y < MARGIN + 40) newPage(false);
+    text(formatDate(penalty.penalisedAt), COLUMNS.date, y);
+    text(penalty.reference, COLUMNS.booking, y);
+    text(
+      fit(clean(penalty.supplierReference ?? "—"), regular, 9, REF_WIDTH),
+      COLUMNS.partnerRef,
+      y,
+    );
+    text(fit(clean(penalty.reason), regular, 9, ROUTE_WIDTH), COLUMNS.route, y);
+    text("Penalty", COLUMNS.charge, y);
+    text(money(-penalty.amountPence), COLUMNS.amount, y, { right: true });
+    y -= 16;
+  }
+  const penaltiesPence = penalties.reduce((sum, penalty) => sum + penalty.amountPence, 0);
 
-  if (y < MARGIN + 100) newPage(false);
+  if (y < MARGIN + 116) newPage(false);
   y -= 2;
   rule(y);
   y -= 22;
@@ -236,6 +267,18 @@ export async function invoicePdf(data: InvoiceData): Promise<Uint8Array> {
     y,
     { size: 9.5, color: MUTED },
   );
+  if (penalties.length) {
+    const muted = { size: 9.5, color: MUTED, right: true };
+    text(money(data.totalPence + penaltiesPence), COLUMNS.amount, y, muted);
+    y -= 16;
+    text(
+      `Less ${penalties.length} ${penalties.length === 1 ? "penalty" : "penalties"}`,
+      COLUMNS.charge - 60,
+      y,
+      { size: 9.5, color: MUTED },
+    );
+    text(money(-penaltiesPence), COLUMNS.amount, y, muted);
+  }
   y -= 20;
   text("Total due", COLUMNS.charge - 60, y, { font: bold, size: 11.5 });
   text(money(data.totalPence), COLUMNS.amount, y, {

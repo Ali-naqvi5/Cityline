@@ -12,6 +12,7 @@ import {
   refundReference,
 } from "@/domain/finance/customer-money";
 import { paymentReference } from "@/domain/finance/driver-pay";
+import { penaltyReference } from "@/domain/finance/penalties";
 import { receiptReference } from "@/domain/finance/supplier-money";
 import type { CsvColumn } from "@/lib/csv";
 import type {
@@ -20,6 +21,7 @@ import type {
   DriverPayment,
   Expense,
   Job,
+  PartnerPenalty,
   Payment,
   Refund,
   Supplier,
@@ -37,8 +39,9 @@ import {
 /**
  * Loading Financial Reports: every movement of money between two dates, by
  * the day it moved — payments in, partners' money, cash settled with drivers,
- * refunds, card fees, drivers paid and expenses. Void records never count,
- * nor test bookings. Owner and Accounts.
+ * refunds, card fees, drivers paid, partner penalties (on the payment they
+ * were taken off) and expenses. Void records never count, nor test bookings.
+ * Owner and Accounts.
  */
 
 type As = { user: User; overrideAccess: false };
@@ -132,8 +135,38 @@ export async function loadFinanceMovements(
         }
       : { source: "partner-0", sourceLabel: "Partner" };
 
-  // The bookings behind website payments, drivers' payments and refunds:
-  // their references, and where each came from.
+  // The partner penalties taken off partners' and drivers' payments: the
+  // booking each was for.
+  const penaltyIds = [
+    ...(partners.docs as SupplierPayment[]).flatMap((receipt) =>
+      (receipt.penalties ?? []).map((line) => relId(line.penalty)),
+    ),
+    ...(drivers.docs as DriverPayment[]).flatMap((payment) =>
+      (payment.penalties ?? []).map((line) => relId(line.penalty)),
+    ),
+  ].filter((id): id is number => id !== null);
+  const penaltyJob = new Map<number, number | null>(
+    penaltyIds.length
+      ? (
+          (
+            await payload.find({
+              collection: "partner-penalties",
+              where: { id: { in: [...new Set(penaltyIds)] } },
+              pagination: false,
+              depth: 0,
+              select: { job: true },
+              ...as,
+            })
+          ).docs as PartnerPenalty[]
+        ).map((penalty) => [penalty.id, relId(penalty.job)])
+      : [],
+  );
+  const penaltyBooking = (penaltyId: number | null, reference: string) => [
+    { id: (penaltyId && penaltyJob.get(penaltyId)) || 0, reference },
+  ];
+
+  // The bookings behind website payments, drivers' payments, refunds and
+  // penalties: their references, and where each came from.
   const websitePayments = website.docs as Payment[];
   const bookingIds = websitePayments
     .map((payment) => relId(payment.booking))
@@ -145,6 +178,7 @@ export async function loadFinanceMovements(
     ...(refunds.docs as Refund[]).flatMap((refund) =>
       (refund.lines ?? []).map((line) => relId(line.job)),
     ),
+    ...penaltyJob.values(),
   ].filter((id): id is number => id !== null);
   const jobs =
     bookingIds.length || lineJobIds.length
@@ -259,6 +293,20 @@ export async function loadFinanceMovements(
         outPence: 0,
       });
     }
+    // The penalties the partner took off this payment (Cityline, 16 Oct 2026).
+    for (const line of receipt.penalties ?? []) {
+      movements.push({
+        ...at(receipt.receivedAt),
+        kind: "partner_penalty",
+        record: receiptReference(receipt.id),
+        recordHref: `/admin/supplier-money/${relId(receipt.supplier)}`,
+        bookings: penaltyBooking(relId(line.penalty), line.jobReference ?? ""),
+        ...from,
+        detail: [line.penaltyReference, line.reason].filter(Boolean).join(" · "),
+        inPence: 0,
+        outPence: line.amountPence ?? 0,
+      });
+    }
   }
 
   for (const payment of drivers.docs as DriverPayment[]) {
@@ -291,6 +339,26 @@ export async function loadFinanceMovements(
           outPence: 0,
         });
       }
+    }
+    // The driver's share of partner penalties, taken off what they were paid.
+    for (const line of payment.penalties ?? []) {
+      const penaltyId = relId(line.penalty);
+      movements.push({
+        ...at(payment.paidAt),
+        kind: "penalty_from_driver",
+        record: paymentReference(payment.id),
+        recordHref: payee?.payHref ?? "/admin/driver-pay",
+        bookings: penaltyBooking(penaltyId, line.jobReference ?? ""),
+        ...sourceOfJob(penaltyId ? (penaltyJob.get(penaltyId) ?? null) : null),
+        detail: [
+          payee?.name ?? "Driver",
+          line.penaltyReference ?? (penaltyId ? penaltyReference(penaltyId) : ""),
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        inPence: line.amountPence ?? 0,
+        outPence: 0,
+      });
     }
   }
 
@@ -357,5 +425,6 @@ export const FINANCE_SOURCES_CSV_COLUMNS: CsvColumn<SourceRow>[] = [
   { header: "Refunds (£)", value: (row) => (row.refundsPence / 100).toFixed(2) },
   { header: "Card fees (£)", value: (row) => (row.feesPence / 100).toFixed(2) },
   { header: "Drivers (£)", value: (row) => (row.driversPence / 100).toFixed(2) },
+  { header: "Penalties (£)", value: (row) => (row.penaltiesPence / 100).toFixed(2) },
   { header: "Left (£)", value: (row) => (row.netPence / 100).toFixed(2) },
 ];

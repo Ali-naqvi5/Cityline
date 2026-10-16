@@ -151,4 +151,15 @@ describe("the payment note on WhatsApp", () => {
     expect(text).toContain("this settles £60.00 you paid Cityline");
     expect(text).toContain("You paid Cityline: £60.00");
   });
+
+  it("lists the driver's share of partner penalties taken off", () => {
+    const text = paymentMessage(
+      "Sam",
+      { ...payment, penaltiesPence: 500, amountPence: 8000 },
+      "+44 7926 608888",
+    );
+    expect(text).toContain("Less penalties: £5.00");
+    expect(text).toContain("Paid to you: £80.00");
+    expect(paymentMessage("Sam", payment, "+44 7926 608888")).not.toContain("penalties");
+  });
 });

@@ -80,6 +80,53 @@ describe("the payment statement PDF", () => {
     expect(pdf.getPageCount()).toBe(1);
   });
 
+  it("lists penalties taken off under the bookings, running on when the page is full", async () => {
+    const penalty = {
+      penalisedAt: new Date("2026-10-04T12:00:00Z"),
+      reference: "J-000001",
+      reason: "Trip.com fined Cityline: the driver was 20 minutes late at Terminal 5",
+      amountPence: 500,
+    };
+    // One booking fills most of the first page, so with a penalty the totals
+    // and bank details run on to a second, as a long statement does.
+    const bytes = await statementPdf(
+      { ...data, penalties: [penalty], penaltiesPence: 500, amountPence: 3000 },
+      assets,
+    );
+    expect((await PDFDocument.load(bytes)).getPageCount()).toBe(2);
+  });
+
+  it("runs on for many penalties, and a payment of penalties alone", async () => {
+    const penalties = Array.from({ length: 14 }, (_, index) => ({
+      penalisedAt: new Date("2026-10-04T12:00:00Z"),
+      reference: `J-${String(index + 1).padStart(6, "0")}`,
+      reason: "The driver was late at Gatwick North and the passenger complained",
+      amountPence: 500,
+    }));
+    const many = await PDFDocument.load(
+      await statementPdf(
+        { ...data, penalties, penaltiesPence: 7000, amountPence: 3500 - 7000 },
+        assets,
+      ),
+    );
+    expect(many.getPageCount()).toBeGreaterThan(1);
+    const alone = await PDFDocument.load(
+      await statementPdf(
+        {
+          ...data,
+          lines: [],
+          earnedPence: 0,
+          penalties: penalties.slice(0, 1),
+          penaltiesPence: 500,
+          amountPence: -500,
+          bank: null,
+        },
+        assets,
+      ),
+    );
+    expect(alone.getPageCount()).toBe(2);
+  });
+
   it("puts a bank transfer receipt by itself on an extra last page", async () => {
     const receipt = new Uint8Array(
       await sharp({

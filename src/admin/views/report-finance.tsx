@@ -51,10 +51,16 @@ const STATEMENT: {
     kind: "in",
   },
   { label: "From partners", field: "partnerPence", kind: "in" },
+  {
+    label: "Penalty shares taken off drivers' pay",
+    field: "penaltiesFromDriversPence",
+    kind: "in",
+  },
   { label: "Money in", field: "inPence", kind: "total" },
   { label: "Refunds", field: "refundsPence", kind: "out" },
   { label: "Card fees", field: "feesPence", kind: "out" },
   { label: "Drivers' prices, paid", field: "driversPence", kind: "out" },
+  { label: "Partner penalties", field: "penaltiesPence", kind: "out" },
   { label: "Cityline's own expenses", field: "expensesPence", kind: "out" },
   { label: "Money out", field: "outPence", kind: "total" },
   { label: "Profit", field: "profitPence", kind: "profit" },
@@ -216,6 +222,7 @@ export async function FinanceReportView(props: AdminViewServerProps) {
                           <th className="py-1 pr-4 text-right font-medium">Refunds</th>
                           <th className="py-1 pr-4 text-right font-medium">Card fees</th>
                           <th className="py-1 pr-4 text-right font-medium">Drivers</th>
+                          <th className="py-1 pr-4 text-right font-medium">Penalties</th>
                           <th className="py-1 pr-4 text-right font-medium">Expenses</th>
                           <th className="py-1 text-right font-medium">Profit</th>
                         </tr>
@@ -237,6 +244,12 @@ export async function FinanceReportView(props: AdminViewServerProps) {
                             </td>
                             <td className="py-1 pr-4 text-right">
                               {money(bucket.lines.driversPence)}
+                            </td>
+                            <td className="py-1 pr-4 text-right">
+                              {money(
+                                bucket.lines.penaltiesPence -
+                                  bucket.lines.penaltiesFromDriversPence,
+                              )}
                             </td>
                             <td className="py-1 pr-4 text-right">
                               {money(bucket.lines.expensesPence)}
@@ -320,7 +333,7 @@ export async function FinanceReportView(props: AdminViewServerProps) {
 
             <Panel
               title="By where the money came from"
-              description="What each brought in, less its refunds, card fees and drivers. Cityline's own expenses are not shared out."
+              description="What each brought in, less its refunds, card fees, drivers and partner penalties (less drivers' shares of them). Cityline's own expenses are not shared out."
               actions={<DownloadCsv href={csvHref("sources")} />}
               bodyClassName="p-0"
             >
@@ -344,6 +357,9 @@ export async function FinanceReportView(props: AdminViewServerProps) {
                         Drivers
                       </th>
                       <th scope="col" className={TH_NUM}>
+                        Penalties
+                      </th>
+                      <th scope="col" className={TH_NUM}>
                         Left
                       </th>
                       <th scope="col" className={TH_NUM}>
@@ -364,6 +380,7 @@ export async function FinanceReportView(props: AdminViewServerProps) {
                         <td className={TD_NUM}>{less(row.refundsPence)}</td>
                         <td className={TD_NUM}>{less(row.feesPence)}</td>
                         <td className={TD_NUM}>{less(row.driversPence)}</td>
+                        <td className={TD_NUM}>{less(row.penaltiesPence)}</td>
                         <td
                           className={cx(
                             TD_NUM,
@@ -387,7 +404,7 @@ export async function FinanceReportView(props: AdminViewServerProps) {
                       >
                         Cityline&apos;s own expenses
                       </th>
-                      <td className={TD_NUM} colSpan={4} />
+                      <td className={TD_NUM} colSpan={5} />
                       <td className={TD_NUM}>{less(lines.expensesPence)}</td>
                       <td className={TD_NUM} />
                     </tr>
@@ -395,7 +412,7 @@ export async function FinanceReportView(props: AdminViewServerProps) {
                       <th scope="row" className={cx(TD, "text-ink text-left")}>
                         {lines.profitPence < 0 ? "Loss" : "Profit"}
                       </th>
-                      <td className={TD_NUM} colSpan={4} />
+                      <td className={TD_NUM} colSpan={5} />
                       <td className={cx(TD_NUM, lines.profitPence < 0 && "text-danger")}>
                         {money(lines.profitPence)}
                       </td>

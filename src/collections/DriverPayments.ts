@@ -12,11 +12,13 @@ import {
   routeText,
   type PayJob,
 } from "@/domain/finance/driver-pay";
+import { penaltyReference } from "@/domain/finance/penalties";
 import type { JobStatus } from "@/domain/jobs/labels";
 import { londonDateAndTime, londonToUtc } from "@/lib/time";
-import type { Job } from "@/payload-types";
+import type { Job, PartnerPenalty } from "@/payload-types";
 
 import { auditChanges } from "./hooks/audit";
+import { linkPenalties } from "./hooks/partner-lines";
 
 /**
  * Payments to drivers (Driver Pay, approved by Cityline, 6 Oct 2026).
@@ -26,7 +28,9 @@ import { auditChanges } from "./hooks/audit";
  * works out the lines and totals from the bookings themselves — the driver
  * price written on each, less any cash the driver collected — so nothing
  * typed can disagree with the bookings, and a booking already paid cannot be
- * paid again. Each covered booking points back at its payment.
+ * paid again. Each covered booking points back at its payment. The driver's
+ * share of partner penalties comes off too, each once (Cityline, 16 Oct
+ * 2026); a payment may cover only such a share, which the driver then owes.
  *
  * A payment is never edited or deleted: a mistake is voided, with a reason,
  * which frees its bookings to be paid again. Owner and Accounts.
@@ -114,16 +118,27 @@ export const DriverPayments: CollectionConfig = {
               .filter((id): id is number => id !== null),
           ),
         ];
-        if (ids.length === 0) fail(req, "lines", "Choose at least one booking to pay.");
+        const penaltyIds = [
+          ...new Set(
+            ((data.penalties ?? []) as { penalty?: unknown }[])
+              .map((line) => relId(line.penalty))
+              .filter((id): id is number => id !== null),
+          ),
+        ];
+        if (ids.length === 0 && penaltyIds.length === 0) {
+          fail(req, "lines", "Choose at least one booking to pay.");
+        }
 
-        const found = await req.payload.find({
-          collection: "jobs",
-          where: { id: { in: ids } },
-          pagination: false,
-          depth: 0,
-          overrideAccess: true,
-          req,
-        });
+        const found = ids.length
+          ? await req.payload.find({
+              collection: "jobs",
+              where: { id: { in: ids } },
+              pagination: false,
+              depth: 0,
+              overrideAccess: true,
+              req,
+            })
+          : { docs: [] };
         if (found.docs.length !== ids.length) {
           fail(req, "lines", "One of those bookings is not on record.");
         }
@@ -170,11 +185,44 @@ export const DriverPayments: CollectionConfig = {
 
         jobs.sort((a, b) => a.pickupAt.localeCompare(b.pickupAt));
 
+        // The driver's share of partner penalties, taken off once each.
+        const penalties = penaltyIds.length
+          ? ((
+              await req.payload.find({
+                collection: "partner-penalties",
+                where: { id: { in: penaltyIds } },
+                sort: "penalisedAt",
+                pagination: false,
+                depth: 0,
+                overrideAccess: true,
+                req,
+              })
+            ).docs as PartnerPenalty[])
+          : [];
+        if (penalties.length !== penaltyIds.length) {
+          fail(req, "penalties", "One of those penalties is not on record.");
+        }
+        for (const penalty of penalties) {
+          const reference = penaltyReference(penalty.id);
+          if (penalty.voidedAt) fail(req, "penalties", `${reference} is void.`);
+          if (!penalty.driverSharePence) {
+            fail(req, "penalties", `Nothing of ${reference} is passed to the driver.`);
+          }
+          if (relId(penalty[payee.field]) !== payee.id) {
+            fail(req, "penalties", `${reference} is not taken from this ${payee.field}.`);
+          }
+          if (relId(penalty.driverPayment)) {
+            fail(req, "penalties", `${reference} was already taken off a payment.`);
+          }
+        }
+
         // The period it covers: from the day after the driver's (or
         // operator's) last payment, not voided, to the day this one runs up
         // to. Kept with the payment, so a statement already sent never changes.
         const londonDay = (value: string) => londonDateAndTime(new Date(value)).date;
         const upToDay = londonDay(String(data.upTo));
+        // A payment of penalties alone covers no bookings: it starts on its day.
+        const firstBooking = jobs[0] ? londonDay(jobs[0].pickupAt) : upToDay;
         const previous = await req.payload.find({
           collection: "driver-payments",
           where: {
@@ -195,12 +243,23 @@ export const DriverPayments: CollectionConfig = {
           paymentPeriodStart({
             upTo: upToDay,
             previousUpTo: previousUpTo ? londonDay(previousUpTo) : null,
-            firstBooking: londonDay(jobs[0]!.pickupAt),
+            firstBooking,
           }),
           "12:00",
         ).toISOString();
 
-        const totals = payTotals(jobs);
+        const penaltyLines = penalties.map((penalty) => ({
+          penalty: penalty.id,
+          penaltyReference: penaltyReference(penalty.id),
+          jobReference: penalty.jobReference ?? "",
+          penalisedAt: penalty.penalisedAt,
+          reason: (penalty.reason ?? "").slice(0, 300),
+          amountPence: penalty.driverSharePence ?? 0,
+        }));
+        const totals = payTotals(
+          jobs,
+          penaltyLines.map((line) => ({ driverSharePence: line.amountPence })),
+        );
         data.lines = jobs.map((job) => ({
           job: job.id,
           jobReference: job.reference,
@@ -212,6 +271,8 @@ export const DriverPayments: CollectionConfig = {
         }));
         data.earnedPence = totals.earnedPence;
         data.cashPence = totals.cashPence;
+        data.penalties = penaltyLines;
+        data.penaltiesPence = totals.penaltiesPence;
         data.amountPence = totals.netPence;
         data.recordedBy = req.user?.id ?? null;
         data.voidedAt = null;
@@ -239,6 +300,7 @@ export const DriverPayments: CollectionConfig = {
             req,
           });
         }
+        await linkPenalties(req, "driverPayment", doc, previousDoc, operation);
         return doc;
       },
       auditChanges<DriverPaymentDoc>({ label: (doc) => paymentReference(doc.id) }),
@@ -319,10 +381,39 @@ export const DriverPayments: CollectionConfig = {
       admin: { description: "Cash the driver collected, taken off. Pence." },
     },
     {
+      name: "penalties",
+      type: "array",
+      admin: {
+        description:
+          "The driver's share of partner penalties taken off, as it was when paid.",
+      },
+      fields: [
+        {
+          name: "penalty",
+          type: "relationship",
+          relationTo: "partner-penalties",
+          required: true,
+        },
+        { name: "penaltyReference", type: "text" },
+        { name: "jobReference", type: "text" },
+        { name: "penalisedAt", type: "date" },
+        { name: "reason", type: "text" },
+        { name: "amountPence", type: "number" },
+      ],
+    },
+    {
+      name: "penaltiesPence",
+      type: "number",
+      admin: {
+        description: "The driver's share of partner penalties, taken off. Pence.",
+      },
+    },
+    {
       name: "amountPence",
       type: "number",
       admin: {
-        description: "Paid: earned less cash. Below zero, the driver paid Cityline.",
+        description:
+          "Paid: earned less cash and penalties. Below zero, the driver paid Cityline.",
       },
     },
     { name: "recordedBy", type: "relationship", relationTo: "users" },

@@ -65,13 +65,14 @@ export function FinanceRings({
           value={money(profit.profitPence)}
           share={profit.margin}
           tone={profit.profitPence < 0 ? "danger" : undefined}
-          caption={`${money(profit.incomePence)} in, less ${profit.refundsPence ? `${money(profit.refundsPence)} refunds, ` : ""}${money(profit.driverPence)} drivers, ${money(profit.feesPence)} card fees and ${money(profit.expensesPence)} expenses`}
+          caption={`${money(profit.incomePence)} in, less ${profit.refundsPence ? `${money(profit.refundsPence)} refunds, ` : ""}${money(profit.driverPence)} drivers, ${money(profit.feesPence)} card fees, ${profit.penaltiesPence ? `${money(profit.penaltiesPence - profit.penaltiesFromDriversPence)} partner penalties${profit.penaltiesFromDriversPence ? ` (after ${money(profit.penaltiesFromDriversPence)} from drivers)` : ""}, ` : ""}and ${money(profit.expensesPence)} expenses`}
           tip="Margin: profit as a share of what the bookings earned, after refunds"
         />
       </TipLayer>
       <p className="text-ink-3 mt-4 text-xs">
-        Profit is booking prices less refunds on them, driver prices, card fees and
-        Cityline&apos;s own expenses in these dates.
+        Profit is booking prices less refunds on them, driver prices, card fees, partner
+        penalties Cityline bears and Cityline&apos;s own expenses in these dates. Below
+        nothing it is a loss.
       </p>
     </Panel>
   );

@@ -3,7 +3,7 @@
 Where the build actually stands. Read this before starting work; update it
 before finishing.
 
-**Last updated:** 15 October 2026
+**Last updated:** 16 October 2026
 
 Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-deviations.md)
 (why the build differs from the designs), [`runbook-vps.md`](runbook-vps.md)
@@ -14,24 +14,24 @@ Related: [`CLAUDE.md`](../CLAUDE.md) (rules), [`design-deviations.md`](design-de
 
 ## At a glance
 
-| Check                   | State                                                                                                                                                                                                        |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm typecheck`        | passing (see the `.next/dev` trap below)                                                                                                                                                                     |
-| `pnpm lint`             | passing                                                                                                                                                                                                      |
-| `pnpm format:check`     | passing                                                                                                                                                                                                      |
-| `pnpm check:compliance` | passing — 437 files, wording + claims                                                                                                                                                                        |
-| `pnpm check:migrations` | passing — 19 migrations, additive only                                                                                                                                                                       |
-| `pnpm test`             | passing — 598 tests across 63 files                                                                                                                                                                          |
-| `pnpm build`            | passing (15 Oct)                                                                                                                                                                                             |
-| `pnpm e2e`              | last run 29 Sep — 18 tests passing                                                                                                                                                                           |
-| `pnpm e2e:admin`        | 15 Oct: `operators`, `fleet`, `dispatch`, `assign`, `driver-pay`, `driver-pay-period`, `owner-rules`, `run-sheet`, `report`, `finance-report`, `access-filters-classes` passed; the other 9 not since 10 Oct |
+| Check                   | State                                                                                                                                                                                                                                                     |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm typecheck`        | passing (see the `.next/dev` trap below)                                                                                                                                                                                                                  |
+| `pnpm lint`             | passing                                                                                                                                                                                                                                                   |
+| `pnpm format:check`     | passing                                                                                                                                                                                                                                                   |
+| `pnpm check:compliance` | passing — 445 files, wording + claims                                                                                                                                                                                                                     |
+| `pnpm check:migrations` | passing — 20 migrations, additive only                                                                                                                                                                                                                    |
+| `pnpm test`             | passing — 616 tests across 64 files                                                                                                                                                                                                                       |
+| `pnpm build`            | passing (16 Oct)                                                                                                                                                                                                                                          |
+| `pnpm e2e`              | last run 29 Sep — 18 tests passing                                                                                                                                                                                                                        |
+| `pnpm e2e:admin`        | 16 Oct: `penalties` (new), `supplier-money`, `driver-pay`, `driver-pay-period`, `operators`, `finance-report` passed; 15 Oct: `fleet`, `dispatch`, `assign`, `owner-rules`, `run-sheet`, `report`, `access-filters-classes`; the other 8 not since 10 Oct |
 
 History is on GitHub (`Ali-naqvi5/Cityline`, branch `main`). Pushing `main`
 deploys to production — there is no staging (see below).
 
 ---
 
-## Where things stand on 15 Oct 2026 — read this first
+## Where things stand on 16 Oct 2026 — read this first
 
 ### Git and deploys
 
@@ -56,6 +56,14 @@ deploys to production — there is no staging (see below).
   - It adds one private-file purpose.
   - It lets a payment's `driver_id` be empty, for payments to operators.
   - No existing data changes.
+- **Waiting to be pushed (16 Oct): partner penalties and loss bookings.** It
+  brings **one migration**, `20261015_234351_partner_penalties`.
+  - It adds the `partner_penalties` table, and a `penalties` list on partner
+    receipts, partner invoices and driver payments.
+  - It adds `bookings_pence` and `penalties_pence` to receipts and invoices,
+    and `penalties_pence` to driver payments.
+  - No existing data changes. Receipts and invoices made before it have no
+    `bookings_pence`; screens fall back to the amount.
 - **After each deploy, check:**
   - the new logo in the website header and the admin;
   - a driver's statement link (Driver Pay → a payment → send details).
@@ -110,6 +118,18 @@ Each decision is written up in `CLAUDE.md`:
   - A booking goes to one from the assign page and runs the same stages.
   - They are paid in Driver Pay. TfL's record on the booking names them,
     their licence and who licensed them.
+- **Partner penalties and loss bookings** (16 Oct): the Owner's answers are
+  in `CLAUDE.md` and Claude's memory (`partner-penalties.md`).
+  - A partner's penalty is recorded by hand on one booking, never
+    automatically. It comes off the partner's payment (a later one too) and
+    any invoice made while it is open. Staff may pass part of it to the
+    driver's next pay, shown on the statement.
+  - A driver price above the agreed price warns of the loss and never blocks.
+    The ring shows a negative margin.
+  - **The statement:** one booking plus a penalty runs to a second page.
+    The Owner's layout keeps room for the bank details, so the penalties
+    table and the totals move over together. Ask the Owner if they want it
+    tighter.
 - **Declined: changing a booking's driver after completion,** by anyone,
   the Owner included (14 Oct). Voiding a payment frees its bookings back to
   the driver on the booking.

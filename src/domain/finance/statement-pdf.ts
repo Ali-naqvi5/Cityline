@@ -30,7 +30,9 @@ import { drawable, fit } from "./pdf-text";
  * (`lib/statement-assets.ts`). A long statement continues on pages with a
  * smaller header (the logo only); every page has the footer with its page
  * number (Cityline, 13 Oct 2026). A bank transfer's receipt, if one was
- * added, is printed by itself on the last page. Text the font cannot draw is
+ * added, is printed by itself on the last page. The driver's share of any
+ * partner penalties is listed under the bookings and taken off in the totals
+ * as "Less: penalties" (Cityline, 16 Oct 2026). Text the font cannot draw is
  * replaced, so an unusual character in an address never stops a statement
  * being produced.
  */
@@ -44,6 +46,16 @@ export interface StatementLine {
   status: string;
   pricePence: number;
   cashPence: number;
+}
+
+/** A partner penalty the driver bears a share of, taken off this payment. */
+export interface StatementPenalty {
+  penalisedAt: Date;
+  /** The booking it was for. */
+  reference: string;
+  reason: string;
+  /** The driver's share, taken off. */
+  amountPence: number;
 }
 
 export interface StatementData {
@@ -69,6 +81,9 @@ export interface StatementData {
   lines: StatementLine[];
   earnedPence: number;
   cashPence: number;
+  /** Penalties taken off; none on payments before 16 Oct 2026. */
+  penalties?: StatementPenalty[];
+  penaltiesPence?: number;
   amountPence: number;
   company: { name: string; address: string; phone: string; email: string };
   generatedAt: Date;
@@ -101,6 +116,8 @@ const CAP = 0.7;
 const ROWS_BOTTOM = 950;
 /** The totals and bank details after the last row, and where they must end. */
 const CLOSING = 24 + 200 + 25 + 126;
+/** The totals' extra row when penalties are taken off. */
+const PENALTY_ROW = 46;
 const CLOSING_BOTTOM = 960;
 
 const hex = (value: string): RGB =>
@@ -194,6 +211,15 @@ const COLUMNS = [
   { key: "cash", label: "CASH RECEIVED", width: 146 },
 ] as const;
 type Column = (typeof COLUMNS)[number]["key"];
+/** The penalties' table, under the bookings: the same width. */
+const PENALTY_COLUMNS = [
+  { key: "date", label: "DATE", width: 180 },
+  { key: "booking", label: "BOOKING REF", width: 200 },
+  { key: "reason", label: "REASON", width: 798 },
+  { key: "amount", label: "TAKEN OFF", width: 200 },
+] as const;
+type PenaltyColumn = (typeof PENALTY_COLUMNS)[number]["key"];
+type TableColumn = { key: string; label: string; width: number };
 const PAD = 20;
 const ROW_TEXT = 14.5;
 const ROW_LINE = 22;
@@ -506,19 +532,31 @@ export async function statementPdf(
   };
   const textWidth = (key: Column) =>
     (COLUMNS.find((column) => column.key === key)?.width ?? 0) - 2 * PAD;
+  const penaltyLeft = (key: PenaltyColumn) => {
+    let x = LEFT;
+    for (const column of PENALTY_COLUMNS) {
+      if (column.key === key) return x;
+      x += column.width;
+    }
+    return x;
+  };
 
+  /** The table being drawn: the bookings, then any penalties. */
+  let columns: readonly TableColumn[] = COLUMNS;
   let tableTop = 0;
   let rowsOnPage = 0;
   const tableHeader = () => {
     tableTop = y;
     rowsOnPage = 0;
     box(LEFT, y, WIDTH, 43.5, 8, { fill: TABLE_HEAD, square: "bottom" });
-    for (const column of COLUMNS) {
-      text(column.label, columnLeft(column.key) + PAD, y + 28.5, {
+    let x = LEFT;
+    for (const column of columns) {
+      text(column.label, x + PAD, y + 28.5, {
         size: 14,
         font: semibold,
         color: GREEN_TEXT,
       });
+      x += column.width;
     }
     y += 43.5;
     line(LEFT, y, RIGHT, y, GRID);
@@ -526,7 +564,7 @@ export async function statementPdf(
   /** The column lines and border, once this page's rows are drawn. */
   const closeTable = () => {
     let x = LEFT;
-    for (const column of COLUMNS.slice(0, -1)) {
+    for (const column of columns.slice(0, -1)) {
       x += column.width;
       line(x, tableTop, x, y, GRID);
     }
@@ -548,6 +586,9 @@ export async function statementPdf(
 
   // --- The bookings -----------------------------------------------------------------
 
+  const penalties = data.penalties ?? [];
+  const penaltiesPence = data.penaltiesPence ?? 0;
+  const closing = CLOSING + (penaltiesPence ? PENALTY_ROW : 0);
   newPage(true);
   const rowCap = ROW_TEXT * CAP;
   data.lines.forEach((entry, index) => {
@@ -556,11 +597,12 @@ export async function statementPdf(
     const lines = Math.max(pickup.length, dropoff.length, 1);
     const block = rowCap + (lines - 1) * ROW_LINE;
     const height = Math.max(46, block + 35);
-    // A row is never split; the last one stays with the totals.
-    const last = index === data.lines.length - 1;
+    // A row is never split; the last one stays with the totals, unless
+    // the penalties come between.
+    const last = index === data.lines.length - 1 && penalties.length === 0;
     if (
       y + height > ROWS_BOTTOM ||
-      (last && y + height + CLOSING > CLOSING_BOTTOM && rowsOnPage > 0)
+      (last && y + height + closing > CLOSING_BOTTOM && rowsOnPage > 0)
     ) {
       closeTable();
       newPage(false);
@@ -617,31 +659,97 @@ export async function statementPdf(
   }
   closeTable();
 
+  // --- The penalties taken off, under the bookings --------------------------------------
+
+  if (penalties.length) {
+    // Each reason on up to two lines, measured once.
+    const reasonWidth = PENALTY_COLUMNS[2].width - 2 * PAD;
+    const rowsOf = penalties.map((entry) => {
+      const reasons = wrap(entry.reason, regular, ROW_TEXT, reasonWidth, 2);
+      const block = rowCap + (Math.max(reasons.length, 1) - 1) * ROW_LINE;
+      return { reasons, height: Math.max(46, block + 35) };
+    });
+    // The heading stays with the table's header and its first row; a lone
+    // penalty that cannot stay with the totals takes its heading over too,
+    // so the totals never stand on a page by themselves.
+    const opening = y + 50 + 43.5 + rowsOf[0]!.height;
+    if (
+      opening > ROWS_BOTTOM ||
+      (penalties.length === 1 && opening + closing > CLOSING_BOTTOM)
+    ) {
+      newPage(false, false);
+      y -= 24;
+    }
+    text("PENALTIES TAKEN OFF", LEFT, y + 38, {
+      size: 15.5,
+      font: bold,
+      color: GREEN_TEXT,
+    });
+    y += 50;
+    columns = PENALTY_COLUMNS;
+    tableHeader();
+    penalties.forEach((entry, index) => {
+      const { reasons, height } = rowsOf[index]!;
+      const last = index === penalties.length - 1;
+      if (
+        y + height > ROWS_BOTTOM ||
+        (last && y + height + closing > CLOSING_BOTTOM && rowsOnPage > 0)
+      ) {
+        closeTable();
+        newPage(false);
+      }
+      if (rowsOnPage) line(LEFT, y, RIGHT, y, GRID);
+      const middle = y + height / 2;
+      const single = middle + rowCap / 2 - 0.5;
+      text(formatDate(entry.penalisedAt), penaltyLeft("date") + PAD, single, {
+        size: ROW_TEXT,
+      });
+      text(entry.reference, penaltyLeft("booking") + PAD, single, { size: ROW_TEXT });
+      const first = middle - (rowCap + (reasons.length - 1) * ROW_LINE) / 2 + rowCap;
+      reasons.forEach((part, i) =>
+        text(part, penaltyLeft("reason") + PAD, first + i * ROW_LINE, {
+          size: ROW_TEXT,
+        }),
+      );
+      text(money(entry.amountPence), penaltyLeft("amount") + PAD, single, {
+        size: ROW_TEXT,
+      });
+      y += height;
+      rowsOnPage++;
+    });
+    closeTable();
+  }
+
   // --- Totals -----------------------------------------------------------------------
 
-  if (y + CLOSING > CLOSING_BOTTOM) {
+  if (y + closing > CLOSING_BOTTOM) {
     newPage(false, false);
     y -= 24;
   }
   const top = y + 24;
   const panelLeft = 852;
   const panelWidth = RIGHT - panelLeft;
-  box(panelLeft, top, panelWidth, 200, 9, { fill: PANEL, opacity: 0.92 });
-  box(panelLeft, top + 140.5, panelWidth, 59.5, 9, { fill: NET_ROW, square: "top" });
-  box(panelLeft, top, panelWidth, 200, 9, { border: BORDER, borderWidth: 1.2 });
 
   const anyPns = data.lines.some((entry) => entry.status === "PNS");
-  const rows: [string, string, number, number][] = [
+  const rows: [string, string, number][] = [
     [
       anyPns ? "Completed and PNS bookings" : "Completed bookings",
       String(data.lines.length),
-      top,
       48,
     ],
-    ["Total booking fares", money(data.earnedPence), top + 48, 46],
-    ["Less: cash received by driver", money(data.cashPence), top + 94, 46.5],
+    ["Total booking fares", money(data.earnedPence), 46],
+    ["Less: cash received by driver", money(data.cashPence), 46.5],
   ];
-  rows.forEach(([label, value, rowTop, height], index) => {
+  if (penaltiesPence) rows.push(["Less: penalties", money(penaltiesPence), PENALTY_ROW]);
+  // The net row sits under the others; the panel grows with a penalties row.
+  const netTop = top + rows.reduce((sum, [, , height]) => sum + height, 0);
+  const panelHeight = netTop - top + 59.5;
+  box(panelLeft, top, panelWidth, panelHeight, 9, { fill: PANEL, opacity: 0.92 });
+  box(panelLeft, netTop, panelWidth, 59.5, 9, { fill: NET_ROW, square: "top" });
+  box(panelLeft, top, panelWidth, panelHeight, 9, { border: BORDER, borderWidth: 1.2 });
+
+  let rowTop = top;
+  rows.forEach(([label, value, height], index) => {
     const middle = rowTop + height / 2;
     text(label, 875, middle + (15 * CAP) / 2, { size: 15 });
     text(value, 1419, middle + (18 * CAP) / 2, {
@@ -649,32 +757,35 @@ export async function statementPdf(
       font: semibold,
       align: "right",
     });
-    if (index < 2) line(872, rowTop + height, 1416, rowTop + height, SOFT_GRID);
+    if (index < rows.length - 1) {
+      line(872, rowTop + height, 1416, rowTop + height, SOFT_GRID);
+    }
+    rowTop += height;
   });
-  line(872, top + 140.5, 1416, top + 140.5, NET_RULE, 1.5);
+  line(872, netTop, 1416, netTop, NET_RULE, 1.5);
 
   // What Cityline pays the driver, or what the driver owes when their cash
-  // came to more than their bookings.
+  // and penalties came to more than their bookings.
   const owed = data.amountPence < 0;
-  icon("coins", 876, top + 154, 31);
+  icon("coins", 876, netTop + 13.5, 31);
   text(
     owed ? "NET PAID BY DRIVER TO CITYLINE" : "NET PAYMENT TO DRIVER",
     923,
-    top + 175.5,
+    netTop + 35,
     {
       size: 15.5,
       font: bold,
       color: GREEN_DARK,
     },
   );
-  text(money(Math.abs(data.amountPence)), 1419, top + 179.5, {
+  text(money(Math.abs(data.amountPence)), 1419, netTop + 39, {
     size: 26,
     font: bold,
     color: GREEN_DARK,
     align: "right",
   });
   if (data.voided) {
-    text("This payment was voided and does not stand.", LEFT, top + 175.5, {
+    text("This payment was voided and does not stand.", LEFT, netTop + 35, {
       size: 15,
       font: bold,
       color: VOID_RED,
@@ -684,7 +795,7 @@ export async function statementPdf(
   // --- The driver's bank account; for cash, the space stays empty ---------------------
 
   if (data.bank) {
-    const bankTop = top + 200 + 25;
+    const bankTop = top + panelHeight + 25;
     box(LEFT, bankTop, WIDTH, 126, 9, { fill: BANK_FILL, opacity: 0.85 });
     box(LEFT, bankTop, WIDTH, 126, 9, { border: BANK_BORDER, borderWidth: 1.2 });
     icon("bank", 77, bankTop + 24, 44);

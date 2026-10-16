@@ -144,7 +144,7 @@ export async function DriverPayView(props: AdminViewServerProps) {
 
       <Panel
         title={`Owed up to ${formatDate(new Date(`${upTo}T12:00:00Z`))}`}
-        description="Completed and PNS bookings not yet paid"
+        description="Completed and PNS bookings not yet paid, less any share of partner penalties"
         bodyClassName="p-0"
       >
         {rows.length === 0 ? (
@@ -168,6 +168,9 @@ export async function DriverPayView(props: AdminViewServerProps) {
                   </th>
                   <th scope="col" className={TH_NUM}>
                     Cash held
+                  </th>
+                  <th scope="col" className={TH_NUM}>
+                    Penalties
                   </th>
                   <th scope="col" className={TH_NUM}>
                     To pay
@@ -203,6 +206,11 @@ export async function DriverPayView(props: AdminViewServerProps) {
                     <td className={TD_NUM}>{money(row.owed.earnedPence)}</td>
                     <td className={TD_NUM}>
                       {row.owed.cashPence ? `-${money(row.owed.cashPence)}` : "—"}
+                    </td>
+                    <td className={TD_NUM}>
+                      {row.owed.penaltiesPence
+                        ? `-${money(row.owed.penaltiesPence)}`
+                        : "—"}
                     </td>
                     <td className={`${TD_NUM} font-semibold`}>
                       {row.owed.netPence >= 0 ? (

@@ -33,6 +33,7 @@ import {
   paymentReference,
   routeText,
 } from "@/domain/finance/driver-pay";
+import { penaltyReference } from "@/domain/finance/penalties";
 import { STATEMENT_LINK_DAYS, statementToken } from "@/domain/finance/statement-link";
 import { stageName } from "@/domain/jobs/status";
 import { paymentMessage, whatsappLink } from "@/domain/messaging/driver-message";
@@ -116,6 +117,7 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
           bookings: payment.lines?.length ?? 0,
           earnedPence: payment.earnedPence ?? 0,
           cashPence: payment.cashPence ?? 0,
+          penaltiesPence: payment.penaltiesPence ?? 0,
           amountPence: payment.amountPence ?? 0,
           statementUrl: `${siteUrl()}/api/statements/${statementToken(payment.id, expires)}`,
         },
@@ -198,7 +200,7 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
         <div className="flex min-w-0 flex-col gap-5">
           <Panel
             title={`Owed up to ${formatDate(new Date(`${upTo}T12:00:00Z`))}`}
-            description="Completed and PNS bookings with a driver price, not yet paid"
+            description="Completed and PNS bookings with a driver price, not yet paid, less any share of partner penalties"
             actions={
               <FilterForm action={payee.payHref} className="flex items-end gap-2">
                 <div>
@@ -213,7 +215,7 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
               </FilterForm>
             }
           >
-            {owed.payable.length === 0 ? (
+            {owed.payable.length === 0 && owed.penalties.length === 0 ? (
               <EmptyState
                 title="Nothing to pay"
                 description={
@@ -241,10 +243,22 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
                   pricePence: job.driverPricePence ?? 0,
                   cashPence: cashHeldPence(job),
                 }))}
+                penalties={owed.penalties.map((penalty) => ({
+                  id: penalty.id,
+                  reference: penaltyReference(penalty.id),
+                  booking: penalty.jobReference,
+                  when: formatDate(new Date(penalty.penalisedAt)),
+                  reason: penalty.reason,
+                  amountPence: penalty.driverSharePence,
+                }))}
               />
             ) : (
               <p className="text-ink-2 text-sm">
-                {owed.payable.length} bookings, {money(owed.netPence)} to pay.
+                {owed.payable.length} bookings
+                {owed.penaltiesPence
+                  ? `, less ${money(owed.penaltiesPence)} of penalties`
+                  : ""}
+                , {money(owed.netPence)} to pay.
               </p>
             )}
           </Panel>
@@ -331,9 +345,12 @@ export async function DriverPayDriverView(props: AdminViewServerProps) {
                           {PAYMENT_METHODS[payment.method as PaymentMethod] ??
                             payment.method}
                           {payment.reference ? ` · ${payment.reference}` : ""} ·{" "}
-                          {counted(payment.lines?.length ?? 0, "booking")},{" "}
-                          {paymentPeriod(periodFromOf(payment), new Date(payment.upTo))} ·
-                          recorded by {recordedBy}
+                          {counted(payment.lines?.length ?? 0, "booking")}
+                          {payment.penaltiesPence
+                            ? ` less ${money(payment.penaltiesPence)} penalties`
+                            : ""}
+                          , {paymentPeriod(periodFromOf(payment), new Date(payment.upTo))}{" "}
+                          · recorded by {recordedBy}
                         </p>
                         {payment.voidedAt ? (
                           <p className="text-danger text-xs">

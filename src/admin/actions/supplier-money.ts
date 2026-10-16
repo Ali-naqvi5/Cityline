@@ -35,6 +35,11 @@ export async function partnerMoneyAction(
     .getAll("job")
     .map((value) => Number(value))
     .filter((id) => Number.isInteger(id) && id > 0);
+  // The partner's penalties it takes off, or shows (Cityline, 16 Oct 2026).
+  const penaltyIds = formData
+    .getAll("penalty")
+    .map((value) => Number(value))
+    .filter((id) => Number.isInteger(id) && id > 0);
   if (!Number.isInteger(supplierId) || supplierId <= 0) {
     return { errors: {}, message: "That partner is not valid. Reload the page." };
   }
@@ -56,6 +61,7 @@ export async function partnerMoneyAction(
   let id: number;
   try {
     const lines = jobIds.map((job) => ({ job }));
+    const penalties = penaltyIds.map((penalty) => ({ penalty }));
     const notes = text(formData, "notes").slice(0, 1000) || null;
     if (intent === "receipt") {
       const saved = await payload.create({
@@ -67,6 +73,7 @@ export async function partnerMoneyAction(
           reference: text(formData, "reference").slice(0, 100) || null,
           notes,
           lines,
+          penalties,
         },
         user,
         overrideAccess: false,
@@ -80,6 +87,7 @@ export async function partnerMoneyAction(
           issuedAt: dayToIso(text(formData, "issuedAt"))!,
           notes,
           lines,
+          penalties,
         },
         user,
         overrideAccess: false,

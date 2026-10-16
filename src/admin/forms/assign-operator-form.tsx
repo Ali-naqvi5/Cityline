@@ -17,6 +17,8 @@ import {
 } from "@/components/ops/form";
 import { Badge, buttonClass, cx } from "@/components/ops/primitives";
 
+import { LossWarning } from "./loss-warning";
+
 /**
  * Giving a booking to a subcontracting operator (Cityline, 15 Oct 2026): a
  * licensed operator who does it with their own driver and car, none of which
@@ -30,6 +32,7 @@ export function AssignOperatorForm({
   operators,
   current,
   pricePence,
+  customerPricePence = null,
   cancelHref,
 }: {
   jobId: number;
@@ -37,9 +40,14 @@ export function AssignOperatorForm({
   /** Whoever has the booking now: a driver, or an operator (with their id). */
   current: { operatorId: number | null; name: string } | null;
   pricePence: number | null;
+  /** The booking's agreed price, for the loss warning (Cityline, 16 Oct 2026). */
+  customerPricePence?: number | null;
   cancelHref: string;
 }) {
   const [state, action, pending] = useActionState(assignOperatorAction, EMPTY_FORM);
+  const [typedPrice, setTypedPrice] = useState(
+    pricePence === null ? "" : (pricePence / 100).toFixed(2),
+  );
   const [chosenId, setChosenId] = useState(
     current?.operatorId ? String(current.operatorId) : "",
   );
@@ -189,6 +197,7 @@ export function AssignOperatorForm({
               inputMode="decimal"
               autoComplete="off"
               defaultValue={pricePence === null ? "" : (pricePence / 100).toFixed(2)}
+              onChange={(event) => setTypedPrice(event.target.value)}
               placeholder="0.00"
               className={inputClass("pl-7 tabular-nums")}
               {...invalid(state.errors.driverPrice, "driverPrice")}
@@ -204,6 +213,11 @@ export function AssignOperatorForm({
               be written later on the booking.
             </p>
           )}
+          <LossWarning
+            customerPricePence={customerPricePence}
+            typed={typedPrice}
+            operator
+          />
         </div>
 
         <FormMessage state={state} />

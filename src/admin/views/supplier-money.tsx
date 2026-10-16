@@ -30,8 +30,9 @@ import type { Supplier, User } from "@/payload-types";
 /**
  * Supplier Money (approved by Cityline, 6 Oct 2026): what each partner owes
  * for the bookings they sent — completed, PNS and late cancellations they pay
- * for — what is overdue on their terms, what needs a decision, and the money
- * received in any period. Owner and Accounts.
+ * for, less the penalties they take off (Cityline, 16 Oct 2026) — what is
+ * overdue on their terms, what needs a decision, and the money received in
+ * any period. Owner and Accounts.
  */
 
 const TH = "px-3 py-2 text-left font-semibold whitespace-nowrap";
@@ -60,7 +61,7 @@ export async function SupplierMoneyView(props: AdminViewServerProps) {
       end: period.previous.end,
     }),
   ]);
-  const owed = rows.reduce((sum, row) => sum + row.owed.totalPence, 0);
+  const owed = rows.reduce((sum, row) => sum + row.owed.netPence, 0);
   const overdue = rows.reduce((sum, row) => sum + row.owed.overduePence, 0);
   const toDecide = rows.reduce((sum, row) => sum + row.owed.toDecide.length, 0);
   const received = receivedTotal(receipts);
@@ -101,7 +102,7 @@ export async function SupplierMoneyView(props: AdminViewServerProps) {
           label={`Owed by partners, up to ${upToLabel}`}
           value={money(owed)}
           current={owed}
-          hint={counted(rows.filter((row) => row.owed.totalPence > 0).length, "partner")}
+          hint={counted(rows.filter((row) => row.owed.netPence > 0).length, "partner")}
         />
         <KpiTile
           label="Overdue"
@@ -176,7 +177,12 @@ export async function SupplierMoneyView(props: AdminViewServerProps) {
                     </td>
                     <td className={TD_NUM}>{row.owed.owed.length}</td>
                     <td className={`${TD_NUM} font-semibold`}>
-                      {money(row.owed.totalPence)}
+                      {money(row.owed.netPence)}
+                      {row.owed.penaltiesPence ? (
+                        <span className="text-ink-3 block text-xs font-normal">
+                          after {money(row.owed.penaltiesPence)} penalties
+                        </span>
+                      ) : null}
                     </td>
                     <td className={TD_NUM}>
                       {row.owed.overduePence ? (

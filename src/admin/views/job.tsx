@@ -25,9 +25,12 @@ import {
   resendManageLinkAction,
 } from "@/admin/actions/jobs";
 import { auditValue } from "@/admin/audit-format";
+import { PenaltyList } from "@/admin/components/penalty-list";
 import { loadJobPayment } from "@/admin/data/payments";
-import { money, pickupLabel, relative, stamp } from "@/admin/format";
+import { loadJobPenalties } from "@/admin/data/supplier-money";
+import { londonDay, money, pickupLabel, relative, stamp } from "@/admin/format";
 import { DriverPriceForm } from "@/admin/forms/driver-price-form";
+import { PenaltyForm } from "@/admin/forms/penalty-form";
 import { NextStageButtons, StageProgress } from "@/admin/forms/stage-controls";
 import { StepBackForm } from "@/admin/forms/step-back-form";
 import { WhatsAppButton } from "@/admin/forms/whatsapp-button";
@@ -271,6 +274,11 @@ const NOTICES: Record<string, { tone: "ok" | "warn" | "danger"; text: string }> 
     text: "Emailing passengers their driver's details is switched off.",
   },
   "driver-price": { tone: "ok", text: "Driver price saved." },
+  penalty: {
+    tone: "ok",
+    text: "Partner penalty recorded. It comes off what the partner owes, and off profit.",
+  },
+  "penalty-voided": { tone: "ok", text: "Partner penalty voided." },
   "details-failed": {
     tone: "danger",
     text: "The driver details could not be emailed. The reason is in the history below.",
@@ -502,12 +510,29 @@ export async function JobView(props: AdminViewServerProps) {
     seesFinance && can(user.role, "payments.view")
       ? await loadJobPayment(payload, user, job)
       : null;
+  // A partner's penalties on this booking (Cityline, 16 Oct 2026).
+  const partnerBooking = job.source === "supplier";
+  const penalties =
+    seesFinance && partnerBooking && can(user.role, "supplierMoney.view")
+      ? await loadJobPenalties(payload, user, job.id)
+      : [];
+  const livePenalties = penalties.filter((penalty) => !penalty.voidedAt);
+  const recordsPenalties =
+    partnerBooking &&
+    can(user.role, "supplierMoney.manage") &&
+    (isDone(status) || status === "cancelled") &&
+    !job.isTest;
   const feesKnown = (job.paymentFeePence ?? 0) > 0;
   const takings = bookingMoney({
     customerPricePence: job.customerPricePence,
     refundedPence: customerPaid?.refundedPence ?? 0,
     paymentFeePence: job.paymentFeePence,
     driverPricePence: job.driverPricePence,
+    penaltyPence: livePenalties.reduce((sum, penalty) => sum + penalty.amountPence, 0),
+    penaltyFromDriverPence: livePenalties.reduce(
+      (sum, penalty) => sum + (penalty.driverSharePence ?? 0),
+      0,
+    ),
   });
   const messageStatus =
     MESSAGE_STATUS[job.driverMessageStatus] ?? MESSAGE_STATUS.not_sent!;
@@ -1138,6 +1163,7 @@ export async function JobView(props: AdminViewServerProps) {
                   key={job.driverPricePence ?? "none"}
                   jobId={job.id}
                   pricePence={job.driverPricePence ?? null}
+                  customerPricePence={job.customerPricePence ?? null}
                   operator={Boolean(job.operator)}
                 />
               ) : (
@@ -1330,8 +1356,18 @@ export async function JobView(props: AdminViewServerProps) {
                     )}
                   </dd>
                 </div>
+                {takings.penaltyPence ? (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-ink-3">Partner penalties Cityline bears</dt>
+                    <dd className="tabular-nums">− {money(takings.penaltyPence)}</dd>
+                  </div>
+                ) : null}
                 <div className="border-line flex justify-between gap-3 border-t pt-2">
-                  <dt className="text-ink font-medium">Profit</dt>
+                  <dt className="text-ink font-medium">
+                    {takings.profitPence !== null && takings.profitPence < 0
+                      ? "Loss"
+                      : "Profit"}
+                  </dt>
                   <dd className="text-right font-semibold tabular-nums">
                     {takings.profitPence === null ? (
                       <NotRecorded>Needs the driver price</NotRecorded>
@@ -1345,6 +1381,42 @@ export async function JobView(props: AdminViewServerProps) {
                   </dd>
                 </div>
               </dl>
+              {partnerBooking && (penalties.length || recordsPenalties) ? (
+                <div className="border-line -mx-5 mt-4 border-t">
+                  <p className="text-ink px-5 pt-4 text-sm font-semibold">
+                    Partner penalties
+                  </p>
+                  {penalties.length ? (
+                    <PenaltyList
+                      penalties={penalties}
+                      canVoid={can(user.role, "supplierMoney.manage")}
+                      back={{ from: "job", jobId: job.id }}
+                    />
+                  ) : (
+                    <p className="text-ink-3 px-5 pt-1 text-sm">None recorded.</p>
+                  )}
+                  {recordsPenalties ? (
+                    <details className="px-5 pt-3">
+                      <summary className="text-accent cursor-pointer text-sm font-medium">
+                        Record a partner penalty
+                      </summary>
+                      <div className="pt-4">
+                        <PenaltyForm
+                          jobId={job.id}
+                          today={londonDay(now)}
+                          takenFrom={
+                            driver
+                              ? (driver.fullName ?? "the driver")
+                              : operator
+                                ? operator.name
+                                : null
+                          }
+                        />
+                      </div>
+                    </details>
+                  ) : null}
+                </div>
+              ) : null}
             </Panel>
           ) : null}
 

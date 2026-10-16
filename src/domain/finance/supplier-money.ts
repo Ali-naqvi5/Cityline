@@ -1,5 +1,7 @@
 import type { JobStatus } from "@/domain/jobs/labels";
 
+import { penaltiesTotal, type PenaltyLine } from "./penalties";
+
 /**
  * Supplier Money (approved by Cityline, 6 Oct 2026): what each partner owes
  * Cityline for the bookings they sent. Partners take their cut before they
@@ -13,6 +15,8 @@ import type { JobStatus } from "@/domain/jobs/labels";
  *   - Money received is recorded against the bookings it covers, so none is
  *     counted twice. An invoice is a document the office chooses to make and
  *     send; it never goes anywhere by itself.
+ *   - A partner's penalty comes off what they owe, and off the payment (and
+ *     any invoice) it is taken from (Cityline, 16 Oct 2026).
  */
 
 export type CancellationCharge = "charged" | "not_charged";
@@ -71,27 +75,42 @@ export function dueDate(
 
 export interface PartnerOwed {
   owed: PartnerJob[];
+  /** The bookings' prices. */
   totalPence: number;
+  /** Penalties not yet taken off a payment, whatever their date. */
+  penalties: PenaltyLine[];
+  penaltiesPence: number;
+  /** What they owe: the bookings less the penalties. */
+  netPence: number;
   overduePence: number;
   /** Owed and on no invoice yet. */
   uninvoiced: number;
   toDecide: PartnerJob[];
 }
 
-/** What a partner owes for bookings picked up before `before`. */
+/**
+ * What a partner owes for bookings picked up before `before`, less their
+ * penalties not yet taken off a payment.
+ */
 export function partnerOwed(
   jobs: readonly PartnerJob[],
   before: Date,
   termsDays: number | null,
   now: Date,
+  penalties: readonly PenaltyLine[] = [],
 ): PartnerOwed {
   const inRange = jobs.filter(
     (job) => new Date(job.pickupAt).getTime() < before.getTime(),
   );
   const owed = inRange.filter(isOwed);
+  const totalPence = owed.reduce((sum, job) => sum + (job.pricePence ?? 0), 0);
+  const penaltiesPence = penaltiesTotal(penalties);
   return {
     owed,
-    totalPence: owed.reduce((sum, job) => sum + (job.pricePence ?? 0), 0),
+    totalPence,
+    penalties: [...penalties],
+    penaltiesPence,
+    netPence: totalPence - penaltiesPence,
     overduePence: owed
       .filter((job) => dueDate(job, termsDays).getTime() < now.getTime())
       .reduce((sum, job) => sum + (job.pricePence ?? 0), 0),

@@ -6,15 +6,24 @@ import { invoiceNumber } from "@/domain/finance/supplier-money";
 import type { Supplier } from "@/payload-types";
 
 import { auditChanges } from "./hooks/audit";
-import { failOn, linkBookings, onlyChange, partnerLines } from "./hooks/partner-lines";
-import { LINE_FIELDS } from "./SupplierPayments";
+import {
+  failOn,
+  linkBookings,
+  linkPenalties,
+  onlyChange,
+  partnerLines,
+  partnerPenaltyLines,
+} from "./hooks/partner-lines";
+import { LINE_FIELDS, PENALTY_FIELDS } from "./SupplierPayments";
 
 /**
  * Invoices to partners (Supplier Money, approved by Cityline, 6 Oct 2026).
  * Made only when the office chooses, for the bookings it chooses, and sent by
  * the office — nothing here sends anything. The lines and total come from the
- * bookings; a booking is on one invoice at a time. Due after the partner's
- * payment terms. Never edited: marked sent, or voided with a reason.
+ * bookings; a booking is on one invoice at a time. The partner's penalties
+ * not yet taken off show as minus lines, so the total is what they will pay
+ * (Cityline, 16 Oct 2026). Due after the partner's payment terms. Never
+ * edited: marked sent, or voided with a reason.
  */
 
 const DAY_MS = 86_400_000;
@@ -56,8 +65,26 @@ export const SupplierInvoices: CollectionConfig = {
           data.lines,
           "supplierInvoice",
         );
+        const penalties = await partnerPenaltyLines(
+          req,
+          "supplier-invoices",
+          supplierId!,
+          data.penalties,
+          "supplierInvoice",
+        );
+        const bookingsPence = lines.reduce((sum, line) => sum + line.amountPence, 0);
+        const penaltiesPence = penalties.reduce((sum, line) => sum + line.amountPence, 0);
+        if (penaltiesPence > bookingsPence) {
+          fail(
+            "penalties",
+            "The penalties come to more than the bookings. Untick some penalties.",
+          );
+        }
         data.lines = lines;
-        data.totalPence = lines.reduce((sum, line) => sum + line.amountPence, 0);
+        data.penalties = penalties;
+        data.bookingsPence = bookingsPence;
+        data.penaltiesPence = penaltiesPence;
+        data.totalPence = bookingsPence - penaltiesPence;
         data.dueAt = new Date(
           new Date(String(data.issuedAt)).getTime() +
             (supplier.paymentTermsDays ?? 0) * DAY_MS,
@@ -73,6 +100,7 @@ export const SupplierInvoices: CollectionConfig = {
     afterChange: [
       async ({ doc, previousDoc, operation, req }) => {
         await linkBookings(req, "supplierInvoice", doc, previousDoc, operation);
+        await linkPenalties(req, "supplierInvoice", doc, previousDoc, operation);
         return doc;
       },
       auditChanges<{ id: number }>({ label: (doc) => invoiceNumber(doc.id) }),
@@ -90,7 +118,24 @@ export const SupplierInvoices: CollectionConfig = {
     { name: "dueAt", type: "date" },
     { name: "notes", type: "textarea" },
     { name: "lines", type: "array", fields: LINE_FIELDS },
-    { name: "totalPence", type: "number" },
+    { name: "penalties", type: "array", fields: PENALTY_FIELDS },
+    {
+      name: "bookingsPence",
+      type: "number",
+      admin: {
+        description: "The bookings' prices. Empty on invoices before 16 Oct 2026.",
+      },
+    },
+    {
+      name: "penaltiesPence",
+      type: "number",
+      admin: { description: "Partner penalties shown as minus lines." },
+    },
+    {
+      name: "totalPence",
+      type: "number",
+      admin: { description: "Due: the bookings less the penalties." },
+    },
     {
       name: "sentAt",
       type: "date",

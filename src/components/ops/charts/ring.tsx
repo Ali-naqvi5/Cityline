@@ -15,7 +15,8 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
  * middle and the figures beside it in plain text, so the ring never carries
  * the number alone. Hover or focus it for the read-out. A share that cannot
  * be worked out (nothing to measure against) leaves the track empty and says
- * so.
+ * so. A share below nothing — a loss's margin — leaves it empty too, and is
+ * written as it is, in red (Cityline, 16 Oct 2026).
  */
 export function Ring({
   label,
@@ -27,7 +28,7 @@ export function Ring({
 }: {
   label: string;
   value: ReactNode;
-  /** 0–1, or null when there is nothing to measure against. */
+  /** 0–1 (below 0 for a loss), or null when there is nothing to measure against. */
   share: number | null;
   caption: ReactNode;
   /** The hover read-out's second line. */
@@ -35,7 +36,7 @@ export function Ring({
   tone?: "danger";
 }) {
   const filled = share === null ? 0 : Math.min(1, Math.max(0, share));
-  const shown = share === null ? "—" : percent(Math.max(0, share));
+  const shown = share === null ? "—" : percent(share);
   return (
     <div className="flex min-w-0 items-center gap-4">
       <div
@@ -77,7 +78,10 @@ export function Ring({
         </svg>
         <span
           aria-hidden
-          className="text-ink absolute inset-0 flex items-center justify-center text-base font-semibold"
+          className={cx(
+            "absolute inset-0 flex items-center justify-center text-base font-semibold",
+            share !== null && share < 0 ? "text-danger" : "text-ink",
+          )}
         >
           {shown}
         </span>

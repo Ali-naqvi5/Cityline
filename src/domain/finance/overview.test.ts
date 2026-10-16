@@ -55,6 +55,8 @@ describe("the accounts overview", () => {
       refundsPence: 0,
       driverPence: 8500,
       feesPence: 120,
+      penaltiesPence: 0,
+      penaltiesFromDriversPence: 0,
       expensesPence: 0,
       profitPence: 21380,
       margin: 21380 / 30000,
@@ -86,5 +88,47 @@ describe("the accounts overview", () => {
 
   it("has no margin with no income", () => {
     expect(financeOverview([]).profit.margin).toBe(null);
+  });
+
+  it("takes a partner's penalty off profit and off what they owe", () => {
+    // £20 booking, £15 driver, a £10 penalty: £5 lost; £5 passed to the driver.
+    const fined = financeOverview([
+      job({
+        source: "supplier",
+        customerPricePence: 2000,
+        driverPricePence: 1500,
+        paymentFeePence: 0,
+        penaltyPence: 1000,
+        penaltyFromDriverPence: 500,
+      }),
+    ]);
+    expect(fined.profit).toMatchObject({
+      penaltiesPence: 1000,
+      penaltiesFromDriversPence: 500,
+      profitPence: 2000 - 1500 - (1000 - 500),
+    });
+    expect(fined.suppliers).toEqual({ owedPence: 1000, receivedPence: 0 });
+  });
+
+  it("counts a penalty taken off a payment as money not received", () => {
+    const settled = financeOverview([
+      job({
+        source: "supplier",
+        customerPricePence: 10000,
+        paymentFeePence: 0,
+        supplierPaymentId: 3,
+        penaltyPence: 1000,
+        penaltySettledPence: 1000,
+      }),
+    ]);
+    expect(settled.suppliers).toEqual({ owedPence: 9000, receivedPence: 9000 });
+  });
+
+  it("shows a loss as a negative profit and margin", () => {
+    const loss = financeOverview([
+      job({ customerPricePence: 2000, driverPricePence: 3000, paymentFeePence: 0 }),
+    ]);
+    expect(loss.profit.profitPence).toBe(-1000);
+    expect(loss.profit.margin).toBe(-0.5);
   });
 });

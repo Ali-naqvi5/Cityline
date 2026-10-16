@@ -42,6 +42,25 @@ describe("the partner invoice PDF", () => {
     expect(pdf.getTitle()).toBe("Invoice INV-000007");
   });
 
+  it("shows a partner's penalties as minus lines, still on one page", async () => {
+    const pdf = await PDFDocument.load(
+      await invoicePdf({
+        ...data,
+        penalties: [
+          {
+            penalisedAt: new Date("2026-10-03T12:00:00Z"),
+            reference: "J-000001",
+            supplierReference: "TRIP-100",
+            reason: "Driver 20 minutes late — passenger complained",
+            amountPence: 1000,
+          },
+        ],
+        totalPence: 5000,
+      }),
+    );
+    expect(pdf.getPageCount()).toBe(1);
+  });
+
   it("runs on to more pages, and survives odd characters and a void", async () => {
     const lines = Array.from({ length: 70 }, (_, index) => ({
       ...data.lines[0]!,

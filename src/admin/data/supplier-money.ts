@@ -4,6 +4,7 @@ import type { Payload } from "payload";
 
 import { relId } from "@/domain/dispatch/assignment";
 import type { InvoiceData } from "@/domain/finance/invoice-pdf";
+import type { PenaltyLine } from "@/domain/finance/penalties";
 import {
   invoiceNumber,
   partnerOwed,
@@ -19,6 +20,7 @@ import { company, formattedAddress } from "@/lib/company";
 import type { CsvColumn } from "@/lib/csv";
 import type {
   Job,
+  PartnerPenalty,
   Supplier,
   SupplierInvoice,
   SupplierPayment,
@@ -26,12 +28,70 @@ import type {
 } from "@/payload-types";
 
 /**
- * Loading Supplier Money: what each partner owes up to a chosen day, the
- * money received, the invoices made, and an invoice as its PDF. Test
- * bookings are never billed. Owner and Accounts.
+ * Loading Supplier Money: what each partner owes up to a chosen day, less
+ * their penalties not yet taken off, the money received, the invoices made,
+ * and an invoice as its PDF. Test bookings are never billed. Owner and
+ * Accounts.
  */
 
 type As = { user: User; overrideAccess: false };
+
+export function toPenaltyLine(penalty: PartnerPenalty): PenaltyLine {
+  return {
+    id: penalty.id,
+    jobId: relId(penalty.job) ?? 0,
+    jobReference: penalty.jobReference ?? "",
+    supplierReference: penalty.supplierReference ?? null,
+    penalisedAt: penalty.penalisedAt,
+    reason: penalty.reason,
+    amountPence: penalty.amountPence,
+    driverSharePence: penalty.driverSharePence ?? 0,
+  };
+}
+
+/**
+ * Partner penalties (Cityline, 16 Oct 2026) not void and not yet taken off a
+ * partner's payment: for one partner, or all of them.
+ */
+async function openPenalties(
+  payload: Payload,
+  as: As,
+  supplierId?: number,
+): Promise<PartnerPenalty[]> {
+  const found = await payload.find({
+    collection: "partner-penalties",
+    where: {
+      and: [
+        { voidedAt: { exists: false } },
+        { supplierPayment: { exists: false } },
+        ...(supplierId ? [{ supplier: { equals: supplierId } }] : []),
+      ],
+    },
+    sort: "penalisedAt",
+    pagination: false,
+    depth: 0,
+    ...as,
+  });
+  return found.docs as PartnerPenalty[];
+}
+
+/** Every penalty on one booking, void ones too, oldest first. */
+export async function loadJobPenalties(
+  payload: Payload,
+  user: User,
+  jobId: number,
+): Promise<PartnerPenalty[]> {
+  const found = await payload.find({
+    collection: "partner-penalties",
+    where: { job: { equals: jobId } },
+    sort: "createdAt",
+    pagination: false,
+    depth: 1,
+    user,
+    overrideAccess: false,
+  });
+  return found.docs as PartnerPenalty[];
+}
 
 export function toPartnerJob(job: Job): PartnerJob {
   return {
@@ -89,9 +149,10 @@ export async function loadPartnersOwed(
   now: Date,
 ): Promise<PartnerRow[]> {
   const as: As = { user, overrideAccess: false };
-  const [jobs, suppliers] = await Promise.all([
+  const [jobs, suppliers, penalties] = await Promise.all([
     partnerJobs(payload, as, before),
     payload.find({ collection: "suppliers", pagination: false, depth: 0, ...as }),
+    openPenalties(payload, as),
   ]);
   const byPartner = new Map<number, PartnerJob[]>();
   for (const job of jobs) {
@@ -99,19 +160,32 @@ export async function loadPartnersOwed(
     if (supplierId === null) continue;
     byPartner.set(supplierId, [...(byPartner.get(supplierId) ?? []), toPartnerJob(job)]);
   }
+  const finedPartner = new Map<number, PenaltyLine[]>();
+  for (const penalty of penalties) {
+    const supplierId = relId(penalty.supplier);
+    if (supplierId === null) continue;
+    finedPartner.set(supplierId, [
+      ...(finedPartner.get(supplierId) ?? []),
+      toPenaltyLine(penalty),
+    ]);
+  }
   return (suppliers.docs as Supplier[])
-    .filter((supplier) => byPartner.has(supplier.id))
+    .filter((supplier) => byPartner.has(supplier.id) || finedPartner.has(supplier.id))
     .map((supplier) => ({
       supplier,
       owed: partnerOwed(
-        byPartner.get(supplier.id)!,
+        byPartner.get(supplier.id) ?? [],
         before,
         supplier.paymentTermsDays ?? null,
         now,
+        finedPartner.get(supplier.id) ?? [],
       ),
     }))
-    .filter((row) => row.owed.owed.length || row.owed.toDecide.length)
-    .sort((a, b) => b.owed.totalPence - a.owed.totalPence);
+    .filter(
+      (row) =>
+        row.owed.owed.length || row.owed.toDecide.length || row.owed.penalties.length,
+    )
+    .sort((a, b) => b.owed.netPence - a.owed.netPence);
 }
 
 /** Money received between `start` and `end`, newest first. */
@@ -157,6 +231,10 @@ export const INVOICE_STATE_LABELS: Record<InvoiceState, string> = {
 export interface PartnerData {
   supplier: Supplier;
   owed: PartnerOwed;
+  /** Open penalties already on an invoice: they cannot go on another. */
+  invoicedPenalties: Map<number, number>;
+  /** Every penalty recorded for this partner, void ones too, newest first. */
+  penalties: PartnerPenalty[];
   receipts: SupplierPayment[];
   invoices: (SupplierInvoice & { state: InvoiceState })[];
 }
@@ -178,7 +256,7 @@ export async function loadPartner(
   })) as Supplier | null;
   if (!supplier) return null;
 
-  const [jobs, receipts, invoices] = await Promise.all([
+  const [jobs, receipts, invoices, open, penalties] = await Promise.all([
     partnerJobs(payload, as, before, supplierId),
     payload.find({
       collection: "supplier-payments",
@@ -194,6 +272,15 @@ export async function loadPartner(
       sort: "-issuedAt",
       pagination: false,
       depth: 0,
+      ...as,
+    }),
+    openPenalties(payload, as, supplierId),
+    payload.find({
+      collection: "partner-penalties",
+      where: { supplier: { equals: supplierId } },
+      sort: "-penalisedAt",
+      pagination: false,
+      depth: 1,
       ...as,
     }),
   ]);
@@ -234,7 +321,14 @@ export async function loadPartner(
       before,
       supplier.paymentTermsDays ?? null,
       now,
+      open.map(toPenaltyLine),
     ),
+    invoicedPenalties: new Map(
+      open
+        .filter((penalty) => relId(penalty.supplierInvoice))
+        .map((penalty) => [penalty.id, relId(penalty.supplierInvoice)!]),
+    ),
+    penalties: penalties.docs as PartnerPenalty[],
     receipts: receipts.docs as SupplierPayment[],
     invoices: (invoices.docs as SupplierInvoice[]).map((invoice) => ({
       ...invoice,
@@ -287,6 +381,13 @@ export async function invoiceFor(
       status: line.status ?? "",
       amountPence: line.amountPence ?? 0,
     })),
+    penalties: (invoice.penalties ?? []).map((line) => ({
+      penalisedAt: new Date(line.penalisedAt ?? invoice.issuedAt),
+      reference: line.jobReference ?? "",
+      supplierReference: line.supplierReference ?? null,
+      reason: line.reason ?? "",
+      amountPence: line.amountPence ?? 0,
+    })),
     totalPence: invoice.totalPence ?? 0,
     company: {
       legalName: company.legalName,
@@ -319,6 +420,11 @@ export const PARTNER_RECEIPTS_CSV_COLUMNS: CsvColumn<SupplierPayment>[] = [
         : String(relId(row.supplier) ?? ""),
   },
   { header: "Bookings", value: (row) => row.lines?.length ?? 0 },
+  {
+    header: "Bookings (£)",
+    value: (row) => pounds(row.bookingsPence ?? row.amountPence),
+  },
+  { header: "Penalties taken off (£)", value: (row) => pounds(row.penaltiesPence) },
   { header: "Amount (£)", value: (row) => pounds(row.amountPence) },
   {
     header: "Method",

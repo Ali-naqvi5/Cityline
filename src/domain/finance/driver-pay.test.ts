@@ -58,7 +58,7 @@ describe("driver pay", () => {
           driverPricePence: 3000,
         }),
       ]),
-    ).toEqual({ earnedPence: 6500, cashPence: 5000, netPence: 1500 });
+    ).toEqual({ earnedPence: 6500, cashPence: 5000, penaltiesPence: 0, netPence: 1500 });
     // More cash held than earned: the driver owes Cityline.
     expect(
       payTotals([job({ paymentMethod: "cash", customerPricePence: 9000 })]).netPence,
@@ -79,6 +79,30 @@ describe("driver pay", () => {
     expect(owed.payable.map((item) => item.id)).toEqual([1]);
     expect(owed.missingPrice.map((item) => item.id)).toEqual([2]);
     expect(owed.netPence).toBe(3500);
+  });
+
+  it("takes the driver's share of a partner penalty off what they are owed", () => {
+    const penalty = {
+      id: 9,
+      jobId: 1,
+      jobReference: "J-000001",
+      supplierReference: "TRIP-1",
+      penalisedAt: "2026-10-03T12:00:00.000Z",
+      reason: "Driver 20 minutes late",
+      amountPence: 1000,
+      driverSharePence: 500,
+    };
+    const owed = owedUpTo([job({ id: 1 })], new Date("2026-10-05T23:00:00.000Z"), [
+      penalty,
+    ]);
+    expect(owed).toMatchObject({
+      earnedPence: 3500,
+      penaltiesPence: 500,
+      netPence: 3000,
+      penalties: [penalty],
+    });
+    // A penalty alone, with no bookings to pay: the driver owes Cityline.
+    expect(payTotals([], [penalty]).netPence).toBe(-500);
   });
 
   it("notices a price changed after the booking was paid", () => {

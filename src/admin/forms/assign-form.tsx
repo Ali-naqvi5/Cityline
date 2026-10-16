@@ -20,6 +20,8 @@ import { fitWarnings } from "@/domain/dispatch/eligibility";
 import { rankMatches } from "@/domain/dispatch/search";
 import { vehicleClassName } from "@/domain/jobs/labels";
 
+import { LossWarning } from "./loss-warning";
+
 interface Verdict {
   blocks: string[];
   warnings: string[];
@@ -52,6 +54,7 @@ export function AssignForm({
   passengerEmails,
   cancelHref,
   driverPricePence,
+  customerPricePence = null,
 }: {
   jobId: number;
   job: { jobClass: string; passengers: number | null };
@@ -64,8 +67,13 @@ export function AssignForm({
   passengerEmails: boolean;
   cancelHref: string;
   driverPricePence: number | null;
+  /** The booking's agreed price, for the loss warning (Cityline, 16 Oct 2026). */
+  customerPricePence?: number | null;
 }) {
   const [state, action, pending] = useActionState(assignDriverAction, EMPTY_FORM);
+  const [typedPrice, setTypedPrice] = useState(
+    driverPricePence === null ? "" : (driverPricePence / 100).toFixed(2),
+  );
   const [query, setQuery] = useState("");
   const [driverId, setDriverId] = useState(
     current?.driverId ? String(current.driverId) : "",
@@ -306,6 +314,7 @@ export function AssignForm({
               defaultValue={
                 driverPricePence === null ? "" : (driverPricePence / 100).toFixed(2)
               }
+              onChange={(event) => setTypedPrice(event.target.value)}
               placeholder="0.00"
               className={inputClass("pl-7 tabular-nums")}
               {...invalid(state.errors.driverPrice, "driverPrice")}
@@ -321,6 +330,7 @@ export function AssignForm({
               message; it can also be written later on the booking.
             </p>
           )}
+          <LossWarning customerPricePence={customerPricePence} typed={typedPrice} />
         </div>
         {!passengerEmails ? (
           // Switched off: the booking's own choice is kept for when it is on.

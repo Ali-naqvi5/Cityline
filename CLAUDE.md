@@ -227,7 +227,8 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   and the numbers as a table too.
 - **Driver Pay** (`/admin/driver-pay`, Owner and Accounts): what each driver
   is owed for completed and PNS bookings — the driver price on each, less
-  cash a passenger paid them — up to any chosen day. A `driver-payments` row
+  cash a passenger paid them and their share of partner penalties — up to
+  any chosen day. A `driver-payments` row
   covers a set of bookings; its collection hook works out the lines and
   totals from the bookings (typed amounts are ignored) and refuses a booking
   already paid, unpriced or someone else's. Payments are never edited or
@@ -281,6 +282,38 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   never sent by the system (Cityline, 6 Oct 2026): PDF
   (`domain/finance/invoice-pdf.ts`), full company name, no VAT (not
   registered), due on the partner's terms; the office marks them sent.
+  A partner's penalties come off its payments and invoices (below).
+- **Partner penalties** (`partner-penalties`, "PN-", Cityline, 16 Oct 2026):
+  a partner fines Cityline for one of its bookings and takes the fine off
+  what it pays.
+  - **Always recorded by hand**, by the Owner and Accounts
+    (`supplierMoney.manage`), from the booking's Finance panel or the
+    partner's Supplier Money page. Nothing may ever create, suggest or
+    enforce one: not lateness, stage times or the Driver Report. Only on a
+    partner booking that is completed, PNS or cancelled, never a test one.
+  - It comes off what the partner owes, and off the receipt it is taken
+    from (`supplier-payments.penalties`; the amount is the bookings less the
+    penalties, never below nothing). That may be a later receipt than the
+    booking's own. An invoice made while it is open shows it as a minus
+    line (`supplier-invoices.penalties`).
+  - Staff may pass part or all of it to the booking's driver or operator
+    (`driverSharePence`, up to the penalty, set when it is recorded). That
+    share comes off their next Driver Pay (`driver-payments.penalties`): on
+    the statement as a "PENALTIES TAKEN OFF" table and a "Less: penalties"
+    line (the Owner's answer of 16 Oct 2026), and in the WhatsApp note. A
+    payment may hold penalty shares alone.
+  - The rest is Cityline's: off the booking's profit (`bookingMoney`), the
+    rings and Financial Reports.
+  - The links to the receipt, invoice and driver payment are written by the
+    payments' hooks only (`linkPenalties`). A penalty is never edited, only
+    voided with a reason, and only while nothing holds it ("Void PR-…
+    first"). Voiding a payment or invoice frees its penalties.
+- **Loss bookings** (Cityline, 16 Oct 2026): profit has no floor. A loss
+  shows as "Loss" in red on the booking, on the rings (with a negative
+  margin) and in Financial Reports. Wherever a driver or operator price is
+  typed (both assign screens and the booking page), a price above the agreed
+  price warns "This booking loses £X" (`driverPriceLoss`, `LossWarning`). It
+  uses only the agreed price, which dispatchers already see, and never blocks.
 - **Payments** (`/admin/payments`, Owner and Accounts): money in from
   customers. Website card payments come from the Stripe webhook; Stripe's
   fee is read from the charge's balance transaction
@@ -300,16 +333,19 @@ data`. To pass a value from `beforeChange` to `afterChange`, use
   never edited or deleted; a payment with live refunds cannot be voided.
 - **The three rings** on the Owner's and Accounts' dashboard
   (`domain/finance/overview.ts`), for bookings picked up in the chosen dates:
-  paid to drivers of what they earned, got from partners of what they owe,
-  and profit = booking prices − refunds on them − driver prices − card fees
-  − expenses, its ring the margin. A cancelled booking earns nothing, so
-  refunding it does not move profit.
+  paid to drivers of what they earned, got from partners of what they owe
+  (less their penalties), and profit = booking prices − refunds on them −
+  driver prices − card fees − partner penalties Cityline bears − expenses,
+  its ring the margin, below zero on a loss. A cancelled booking earns
+  nothing, so refunding it does not move profit.
 - **Financial Reports** (`/admin/reports/finance`, `reports.financial`):
   money by the day it moved (Cityline, 6 Oct 2026) — not by pickup date,
   which is the rings' view. `admin/reports/finance-data.ts` turns every
   record into movements: card payments, office payments, partner receipts and
   cash on office bookings (counted when settled on the driver's payment) in;
-  refunds, card fees, drivers' prices paid and expenses out. Split by website,
+  refunds, card fees, drivers' prices paid and expenses out. A partner
+  penalty is out on the day of the receipt it was taken off; a driver's share
+  of one is in on the day of their payment. Split by website,
   office and each partner (`finance-report.ts`); the CSV is one row per
   movement, `data=sources` one per source. Void records never count.
 - **Expenses** (`/admin/expenses`): Cityline's own costs only — fuel,

@@ -85,6 +85,7 @@ export interface Config {
     'driver-payments': DriverPayment;
     'supplier-payments': SupplierPayment;
     'supplier-invoices': SupplierInvoice;
+    'partner-penalties': PartnerPenalty;
     expenses: Expense;
     'customer-payments': CustomerPayment;
     users: User;
@@ -114,6 +115,7 @@ export interface Config {
     'driver-payments': DriverPaymentsSelect<false> | DriverPaymentsSelect<true>;
     'supplier-payments': SupplierPaymentsSelect<false> | SupplierPaymentsSelect<true>;
     'supplier-invoices': SupplierInvoicesSelect<false> | SupplierInvoicesSelect<true>;
+    'partner-penalties': PartnerPenaltiesSelect<false> | PartnerPenaltiesSelect<true>;
     expenses: ExpensesSelect<false> | ExpensesSelect<true>;
     'customer-payments': CustomerPaymentsSelect<false> | CustomerPaymentsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -747,9 +749,62 @@ export interface DriverPayment {
    */
   cashPence?: number | null;
   /**
-   * Paid: earned less cash. Below zero, the driver paid Cityline.
+   * The driver's share of partner penalties taken off, as it was when paid.
+   */
+  penalties?:
+    | {
+        penalty: number | PartnerPenalty;
+        penaltyReference?: string | null;
+        jobReference?: string | null;
+        penalisedAt?: string | null;
+        reason?: string | null;
+        amountPence?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The driver's share of partner penalties, taken off. Pence.
+   */
+  penaltiesPence?: number | null;
+  /**
+   * Paid: earned less cash and penalties. Below zero, the driver paid Cityline.
    */
   amountPence?: number | null;
+  recordedBy?: (number | null) | User;
+  voidedAt?: string | null;
+  voidReason?: string | null;
+  voidedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Penalties partners took off what they pay, recorded by hand. Voided, never edited.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partner-penalties".
+ */
+export interface PartnerPenalty {
+  id: number;
+  supplier?: (number | null) | Supplier;
+  job: number | Job;
+  jobReference?: string | null;
+  supplierReference?: string | null;
+  penalisedAt: string;
+  amountPence: number;
+  reason: string;
+  /**
+   * The partner's own reference for the penalty.
+   */
+  partnerReference?: string | null;
+  /**
+   * The part passed to the booking's driver or operator, taken off their next Driver Pay. Pence.
+   */
+  driverSharePence?: number | null;
+  driver?: (number | null) | Driver;
+  operator?: (number | null) | Operator;
+  supplierPayment?: (number | null) | SupplierPayment;
+  supplierInvoice?: (number | null) | SupplierInvoice;
+  driverPayment?: (number | null) | DriverPayment;
   recordedBy?: (number | null) | User;
   voidedAt?: string | null;
   voidReason?: string | null;
@@ -785,6 +840,29 @@ export interface SupplierPayment {
         id?: string | null;
       }[]
     | null;
+  penalties?:
+    | {
+        penalty: number | PartnerPenalty;
+        penaltyReference?: string | null;
+        jobReference?: string | null;
+        supplierReference?: string | null;
+        penalisedAt?: string | null;
+        reason?: string | null;
+        amountPence?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The bookings' prices. Empty on receipts before 16 Oct 2026.
+   */
+  bookingsPence?: number | null;
+  /**
+   * Partner penalties taken off.
+   */
+  penaltiesPence?: number | null;
+  /**
+   * Received: the bookings less the penalties taken off.
+   */
   amountPence?: number | null;
   recordedBy?: (number | null) | User;
   voidedAt?: string | null;
@@ -817,6 +895,29 @@ export interface SupplierInvoice {
         id?: string | null;
       }[]
     | null;
+  penalties?:
+    | {
+        penalty: number | PartnerPenalty;
+        penaltyReference?: string | null;
+        jobReference?: string | null;
+        supplierReference?: string | null;
+        penalisedAt?: string | null;
+        reason?: string | null;
+        amountPence?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The bookings' prices. Empty on invoices before 16 Oct 2026.
+   */
+  bookingsPence?: number | null;
+  /**
+   * Partner penalties shown as minus lines.
+   */
+  penaltiesPence?: number | null;
+  /**
+   * Due: the bookings less the penalties.
+   */
   totalPence?: number | null;
   /**
    * When the office sent it. Nothing is sent automatically.
@@ -1164,6 +1265,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'supplier-invoices';
         value: number | SupplierInvoice;
+      } | null)
+    | ({
+        relationTo: 'partner-penalties';
+        value: number | PartnerPenalty;
       } | null)
     | ({
         relationTo: 'expenses';
@@ -1628,6 +1733,18 @@ export interface DriverPaymentsSelect<T extends boolean = true> {
       };
   earnedPence?: T;
   cashPence?: T;
+  penalties?:
+    | T
+    | {
+        penalty?: T;
+        penaltyReference?: T;
+        jobReference?: T;
+        penalisedAt?: T;
+        reason?: T;
+        amountPence?: T;
+        id?: T;
+      };
+  penaltiesPence?: T;
   amountPence?: T;
   recordedBy?: T;
   voidedAt?: T;
@@ -1658,6 +1775,20 @@ export interface SupplierPaymentsSelect<T extends boolean = true> {
         amountPence?: T;
         id?: T;
       };
+  penalties?:
+    | T
+    | {
+        penalty?: T;
+        penaltyReference?: T;
+        jobReference?: T;
+        supplierReference?: T;
+        penalisedAt?: T;
+        reason?: T;
+        amountPence?: T;
+        id?: T;
+      };
+  bookingsPence?: T;
+  penaltiesPence?: T;
   amountPence?: T;
   recordedBy?: T;
   voidedAt?: T;
@@ -1687,9 +1818,49 @@ export interface SupplierInvoicesSelect<T extends boolean = true> {
         amountPence?: T;
         id?: T;
       };
+  penalties?:
+    | T
+    | {
+        penalty?: T;
+        penaltyReference?: T;
+        jobReference?: T;
+        supplierReference?: T;
+        penalisedAt?: T;
+        reason?: T;
+        amountPence?: T;
+        id?: T;
+      };
+  bookingsPence?: T;
+  penaltiesPence?: T;
   totalPence?: T;
   sentAt?: T;
   createdBy?: T;
+  voidedAt?: T;
+  voidReason?: T;
+  voidedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partner-penalties_select".
+ */
+export interface PartnerPenaltiesSelect<T extends boolean = true> {
+  supplier?: T;
+  job?: T;
+  jobReference?: T;
+  supplierReference?: T;
+  penalisedAt?: T;
+  amountPence?: T;
+  reason?: T;
+  partnerReference?: T;
+  driverSharePence?: T;
+  driver?: T;
+  operator?: T;
+  supplierPayment?: T;
+  supplierInvoice?: T;
+  driverPayment?: T;
+  recordedBy?: T;
   voidedAt?: T;
   voidReason?: T;
   voidedBy?: T;

@@ -8,13 +8,14 @@ import { financeOverview, type FinanceOverview } from "@/domain/finance/overview
 import type { CancellationCharge } from "@/domain/finance/supplier-money";
 import type { JobStatus } from "@/domain/jobs/labels";
 import { staffCan } from "@/domain/staff/permissions";
-import type { Job, Refund, User } from "@/payload-types";
+import type { Job, PartnerPenalty, Refund, User } from "@/payload-types";
 
 /**
  * The accounts overview (the three rings): the bookings picked up in the
  * chosen dates, test bookings never, reduced to what was earned, paid and
- * received — less the refunds recorded on them, and Cityline's own expenses
- * in the same dates. Owner and Accounts.
+ * received — less the refunds recorded on them, the partner penalties on
+ * them (Cityline, 16 Oct 2026), and Cityline's own expenses in the same
+ * dates. Owner and Accounts.
  */
 export async function loadFinanceOverview(
   payload: Payload,
@@ -90,6 +91,38 @@ export async function loadFinanceOverview(
       }
     }
   }
+  // Partner penalties on these bookings; void ones never count.
+  const fined = new Map<number, { amount: number; driver: number; settled: number }>();
+  if (jobs.length && staffCan(user, "supplierMoney.view")) {
+    const penalties = await payload.find({
+      collection: "partner-penalties",
+      where: {
+        and: [
+          { voidedAt: { exists: false } },
+          { job: { in: jobs.map((job) => job.id) } },
+        ],
+      },
+      pagination: false,
+      depth: 0,
+      select: {
+        job: true,
+        amountPence: true,
+        driverSharePence: true,
+        supplierPayment: true,
+      },
+      user,
+      overrideAccess: false,
+    });
+    for (const penalty of penalties.docs as PartnerPenalty[]) {
+      const jobId = relId(penalty.job);
+      if (!jobId) continue;
+      const entry = fined.get(jobId) ?? { amount: 0, driver: 0, settled: 0 };
+      entry.amount += penalty.amountPence ?? 0;
+      entry.driver += penalty.driverSharePence ?? 0;
+      if (relId(penalty.supplierPayment)) entry.settled += penalty.amountPence ?? 0;
+      fined.set(jobId, entry);
+    }
+  }
   return financeOverview(
     jobs.map((job) => ({
       status: job.status as JobStatus,
@@ -101,6 +134,9 @@ export async function loadFinanceOverview(
       driverPaymentId: relId(job.driverPayment),
       supplierPaymentId: relId(job.supplierPayment),
       refundedPence: refunded.get(job.id) ?? 0,
+      penaltyPence: fined.get(job.id)?.amount ?? 0,
+      penaltyFromDriverPence: fined.get(job.id)?.driver ?? 0,
+      penaltySettledPence: fined.get(job.id)?.settled ?? 0,
     })),
     expenses.docs.reduce((sum, expense) => sum + (expense.amountPence ?? 0), 0),
   );

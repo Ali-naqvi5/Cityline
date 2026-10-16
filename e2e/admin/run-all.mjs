@@ -28,6 +28,7 @@ const ORDER = [
   "report",
   "run-sheet",
   "supplier-money",
+  "penalties",
   "access-filters-classes",
   "owner-rules",
 ];

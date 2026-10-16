@@ -225,6 +225,8 @@ export interface PaymentMessage {
   bookings: number;
   earnedPence: number;
   cashPence: number;
+  /** The driver's share of partner penalties, taken off. */
+  penaltiesPence?: number;
   amountPence: number;
   /** The private link to the statement PDF. */
   statementUrl: string;
@@ -259,6 +261,9 @@ export function paymentMessage(
     `${payment.bookings} ${payment.bookings === 1 ? "booking" : "bookings"}, ${paymentPeriod(payment.periodFrom, payment.upTo)}: ${formatPence(payment.earnedPence as Pence)}`,
     ...(payment.cashPence
       ? [`Less cash you collected: ${formatPence(payment.cashPence as Pence)}`]
+      : []),
+    ...(payment.penaltiesPence
+      ? [`Less penalties: ${formatPence(payment.penaltiesPence as Pence)}`]
       : []),
     owedCityline ? `You paid Cityline: ${amount}` : `Paid to you: ${amount}`,
     "",

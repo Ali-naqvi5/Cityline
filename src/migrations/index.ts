@@ -17,6 +17,7 @@ import * as migration_20261010_000823_outsourced_phv_number from "./20261010_000
 import * as migration_20261013_021613_driver_payment_receipt from "./20261013_021613_driver_payment_receipt";
 import * as migration_20261014_153546_driver_payment_period from "./20261014_153546_driver_payment_period";
 import * as migration_20261015_161905_subcontracting_operators from "./20261015_161905_subcontracting_operators";
+import * as migration_20261015_234351_partner_penalties from "./20261015_234351_partner_penalties";
 
 export const migrations = [
   {
@@ -113,5 +114,10 @@ export const migrations = [
     up: migration_20261015_161905_subcontracting_operators.up,
     down: migration_20261015_161905_subcontracting_operators.down,
     name: "20261015_161905_subcontracting_operators",
+  },
+  {
+    up: migration_20261015_234351_partner_penalties.up,
+    down: migration_20261015_234351_partner_penalties.down,
+    name: "20261015_234351_partner_penalties",
   },
 ];
